@@ -5,7 +5,7 @@
 >
 > This is a short English overview. The full reference (every step, `personaje.json`, styles, objects, vehicles,
 > scenery, the Godot guide and known issues) is the Spanish [README.md](README.md). The code, CLI and config keys
-> are in Spanish too.
+> are in Spanish too. What is done and what is next: [ROADMAP.md](ROADMAP.md) (Spanish).
 
 **From one image to 2D and 3D game assets** (animated characters, props, vehicles and scenery kits) with **local,
 open-source AI**: everything runs on your own machine, with no paid APIs or cloud services. *Crisol* is Spanish for
@@ -71,6 +71,11 @@ python3 pipeline.py iso bandit              # 8 isometric directions (~25 s)
 python3 pipeline.py revisar bandit          # review sheet -> trabajo/revision.png
 python3 pipeline.py godot bandit            # Godot scenes in personajes/bandit/godot/
 ```
+
+Pick the **style before generating the image** (`estilo` in `personaje.json`): it shapes the image prompt, and
+changing it later only changes the render. For people use `moderno` (3D cartoon with an outline, recommended) or
+`semirealista`; `moderno_juguete` is for hard-plastic toys. If the eyes look off on the model (cross-eyed, heavy
+outline), re-run `pipeline.py ultratex <n>` with another `malla.ultratex.seed`.
 
 Each step reads `personaje.json` and writes to `trabajo/`, so any step can be re-run on its own. Run **one GPU job
 at a time** (image, views, mesh, UltraTex, joints, textures): two at once slow down dramatically and the mesh step

@@ -3,6 +3,8 @@
 > **En construcción**: el código funciona, pero la documentación, los ejemplos y la instalación todavía se están
 > ordenando para la primera versión pública (v0.1 en camino). Puede haber cambios que rompan configuraciones.
 >
+> Qué está hecho y qué falta: [ROADMAP.md](ROADMAP.md).
+>
 > *English version (short): [README.en.md](README.en.md).*
 
 **De una imagen a assets de juego 2D y 3D** (personajes animados, objetos, vehículos y escenarios), con **IA local y
@@ -215,9 +217,11 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
 
 1. **Referencia**: recortar al personaje solo (sin cajas, logos ni texto: Qwen los mete en la imagen), entero y con
    aire alrededor. Fondo liso.
-2. **Imagen** (Qwen Edit, 4 seeds): el prompt lo arma el estilo con `imagen.descripcion`. Para humanoides andan bien
-   `moderno` (cartoon 3D con contorno), `semirealista` (mismo render, proporciones y materiales reales) y
-   `moderno_juguete` (plástico duro). En la `descripcion`, sacar lo que cambie la pose de la referencia ("arms down,
+2. **Imagen** (4 seeds; con referencia Qwen Edit, ≈20 s cada una; sin referencia FLUX.2 Dev, ≈3 min cada una): el
+   prompt lo arma el estilo con `imagen.descripcion`, así que **el estilo se elige antes de generar la imagen**
+   (cambiarlo después solo cambia el render, no la textura). Para personas: `moderno` (cartoon 3D con contorno, el
+   recomendado) o `semirealista` (mismo render, proporciones y materiales reales). `moderno_juguete` es para muñecos
+   de plástico duro: en una persona la ropa sale lustrada como vinilo. En la `descripcion`, sacar lo que cambie la pose de la referencia ("arms down,
    not on the hips"). Elegir la de **proporciones** correctas (a veces salen cabezonas). **Ojos achinados** por la
    sonrisa: no cambiar de seed, editar la elegida: copiarla como `base_<seed>.png`, ponerla de `referencia` y escribir
    un `prompt` "Keep this exact image unchanged ... Only change the eyes: open the eyes wider ...".
@@ -225,6 +229,8 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
    imagen. Una mala se borra (`trabajo/imagen/vista_<v>.png`) y se rehace.
 4. **Malla**: mirar `ultratex_vistas.png` y `ultratex_espalda.png`. Sin `ultratex.espalda`, UltraTex inventa la
    espalda y suele copiar lo del pecho (un logo, un emblema); con `espalda` la de atrás sale de la vista de Qwen.
+   Mirar la **cara de cerca**: los ojos dependen mucho de `ultratex.seed` (pueden salir estrábicos o con delineado
+   grueso); si no convencen, `pipeline.py ultratex <n>` con otra seed (≈6 min, sin rehacer la forma).
 5. **Articulaciones** (`pipeline.py articulaciones`): revisar `guia.png` (y `pose_frente.png`, lo que vio DWPose). Con
    muñecos y juguetes DWPose suele no detectar a nadie: ahí cargarlas a mano (ver [3a](#3a-guía-de-articulaciones-pipelinepy-guia)).
 6. **Animación**: los valores por defecto andan; ver [3b](#3b-blender-pipelinepy-blender) si la cara no mira al
