@@ -4,6 +4,8 @@
   "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/ (render, tema, paleta, luces, posproceso, escala)",
   "imagen": {
     "referencia": "referencia.png",
+    "motor": "zimage",
+    "_motor": "solo sin referencia: zimage (Z-Image Turbo, segundos, Apache-2.0) | flux2 (FLUX.2 Dev, ~3 min, no comercial). Con referencia siempre Qwen Image Edit",
     "descripcion": "<QUIÉN ES: ropa, pelo, colores, accesorios, expresión; en inglés, p. ej. a young knight with short red hair, dented steel breastplate over a blue tunic, brown leather boots, friendly smile>",
     "_descripcion": "El prompt se arma solo: estilo (render, tema, paleta) + descripcion + encuadre técnico (cuerpo entero, frente, pose A). Queda en trabajo/imagen/prompt.txt. Para escribir el prompt entero a mano: borrar descripcion y usar \"prompt\".",
     "seeds": [

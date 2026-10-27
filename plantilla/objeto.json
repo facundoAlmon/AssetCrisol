@@ -5,6 +5,8 @@
   "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/",
   "imagen": {
     "referencia": null,
+    "motor": "zimage",
+    "_motor": "solo sin referencia: zimage (Z-Image Turbo, segundos, Apache-2.0) | flux2 (FLUX.2 Dev, ~3 min, no comercial). Con referencia siempre Qwen Image Edit",
     "descripcion": "<QUÉ ES, en inglés, p. ej. a sturdy wooden crate with metal corner brackets>",
     "_descripcion": "El prompt se arma solo: estilo (render, tema, paleta) + descripcion + encuadre (objeto solo, tres cuartos desde arriba). Queda en trabajo/imagen/prompt.txt.",
     "seeds": [

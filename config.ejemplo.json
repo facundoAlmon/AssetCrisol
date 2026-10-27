@@ -20,6 +20,9 @@
     "qwen_lora": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
     "flux_unet": "flux2DevFP8GGUF_ggufQ5KM.gguf",
     "flux_clip": "flux2DevFP8GGUF_textEncoderFP8.safetensors",
-    "flux_vae": "flux2DevFP8GGUF_flux2DevVAE.safetensors"
+    "flux_vae": "flux2DevFP8GGUF_flux2DevVAE.safetensors",
+    "zimage_unet": "z_image_turbo_bf16.safetensors",
+    "zimage_clip": "qwen_3_4b.safetensors",
+    "zimage_vae": "z_image_ae.safetensors"
   }
 }

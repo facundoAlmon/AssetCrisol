@@ -1,6 +1,7 @@
 # Paso 1: imagen limpia del personaje (frente, pose A, fondo liso) con ComfyUI local.
 #  - Con referencia (personajes/<n>/referencia.png): Qwen-Image-Edit 2511 la "re-renderiza" en estilo 3D.
-#  - Sin referencia: Flux.2 Dev genera desde el prompt.
+#  - Sin referencia: Z-Image Turbo (por defecto: segundos, Apache-2.0) o FLUX.2 Dev (`imagen.motor: "flux2"`: ~3 min,
+#    licencia no comercial) generan desde el prompt.
 # Una imagen por seed -> personajes/<n>/trabajo/imagen/cand_<seed>.png + candidatos.png (hoja de contacto).
 # Se llama desde pipeline.py (python3 del sistema; usa el CLI `comfy` del venv de ComfyUI).
 import glob, json, os, shutil, subprocess, sys, time, urllib.request
@@ -74,6 +75,30 @@ def componer_prompt(pj):
     return ' '.join(partes)
 
 
+def motor_texto(cfg, pj):
+    """Motor de imagen sin referencia: imagen.motor, o Z-Image Turbo si la config tiene sus modelos (si no, FLUX.2 Dev)."""
+    return pj['imagen'].get('motor') or ('zimage' if cfg['modelos_imagen'].get('zimage_unet') else 'flux2')
+
+
+def workflow_zimage(cfg, prompt, seed, prefijo, lado=1024):
+    """Z-Image Turbo en formato API: 8 pasos, cfg 1, negativo vacío (ConditioningZeroOut)."""
+    M = cfg['modelos_imagen']
+    return {
+        '1': {'class_type': 'UNETLoader', 'inputs': {'unet_name': M['zimage_unet'], 'weight_dtype': 'default'}},
+        '2': {'class_type': 'CLIPLoader', 'inputs': {'clip_name': M['zimage_clip'], 'type': 'lumina2'}},
+        '3': {'class_type': 'VAELoader', 'inputs': {'vae_name': M['zimage_vae']}},
+        '4': {'class_type': 'ModelSamplingAuraFlow', 'inputs': {'model': ['1', 0], 'shift': 3.0}},
+        '5': {'class_type': 'CLIPTextEncode', 'inputs': {'clip': ['2', 0], 'text': prompt}},
+        '6': {'class_type': 'ConditioningZeroOut', 'inputs': {'conditioning': ['5', 0]}},
+        '7': {'class_type': 'EmptySD3LatentImage', 'inputs': {'width': lado, 'height': lado, 'batch_size': 1}},
+        '8': {'class_type': 'KSampler', 'inputs': {'model': ['4', 0], 'positive': ['5', 0], 'negative': ['6', 0],
+              'latent_image': ['7', 0], 'seed': seed, 'steps': 8, 'cfg': 1.0, 'sampler_name': 'res_multistep',
+              'scheduler': 'simple', 'denoise': 1.0}},
+        '9': {'class_type': 'VAEDecode', 'inputs': {'samples': ['8', 0], 'vae': ['3', 0]}},
+        '10': {'class_type': 'SaveImage', 'inputs': {'images': ['9', 0], 'filename_prefix': prefijo}},
+    }
+
+
 def armar_workflow(cfg, nombre, pj, seed, wf_path, prefijo, ref=None, prompt=None):
     """`ref` y `prompt` pisan a los del personaje (las vistas de Pixal3D editan la imagen elegida)."""
     comfy = comfy_cli(cfg)
@@ -115,7 +140,8 @@ def main(cfg, nombre, pj):
     prompt = componer_prompt(pj)
     with open(os.path.join(out_dir, 'prompt.txt'), 'w') as f:
         f.write(prompt + '\n')
-    print(f'[imagen] estilo {pj["_estilo"]["nombre"]}; prompt (en trabajo/imagen/prompt.txt):\n  {prompt}')
+    motor = 'qwen edit' if pj['imagen'].get('referencia') else motor_texto(cfg, pj)
+    print(f'[imagen] estilo {pj["_estilo"]["nombre"]}, motor {motor}; prompt (en trabajo/imagen/prompt.txt):\n  {prompt}')
     asegurar_servidor(cfg, out_dir)
     comfy = comfy_cli(cfg)
     salida_comfy = os.path.join(cfg['comfyui_dir'], 'output')
@@ -123,9 +149,16 @@ def main(cfg, nombre, pj):
     for seed in pj['imagen']['seeds']:
         prefijo = f'gp_{nombre}_s{seed}'
         wf = os.path.join(out_dir, f'wf_s{seed}.json')
-        armar_workflow(cfg, nombre, pj, seed, wf, prefijo)
         print(f'[imagen] seed {seed}...')
-        run_json([comfy, '--json', '--where', 'local', 'run', '--workflow', wf, '--wait'])
+        if not pj['imagen'].get('referencia') and motor_texto(cfg, pj) == 'zimage':
+            import generar_malla_pixal3d   # su `correr` encola un workflow API y espera
+            w = workflow_zimage(cfg, prompt, seed, prefijo)
+            with open(wf, 'w') as f:
+                json.dump(w, f, indent=1)
+            generar_malla_pixal3d.correr(cfg, w)
+        else:
+            armar_workflow(cfg, nombre, pj, seed, wf, prefijo)
+            run_json([comfy, '--json', '--where', 'local', 'run', '--workflow', wf, '--wait'])
         ult = max(glob.glob(os.path.join(salida_comfy, prefijo + '_*.png')), key=os.path.getmtime)
         dst = os.path.join(out_dir, f'cand_{seed}.png')
         shutil.copy(ult, dst)
