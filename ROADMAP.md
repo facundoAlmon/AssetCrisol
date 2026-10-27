@@ -43,7 +43,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] Personaje: Z-Image (sin referencia) → Qwen (limpieza) → vistas → Pixal3D 4 vistas + UltraTex (seed 2) → rig →
       revisión (revés 0,2 %). En `ejemplos/personajes/cris`.
 - [ ] Objetos: el crisol con metal brillando (logo), yunque, martillo, horno de fundición, caja de herramientas.
-- [ ] Vehículo (opcional): vagoneta minera o carretilla.
+- [ ] Vehículo: un auto para Cris (receta de vehículos).
 - [x] Escenario: el taller (piso de piedra, camino y pared de ladrillo; Z-Image Turbo). En `ejemplos/escenarios/taller`.
 
 ## 2. Requisitos e instalación (humanos y agentes)
@@ -125,6 +125,8 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
       pierna y placas rígidas que se cruzan en golpes (robots).
 - [ ] Animación nueva: saludar (mano en alto, de frente). Al final de la hoja (`anim.TODAS`, `armar_iso.NOMBRES`, README);
       probar procedural y Kimodo.
+- [ ] Vehículos que no son autos: los prompts de `vistas` y la vista de atrás dicen "toy car" (luces traseras,
+      alerón) y Qwen convierte una vagoneta en un auto; armarlos desde la descripción del objeto.
 - [ ] Manos: siempre abiertas (el rig no tiene dedos); evaluar un puño por forma o huesos de dedos simples.
 - [ ] Opciones dudosas: `modelo.simetria` y `render.oscuro_brillante` (probadas sin uso claro): documentar o sacar.
 
