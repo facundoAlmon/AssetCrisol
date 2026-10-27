@@ -12,7 +12,7 @@ Personajes animados · objetos · vehículos · kits de escenario → sprites, `
 [![Godot 4](https://img.shields.io/badge/Godot-4-478CBF?logo=godotengine&logoColor=white)](#guía-de-godot)
 [![Blender 5.1](https://img.shields.io/badge/Blender-5.1-F5792A?logo=blender&logoColor=white)](#4-blender)
 
-<!-- demo: ejemplos/cris/preview_iso.gif -->
+<!-- demo: ejemplos/personajes/cris/preview_iso.gif -->
 *Demo en preparación: Cris, la mascota del proyecto, caminando en 8 direcciones.*
 
 [English](README.en.md) · [Roadmap](ROADMAP.md) · [Empezá acá](#empezá-acá) · [Para agentes de IA](#para-agentes-de-ia)

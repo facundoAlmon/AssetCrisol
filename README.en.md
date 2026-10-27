@@ -12,7 +12,7 @@ Animated characters · props · vehicles · scenery kits → sprites, `.glb` fil
 [![Godot 4](https://img.shields.io/badge/Godot-4-478CBF?logo=godotengine&logoColor=white)](#godot-guide)
 [![Blender 5.1](https://img.shields.io/badge/Blender-5.1-F5792A?logo=blender&logoColor=white)](#4-blender)
 
-<!-- demo: ejemplos/cris/preview_iso.gif -->
+<!-- demo: ejemplos/personajes/cris/preview_iso.gif -->
 *Demo coming soon: Cris, the project's mascot, walking in 8 directions.*
 
 [Español](README.md) · [Roadmap](ROADMAP.md) · [Start here](#start-here) · [For AI agents](#for-ai-agents)

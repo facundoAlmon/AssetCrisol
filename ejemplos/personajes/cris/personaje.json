@@ -1,0 +1,228 @@
+{
+  "_doc": "Cris, la mascota de AssetCrisol. La imagen salió de Z-Image sin referencia (descripción en imagen._descripcion, seed 102 = base_102.png) y Qwen la limpió con imagen.prompt (elegida 104). Vistas, malla (Pixal3D 4 vistas + UltraTex seed 2) y articulaciones (DWPose) ya hechas: copiar a <datos_dir>/personajes/ y correr blender, sprites, iso, revisar.",
+  "estilo": "semirealista",
+  "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/ (render, tema, paleta, luces, posproceso, escala)",
+  "imagen": {
+    "referencia": "base_102.png",
+    "_descripcion": "a cheerful young woman blacksmith, athletic build, short copper-red hair in a pixie cut, wearing a fitted dark navy blue work jumpsuit with copper-orange stitching, sleeves rolled up to the elbows, sturdy brown leather work gloves, sturdy brown leather work boots, a simple leather tool belt tight at the waist, round brass welding goggles pushed up on the forehead, short tidy hair, friendly confident smile, big clearly open eyes, normal adult proportions (not chibi, not big-headed), arms down and separated from the body, nothing held in the hands, no apron, no cape, no hat, no loose or baggy clothing",
+    "seeds": [
+      101,
+      102,
+      103,
+      104
+    ],
+    "elegida": 104,
+    "motor": "zimage",
+    "prompt": "Keep this exact character unchanged: the same young woman, same face, same copper-red short hair, same brass goggles on the forehead, same dark navy blue work jumpsuit with copper stitching, same rolled-up sleeves, same brown leather gloves and boots, same semi-realistic 3D render style, same lighting and plain light grey background. Only make these changes: remove the badge on the chest so the chest is plain fabric with nothing on it; remove the thigh holster, the leg straps and everything hanging from the belt, keep only a simple plain belt tight at the waist; remove the side cargo pockets; make the trouser legs fitted and straight down to the boots, not baggy; full body, front view, symmetrical, standing straight in a relaxed A-pose with the arms straight down and angled about 25 degrees away from the body, a clear gap between the arms and the torso, hands not touching the body, legs slightly apart, feet pointing forward."
+  },
+  "malla": {
+    "motor": "pixal3d",
+    "vistas": true,
+    "ultratex": {
+      "seed": 2,
+      "giro": 45,
+      "espalda": true
+    },
+    "caras": 200000,
+    "resolucion": 1536,
+    "textura_px": 4096,
+    "seed": 1234,
+    "_doc": "Por defecto (humanoides, 2026-10): Pixal3D 4 vistas (espalda y costados con Qwen: `pipeline.py vistas` para mirarlas antes) + UltraTex con segunda pasada a 45° y la espalda de la vista de Qwen (espalda: true; sin eso UltraTex la inventa). resolucion 1024 | 1536. Para objetos o formas raras probar \"motor\": \"trellis2\" (resolucion 512 | 1024 | 1536) + ultratex."
+  },
+  "modelo": {
+    "altura": 1.85,
+    "articulaciones": {
+      "root": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0.4,
+          0
+        ]
+      ],
+      "hips": [
+        [
+          0,
+          -0.041,
+          0.927
+        ],
+        [
+          0,
+          -0.041,
+          1.012
+        ]
+      ],
+      "spine": [
+        [
+          0,
+          -0.041,
+          1.012
+        ],
+        [
+          0,
+          -0.041,
+          1.139
+        ]
+      ],
+      "chest": [
+        [
+          0,
+          -0.041,
+          1.139
+        ],
+        [
+          0,
+          -0.041,
+          1.351
+        ]
+      ],
+      "neck": [
+        [
+          0,
+          -0.041,
+          1.351
+        ],
+        [
+          0,
+          -0.041,
+          1.459
+        ]
+      ],
+      "head": [
+        [
+          0,
+          -0.041,
+          1.459
+        ],
+        [
+          0,
+          -0.041,
+          1.849
+        ]
+      ],
+      "shoulder.S": [
+        [
+          0.05,
+          -0.041,
+          1.321
+        ],
+        [
+          0.133,
+          -0.041,
+          1.306
+        ]
+      ],
+      "upper_arm.S": [
+        [
+          0.153,
+          -0.041,
+          1.306
+        ],
+        [
+          0.218,
+          -0.033,
+          1.105
+        ]
+      ],
+      "forearm.S": [
+        [
+          0.218,
+          -0.033,
+          1.105
+        ],
+        [
+          0.317,
+          -0.06,
+          0.891
+        ]
+      ],
+      "hand.S": [
+        [
+          0.317,
+          -0.06,
+          0.891
+        ],
+        [
+          0.376,
+          -0.07,
+          0.764
+        ]
+      ],
+      "thigh.S": [
+        [
+          0.107,
+          -0.054,
+          0.927
+        ],
+        [
+          0.172,
+          -0.007,
+          0.531
+        ]
+      ],
+      "shin.S": [
+        [
+          0.172,
+          -0.007,
+          0.531
+        ],
+        [
+          0.233,
+          0.03,
+          0.156
+        ]
+      ],
+      "foot.S": [
+        [
+          0.233,
+          0.03,
+          0.156
+        ],
+        [
+          0.248,
+          -0.17,
+          0.03
+        ]
+      ],
+      "foot_ik.S": [
+        [
+          0.233,
+          0.03,
+          0.156
+        ],
+        [
+          0.248,
+          -0.17,
+          0.03
+        ]
+      ],
+      "knee_pole.S": [
+        [
+          0.172,
+          -0.7,
+          0.531
+        ],
+        [
+          0.172,
+          -0.8,
+          0.531
+        ]
+      ]
+    }
+  },
+  "animacion": {
+    "zancada": 0.14,
+    "levantar_pie": 0.09,
+    "balanceo_brazos_grados": 24,
+    "cabeza_arriba_grados": 0
+  },
+  "sprites": {
+    "alto_en_pantalla_px": null,
+    "_alto": "null = modelo.altura × estilo.escala.px_por_unidad (misma escala para todos los assets del estilo)",
+    "superresolucion": 3
+  }
+}
