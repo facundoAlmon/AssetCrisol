@@ -1,0 +1,35 @@
+{
+  "_doc": "Configuración de un objeto (caja, mesa, tronco...). Copiada por `pipeline.py nuevo <nombre> --objeto`. Ver README.md > Objetos.",
+  "tipo": "objeto",
+  "imagen": {
+    "referencia": null,
+    "descripcion": "a sturdy wooden crate made of light brown planks with dark metal corner brackets and nails",
+    "seeds": [
+      4242,
+      777,
+      31337
+    ],
+    "elegida": 4242
+  },
+  "malla": {
+    "caras": 20000,
+    "octree": 384,
+    "pasos": 50,
+    "seed": 1234
+  },
+  "modelo": {
+    "altura": 0.7,
+    "giro_grados": 0
+  },
+  "lateral": {
+    "px_por_unidad": null,
+    "superresolucion": 3
+  },
+  "isometrico": {
+    "baldosa_px": null,
+    "superresolucion": 2,
+    "direcciones": 4,
+    "sombra": true
+  },
+  "colision": true
+}
