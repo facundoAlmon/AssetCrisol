@@ -158,6 +158,8 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
 
 ## Verificar cambios
 
+- **Antes de commitear cambios de Blender, sprites, iso, Godot o escenarios**: `python3 tests/humo.py` (~3 min; usa la
+  GPU para renderizar con EEVEE: no correrlo mientras hay una generación) o `--rapido` (~1,5 min). Datos temporales.
 - Referencias: `cris` (personaje) y `caja` (objeto) en `ejemplos/`; copiarlos con `cp -r ejemplos/* <datos_dir>/`.
 - Blender/animación: `crisol blender cris && crisol sprites cris` y mirar `preview.gif`; también `iso cris`
   → `preview_iso.gif` y poses (golpe, patada, brazos arriba). Celdas sueltas: recortar la hoja con `meta.json`.

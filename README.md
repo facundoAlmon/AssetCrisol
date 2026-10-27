@@ -254,6 +254,9 @@ crisol tema taller                   # lo mismo: piso de piedra, camino y pared 
 El bosque trae solo las 4 texturas elegidas: el piso con Z-Image Turbo (Apache-2.0) y el resto con DreamShaper XL Turbo
 (CreativeML Open RAIL++-M). El taller trae sus 3 texturas elegidas, todas con Z-Image Turbo.
 
+`python3 tests/humo.py` hace todo esto solo en una carpeta temporal (sin tocar `datos_dir`), revisa lo que deja y, si
+hay Godot, instancia las escenas en un proyecto vacío: ~3 min, sale con 1 si algo falla.
+
 En `ejemplos/personajes/cris/` también están los gifs de demo, armados con sus sprites iso:
 [`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (el de arriba),
 [`demo_paseo.gif`](ejemplos/personajes/cris/demo_paseo.gif) (camina por un piso iso) y

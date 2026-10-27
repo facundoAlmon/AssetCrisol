@@ -262,6 +262,10 @@ crisol tema taller                   # same: stone floor, brick path and wall
 The forest ships only its 4 chosen textures: the floor made with Z-Image Turbo (Apache-2.0) and the rest with DreamShaper
 XL Turbo (CreativeML Open RAIL++-M). The workshop ships its 3 chosen textures, all made with Z-Image Turbo.
 
+`python3 tests/humo.py` (smoke test) does all of this by itself in a temporary folder (without touching `datos_dir`),
+checks what it leaves and, if Godot is configured, instantiates the scenes in an empty project: ~3 min, exits with 1
+if something fails.
+
 `ejemplos/personajes/cris/` also has the demo gifs, made from its iso sprites:
 [`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (the one at the top),
 [`demo_paseo.gif`](ejemplos/personajes/cris/demo_paseo.gif) (walking on an iso floor) and
