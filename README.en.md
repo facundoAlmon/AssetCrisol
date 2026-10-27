@@ -243,7 +243,7 @@ the GPU. The `MISSING`/`UNEXPECTED` LoRA warnings on load are normal.
 ### Try the examples (no generation needed)
 
 `ejemplos/` (examples) contains **Cris**, the project's main character (a young blacksmith with copper hair and goggles), a
-prop (`caja`, a crate) and a scenery kit (`bosque`, a forest), each with its json. Cris and the crate already include
+prop (`caja`, a crate) and two scenery kits (`bosque`, a forest, and `taller`, Cris's workshop), each with its json. Cris and the crate already include
 their `trabajo/malla/modelo.glb`, so you can run everything **from Blender onwards** without ComfyUI or TRELLIS.2
 (just Blender and Pillow):
 
@@ -255,10 +255,11 @@ crisol iso cris                      # 8 isometric directions (~25 s) -> preview
 crisol revisar cris                  # review sheet -> trabajo/revision.png
 crisol blender caja && crisol sprites caja   # -> objetos/caja/preview.png
 crisol tema bosque                   # tileable textures + theme colors (the chosen textures are included)
+crisol tema taller                   # same: stone floor, brick path and wall
 ```
 
 The forest ships only its 4 chosen textures: the floor made with Z-Image Turbo (Apache-2.0) and the rest with DreamShaper
-XL Turbo (CreativeML Open RAIL++-M).
+XL Turbo (CreativeML Open RAIL++-M). The workshop ships its 3 chosen textures, all made with Z-Image Turbo.
 
 `ejemplos/personajes/cris/` also has the demo gifs, made from its iso sprites:
 [`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (the one at the top),

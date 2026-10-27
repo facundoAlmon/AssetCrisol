@@ -236,7 +236,7 @@ avisos `MISSING`/`UNEXPECTED` del LoRA al cargar son normales.
 ### Probar con los ejemplos (sin generar nada)
 
 `ejemplos/` trae a **Cris**, la protagonista del proyecto (una herrera joven de pelo cobrizo con antiparras), un objeto
-(`caja`) y un escenario (`bosque`), cada uno con su json. Cris y la caja traen ya su `trabajo/malla/modelo.glb`, así
+(`caja`) y dos escenarios (`bosque` y `taller`, el taller de Cris), cada uno con su json. Cris y la caja traen ya su `trabajo/malla/modelo.glb`, así
 que se puede correr todo **de Blender en adelante** sin ComfyUI ni TRELLIS.2 (solo Blender y Pillow):
 
 ```bash
@@ -247,10 +247,11 @@ crisol iso cris                      # 8 direcciones isométricas (≈25 s) -> p
 crisol revisar cris                  # hoja de control -> trabajo/revision.png
 crisol blender caja && crisol sprites caja   # -> objetos/caja/preview.png
 crisol tema bosque                   # texturas repetibles + colores del tema (trae las texturas elegidas)
+crisol tema taller                   # lo mismo: piso de piedra, camino y pared de ladrillo
 ```
 
 El bosque trae solo las 4 texturas elegidas: el piso con Z-Image Turbo (Apache-2.0) y el resto con DreamShaper XL Turbo
-(CreativeML Open RAIL++-M).
+(CreativeML Open RAIL++-M). El taller trae sus 3 texturas elegidas, todas con Z-Image Turbo.
 
 En `ejemplos/personajes/cris/` también están los gifs de demo, armados con sus sprites iso:
 [`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (el de arriba),

@@ -43,7 +43,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
       revisión (revés 0,2 %). En `ejemplos/personajes/cris`.
 - [ ] Objetos: el crisol con metal brillando (logo), yunque, martillo, horno de fundición, caja de herramientas.
 - [ ] Vehículo (opcional): vagoneta minera o carretilla.
-- [ ] Escenario: el taller (piso de ladrillo o piedra, pared de ladrillo, paleta cálida).
+- [x] Escenario: el taller (piso de piedra, camino y pared de ladrillo; Z-Image Turbo). En `ejemplos/escenarios/taller`.
 
 ## 2. Requisitos e instalación (humanos y agentes)
 - [ ] Requisitos explícitos: GPU y VRAM, driver/CUDA, RAM, disco por nivel, distribuciones probadas, tiempo de cada
