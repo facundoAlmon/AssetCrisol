@@ -12,8 +12,9 @@ Animated characters · props · vehicles · scenery kits → sprites, `.glb` fil
 [![Godot 4](https://img.shields.io/badge/Godot-4-478CBF?logo=godotengine&logoColor=white)](#godot-guide)
 [![Blender 5.1](https://img.shields.io/badge/Blender-5.1-F5792A?logo=blender&logoColor=white)](#4-blender)
 
-<!-- demo: ejemplos/personajes/cris/preview_iso.gif -->
-*Demo coming soon: Cris, the project's mascot, walking in 8 directions.*
+<img src="ejemplos/personajes/cris/demo_acciones.gif" alt="Cris, the project's mascot, in isometric view: idle, walk, run, punch, kick, jump, roll and arms up" width="300">
+
+*Cris, the project's mascot: isometric sprites generated end to end with AssetCrisol.*
 
 [Español](README.md) · [Roadmap](ROADMAP.md) · [Start here](#start-here) · [For AI agents](#for-ai-agents)
 
@@ -257,6 +258,11 @@ python3 pipeline.py tema bosque      # tileable textures + theme colors (the cho
 
 The forest ships only its 4 chosen textures; the floor one was made with FLUX.2 Klein (non-commercial license): it is
 an example to try things out, not an asset for a commercial game.
+
+`ejemplos/personajes/cris/` also has the demo gifs, made from its iso sprites:
+[`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (the one at the top),
+[`demo_paseo.gif`](ejemplos/personajes/cris/demo_paseo.gif) (walking on an iso floor) and
+[`demo_direcciones.gif`](ejemplos/personajes/cris/demo_direcciones.gif) (all 8 directions at once).
 
 ### First character in 10 commands
 
