@@ -1,0 +1,12 @@
+# configuración local (copiar config.ejemplo.json)
+config.json
+__pycache__/
+*.pyc
+# datos generados, si datos_dir apunta a esta carpeta (por defecto)
+/personajes/
+/objetos/
+/escenarios/
+/movimientos/
+# candidatos de `pipeline.py movimiento` sin datos_dir
+herramientas/3_blender/movimientos/candidatos/
+.codegraph/

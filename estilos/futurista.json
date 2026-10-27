@@ -1,0 +1,26 @@
+{
+  "_doc": "Ciencia ficción limpia: superficies lisas, acentos de neón cian/magenta, luz fría y contraste alto.",
+  "prompt": {
+    "render_personaje": "a high quality stylized 3D sci-fi game character, sleek CGI render",
+    "render_objeto": "a high quality stylized 3D sci-fi game prop, sleek CGI render",
+    "tema": "futuristic sci-fi setting: smooth armor panels, carbon fiber, brushed metal, glowing light strips; no medieval or rustic elements",
+    "paleta": "cool palette: gunmetal grey, white, deep blue, with small cyan and magenta neon accents",
+    "extra": "clean studio lighting, plain light grey background"
+  },
+  "render": {
+    "luz_principal": {"energia": 3.6, "elevacion_grados": 45, "azimut_grados": -30, "color": [0.9, 0.95, 1.0]},
+    "luz_relleno": {"energia": 1.6, "elevacion_grados": 15, "azimut_grados": 160, "color": [0.55, 0.8, 1.0]},
+    "ambiente": [0.28, 0.31, 0.36],
+    "rugosidad": 0.45
+  },
+  "posproceso": {
+    "saturacion": 1.05,
+    "contraste": 1.12,
+    "brillo": 1.0,
+    "tinte": [200, 225, 255],
+    "tinte_fuerza": 0.06,
+    "contorno_px": 0,
+    "contorno_color": [10, 20, 35]
+  },
+  "escala": {"px_por_unidad": 98.38, "baldosa_px": 128}
+}

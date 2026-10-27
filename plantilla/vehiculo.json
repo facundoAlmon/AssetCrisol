@@ -1,0 +1,47 @@
+{
+  "_doc": "Se fusiona sobre plantilla/objeto.json con `pipeline.py nuevo <n> --vehiculo` (README > Vehículos): auto para un juego 3D. Pasos: imagen -> vistas (la cola en tres cuartos de Qwen) -> malla (los candidatos) -> blender (revision.png: una fila por candidato) -> elegir malla.elegida y volver a correr blender.",
+  "imagen": {
+    "descripcion": "<QUÉ AUTO, en inglés, p. ej. a die-cast toy hatchback: glossy bright sky blue paint, big rear wing, black windows, chunky toy proportions, glossy paint, no logos, no text, whole car visible, three-quarter front side view, no ground, no base>",
+    "seeds": [
+      101,
+      202,
+      303,
+      404,
+      505,
+      606
+    ]
+  },
+  "malla": {
+    "motor": "trellis2",
+    "vista": "atras",
+    "seed_vistas": 2,
+    "caras": 100000,
+    "resolucion": 1024,
+    "textura_px": 2048,
+    "seed": 1234,
+    "candidatos": {
+      "pixal3d": {
+        "motor": "pixal3d",
+        "resolucion": 1536,
+        "seed": 1,
+        "caras": 100000
+      },
+      "ultratex": {
+        "desde": "trellis2",
+        "ultratex": {
+          "seed": 1,
+          "giro": 45
+        }
+      }
+    },
+    "elegida": "trellis2",
+    "_doc": "trellis2 = la principal (TRELLIS.2 a 1024; a 1536 limpio desde el remesh a 1280, pero no mejor). Candidatos: pixal3d (copia mejor colores y dibujos, abolla alerones) y ultratex (la misma de TRELLIS.2 repintada: arregla colores errados, ondula un poco las chapas). Borrar trabajo/malla_<c> para rehacer uno."
+  },
+  "vehiculo": {
+    "largo_m": 2.3,
+    "simetria": "izquierda",
+    "ruedas": "originales",
+    "_doc": "trompa en +Z del glTF; simetria izquierda (+X) | derecha | null; ruedas originales | armadas | false; materiales, alisar, radio_m, ancho_rueda_m: README > Vehículos"
+  },
+  "colision": true
+}

@@ -1,0 +1,46 @@
+{
+  "_doc": "Configuración de un personaje. Copiada por `pipeline.py nuevo <nombre>`. Ver README.md > personaje.json.",
+  "estilo": null,
+  "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/ (render, tema, paleta, luces, posproceso, escala)",
+  "imagen": {
+    "referencia": "referencia.png",
+    "descripcion": "<QUIÉN ES: ropa, pelo, colores, accesorios, expresión; en inglés, p. ej. a young knight with short red hair, dented steel breastplate over a blue tunic, brown leather boots, friendly smile>",
+    "_descripcion": "El prompt se arma solo: estilo (render, tema, paleta) + descripcion + encuadre técnico (cuerpo entero, frente, pose A). Queda en trabajo/imagen/prompt.txt. Para escribir el prompt entero a mano: borrar descripcion y usar \"prompt\".",
+    "seeds": [
+      101,
+      102,
+      103,
+      104
+    ],
+    "elegida": null
+  },
+  "malla": {
+    "motor": "pixal3d",
+    "vistas": true,
+    "ultratex": {
+      "seed": 1,
+      "giro": 45,
+      "espalda": true
+    },
+    "caras": 200000,
+    "resolucion": 1536,
+    "textura_px": 4096,
+    "seed": 1234,
+    "_doc": "Por defecto (humanoides, 2026-10): Pixal3D 4 vistas (espalda y costados con Qwen: `pipeline.py vistas` para mirarlas antes) + UltraTex con segunda pasada a 45° y la espalda de la vista de Qwen (espalda: true; sin eso UltraTex la inventa). resolucion 1024 | 1536. Para objetos o formas raras probar \"motor\": \"trellis2\" (resolucion 512 | 1024 | 1536) + ultratex."
+  },
+  "modelo": {
+    "altura": 1.85,
+    "articulaciones": null
+  },
+  "animacion": {
+    "zancada": 0.14,
+    "levantar_pie": 0.09,
+    "balanceo_brazos_grados": 24,
+    "cabeza_arriba_grados": 0
+  },
+  "sprites": {
+    "alto_en_pantalla_px": null,
+    "_alto": "null = modelo.altura × estilo.escala.px_por_unidad (misma escala para todos los assets del estilo)",
+    "superresolucion": 3
+  }
+}

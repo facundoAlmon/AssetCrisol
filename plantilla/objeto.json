@@ -1,0 +1,56 @@
+{
+  "_doc": "Configuración de un objeto (caja, mesa, tronco...). Copiada por `pipeline.py nuevo <nombre> --objeto`. Ver README.md > Objetos.",
+  "tipo": "objeto",
+  "estilo": null,
+  "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/",
+  "imagen": {
+    "referencia": null,
+    "descripcion": "<QUÉ ES, en inglés, p. ej. a sturdy wooden crate with metal corner brackets>",
+    "_descripcion": "El prompt se arma solo: estilo (render, tema, paleta) + descripcion + encuadre (objeto solo, tres cuartos desde arriba). Queda en trabajo/imagen/prompt.txt.",
+    "seeds": [
+      4242,
+      777,
+      31337
+    ],
+    "elegida": null
+  },
+  "malla": {
+    "caras": 20000,
+    "resolucion": 512,
+    "textura_px": 2048,
+    "seed": 1234,
+    "_doc": "TRELLIS.2: resolucion 512 | 1024 | 1536 (más = más detalle y VRAM; los objetos macizos a 1024 no entran en 16 GB). Candidatos (README > paso 2): ultratex = la de TRELLIS.2 repintada (cofre mejor, computadora peor) y pixal3d = Pixal3D de una vista (mejor geometría en el cofre; el paso malla lo endereza). malla genera los tres y arma trabajo/candidatos.png: elegir malla.elegida y correr malla de nuevo (copia). Sacar candidatos para ahorrar GPU (~1 y ~4 min). \"motor\":",
+    "candidatos": {
+      "ultratex": {
+        "desde": "trellis2",
+        "ultratex": {
+          "seed": 1,
+          "giro": 45
+        }
+      },
+      "pixal3d": {
+        "motor": "pixal3d",
+        "resolucion": 1536,
+        "seed": 1,
+        "caras": 200000
+      }
+    },
+    "elegida": "trellis2"
+  },
+  "modelo": {
+    "altura": 0.8,
+    "giro_grados": 0
+  },
+  "lateral": {
+    "px_por_unidad": null,
+    "superresolucion": 3
+  },
+  "isometrico": {
+    "baldosa_px": null,
+    "superresolucion": 2,
+    "direcciones": 4,
+    "sombra": true
+  },
+  "_escalas": "px_por_unidad / baldosa_px en null = los del estilo",
+  "colision": true
+}

@@ -1,0 +1,25 @@
+{
+  "_doc": "Copiar a config.json (o apuntar ASSETCRISOL_CONFIG a otro archivo) y completar las rutas. Ver README.md > Instalación.",
+  "datos_dir": ".",
+  "_datos_dir": "dónde se crean personajes/, objetos/, escenarios/ y movimientos/candidatos/; relativo a este archivo",
+  "estilo": "moderno",
+  "_estilo": "estilo por defecto (estilos/<nombre>.json); un personaje u objeto lo pisa con \"estilo\" en su json",
+  "comfyui_dir": "/ruta/a/ComfyUI",
+  "comfyui_url": "http://127.0.0.1:8188",
+  "trellis2_dir": "/ruta/a/TRELLIS.2",
+  "kimodo_dir": "/ruta/a/kimodo",
+  "_kimodo_dir": "Kimodo (NVIDIA) para clips de movimiento: ver README > Animaciones: dos métodos",
+  "env_modelos": {
+    "HF_HOME": "/ruta/a/.hf-cache",
+    "U2NET_HOME": "/ruta/a/.u2net"
+  },
+  "blender": "/ruta/a/blender-5.1/blender",
+  "godot": "/ruta/a/Godot_v4.x_linux.x86_64",
+  "modelos_imagen": {
+    "qwen_unet": "qwen_image_edit_2511_int8_convrot.safetensors",
+    "qwen_lora": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+    "flux_unet": "flux2DevFP8GGUF_ggufQ5KM.gguf",
+    "flux_clip": "flux2DevFP8GGUF_textEncoderFP8.safetensors",
+    "flux_vae": "flux2DevFP8GGUF_flux2DevVAE.safetensors"
+  }
+}

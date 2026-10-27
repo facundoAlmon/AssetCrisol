@@ -1,0 +1,272 @@
+{
+  "recipe": "flux2_t2i",
+  "params": {
+    "prompt": {
+      "type": "string",
+      "default": "a majestic fox standing in a misty forest at sunrise, cinematic lighting, highly detailed"
+    },
+    "guidance": {
+      "type": "float",
+      "default": 4
+    },
+    "seed": {
+      "type": "int",
+      "default": 0
+    },
+    "steps": {
+      "type": "int",
+      "default": 20
+    },
+    "width": {
+      "type": "int",
+      "default": 1024
+    },
+    "height": {
+      "type": "int",
+      "default": 1024
+    },
+    "filename_prefix": {
+      "type": "string",
+      "default": "flux2_t2i"
+    }
+  },
+  "ops": [
+    {
+      "op": "add_node",
+      "class_type": "UnetLoaderGGUF",
+      "as": "unetloadergguf",
+      "at": [
+        40.0,
+        60.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "CLIPLoader",
+      "as": "cliploader",
+      "at": [
+        40.0,
+        186.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "cliploader",
+      "widget": "type",
+      "value": "flux2"
+    },
+    {
+      "op": "add_node",
+      "class_type": "VAELoader",
+      "as": "vaeloader",
+      "at": [
+        40.0,
+        360.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "CLIPTextEncode",
+      "as": "cliptextencode",
+      "at": [
+        360.0,
+        60.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "cliptextencode",
+      "widget": "text",
+      "value": "${prompt}"
+    },
+    {
+      "op": "add_node",
+      "class_type": "FluxGuidance",
+      "as": "fluxguidance",
+      "at": [
+        680.0,
+        60.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "fluxguidance",
+      "widget": "guidance",
+      "value": "${guidance}"
+    },
+    {
+      "op": "add_node",
+      "class_type": "BasicGuider",
+      "as": "basicguider",
+      "at": [
+        1000.0,
+        60.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "RandomNoise",
+      "as": "randomnoise",
+      "at": [
+        40.0,
+        486.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "randomnoise",
+      "widget": "noise_seed",
+      "value": "${seed}"
+    },
+    {
+      "op": "add_node",
+      "class_type": "KSamplerSelect",
+      "as": "ksamplerselect",
+      "at": [
+        40.0,
+        636.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "Flux2Scheduler",
+      "as": "flux2scheduler",
+      "at": [
+        40.0,
+        762.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "flux2scheduler",
+      "widget": "steps",
+      "value": "${steps}"
+    },
+    {
+      "op": "set_widget",
+      "node": "flux2scheduler",
+      "widget": "width",
+      "value": "${width}"
+    },
+    {
+      "op": "set_widget",
+      "node": "flux2scheduler",
+      "widget": "height",
+      "value": "${height}"
+    },
+    {
+      "op": "add_node",
+      "class_type": "EmptyFlux2LatentImage",
+      "as": "emptyflux2latentimage",
+      "at": [
+        40.0,
+        936.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "emptyflux2latentimage",
+      "widget": "width",
+      "value": "${width}"
+    },
+    {
+      "op": "set_widget",
+      "node": "emptyflux2latentimage",
+      "widget": "height",
+      "value": "${height}"
+    },
+    {
+      "op": "add_node",
+      "class_type": "SamplerCustomAdvanced",
+      "as": "samplercustomadvanced",
+      "at": [
+        1320.0,
+        60.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "VAEDecode",
+      "as": "vaedecode",
+      "at": [
+        1640.0,
+        60.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "SaveImage",
+      "as": "saveimage",
+      "at": [
+        1960.0,
+        60.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "saveimage",
+      "widget": "filename_prefix",
+      "value": "${filename_prefix}"
+    },
+    {
+      "op": "connect",
+      "from": "cliploader.CLIP",
+      "to": "cliptextencode.clip"
+    },
+    {
+      "op": "connect",
+      "from": "cliptextencode.CONDITIONING",
+      "to": "fluxguidance.conditioning"
+    },
+    {
+      "op": "connect",
+      "from": "unetloadergguf.MODEL",
+      "to": "basicguider.model"
+    },
+    {
+      "op": "connect",
+      "from": "fluxguidance.CONDITIONING",
+      "to": "basicguider.conditioning"
+    },
+    {
+      "op": "connect",
+      "from": "randomnoise.NOISE",
+      "to": "samplercustomadvanced.noise"
+    },
+    {
+      "op": "connect",
+      "from": "basicguider.GUIDER",
+      "to": "samplercustomadvanced.guider"
+    },
+    {
+      "op": "connect",
+      "from": "ksamplerselect.SAMPLER",
+      "to": "samplercustomadvanced.sampler"
+    },
+    {
+      "op": "connect",
+      "from": "flux2scheduler.SIGMAS",
+      "to": "samplercustomadvanced.sigmas"
+    },
+    {
+      "op": "connect",
+      "from": "emptyflux2latentimage.LATENT",
+      "to": "samplercustomadvanced.latent_image"
+    },
+    {
+      "op": "connect",
+      "from": "samplercustomadvanced.output",
+      "to": "vaedecode.samples"
+    },
+    {
+      "op": "connect",
+      "from": "vaeloader.VAE",
+      "to": "vaedecode.vae"
+    },
+    {
+      "op": "connect",
+      "from": "vaedecode.IMAGE",
+      "to": "saveimage.images"
+    }
+  ]
+}

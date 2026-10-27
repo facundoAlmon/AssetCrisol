@@ -1,0 +1,26 @@
+{
+  "_doc": "Fantasía medieval pintada a mano: tonos tierra, luz cálida de tarde, algo desaturado.",
+  "prompt": {
+    "render_personaje": "a stylized hand-painted 3D fantasy game character, painterly textures in the style of classic fantasy RPGs",
+    "render_objeto": "a stylized hand-painted 3D fantasy game prop, painterly textures in the style of classic fantasy RPGs",
+    "tema": "medieval fantasy world: wool, linen, leather, iron, bronze and weathered wood; no modern or technological elements",
+    "paleta": "warm earthy muted colors: ochre, rust, moss green, brown, desaturated blues",
+    "extra": "soft warm lighting, plain light grey background"
+  },
+  "render": {
+    "luz_principal": {"energia": 4.2, "elevacion_grados": 35, "azimut_grados": -35, "color": [1.0, 0.9, 0.75]},
+    "luz_relleno": {"energia": 0.9, "elevacion_grados": 20, "azimut_grados": 150, "color": [0.7, 0.78, 1.0]},
+    "ambiente": [0.36, 0.33, 0.29],
+    "rugosidad": 0.75
+  },
+  "posproceso": {
+    "saturacion": 0.88,
+    "contraste": 1.05,
+    "brillo": 1.0,
+    "tinte": [255, 225, 180],
+    "tinte_fuerza": 0.08,
+    "contorno_px": 0,
+    "contorno_color": [40, 28, 20]
+  },
+  "escala": {"px_por_unidad": 98.38, "baldosa_px": 128}
+}

@@ -1,0 +1,25 @@
+{
+  "_doc": "Clips de Kimodo por animación (ver README > Animaciones: dos métodos). recomendado=true: es el método por defecto de esa animación; un personaje lo pisa con animacion.metodos. desde/hasta: segundos del clip que se muestrean (en un ciclo sin desde, de un apoyo del pie izquierdo al siguiente).",
+  "caminar": {
+    "clip": "caminar.npz", "recomendado": true,
+    "prompt": "A person walks forward at a normal pace.", "duracion": 4, "seed": 1, "muestra": 0,
+    "_nota": "más natural que la procedural: paso largo, pies que apoyan, vaivén de cadera"
+  },
+  "golpe": {
+    "clip": "golpe.npz", "recomendado": false, "desde": 0.6, "hasta": 1.3,
+    "prompt": "A person in a boxing stance throws one fast straight punch forward with the right fist and returns to the stance.",
+    "duracion": 2.5, "seed": 1, "muestra": 0,
+    "_nota": "directo de boxeo real: dura ~2 cuadros y en un cabezón casi no se ve; mano abierta. La procedural exagera y se lee mejor"
+  },
+  "morir": {
+    "clip": "morir.npz", "recomendado": true, "desde": 0.6, "hasta": 2.0,
+    "prompt": "A person is hit, staggers backwards, collapses and falls onto their back on the ground and lies still.",
+    "duracion": 3.5, "seed": 1, "muestra": 1,
+    "_nota": "caída de espaldas creíble, termina acostado"
+  },
+  "correr": {
+    "clip": "correr.npz", "recomendado": false,
+    "prompt": "A person runs forward at a steady jogging pace.", "duracion": 3, "seed": 1, "muestra": 0,
+    "_nota": "en iso más natural que la procedural: erguida, zancada larga, brazos doblados; la procedural va muy agachada. Falta el visto bueno para hacerla recomendada"
+  }
+}

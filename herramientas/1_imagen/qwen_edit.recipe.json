@@ -1,0 +1,314 @@
+{
+  "recipe": "qwen_edit_refimage",
+  "params": {
+    "ref_image": {
+      "type": "string",
+      "default": "ref_personaje_side.png"
+    },
+    "edit_prompt": {
+      "type": "string",
+      "default": "change the character's t-shirt to red and add a small backpack, keep the exact same pixel art style, pose and background"
+    },
+    "seed": {
+      "type": "int",
+      "default": 111222
+    },
+    "steps": {
+      "type": "int",
+      "default": 4
+    },
+    "filename_prefix": {
+      "type": "string",
+      "default": "qwen_edit_refimage"
+    }
+  },
+  "ops": [
+    {
+      "op": "add_node",
+      "class_type": "UNETLoader",
+      "as": "unetloader",
+      "at": [
+        40.0,
+        60.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "LoraLoaderModelOnly",
+      "as": "loraloadermodelonly",
+      "at": [
+        360.0,
+        60.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "ModelSamplingAuraFlow",
+      "as": "modelsamplingauraflow",
+      "at": [
+        680.0,
+        60.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "modelsamplingauraflow",
+      "widget": "shift",
+      "value": 3.1
+    },
+    {
+      "op": "add_node",
+      "class_type": "CFGNorm",
+      "as": "cfgnorm",
+      "at": [
+        1000.0,
+        60.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "CLIPLoader",
+      "as": "cliploader",
+      "at": [
+        40.0,
+        210.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "cliploader",
+      "widget": "clip_name",
+      "value": "qwen_2.5_vl_7b_fp8_scaled.safetensors"
+    },
+    {
+      "op": "set_widget",
+      "node": "cliploader",
+      "widget": "type",
+      "value": "qwen_image"
+    },
+    {
+      "op": "add_node",
+      "class_type": "VAELoader",
+      "as": "vaeloader",
+      "at": [
+        40.0,
+        384.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "vaeloader",
+      "widget": "vae_name",
+      "value": "qwen_image_vae.safetensors"
+    },
+    {
+      "op": "add_node",
+      "class_type": "LoadImage",
+      "as": "loadimage",
+      "at": [
+        40.0,
+        510.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "loadimage",
+      "widget": "image",
+      "value": "${ref_image}"
+    },
+    {
+      "op": "add_node",
+      "class_type": "FluxKontextImageScale",
+      "as": "fluxkontextimagescale",
+      "at": [
+        360.0,
+        210.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "VAEEncode",
+      "as": "vaeencode",
+      "at": [
+        680.0,
+        186.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "TextEncodeQwenImageEditPlus",
+      "as": "textencodeqwenimageeditplus",
+      "at": [
+        680.0,
+        308.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "textencodeqwenimageeditplus",
+      "widget": "prompt",
+      "value": "${edit_prompt}"
+    },
+    {
+      "op": "add_node",
+      "class_type": "TextEncodeQwenImageEditPlus",
+      "as": "textencodeqwenimageeditplus_2",
+      "at": [
+        680.0,
+        514.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "textencodeqwenimageeditplus_2",
+      "widget": "prompt",
+      "value": ""
+    },
+    {
+      "op": "add_node",
+      "class_type": "KSampler",
+      "as": "ksampler",
+      "at": [
+        1320.0,
+        60.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "ksampler",
+      "widget": "seed",
+      "value": "${seed}"
+    },
+    {
+      "op": "set_widget",
+      "node": "ksampler",
+      "widget": "steps",
+      "value": "${steps}"
+    },
+    {
+      "op": "set_widget",
+      "node": "ksampler",
+      "widget": "cfg",
+      "value": 1.0
+    },
+    {
+      "op": "add_node",
+      "class_type": "VAEDecode",
+      "as": "vaedecode",
+      "at": [
+        1640.0,
+        60.0
+      ]
+    },
+    {
+      "op": "add_node",
+      "class_type": "SaveImage",
+      "as": "saveimage",
+      "at": [
+        1960.0,
+        60.0
+      ]
+    },
+    {
+      "op": "set_widget",
+      "node": "saveimage",
+      "widget": "filename_prefix",
+      "value": "${filename_prefix}"
+    },
+    {
+      "op": "connect",
+      "from": "unetloader.MODEL",
+      "to": "loraloadermodelonly.model"
+    },
+    {
+      "op": "connect",
+      "from": "loraloadermodelonly.MODEL",
+      "to": "modelsamplingauraflow.model"
+    },
+    {
+      "op": "connect",
+      "from": "modelsamplingauraflow.MODEL",
+      "to": "cfgnorm.model"
+    },
+    {
+      "op": "connect",
+      "from": "loadimage.IMAGE",
+      "to": "fluxkontextimagescale.image"
+    },
+    {
+      "op": "connect",
+      "from": "fluxkontextimagescale.IMAGE",
+      "to": "vaeencode.pixels"
+    },
+    {
+      "op": "connect",
+      "from": "vaeloader.VAE",
+      "to": "vaeencode.vae"
+    },
+    {
+      "op": "connect",
+      "from": "cliploader.CLIP",
+      "to": "textencodeqwenimageeditplus.clip"
+    },
+    {
+      "op": "connect",
+      "from": "vaeloader.VAE",
+      "to": "textencodeqwenimageeditplus.vae"
+    },
+    {
+      "op": "connect",
+      "from": "fluxkontextimagescale.IMAGE",
+      "to": "textencodeqwenimageeditplus.image1"
+    },
+    {
+      "op": "connect",
+      "from": "cliploader.CLIP",
+      "to": "textencodeqwenimageeditplus_2.clip"
+    },
+    {
+      "op": "connect",
+      "from": "vaeloader.VAE",
+      "to": "textencodeqwenimageeditplus_2.vae"
+    },
+    {
+      "op": "connect",
+      "from": "fluxkontextimagescale.IMAGE",
+      "to": "textencodeqwenimageeditplus_2.image1"
+    },
+    {
+      "op": "connect",
+      "from": "cfgnorm.patched_model",
+      "to": "ksampler.model"
+    },
+    {
+      "op": "connect",
+      "from": "textencodeqwenimageeditplus.CONDITIONING",
+      "to": "ksampler.positive"
+    },
+    {
+      "op": "connect",
+      "from": "textencodeqwenimageeditplus_2.CONDITIONING",
+      "to": "ksampler.negative"
+    },
+    {
+      "op": "connect",
+      "from": "vaeencode.LATENT",
+      "to": "ksampler.latent_image"
+    },
+    {
+      "op": "connect",
+      "from": "ksampler.LATENT",
+      "to": "vaedecode.samples"
+    },
+    {
+      "op": "connect",
+      "from": "vaeloader.VAE",
+      "to": "vaedecode.vae"
+    },
+    {
+      "op": "connect",
+      "from": "vaedecode.IMAGE",
+      "to": "saveimage.images"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "_doc": "Como moderno pero de plástico duro: oclusión en ranuras y uniones, menos rugosidad (brillo), luz con más contraste y nitidez. Probado en un muñeco con armadura (2026-10-03).",
+  "prompt": {
+    "render_personaje": "a stylized 3D cartoon game character, clean toy-like CGI render",
+    "render_objeto": "a stylized 3D cartoon game prop, clean toy-like CGI render",
+    "tema": "contemporary everyday world: casual clothes, plastic, denim, cardboard, painted metal",
+    "paleta": "bright but balanced colors, clean saturated primaries with neutral greys",
+    "extra": "soft studio lighting, plain light grey background"
+  },
+  "render": {
+    "luz_principal": {
+      "energia": 4.6,
+      "elevacion_grados": 50,
+      "azimut_grados": -30,
+      "color": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "luz_relleno": {
+      "energia": 0.9,
+      "elevacion_grados": 20,
+      "azimut_grados": 150,
+      "color": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ambiente": [
+      0.3,
+      0.3,
+      0.32
+    ],
+    "rugosidad": 0.35,
+    "oclusion": {
+      "distancia": 0.08,
+      "fuerza": 0.75
+    }
+  },
+  "posproceso": {
+    "saturacion": 1.08,
+    "contraste": 1.08,
+    "brillo": 1.0,
+    "tinte": null,
+    "tinte_fuerza": 0.0,
+    "contorno_px": 2,
+    "contorno_color": [
+      30,
+      25,
+      35
+    ],
+    "nitidez": 60
+  },
+  "escala": {
+    "px_por_unidad": 98.38,
+    "baldosa_px": 128
+  }
+}

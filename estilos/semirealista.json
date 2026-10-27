@@ -1,0 +1,55 @@
+{
+  "_doc": "Como moderno (mismo render, luces, contorno y escala: conviven en el mismo juego) pero el prompt pide un personaje semi-realista: proporciones reales, piel, pelo y telas creíbles, apenas estilizado. Probado en dos humanoides (2026-10-19, con prompt escrito a mano equivalente).",
+  "prompt": {
+    "render_personaje": "a semi-realistic 3D game character: high quality CGI render with realistic proportions and realistic skin, hair, fabric and metal materials, only slightly stylized, like a character from a high-end modern video game or a modern animated film. Not anime, not cartoon, not chibi, not a toy, not a photograph, no outlines",
+    "render_objeto": "a semi-realistic 3D game prop: high quality CGI render with realistic proportions and materials, only slightly stylized, no outlines",
+    "tema": "contemporary everyday world: casual clothes, plastic, denim, cardboard, painted metal",
+    "paleta": "bright but balanced colors, clean saturated primaries with neutral greys",
+    "extra": "soft studio lighting, plain light grey background"
+  },
+  "render": {
+    "luz_principal": {
+      "energia": 4.0,
+      "elevacion_grados": 45,
+      "azimut_grados": -25,
+      "color": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "luz_relleno": {
+      "energia": 1.2,
+      "elevacion_grados": 20,
+      "azimut_grados": 150,
+      "color": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "ambiente": [
+      0.35,
+      0.35,
+      0.36
+    ],
+    "rugosidad": 0.6
+  },
+  "posproceso": {
+    "saturacion": 1.08,
+    "contraste": 1.04,
+    "brillo": 1.0,
+    "tinte": null,
+    "tinte_fuerza": 0.0,
+    "contorno_px": 2,
+    "contorno_color": [
+      30,
+      25,
+      35
+    ]
+  },
+  "escala": {
+    "px_por_unidad": 98.38,
+    "baldosa_px": 128
+  }
+}

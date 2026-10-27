@@ -1,0 +1,29 @@
+{
+  "_doc": "Estilo visual compartido por todos los personajes y objetos que lo usan (ver README.md > Estilo). Es la base: 3D de película animada, sin época; los demás estilos se fusionan sobre este.",
+  "prompt": {
+    "render_personaje": "a high quality 3D animated movie character, stylized 3D animated film CGI render",
+    "render_objeto": "a high quality stylized 3D game asset, stylized 3D animated film CGI render",
+    "tema": "",
+    "paleta": "",
+    "extra": "detailed materials, soft studio lighting, plain light grey background"
+  },
+  "render": {
+    "luz_principal": {"energia": 4.0, "elevacion_grados": 40, "azimut_grados": -30, "color": [1.0, 1.0, 1.0]},
+    "luz_relleno": {"energia": 1.0, "elevacion_grados": 20, "azimut_grados": 150, "color": [1.0, 1.0, 1.0]},
+    "ambiente": [0.33, 0.35, 0.36],
+    "rugosidad": 0.65
+  },
+  "posproceso": {
+    "saturacion": 1.0,
+    "contraste": 1.0,
+    "brillo": 1.0,
+    "tinte": null,
+    "tinte_fuerza": 0.0,
+    "contorno_px": 0,
+    "contorno_color": [25, 20, 30]
+  },
+  "escala": {
+    "px_por_unidad": 98.38,
+    "baldosa_px": 128
+  }
+}

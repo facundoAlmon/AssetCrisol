@@ -1,0 +1,53 @@
+{
+  "_doc": "Kit de un escenario (texturas repetibles de piso, camino y pared + colores del tema). Copiado por `pipeline.py nuevo <nombre> --escenario`. Ver README.md > Escenarios.",
+  "tipo": "escenario",
+  "estilo": null,
+  "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/",
+  "referencia": null,
+  "_referencia": "imagen (en esta carpeta) de la que se copia el estilo y los colores con IP-Adapter; cada textura puede tener la suya y un `recorte` [x0, y0, x1, y1] en píxeles (mejor: solo la zona de ese material)",
+  "motor": "sdxl",
+  "_motor": "sdxl = DreamShaper XL Turbo (~5 s, entra con el editor abierto, admite referencia) | flux = Flux.2 (más prolijo, ~4 min, sin referencia)",
+  "ip_peso": 0.8,
+  "texturas": {
+    "piso": {
+      "descripcion": "soft green lawn with a few clover patches",
+      "vista": "arriba",
+      "referencia": null,
+      "recorte": null,
+      "seeds": [1, 2, 3, 4],
+      "elegida": null
+    },
+    "camino": {
+      "descripcion": "packed light brown dirt with a few scattered round pebbles",
+      "vista": "arriba",
+      "referencia": null,
+      "recorte": null,
+      "seeds": [1, 2, 3, 4],
+      "elegida": null
+    },
+    "pared": {
+      "descripcion": "rounded green tree foliage made of big simple leaf clusters",
+      "vista": "frente",
+      "referencia": null,
+      "recorte": null,
+      "seeds": [1, 2, 3, 4],
+      "elegida": null
+    },
+    "fondo": {
+      "descripcion": "a distant line of round green forest trees and soft hills under a light blue sky",
+      "vista": "fondo",
+      "referencia": null,
+      "recorte": null,
+      "seeds": [1, 2, 3, 4],
+      "elegida": null
+    }
+  },
+  "_texturas": "descripcion en inglés (el prompt suma estilo y \"seamless tileable texture\"); vista arriba (piso) | frente (paredes) | fondo (telón detrás del mapa, horizonte abajo y cielo arriba, repetible solo a lo ancho); una textura que no se quiere: sacarla del json",
+  "tema": {
+    "px": 512,
+    "repeticion_m": 6.0,
+    "contraste": 0.5,
+    "colores": true,
+    "_doc": "px de las texturas finales (celular: 512); repeticion_m = metros por repetición en el juego (una baldosa = 2 m); contraste: relieve del detalle (1 = el de la imagen, muy ruidoso en el juego); colores: false = el tema del juego conserva los suyos y la textura solo pone el detalle (los promedios de las texturas salen más oscuros que la paleta de juguete)"
+  }
+}
