@@ -1,59 +1,91 @@
+<div align="center">
+
 # AssetCrisol
 
-> **En construcción**: el código funciona, pero la documentación, los ejemplos y la instalación todavía se están
-> ordenando para la primera versión pública (v0.1 en camino). Puede haber cambios que rompan configuraciones.
->
-> Qué está hecho y qué falta: [ROADMAP.md](ROADMAP.md).
->
-> *English version (short): [README.en.md](README.en.md).*
+**De una imagen a assets de juego 2D y 3D, con IA local y open source.**
 
-**De una imagen a assets de juego 2D y 3D** (personajes animados, objetos, vehículos y escenarios), con **IA local y
-open source**: todo corre en tu PC, sin APIs pagas ni servicios en la nube. *Crisol* (en inglés, *crucible*) es el
-recipiente donde se funde el material para darle forma: acá entra una imagen y salen sprites, modelos y escenas.
+Personajes animados · objetos · vehículos · kits de escenario → sprites, `.glb` y escenas de Godot
 
-```
-referencia.png ─(1 ComfyUI: Qwen-Image-Edit)→ imagen limpia, de frente, pose A
-               ─(2 Pixal3D 4 vistas + UltraTex en ComfyUI, o TRELLIS.2)→ modelo.glb (malla + textura)
-               ─(3 Blender headless)→ rig + pesos + animaciones → frames laterales + retrato
-               ─(4 PIL)→ hoja de sprites + meta + preview.gif
-               ─(iso)→ animaciones en 8 direcciones isométricas → SpriteFrames
-               ─(5)→ escenas de Godot listas para instanciar
-```
+[![Licencia: GPL-3.0](https://img.shields.io/badge/licencia-GPL--3.0-blue)](LICENSE)
+[![Plataforma: Linux](https://img.shields.io/badge/plataforma-Linux-FCC624?logo=linux&logoColor=black)](#requisitos)
+[![GPU: NVIDIA 16 GB](https://img.shields.io/badge/GPU-NVIDIA%2016%20GB-76B900?logo=nvidia&logoColor=white)](#requisitos)
+[![Godot 4](https://img.shields.io/badge/Godot-4-478CBF?logo=godotengine&logoColor=white)](#guía-de-godot)
+[![Blender 5.1](https://img.shields.io/badge/Blender-5.1-F5792A?logo=blender&logoColor=white)](#4-blender)
 
-Además del personaje animado genera **retratos** para una pantalla de selección, **objetos** estáticos (cajas,
-mesas, cofres...) con vista lateral e isométrica, **vehículos** como `.glb` con las ruedas separadas para un juego
-3D, y el **kit de un escenario**: texturas repetibles de piso, camino y pared, telón de fondo y colores del tema.
+<!-- demo: ejemplos/cris/preview_iso.gif -->
+*Demo en preparación: Cris, la mascota del proyecto, caminando en 8 direcciones.*
 
-Licencia del código: **GPL-3.0** (ver `LICENSE`). Los modelos de IA que usa tienen sus propias licencias, algunas
-**no comerciales**: ver [Licencias de terceros](#licencias-de-terceros) antes de usar lo generado en un juego que
-vayas a vender.
+[English](README.en.md) · [Roadmap](ROADMAP.md) · [Empezá acá](#empezá-acá) · [Para agentes de IA](#para-agentes-de-ia)
 
----
+</div>
 
-## Índice
+> [!WARNING]
+> **En construcción.** El código funciona, pero la documentación, los ejemplos y la instalación todavía se están
+> ordenando para la primera versión pública (v0.1 en camino). Puede haber cambios que rompan configuraciones. Qué
+> está hecho y qué falta: [ROADMAP.md](ROADMAP.md).
 
-- [Requisitos](#requisitos)
-- [Instalación](#instalación)
-- [Primer personaje, paso a paso](#primer-personaje-paso-a-paso)
-- [Los pasos en detalle](#los-pasos-en-detalle)
-- [personaje.json](#personajejson)
-- [Estilos](#estilos)
-- [Objetos](#objetos) · [Vehículos](#vehículos) · [Escenarios](#escenarios)
-- [Guía de Godot](#guía-de-godot)
-- [Problemas conocidos](#problemas-conocidos)
-- [Limitaciones](#limitaciones)
-- [Licencias de terceros](#licencias-de-terceros)
+Todo corre en tu PC: sin APIs pagas ni servicios en la nube. *Crisol* (en inglés, *crucible*) es el recipiente donde
+se funde el material para darle forma: acá entra una imagen y salen sprites, modelos y escenas.
+
+> [!CAUTION]
+> El código es **GPL-3.0**, pero los modelos de IA tienen sus propias licencias y **algunos no son comerciales**: la
+> receta por defecto de los humanoides usa UltraTex (FLUX.2 Klein 9B) y una imagen sin referencia usa FLUX.2 Dev.
+> Leé [Licencias de terceros](#licencias-de-terceros) antes de usar lo generado en un juego que vayas a vender.
 
 ---
 
-## Requisitos
+## Qué podés hacer
+
+| | Asset | De una imagen sale... | Pasos clave |
+|---|---|---|---|
+| 🧍 | **Personaje animado** | rig + 15 animaciones (caminar, correr, saltar, golpe, patada, morir...) como hoja de sprites lateral, hojas **isométricas en 8 direcciones**, retrato y cuerpo de frente para una pantalla de selección, anclas por cuadro para colgarle equipo | `imagen` → `malla` → `blender` → `sprites` → `iso` |
+| 📦 | **Objeto** | cajas, mesas, cofres, barriles: vista lateral + vistas isométricas con sombra de contacto, escenas `StaticBody2D` con colisión, o el `.glb` para un juego 3D | `imagen` → `malla` → `blender` → `sprites` |
+| 🚗 | **Vehículo** | `.glb` con las 4 ruedas separadas en su nodo (origen en el eje), carrocería con materiales `pintura`/`oscuro` y una tarjeta para un selector | `imagen` → `vistas` → `malla` → `blender` |
+| 🌲 | **Kit de escenario** | texturas repetibles de piso, camino y pared (detalle normalizado para teñir con los colores del tema), telón de fondo pintado y `tema.json` con los colores | `texturas` → `tema` |
+
+## Cómo funciona
+
+```mermaid
+flowchart LR
+    REF["Referencia<br/>boceto, foto, sprite<br/>o solo texto"] --> IMG["1 · Imagen<br/>ComfyUI: Qwen-Image-Edit<br/>o FLUX.2 Dev"]
+    IMG -->|"elegís la seed"| VIS["Vistas<br/>espalda y costados<br/>con Qwen"]
+    VIS --> MALLA["2 · Malla<br/>Pixal3D 4 vistas + UltraTex<br/>o TRELLIS.2"]
+    MALLA --> BL["3 · Blender headless<br/>rig, pesos, animaciones"]
+    BL --> SPR["4 · Sprites<br/>hoja, meta, preview.gif,<br/>retrato"]
+    BL --> ISO["Iso<br/>8 direcciones<br/>+ anclas"]
+    SPR --> REV["Revisar<br/>revision.png"]
+    ISO --> REV
+    REV --> GD["5 · Godot<br/>.tscn, SpriteFrames"]
+    MALLA --> GLB["Objeto o vehículo<br/>.glb para 3D"]
+    TEX["Escenario<br/>texturas → tema"] --> GD
+```
+
+Los pasos 1 y 2 usan la GPU (minutos); de Blender en adelante son segundos. Cada paso lee el json del asset y escribe
+en su carpeta `trabajo/`, así que **cualquier paso se puede repetir por separado**. Las decisiones (qué imagen, qué
+malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
+
+---
+
+## Empezá acá
+
+### Requisitos
 
 | | |
 |---|---|
 | Sistema | **Linux** (probado en Linux Mint 22.3, base Ubuntu 24.04). Windows y macOS no están probados. |
-| GPU | **NVIDIA con 16 GB de VRAM** (probado en una RTX 4080 Super). Con menos, la malla no entra; TRELLIS.2 pide 24 GB oficialmente y entra en 16 con `low_vram`. Hace falta el toolkit de CUDA para compilar las extensiones de TRELLIS.2. |
-| RAM | Probado con 64 GB; 32 GB debería alcanzar (Kimodo usa ~16 GB en CPU). |
-| Disco | del orden de **100-150 GB** libres para modelos, entornos y cachés (estimado: TRELLIS.2 ~24 GB, Pixal3D ~15 GB, UltraTex ~11 GB, Qwen Image Edit y FLUX.2 Dev, más el codificador de texto de Kimodo si lo usás). Conviene que las cachés de modelos vayan a un disco con lugar (`env_modelos` en la config). |
+| GPU | **NVIDIA con 16 GB de VRAM** (probado en una RTX 4080 Super) + toolkit de CUDA |
+| RAM | probado con 64 GB; 32 GB debería alcanzar |
+| Disco | ~100-150 GB libres para modelos, entornos y cachés |
+| Software | `python3` con Pillow, **Blender 5.1**, ComfyUI con `comfy-cli`, TRELLIS.2; opcionales: Kimodo y **Godot 4** |
+
+<details>
+<summary><b>Requisitos en detalle</b></summary>
+
+| | |
+|---|---|
+| GPU | Con menos de 16 GB la malla no entra; TRELLIS.2 pide 24 GB oficialmente y entra en 16 con `low_vram`. El toolkit de CUDA hace falta para compilar las extensiones de TRELLIS.2. |
+| RAM | Kimodo usa ~16 GB en CPU. |
+| Disco | Estimado: TRELLIS.2 ~24 GB, Pixal3D ~15 GB, UltraTex ~11 GB, Qwen Image Edit y FLUX.2 Dev, más el codificador de texto de Kimodo si lo usás. Conviene que las cachés de modelos vayan a un disco con lugar (`env_modelos` en la config). |
 | Python | `python3` del sistema con **Pillow** (para `pipeline.py`). Cada herramienta trae su propio entorno. |
 | Blender | **5.1** (headless; el pipeline nunca toca un Blender abierto). |
 | ComfyUI | reciente (con los nodos nativos de Pixal3D, TRELLIS.2 y BiRefNet) y el CLI `comfy` (`comfy-cli`) en su venv. |
@@ -61,24 +93,33 @@ vayas a vender.
 | Kimodo | **opcional**: solo para generar clips de movimiento nuevos (los incluidos se leen sin Kimodo). |
 | Godot | **opcional**: 4.x, solo para `godot --instalar` (importación headless). |
 
----
+</details>
 
-## Instalación
-
-### 1. Clonar y configurar
+### Instalación en 5 pasos
 
 ```bash
+# 1. Clonar y configurar
 git clone https://github.com/facundoAlmon/AssetCrisol.git && cd AssetCrisol
 cp config.ejemplo.json config.json      # y completar las rutas
 python3 -c "import PIL"                 # pipeline.py necesita Pillow (apt install python3-pil)
 ```
+
+2. **ComfyUI** con su venv, `comfy-cli`, 4 nodos extra y los modelos → [ComfyUI](#2-comfyui-imagen-pixal3d-ultratex-dwpose-escenarios)
+3. **TRELLIS.2** con su venv (Python 3.10, `transformers==4.57.1`) → [TRELLIS.2](#3-trellis2-motor-alternativo-su-venv-también-se-usa-para-rembg)
+4. **Blender 5.1** → [Blender](#4-blender)
+5. *(opcional)* **Kimodo** para clips de movimiento nuevos → [Kimodo](#5-kimodo-opcional)
+
+Después: `python3 pipeline.py --help`.
+
+<details>
+<summary><b>1. config.json</b></summary>
 
 `config.json` (no se versiona) tiene:
 
 | clave | qué es |
 |---|---|
 | `datos_dir` | dónde se crean `personajes/`, `objetos/`, `escenarios/` y `movimientos/candidatos/`; relativo al archivo de config. Por defecto `.` (la carpeta del repo, ignorada por git). Conviene apuntarlo a una carpeta propia fuera del repo. |
-| `estilo` | estilo por defecto (`estilos/<nombre>.json`), ver [Estilos](#estilos) |
+| `estilo` | estilo por defecto (`estilos/<nombre>.json`; el ejemplo trae `moderno`), ver [Estilos](#estilos) |
 | `comfyui_dir`, `comfyui_url` | carpeta de ComfyUI (con `venv/bin/python` y `venv/bin/comfy`) y su URL |
 | `trellis2_dir` | carpeta de TRELLIS.2 (con `venv/bin/python`) |
 | `kimodo_dir` | carpeta de Kimodo (con `venv/bin/python`); solo para `pipeline.py movimiento` |
@@ -89,7 +130,9 @@ python3 -c "import PIL"                 # pipeline.py necesita Pillow (apt insta
 En vez de `config.json` en el repo se puede usar otro archivo con la variable `ASSETCRISOL_CONFIG=/ruta/config.json`
 (útil para tener la config y los datos en una carpeta privada aparte).
 
-### 2. ComfyUI (imagen, Pixal3D, UltraTex, DWPose, escenarios)
+</details>
+
+#### 2. ComfyUI (imagen, Pixal3D, UltraTex, DWPose, escenarios)
 
 Instalar [ComfyUI](https://github.com/comfyanonymous/ComfyUI) con un venv en `<comfyui_dir>/venv` y el CLI:
 `<comfyui_dir>/venv/bin/pip install comfy-cli`. `pipeline.py` arranca ComfyUI solo si no está corriendo.
@@ -102,7 +145,14 @@ Nodos extra (en `custom_nodes/`):
 - [comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux) (DWPose, paso `articulaciones`);
 - [ComfyUI_IPAdapter_plus](https://github.com/cubiq/ComfyUI_IPAdapter_plus) (escenarios con referencia).
 
-Modelos (en `ComfyUI/models/`; los nombres de Qwen y FLUX.2 Dev se configuran en `modelos_imagen`):
+Pixal3D no necesita nodos extra: ComfyUI trae `Pixal3DConditioning`, `Pixal3DMultiViewConditioning` y el
+remesh/UV/horneado. El workflow lo arma `generar_malla_pixal3d.py` en Python (la plantilla oficial no valida tal
+cual).
+
+<details>
+<summary><b>Lista de modelos de ComfyUI</b> (rutas dentro de <code>ComfyUI/models/</code>)</summary>
+
+Los nombres de Qwen y FLUX.2 Dev se configuran en `modelos_imagen`.
 
 ```
 # Paso 1: imagen
@@ -132,11 +182,9 @@ ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors
 clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors
 ```
 
-Pixal3D no necesita nodos extra: ComfyUI trae `Pixal3DConditioning`, `Pixal3DMultiViewConditioning` y el
-remesh/UV/horneado. El workflow lo arma `generar_malla_pixal3d.py` en Python (la plantilla oficial no valida tal
-cual).
+</details>
 
-### 3. TRELLIS.2 (motor alternativo; su venv también se usa para rembg)
+#### 3. TRELLIS.2 (motor alternativo; su venv también se usa para rembg)
 
 Seguir la instalación de [microsoft/TRELLIS.2](https://github.com/microsoft/TRELLIS.2) con el venv en
 `<trellis2_dir>/venv` (Python 3.10). Puntos que importan:
@@ -149,16 +197,18 @@ Seguir la instalación de [microsoft/TRELLIS.2](https://github.com/microsoft/TRE
   **`facebook/dinov3-vitl16-pretrain-lvd1689m`, que es gated**: pedir acceso en su página de Hugging Face y hacer
   `hf auth login` con el mismo `HF_HOME` que `env_modelos`.
 
-### 4. Blender
+#### 4. Blender
 
 Bajar [Blender 5.1](https://www.blender.org/download/) y poner el ejecutable en `blender`. Se usa siempre
 `-b --factory-startup`, sin addons.
 
-### 5. Kimodo (opcional)
+#### 5. Kimodo (opcional)
 
-[Kimodo](https://github.com/nv-tlabs/kimodo) (NVIDIA) genera movimiento humano a partir de texto. Solo hace falta para
-**generar clips nuevos** con `pipeline.py movimiento`: los clips elegidos ya vienen en
-`herramientas/3_blender/movimientos/` y Blender los lee sin Kimodo.
+<details>
+<summary>Solo para <b>generar clips de movimiento nuevos</b> con <code>pipeline.py movimiento</code></summary>
+
+[Kimodo](https://github.com/nv-tlabs/kimodo) (NVIDIA) genera movimiento humano a partir de texto. Los clips elegidos
+ya vienen en `herramientas/3_blender/movimientos/` y Blender los lee sin Kimodo.
 
 ```bash
 git clone https://github.com/nv-tlabs/kimodo.git && cd kimodo
@@ -173,22 +223,28 @@ espejo con los mismos pesos (p. ej. `NousResearch/Meta-Llama-3-8B-Instruct`, mis
 carpeta. `pipeline.py movimiento` corre **todo en CPU** (~2,5 min, ~16 GB de RAM): no compite por la GPU. Los
 avisos `MISSING`/`UNEXPECTED` del LoRA al cargar son normales.
 
-### 6. Probar
+</details>
+
+### Probar con los ejemplos (sin generar nada)
+
+`ejemplos/` trae a **Cris**, la mascota del proyecto (una herrera joven de pelo cobrizo con antiparras), un objeto
+(`caja`) y un escenario (`bosque`), cada uno con su json. Cris y la caja traen ya su `trabajo/malla/modelo.glb`, así
+que se puede correr todo **de Blender en adelante** sin ComfyUI ni TRELLIS.2 (solo Blender y Pillow):
 
 ```bash
-python3 pipeline.py --help
+cp -r ejemplos/* <datos_dir>/        # personajes/cris, objetos/caja, escenarios/bosque
+python3 pipeline.py blender cris     # rig + animaciones + frames (≈1 min)
+python3 pipeline.py sprites cris     # hoja + preview.gif + retrato
+python3 pipeline.py iso cris         # 8 direcciones isométricas (≈25 s) -> preview_iso.gif
+python3 pipeline.py revisar cris     # hoja de control -> trabajo/revision.png
+python3 pipeline.py blender caja && python3 pipeline.py sprites caja   # -> objetos/caja/preview.png
 ```
 
-Un personaje y un objeto de ejemplo (la mascota `cris` y `caja`) van a estar en `ejemplos/` para probar los pasos
-de Blender en adelante sin generar nada.
-
----
-
-## Primer personaje, paso a paso
+### Primer personaje en 10 comandos
 
 ```bash
 python3 pipeline.py nuevo bandido --referencia ~/boceto_bandido.png
-#   editar <datos_dir>/personajes/bandido/personaje.json -> imagen.descripcion (en inglés: quién es)
+#   editar <datos_dir>/personajes/bandido/personaje.json -> estilo e imagen.descripcion (en inglés: quién es)
 python3 pipeline.py imagen bandido          # candidatas (≈20 s c/u con referencia) -> trabajo/imagen/candidatos.png
 #   elegir: personaje.json -> imagen.elegida = <seed>
 python3 pipeline.py vistas bandido          # espalda y costados con Qwen -> trabajo/imagen/vistas.png (mirarlas)
@@ -197,19 +253,30 @@ python3 pipeline.py articulaciones bandido  # articulaciones con DWPose -> traba
 python3 pipeline.py blender bandido         # rig + animaciones + frames (≈1 min)
 python3 pipeline.py sprites bandido         # hoja + preview.gif + retrato
 python3 pipeline.py iso bandido             # 8 direcciones isométricas (≈25 s)
-python3 pipeline.py anclas bandido          # huesos por cuadro de iso (para colgarle cosas en el juego)
 python3 pipeline.py revisar bandido         # hoja de control -> trabajo/revision.png
 python3 pipeline.py godot bandido           # escenas de Godot en personajes/bandido/godot/
 ```
 
-Cada paso lee `personaje.json` y deja sus resultados en `personajes/<n>/trabajo/`, así que se puede repetir
-cualquier paso por separado (p. ej. cambiar una animación y correr solo `blender` → `sprites` → `iso`).
+Para colgarle cosas en el juego (espada, casco), sumar `python3 pipeline.py anclas bandido` después de `iso`. Para
+pasar un cambio puntual (p. ej. una animación) alcanza con `blender` → `sprites` → `iso`.
 
-**Una generación por vez en la GPU**: `imagen`, `vistas`, `malla`, `ultratex`, `articulaciones` y `texturas` usan la
-GPU (ComfyUI o TRELLIS.2). Con dos a la vez cada una tarda muchísimo más y la malla se puede quedar sin VRAM. Antes
-de lanzar uno, mirar que ComfyUI no esté generando (`curl -s 127.0.0.1:8188/queue`: `queue_running` y
-`queue_pending` vacías) y que no haya otra malla en curso (`nvidia-smi`). ComfyUI cargado con la cola vacía no
-molesta: `malla` le pide que libere la VRAM.
+> [!IMPORTANT]
+> **El estilo se elige antes de generar la imagen.** El prompt lo arma el estilo con `imagen.descripcion`: cambiarlo
+> después solo cambia luces y posproceso, no la textura. Para personas, `moderno` (cartoon 3D con contorno, el
+> recomendado) o `semirealista` (proporciones y materiales reales). `moderno_juguete` es **solo para muñecos de
+> plástico duro**: en una persona la ropa sale lustrada como vinilo.
+
+> [!WARNING]
+> **Una generación por vez en la GPU.** `imagen`, `vistas`, `malla`, `ultratex`, `articulaciones` y `texturas` usan la
+> GPU (ComfyUI o TRELLIS.2). Con dos a la vez cada una tarda muchísimo más y la malla se puede quedar sin VRAM. Antes
+> de lanzar uno, mirar que ComfyUI no esté generando (`curl -s 127.0.0.1:8188/queue`: `queue_running` y
+> `queue_pending` vacías) y que no haya otra malla en curso (`nvidia-smi`). ComfyUI cargado con la cola vacía no
+> molesta: `malla` le pide que libere la VRAM.
+
+> [!TIP]
+> **Mirá la cara de cerca** en `ultratex_vistas.png`: los ojos dependen mucho de `malla.ultratex.seed` (pueden salir
+> estrábicos o con delineado grueso). Si no convencen, `pipeline.py ultratex <n>` con otra seed rehace solo la
+> textura (≈6 min, sin rehacer la forma).
 
 ### Qué mirar en cada paso (receta para humanoides)
 
@@ -217,22 +284,19 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
 
 1. **Referencia**: recortar al personaje solo (sin cajas, logos ni texto: Qwen los mete en la imagen), entero y con
    aire alrededor. Fondo liso.
-2. **Imagen** (4 seeds; con referencia Qwen Edit, ≈20 s cada una; sin referencia FLUX.2 Dev, ≈3 min cada una): el
-   prompt lo arma el estilo con `imagen.descripcion`, así que **el estilo se elige antes de generar la imagen**
-   (cambiarlo después solo cambia el render, no la textura). Para personas: `moderno` (cartoon 3D con contorno, el
-   recomendado) o `semirealista` (mismo render, proporciones y materiales reales). `moderno_juguete` es para muñecos
-   de plástico duro: en una persona la ropa sale lustrada como vinilo. En la `descripcion`, sacar lo que cambie la pose de la referencia ("arms down,
-   not on the hips"). Elegir la de **proporciones** correctas (a veces salen cabezonas). **Ojos achinados** por la
-   sonrisa: no cambiar de seed, editar la elegida: copiarla como `base_<seed>.png`, ponerla de `referencia` y escribir
-   un `prompt` "Keep this exact image unchanged ... Only change the eyes: open the eyes wider ...".
+2. **Imagen** (4 seeds; con referencia Qwen Edit, ≈20 s cada una; sin referencia FLUX.2 Dev, ≈3 min cada una):
+   elegir el estilo antes (ver arriba). En la `descripcion`, sacar lo que cambie la pose de la referencia ("arms
+   down, not on the hips"). Elegir la de **proporciones** correctas (a veces salen cabezonas). **Ojos achinados** por
+   la sonrisa: no cambiar de seed, editar la elegida: copiarla como `base_<seed>.png`, ponerla de `referencia` y
+   escribir un `prompt` "Keep this exact image unchanged ... Only change the eyes: open the eyes wider ...".
 3. **Vistas** (`pipeline.py vistas`): la espalda no debe repetir lo del pecho y `left`/`right` miran a su borde de la
    imagen. Una mala se borra (`trabajo/imagen/vista_<v>.png`) y se rehace.
 4. **Malla**: mirar `ultratex_vistas.png` y `ultratex_espalda.png`. Sin `ultratex.espalda`, UltraTex inventa la
    espalda y suele copiar lo del pecho (un logo, un emblema); con `espalda` la de atrás sale de la vista de Qwen.
-   Mirar la **cara de cerca**: los ojos dependen mucho de `ultratex.seed` (pueden salir estrábicos o con delineado
-   grueso); si no convencen, `pipeline.py ultratex <n>` con otra seed (≈6 min, sin rehacer la forma).
-5. **Articulaciones** (`pipeline.py articulaciones`): revisar `guia.png` (y `pose_frente.png`, lo que vio DWPose). Con
-   muñecos y juguetes DWPose suele no detectar a nadie: ahí cargarlas a mano (ver [3a](#3a-guía-de-articulaciones-pipelinepy-guia)).
+   Mirar la **cara de cerca** (ver el consejo de arriba).
+5. **Articulaciones** (`pipeline.py articulaciones`): revisar `guia.png` (y `pose_frente.png`, lo que vio DWPose).
+   Con muñecos y juguetes DWPose suele no detectar a nadie: ahí cargarlas a mano (ver
+   [3a](#3a-guía-de-articulaciones-pipelinepy-guia)).
 6. **Animación**: los valores por defecto andan; ver [3b](#3b-blender-pipelinepy-blender) si la cara no mira al
    frente o los codos doblan raro.
 7. **Revisar** (`pipeline.py revisar`, después de `sprites` + `iso`): `trabajo/revision.png` junta la cabeza de
@@ -245,7 +309,27 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
 
 ---
 
-## Estructura
+## Referencia
+
+### Comandos
+
+```bash
+python3 pipeline.py <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n>
+python3 pipeline.py nuevo <n> [--referencia img] [--objeto | --vehiculo | --escenario]
+python3 pipeline.py comparar <n>                    # rehace trabajo/candidatos.png de malla.candidatos
+python3 pipeline.py rehacer <n1,n2,...|todos>       # blender..revisar en lote
+python3 pipeline.py metodo <n> [anim=kimodo|procedural ...]
+python3 pipeline.py movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
+python3 pipeline.py <texturas|tema> <n> [--solo piso,pared]   # escenarios
+python3 pipeline.py godot <n> [--instalar <proyecto>]
+python3 pipeline.py todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
+```
+
+`<n>` se busca en `personajes/`, `objetos/` y `escenarios/` de `datos_dir`. `python3 pipeline.py --help` describe
+cada paso.
+
+<details>
+<summary><b>Estructura del repo y de <code>datos_dir</code></b></summary>
 
 ```
 AssetCrisol/
@@ -253,6 +337,7 @@ AssetCrisol/
 ├── config.ejemplo.json       modelo de config.json (no versionado)
 ├── estilos/                  animacion3d.json (base) y los demás (ver Estilos)
 ├── plantilla/                personaje.json, objeto.json, vehiculo.json, escenario.json: valores por defecto
+├── ejemplos/                 Cris, caja y bosque, listos para copiar a datos_dir
 └── herramientas/
     ├── 1_imagen/     generar_imagen.py + recetas de ComfyUI (qwen_edit, flux2_t2i)
     ├── 2_malla/      generar_malla_pixal3d.py (ComfyUI), generar_malla_trellis.py (venv TRELLIS.2),
@@ -285,25 +370,7 @@ AssetCrisol/
 └── movimientos/candidatos/   clips candidatos de Kimodo
 ```
 
----
-
-## Los pasos en detalle
-
-### Comandos
-
-```bash
-python3 pipeline.py <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n>
-python3 pipeline.py nuevo <n> [--referencia img] [--objeto | --vehiculo | --escenario]
-python3 pipeline.py comparar <n>                    # rehace trabajo/candidatos.png de malla.candidatos
-python3 pipeline.py rehacer <n1,n2,...|todos>       # blender..revisar en lote
-python3 pipeline.py metodo <n> [anim=kimodo|procedural ...]
-python3 pipeline.py movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
-python3 pipeline.py <texturas|tema> <n>             # escenarios
-python3 pipeline.py godot <n> [--instalar <proyecto>]
-python3 pipeline.py todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
-```
-
-`<n>` se busca en `personajes/`, `objetos/` y `escenarios/` de `datos_dir`.
+</details>
 
 ### 1. Imagen (`pipeline.py imagen`)
 
@@ -312,6 +379,12 @@ Genera una imagen por cada seed de `imagen.seeds`:
   sprite pixel art, boceto, foto de un muñeco.
 - **Sin referencia** (`imagen.referencia: null`) → FLUX.2 Dev la genera solo desde el prompt (más lento: ≈3 min
   por seed en 16 GB).
+
+Mirá `trabajo/imagen/candidatos.png` y poné la seed ganadora en `imagen.elegida`. También se puede poner el nombre
+de un archivo propio dentro de la carpeta del personaje (`"elegida": "mi_render.png"`) y saltear este paso.
+
+<details>
+<summary><b>Cómo se arma el prompt</b></summary>
 
 El prompt **se arma solo** (`generar_imagen.componer_prompt`) y queda en `trabajo/imagen/prompt.txt`: render del
 estilo + `imagen.descripcion` + tema y paleta del estilo + encuadre técnico + extra del estilo. El encuadre es fijo
@@ -328,8 +401,7 @@ vez de `descripcion` (el estilo entonces no entra en el prompt, solo en luces y 
 referencia y un estilo de dibujo, pedir "3D ... no outlines, not a 2D drawing": si no, Qwen devuelve una
 ilustración plana con contorno, mala para la malla.
 
-Mirá `trabajo/imagen/candidatos.png` y poné la seed ganadora en `imagen.elegida`. También se puede poner el nombre
-de un archivo propio dentro de la carpeta del personaje (`"elegida": "mi_render.png"`) y saltear este paso.
+</details>
 
 ### Vistas (`pipeline.py vistas`)
 
@@ -342,24 +414,43 @@ revés, espejarla). Borrar una para rehacerla. En vehículos, `vistas` hace la c
 
 ### 2. Malla (`pipeline.py malla`)
 
-Antes de empezar le pide a ComfyUI que libere la VRAM (`POST /free`) sin cerrarlo.
+Antes de empezar le pide a ComfyUI que libere la VRAM (`POST /free`) sin cerrarlo. Hay dos motores y un repintado:
 
-**Pixal3D** (`"motor": "pixal3d"`, el defecto de los personajes; ≈2 min con 1 vista, ≈3 min + 1 de vistas con 4):
-la base de TRELLIS.2 pero **alineada a píxel** (proyecta los rasgos de la imagen al 3D). Corre en ComfyUI
+| | motor | tiempo | cuándo |
+|---|---|---|---|
+| **Pixal3D** | `"motor": "pixal3d"` (defecto de personajes) | ≈2 min con 1 vista, ≈3 min + 1 de vistas con 4 | caras finas, ojos de verdad, estampados nítidos |
+| **TRELLIS.2** | `"motor": "trellis2"` | ≈3 min | objetos (a 512), vehículos (a 1024), alternativa general |
+| **UltraTex** | `"ultratex": true` o un dict | ≈1-6 min | repinta la malla del motor; la mejor textura para humanoides |
+
+> [!TIP]
+> **La seed pesa mucho**: si algo sale mal (una cara que desaparece adentro de un casco de vidrio, colores muy
+> oscuros, un objeto acostado), probá 2-3 seeds de malla antes de tocar nada más.
+
+<details>
+<summary><b>Pixal3D</b>: cómo funciona y parámetros</summary>
+
+La base de TRELLIS.2 pero **alineada a píxel** (proyecta los rasgos de la imagen al 3D). Corre en ComfyUI
 (`generar_malla_pixal3d.py`; el workflow queda en `trabajo/malla/pixal3d_api.json`): BiRefNet saca el fondo
 (`sin_fondo.png`), MoGe estima el campo visual, Pixal3D genera forma y color, y ComfyUI hace el remesh, la reducción
 a `caras`, el UV y el horneado. Del GLB se deja solo el color base (los mapas de normal/AO/metal harían que Blender
-ignore la rugosidad del estilo). Da caras finas con ojos de verdad y estampados nítidos.
+ignore la rugosidad del estilo).
+
 Parámetros: `seed`, `seed_estructura` (opcional, solo la estructura gruesa: para huecos en la malla), `resolucion`
 (1024 | 1536; con 512 ComfyUI no corre la malla), `caras`, `textura_px` y **`vistas`** (`true` = modelo de 4 vistas
 con las de Qwen). Con 1 vista la espalda se inventa; con 4 la forma es mejor pero el **color es menos fiel** (por eso
 se repinta con UltraTex). El remesh arma cáscaras de dos caras: que `blender` saque ~3/4 de las caras como
 interior es normal.
 
-**TRELLIS.2** (`"motor": "trellis2"`, ≈3 min, log `trellis2.log`): rembg saca el fondo, TRELLIS.2 genera forma y
-color juntos y o-voxel arma la malla, el UV y hornea la textura (`forma.glb` = sin textura). Se sacan los pedacitos
-sueltos de menos de 100 caras en personajes (en objetos solo migas de menos de 10, hasta el 10 % de las caras; la
-pieza más grande nunca); las piezas separadas que quedan (ojos, cartucheras) las pega al cuerpo el rig.
+</details>
+
+<details>
+<summary><b>TRELLIS.2</b>: cómo funciona y parámetros</summary>
+
+Log en `trellis2.log`. rembg saca el fondo, TRELLIS.2 genera forma y color juntos y o-voxel arma la malla, el UV y
+hornea la textura (`forma.glb` = sin textura). Se sacan los pedacitos sueltos de menos de 100 caras en personajes (en
+objetos solo migas de menos de 10, hasta el 10 % de las caras; la pieza más grande nunca); las piezas separadas que
+quedan (ojos, cartucheras) las pega al cuerpo el rig.
+
 Parámetros: `caras`, `seed`, `resolucion` (512 | 1024 | 1536; 1024 probado en 16 GB con personajes) y `textura_px`.
 Si se queda sin VRAM se relanza solo con la resolución de abajo, o sin remesh si la malla es muy densa (`AVISO` en
 la salida). Los objetos macizos no entran a 1024: por eso los objetos van a 512 por defecto.
@@ -369,16 +460,17 @@ la salida). Los objetos macizos no entran a 1024: por eso los objetos van a 512 
 - `malla.margen` (apagado): recorta un cuadrado con ese margen (1.1) alrededor del objeto antes de llevarlo a 1024
   (sin margen, el objeto toca los bordes). Es otro punto de partida, no una mejora segura: probarlo como otra seed.
 
-**La seed pesa mucho**: si algo sale mal (una cara que desaparece adentro de un casco de vidrio, colores muy
-oscuros, un objeto acostado), probá 2-3 seeds de malla antes de tocar nada más.
+</details>
 
-**UltraTex** (`"ultratex": true` o un dict en `malla`; o `pipeline.py ultratex <n>` para rehacer solo la textura,
-≈1-6 min): vuelve a pintar la malla del motor desde cero. `blender limpia` la suelda y le saca el interior
-(`limpia.glb`), FLUX.2 Klein + la LoRA de UltraTex pintan 6 vistas guiadas por `sin_fondo.png`
-(`trabajo/malla/ultratex_vistas.png`: **mirarlas**) y se hornean a UV nuevas → `modelo.glb`. La malla del motor
-queda en `modelo_motor.glb` (de ahí parte cada `ultratex`). Es la mejor textura para humanoides sobre la forma de
-Pixal3D 4 vistas. Opciones:
-- `seed`: cambia detalles; con la misma seed sale idéntico.
+<details>
+<summary><b>UltraTex</b>: cómo funciona y opciones</summary>
+
+`"ultratex": true` o un dict en `malla`; o `pipeline.py ultratex <n>` para rehacer solo la textura. Vuelve a pintar
+la malla del motor desde cero. `blender limpia` la suelda y le saca el interior (`limpia.glb`), FLUX.2 Klein + la
+LoRA de UltraTex pintan 6 vistas guiadas por `sin_fondo.png` (`trabajo/malla/ultratex_vistas.png`: **mirarlas**) y
+se hornean a UV nuevas → `modelo.glb`. La malla del motor queda en `modelo_motor.glb` (de ahí parte cada
+`ultratex`). Es la mejor textura para humanoides sobre la forma de Pixal3D 4 vistas. Opciones:
+- `seed`: cambia detalles (sobre todo la cara); con la misma seed sale idéntico.
 - `giro: 45`: segunda pasada con cámaras a 45° (más superficie vista).
 - `espalda: true`: dos pasadas; la vista de atrás se reemplaza por `vista_back.png` de Qwen (sin fondo con rembg,
   encajada en la silueta) y la segunda pasada (`denoise_espalda`, 0.6) repinta todo coherente. Sin esto UltraTex
@@ -387,16 +479,23 @@ Pixal3D 4 vistas. Opciones:
   contrario se espeja sola (compara el calce de la silueta). Apagado por defecto: trae los brillos del render de
   Qwen; probarlo por personaje.
 
-Mientras corre `ultratex`, `modelo.glb` es la malla del motor: no sacar conclusiones de una `guia` hecha en ese momento.
+Mientras corre `ultratex`, `modelo.glb` es la malla del motor: no sacar conclusiones de una `guia` hecha en ese
+momento.
 
-**Candidatos de malla** (`malla.candidatos` + `malla.elegida`, como las seeds de la imagen: la elección es del
-usuario). La principal es el resto de `malla` (su nombre es el motor); cada candidato pisa claves de `malla`, y
-`desde: "<otro>"` reusa la malla de ese otro y solo le aplica lo suyo (típico: `{"desde": "trellis2", "ultratex":
-{"giro": 45}}`). `malla` genera cada uno en `trabajo/malla_<c>/` (el que ya tiene `modelo.glb` no se rehace) y deja
-el elegido en `trabajo/malla`; en personajes y objetos arma `trabajo/candidatos.png` (`pipeline.py comparar <n>` la
-rehace): una fila por candidato, vista con la cámara iso desde cinco ángulos. Para cambiar de elegida, editar
-`malla.elegida` y correr `malla` de nuevo (copia, no genera). Los candidatos heredan `caras`: Pixal3D con 5000 sale
-astillado.
+</details>
+
+<details>
+<summary><b>Candidatos de malla</b> (<code>malla.candidatos</code> + <code>malla.elegida</code>)</summary>
+
+Como las seeds de la imagen: la elección es del usuario. La principal es el resto de `malla` (su nombre es el motor);
+cada candidato pisa claves de `malla`, y `desde: "<otro>"` reusa la malla de ese otro y solo le aplica lo suyo
+(típico: `{"desde": "trellis2", "ultratex": {"giro": 45}}`). `malla` genera cada uno en `trabajo/malla_<c>/` (el que
+ya tiene `modelo.glb` no se rehace) y deja el elegido en `trabajo/malla`; en personajes y objetos arma
+`trabajo/candidatos.png` (`pipeline.py comparar <n>` la rehace): una fila por candidato, vista con la cámara iso
+desde cinco ángulos. Para cambiar de elegida, editar `malla.elegida` y correr `malla` de nuevo (copia, no genera).
+Los candidatos heredan `caras`: Pixal3D con 5000 sale astillado.
+
+</details>
 
 ### 3a. Guía de articulaciones (`pipeline.py guia`)
 
@@ -410,6 +509,9 @@ cuello se reparten entre cadera, cuello y nariz, y la profundidad sale de la vis
 prueba cayó a menos de 5 cm de las cargadas a mano. Si no detecta a nadie o la pose no pasa la validación
 anatómica (orden de arriba a abajo, rodilla y codo cerca de la mitad), avisa y quedan las de antes (en
 `modelo._articulaciones_previas`). Pasa con muñecos y juguetes.
+
+<details>
+<summary><b>Articulaciones estimadas o a mano</b></summary>
 
 Si `modelo.articulaciones` es `null`, se **estiman** por rebanadas de la malla (anda en cuerpos de proporciones
 normales; falla en chibis, cabezones o torsos anchos). **A mano**: copiar el bloque `articulaciones` de
@@ -426,9 +528,34 @@ Modelos asimétricos: además de `<hueso>.S` se puede poner un lado suelto de lo
 `forearm.R`, `hand.R` o `.L`, coordenadas tal cual) que reemplaza a ese lado (un robot con un cañón en un solo brazo:
 espejado, el hueso pasaba por el cañón y el brazo de verdad quedaba sin hueso).
 
+</details>
+
 ### 3b. Blender (`pipeline.py blender`)
 
-Blender headless (`-b --factory-startup`):
+Blender headless (`-b --factory-startup`) arma la escena, importa y limpia la malla, la riggea, la anima y renderiza
+los frames laterales y el retrato. Todas las animaciones son **en el lugar** (el juego mueve el cuerpo):
+
+| carpeta | en Godot | frames | qué es |
+|---|---|---|---|
+| `idle` | `idle` | 1 | pose de reposo |
+| `caminar` | `walk` | 8 | ciclo con doble apoyo, vaivén de cadera, braceo opuesto |
+| `saltar` | `jump`, `land` | 4 + 1 | despegue, subida, cima, caída y aterrizaje |
+| `respirar` | `idle_loop` | 8 | quieto en loop |
+| `correr` | `run` | 12 | fase de vuelo, braceo con puños, torso inclinado |
+| `rodar` | `roll` | 8 | voltereta hacia adelante |
+| `golpe` | `punch` | 7 | uno-dos desde la guardia |
+| `patada` | `kick` | 8 | patada frontal |
+| `agacharse` | `crouch` | 1 | |
+| `defender` | `block` | 1 | antebrazos verticales delante de la cara |
+| `herido` | `hurt` | 3 | recibe un golpe, paso atrás |
+| `morir` | `die` | 6 | cae de espaldas; el último cuadro queda acostado |
+| `lanzar` | `throw` | 6 | lanza algo adelante con la mano de atrás |
+| `brazos_arriba` | `arms_up` | 6 | los dos brazos arriba en V (festejo, conjuro) |
+| `cargar` | `charge` | 6 | carga energía en loop, agachado |
+
+<details>
+<summary><b>Qué hace Blender, paso por paso</b></summary>
+
 1. arma una escena limpia: cámara ortográfica **a nivel**, sol principal + relleno, EEVEE, fondo transparente,
    color *Standard*;
 2. importa `modelo.glb`, lo normaliza (altura `modelo.altura`, pies en z=0, centrado) y **suelda los vértices**
@@ -448,31 +575,16 @@ Blender headless (`-b --factory-startup`):
    (`modelo.cortar_puentes`, activo): se cortan y tapan las caras que unen partes lejanas del esqueleto (los dos
    zapatos, mano-cadera), que si no se estiran como una lámina. Ver [Cuando los pesos fallan](#cuando-los-pesos-fallan);
 4. animaciones (`anim.py`, lista `TODAS`) con los parámetros de `animacion`, el personaje mirando a la derecha.
-   Todas son **en el lugar** (el juego mueve el cuerpo):
-
-   | carpeta | en Godot | frames | qué es |
-   |---|---|---|---|
-   | `idle` | `idle` | 1 | pose de reposo |
-   | `caminar` | `walk` | 8 | ciclo con doble apoyo, vaivén de cadera, braceo opuesto |
-   | `saltar` | `jump`, `land` | 4 + 1 | despegue, subida, cima, caída y aterrizaje |
-   | `respirar` | `idle_loop` | 8 | quieto en loop |
-   | `correr` | `run` | 12 | fase de vuelo, braceo con puños, torso inclinado |
-   | `rodar` | `roll` | 8 | voltereta hacia adelante |
-   | `golpe` | `punch` | 7 | uno-dos desde la guardia |
-   | `patada` | `kick` | 8 | patada frontal |
-   | `agacharse` | `crouch` | 1 | |
-   | `defender` | `block` | 1 | antebrazos verticales delante de la cara |
-   | `herido` | `hurt` | 3 | recibe un golpe, paso atrás |
-   | `morir` | `die` | 6 | cae de espaldas; el último cuadro queda acostado |
-   | `lanzar` | `throw` | 6 | lanza algo adelante con la mano de atrás |
-   | `brazos_arriba` | `arms_up` | 6 | los dos brazos arriba en V (festejo, conjuro) |
-   | `cargar` | `charge` | 6 | carga energía en loop, agachado |
-
    `rodar` y `morir` se apoyan solas en el piso midiendo la malla deformada en cada pose;
 5. **retrato** de frente (cabeza y hombros, y cuerpo entero) + `trabajo/retrato/retrato.json` con la caja del retrato
    en unidades del modelo (la usa `sprites` para recortar la imagen original);
 6. guarda `trabajo/<n>.blend` y los PNG en `trabajo/frames/` y `trabajo/retrato/`. Lo que se toque a mano en el
    `.blend` se pierde: todos los modos rearman desde `modelo.glb`.
+
+</details>
+
+<details>
+<summary><b>Ajustes del cuerpo</b>: codos, piernas cortas, cabeza, ojos</summary>
 
 **Codos y rodillas**: el Armature usa cuaterniones duales (`modelo.preservar_volumen`, activo): con la mezcla lineal
 el codo doblado 110-135° se aplastaba como plastilina. Si un traje liso sigue doblando como goma,
@@ -495,10 +607,16 @@ y tapa con piel lo que en las cajas `tapar` es agujero. En el modelo normalizado
 ```
 Opcionales: `bulto`, `iris` (RGB), `iris_radio`, `iris_alto`, `pupila_radio`, `esclerotica`, `tapar_min`.
 
+</details>
+
 #### Cuando los pesos fallan
 
 Diagnóstico: render coloreado por hueso dominante, en reposo y en poses (`throw`, `arms_up`, `kick`), no solo en la
 caminata.
+
+<details>
+<summary><b>Opciones de pesos</b></summary>
+
 - `modelo.pesos: "distancia"`: pesos por distancia a cada hueso dividida por el grosor del miembro, sin bone heat.
   Para chibis de cuerpo redondo donde el bone heat da basura. En humanoides normales es peor.
   `modelo.pesos_exponente` (6) = qué tan corta es la mezcla.
@@ -514,6 +632,8 @@ caminata.
 - Chibis con los brazos fundidos al costado del cuerpo no tienen arreglo de pesos: al levantar los brazos se llevan la
   ropa. Regenerar la imagen con "both arms held clearly away from the body, a visible gap between each arm and the
   torso" (con la imagen anterior de referencia para conservar el diseño).
+
+</details>
 
 #### Animaciones: dos métodos (`procedural` y `kimodo`)
 
@@ -533,7 +653,9 @@ python3 pipeline.py metodo bandido golpe=kimodo caminar=procedural   # lo guarda
 python3 pipeline.py blender bandido && python3 pipeline.py sprites bandido   # + iso y anclas
 ```
 
-**Clip nuevo** para una animación:
+<details>
+<summary><b>Clip nuevo con Kimodo</b></summary>
+
 ```bash
 python3 pipeline.py movimiento correr --prompt "A person runs forward at a steady jogging pace." --duracion 3
 #   -> <datos_dir>/movimientos/candidatos/correr_s1_{0,1,2}.npz + correr_s1.png (esqueletos de costado, una fila
@@ -543,6 +665,8 @@ python3 pipeline.py movimiento correr --prompt "A person runs forward at a stead
 ```
 Prompts en inglés y concretos. Animaciones con clip posible: las de `kimodo_clip.CUADROS` (todas menos `idle`,
 `saltar`, `agacharse` y `defender`).
+
+</details>
 
 ### 4. Sprites (`pipeline.py sprites`)
 
@@ -583,6 +707,13 @@ Ver [Guía de Godot](#guía-de-godot).
 ---
 
 ## personaje.json
+
+Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla.motor`, `malla.ultratex`,
+`modelo.altura`, `modelo.articulaciones` y `animacion.cabeza_arriba_grados`. La plantilla
+(`plantilla/personaje.json`) trae valores que andan para humanoides.
+
+<details>
+<summary><b>Todas las claves</b></summary>
 
 | clave | qué es |
 |---|---|
@@ -628,13 +759,36 @@ Ver [Guía de Godot](#guía-de-godot).
 | `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (opcional) ver [Iso](#iso-pipelinepy-iso) |
 
+</details>
+
 ---
 
 ## Estilos
 
 Para que todo lo que se genera para un juego combine, las pautas visuales viven en un **estilo** compartido
 (`estilos/<nombre>.json`). `config.json > estilo` elige el de por defecto y cada personaje u objeto puede pisarlo con
-`"estilo": "<nombre>"`. Un estilo parcial se completa con `animacion3d.json`: alcanza con escribir lo que cambia.
+`"estilo": "<nombre>"`. Un estilo parcial se completa con `animacion3d.json` (la base): alcanza con escribir lo que
+cambia.
+
+| estilo | para qué |
+|---|---|
+| `animacion3d` | la base: animación 3D estilizada |
+| `moderno` | cartoon contemporáneo con contorno oscuro de 2 px; **el recomendado para personas** |
+| `semirealista` | render de `moderno` con prompt de proporciones y materiales reales |
+| `moderno_juguete` | `moderno` de plástico duro (oclusión, más contraste y nitidez): **solo para muñecos y juguetes** |
+| `medieval` | fantasía pintada a mano, luz cálida |
+| `futurista` | sci-fi, luz fría, acentos neón |
+
+Qué pesa más: el **prompt** define cómo se ve el modelo 3D (la textura sale de esa imagen); luces y posproceso
+emparejan lo que queda. Cambiar el estilo de un personaje ya hecho sin regenerar la imagen solo cambia luces y
+posproceso (`blender` + `sprites`). Para un juego nuevo: copiar un estilo, ajustarlo, ponerlo en la config y generar
+un personaje y un objeto de prueba para ver que combinen antes de producir el resto.
+
+**Plastilina**: con luz suave, material mate y sin oclusión, un muñeco se ve de plastilina. `moderno_juguete` +
+`malla.caras: 200000` + `malla.textura_px: 4096` lo pasan a plástico duro.
+
+<details>
+<summary><b>Secciones de un estilo</b></summary>
 
 | sección | qué controla | dónde actúa |
 |---|---|---|
@@ -651,18 +805,7 @@ Para que todo lo que se genera para un juego combine, las pautas visuales viven 
 | `posproceso` | `saturacion`, `contraste`, `brillo`, `nitidez` (opcional), `tinte` + `tinte_fuerza`, `contorno_px` + `contorno_color` | sprites |
 | `escala.px_por_unidad`, `escala.baldosa_px` | mismo tamaño en pantalla para todos los assets | Blender, sprites |
 
-Estilos incluidos: `animacion3d` (la base: animación 3D estilizada), `medieval` (fantasía pintada a mano, luz cálida), `futurista` (sci-fi, luz fría,
-acentos neón), `moderno` (cartoon contemporáneo con contorno oscuro de 2 px), `semirealista` (render de `moderno` con
-prompt de proporciones y materiales reales) y `moderno_juguete` (`moderno` de plástico duro: oclusión, más
-contraste y nitidez).
-
-**Plastilina**: con luz suave, material mate y sin oclusión, un personaje se ve de plastilina. `moderno_juguete` +
-`malla.caras: 200000` + `malla.textura_px: 4096` lo pasan a plástico duro.
-
-Qué pesa más: el **prompt** define cómo se ve el modelo 3D (la textura sale de esa imagen); luces y posproceso
-emparejan lo que queda. Cambiar el estilo de un personaje ya hecho sin regenerar la imagen solo cambia luces y
-posproceso (`blender` + `sprites`). Para un juego nuevo: copiar un estilo, ajustarlo, ponerlo en la config y generar
-un personaje y un objeto de prueba para ver que combinen antes de producir el resto.
+</details>
 
 ---
 
@@ -676,6 +819,9 @@ python3 pipeline.py imagen barril           # elegir seed -> objeto.json > image
 python3 pipeline.py malla barril            # candidatos -> trabajo/candidatos.png; elegir malla.elegida y repetir
 python3 pipeline.py blender barril && python3 pipeline.py sprites barril && python3 pipeline.py godot barril
 ```
+
+<details>
+<summary><b>Detalle de objetos</b></summary>
 
 - **Prompt**: objeto solo, **tres cuartos un poco desde arriba** (el modelo 3D saca más forma que de frente), entero,
   centrado, fondo liso claro.
@@ -703,6 +849,8 @@ lisas: "big smooth puffy rounded green foliage clumps, no individual leaves, sol
 follaje. Aun así, la malla reducida para un juego queda facetada: para árboles de fondo suele andar mejor un sprite
 dibujado a partir de la imagen elegida.
 
+</details>
+
 ---
 
 ## Vehículos
@@ -717,6 +865,13 @@ python3 pipeline.py malla <n>      # los candidatos (~10 min): trabajo/malla_<ca
 python3 pipeline.py blender <n>    # -> trabajo/revision.png (una fila por candidato) + vehiculo.glb del elegido
 # elegir malla.elegida mirando revision.png y volver a correr blender (segundos)
 ```
+
+**Salida** `trabajo/vehiculo.glb` (y `vehiculo_<candidato>.glb`): nodos `carroceria` (materiales `pintura`, `oscuro`,
+`pasarrueda`), `rueda_di`, `rueda_dd`, `rueda_ti`, `rueda_td` (d/t = delantera/trasera, i/d = izquierda/derecha), cada
+rueda con el origen en su eje; trompa en +Z del glTF.
+
+<details>
+<summary><b>Detalle de vehículos</b></summary>
 
 - **Por qué de atrás** (`malla.vista: "atras"`): en una carrera los autos se ven casi siempre desde atrás y arriba, y
   el modelo 3D inventa lo que la imagen no muestra. Desde la cola, lo inventado es la trompa, que casi no se ve.
@@ -737,13 +892,12 @@ python3 pipeline.py blender <n>    # -> trabajo/revision.png (una fila por candi
 
   `materiales` (por defecto sí) separa la carrocería en `pintura` y `oscuro` (vidrios, tomas, bajos). Todo se
   exporta con doble cara (quedan cavidades abiertas).
-- **Salida** `trabajo/vehiculo.glb` (y `vehiculo_<candidato>.glb`): nodos `carroceria` (materiales `pintura`,
-  `oscuro`, `pasarrueda`), `rueda_di`, `rueda_dd`, `rueda_ti`, `rueda_td` (d/t = delantera/trasera, i/d =
-  izquierda/derecha), cada rueda con el origen en su eje; trompa en +Z del glTF.
 - **Tarjeta** `trabajo/tarjeta.png`: el auto en tres cuartos de frente desde arriba, fondo transparente, 512 px de
   ancho (para un selector).
 - **Revisión** `trabajo/revision.png`: vista de juego, tres cuartos, costado y arriba; una fila por candidato. Para
   buscar agujeros: render Workbench con `show_backface_culling` y fondo verde (con magenta el violeta no se distingue).
+
+</details>
 
 ---
 
@@ -760,6 +914,9 @@ python3 pipeline.py texturas bosque             # 4 candidatas por textura (~5 s
 #   elegir: escenario.json > texturas.<clave>.elegida   (--solo piso,pared rehace solo esas)
 python3 pipeline.py tema bosque                 # -> trabajo/tema/{piso,camino,pared}.png + tema.json, preview.png
 ```
+
+<details>
+<summary><b>Detalle de escenarios</b></summary>
 
 - **Prompt**: `texturas.<clave>.descripcion` (en inglés) + "seamless tileable top-down/front view texture" +
   `render_textura` del estilo + "large simple shapes, low detail". Sin la `paleta` del estilo (es de personajes);
@@ -780,6 +937,8 @@ python3 pipeline.py tema bosque                 # -> trabajo/tema/{piso,camino,p
   el color del cielo (`background_color`) y el 10 % de abajo con el del suelo (`backdrop_ground`), en color de verdad
   (no es detalle).
 
+</details>
+
 ---
 
 ## Guía de Godot
@@ -797,6 +956,10 @@ Genera en `personajes/<n>/godot/personajes/` (replica `res://personajes/...`):
 `--instalar <proyecto>` copia eso a `res://personajes/` del proyecto (conserva los `.import` existentes, así el uid
 no cambia) y corre `godot --headless --import`. Lo instalado no se edita a mano: se regenera.
 
+**Uso**: instanciar `<n>_visual.tscn` como **hijo directo** del `CharacterBody2D` (el rayo de la sombra excluye al
+padre) y llamar `visual.set_frame(frame, mirando_izquierda)`. Colisión recomendada en `colision_sugerida` (≈ 24 % ×
+77 % del alto en pantalla).
+
 **Contrato del visual** (`sprite_personaje.gd`):
 - `set_frame(frame: int, flip_h: bool)`;
 - `frame_de(animacion, tiempo)` y `duracion(animacion)`: por nombre, con los datos de `animaciones` del meta (así un
@@ -806,18 +969,18 @@ no cambia) y corre `godot --headless --import`. Lo instalado no se edita a mano:
   desaparece sobre pozos). Nunca va en los sprites (subiría con el salto). Parámetros: `shadow_radius`,
   `shadow_alpha`, `shadow_fade_height`.
 
-Uso: instanciar `<n>_visual.tscn` como **hijo directo** del `CharacterBody2D` (el rayo de la sombra excluye al padre)
-y llamar `visual.set_frame(frame, mirando_izquierda)`. Colisión recomendada en `colision_sugerida` (≈ 24 % × 77 % del
-alto en pantalla).
+<details>
+<summary><b>Orden de la hoja</b> (índices de frame)</summary>
 
-**Orden de la hoja** (índice = fila × 13 + columna, igual que `Sprite2D.frame` con `hframes`/`vframes`; fila 0 = la
-tira original). Las animaciones nuevas se agregan **siempre al final** (`armar_tira.ANIMACIONES`); las celdas van
-seguidas, así que cambiar los cuadros de una corre los índices de las siguientes (buscar por nombre con `frame_de`
-o el meta):
+Índice = fila × 13 + columna, igual que `Sprite2D.frame` con `hframes`/`vframes`; fila 0 = la tira original. Las
+animaciones nuevas se agregan **siempre al final** (`armar_tira.ANIMACIONES`); las celdas van seguidas, así que
+cambiar los cuadros de una corre los índices de las siguientes (buscar por nombre con `frame_de` o el meta):
 
 | frame | 0 | 1-8 | 9 | 10 | 11 | 12 | 13-20 | 21-32 | 33-40 | 41-47 | 48-55 | 56 | 57 | 58 | 59-61 | 62-67 | 68-73 | 74-79 | 80-85 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | anim | idle | walk | despegue | subida | cima | caída | idle_loop | run | roll | punch | kick | crouch | block | land | hurt | die | throw | arms_up | charge |
+
+</details>
 
 ### Personaje isométrico (`iso` + `godot`)
 
@@ -841,6 +1004,9 @@ las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para
 
 ## Problemas conocidos
 
+<details>
+<summary><b>Síntomas frecuentes y su solución</b></summary>
+
 | Síntoma | Causa / solución |
 |---|---|
 | `Bone Heat Weighting: failed to find solution` / todo sin peso | malla no soldada o un hueso fuera del cuerpo → revisar con `guia`; muchas piezas sueltas también lo rompen |
@@ -854,13 +1020,15 @@ las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para
 | Se llena el disco del sistema | las cachés de Hugging Face y uv van por defecto a `~/.cache` → `env_modelos` en la config |
 | La cara mira hacia abajo (o al cielo) en los sprites | `animacion.cabeza_arriba_grados` (negativo = levantar la cara) |
 | Ojos como agujeros grises | ver `modelo.ojos` (3b) |
+| Ojos estrábicos o con delineado grueso | `pipeline.py ultratex <n>` con otra `malla.ultratex.seed` |
 | El personaje "flota" o se hunde en Godot | el offset sale de la última fila opaca del frame quieto; si hay algo debajo de los pies (capa, cola), ajustar `position.y` del Sprite en el `.tscn` |
 | Personaje muy oscuro | TRELLIS.2 pinta la textura más oscura que la imagen; con colores oscuros de por sí no alcanza la compensación del render → aclarar la textura de `modelo.glb` (curva gamma ~0,6) antes de `blender`, o repintar con UltraTex |
 | La espalda repite lo del pecho | UltraTex o Qwen copiaron el frente → `ultratex.espalda: true` y revisar `vista_back.png` |
 | La cara sale cachetona, con ojos y boca como manchas | en una imagen de cuerpo entero con proporciones reales la cara ocupa ~50 px → Pixal3D + UltraTex la resuelven mejor que TRELLIS.2 |
 | Personaje sin referencia sale raro | con `referencia: null` y un `imagen.prompt` a mano, no empezar con "Transform this...": usar `imagen.descripcion` |
+| La ropa sale lustrada como vinilo | estilo `moderno_juguete` en una persona → `moderno` o `semirealista` (y regenerar la imagen) |
 
----
+</details>
 
 ## Limitaciones
 
@@ -878,11 +1046,35 @@ las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para
 
 ---
 
+## Para agentes de IA
+
+AssetCrisol está pensado para dos tipos de usuario: personas y **agentes de IA** (Claude Code u otro) que lo instalan,
+corren los pasos y le muestran a la persona lo que tiene que decidir. Las instrucciones para agentes (cómo correr
+cada paso, mapa del código, contratos que no hay que romper y problemas ya resueltos) están en
+[CLAUDE.md](CLAUDE.md); [AGENTS.md](AGENTS.md) remite ahí para cualquier agente. Lo esencial:
+
+- una generación por vez en la GPU (revisar la cola de ComfyUI y `nvidia-smi` antes de cada paso de GPU);
+- **no elegir por la persona** `imagen.elegida`, `malla.elegida` ni las texturas elegidas: mostrarle la hoja de
+  candidatos y preguntar;
+- mirar los resultados visuales (`candidatos.png`, `preview.gif`, `revision.png`) antes de darlos por buenos.
+
+---
+
+## Licencia
+
+AssetCrisol (este código) es **GPL-3.0**: ver [LICENSE](LICENSE). Los scripts que importan `bpy` se consideran GPL,
+coherente con Blender.
+
 ## Licencias de terceros
 
-AssetCrisol (este código) es **GPL-3.0**. No incluye pesos de modelos: cada uno se baja aparte y tiene su licencia.
-Lo que sigue es una guía, no asesoramiento legal: **verificá la licencia vigente de cada modelo antes de usar los
-resultados con fines comerciales.**
+AssetCrisol no incluye pesos de modelos: cada uno se baja aparte y tiene su licencia. Lo que sigue es una guía, no
+asesoramiento legal: **verificá la licencia vigente de cada modelo antes de usar los resultados con fines
+comerciales.**
+
+> [!CAUTION]
+> **La receta por defecto de los humanoides usa UltraTex (FLUX.2 Klein 9B, no comercial)**, y una imagen sin
+> referencia usa FLUX.2 Dev (no comercial). Para un proyecto comercial, revisá estas licencias o usá una receta sin
+> esos modelos (p. ej. TRELLIS.2 o Pixal3D sin `ultratex`, y siempre con imagen de referencia).
 
 | Componente | Para qué | Licencia |
 |---|---|---|
@@ -907,7 +1099,3 @@ resultados con fines comerciales.**
 | ComfyUI | servidor de generación | GPL-3.0 |
 | Blender | rig, animación y render | GPL |
 | Godot | motor de destino (opcional) | MIT |
-
-Importante: **la receta por defecto de los humanoides usa UltraTex (FLUX.2 Klein 9B, no comercial)**, y una imagen
-sin referencia usa FLUX.2 Dev (no comercial). Para un proyecto comercial, revisá estas licencias o usá una receta sin
-esos modelos (p. ej. TRELLIS.2 o Pixal3D sin `ultratex`, y siempre con imagen de referencia).
