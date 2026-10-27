@@ -39,22 +39,30 @@ python3 pipeline.py movimiento <anim> --prompt "..." [--duracion s] [--seed n]  
 - `pipeline.py` corre con el python3 del sistema (Pillow); cada paso lanza su herramienta con su intérprete (venv de
   ComfyUI, de TRELLIS.2 —también rembg—, de Kimodo; Blender `-b --factory-startup`; Godot `--headless`).
   **No importar `bpy`/`torch` desde `pipeline.py`.**
-- Duraciones: `imagen` ~20 s/seed con referencia (sin referencia, FLUX.2 Dev ~3,5 min y llena 16 GB), `malla` 3-6
+- Duraciones: `imagen` ~20 s/seed (con referencia Qwen Image Edit; sin referencia Z-Image Turbo, el `imagen.motor`
+  por defecto si la config tiene `modelos_imagen.zimage_unet`; con `motor: "flux2"`, FLUX.2 Dev ~3,5 min y llena
+  16 GB), `malla` 3-6
   min y `ultratex` 1-6 min (en background, esperar la notificación), `blender` segundos a 1 min, `iso` ~25 s.
 - Cada paso lee `<datos_dir>/<tipo>/<n>/personaje.json` y escribe en `<n>/trabajo/`; se puede re-correr aislado.
   Logs: `trabajo/malla/trellis2.log`, `trabajo/blender_<modo>.log`, `trabajo/imagen/comfyui.log`.
-- **Estilo**: se elige **antes de generar la imagen** (define el prompt: `generar_imagen.componer_prompt` desde
-  `imagen.descripcion`). `cargar()` fusiona `estilos/<estilo>.json` sobre `animacion3d.json` (base) en
+- **Estilo**: su `prompt` define la imagen (`generar_imagen.componer_prompt` desde `imagen.descripcion`; con
+  `imagen.descripcion` presente, `imagen.prompt` se ignora) y su `render` solo Blender. `moderno` y `moderno_juguete`
+  tienen el mismo prompt (cambiar entre ellos = rehacer `blender`/`sprites`/`iso`, no la imagen); `semirealista`
+  cambia el prompt y comparte el render de `moderno`. `cargar()` fusiona `estilos/<estilo>.json` sobre `animacion3d.json` (base) en
   `pj['_estilo']`; un bloque `render` del json pisa al del estilo. `blender()` escribe la config efectiva en
   `trabajo/_config.json`, que es lo que lee `blender_main.py`. Personas: `moderno`/`semirealista`;
-  `moderno_juguete` solo para juguetes de plástico (en una persona la ropa sale lustrada).
-- Humanoides nuevos: README > *Qué mirar en cada paso (receta para humanoides)* (Pixal3D 4 vistas + UltraTex).
+  `moderno_juguete` solo para juguetes de plástico (en una persona la ropa sale lustrada: pasar a `moderno` y
+  rehacer el render).
+- Humanoides nuevos: README > *Qué mirar en cada paso (receta para humanoides)* (Pixal3D 4 vistas + UltraTex). Sin
+  referencia: Z-Image para la idea → la elegida como `base_<seed>.png` de `referencia` → Qwen con un `imagen.prompt`
+  de edición (sin `descripcion`) que saque piezas sueltas y ajuste la ropa.
 
 ## Mapa del código
 
 `herramientas/` por paso. Intérprete: python3 del sistema salvo `generar_malla_trellis.py` (venv TRELLIS.2),
 `generar_movimiento.py` (venv Kimodo) y `blender_main`/`rig_lib`/`anim`/`kimodo_clip`/`vehiculo` (Blender).
-- `1_imagen/generar_imagen.py` + `*.recipe.json`: workflows con `comfy workflow apply` + modelos fijados, hoja de contacto.
+- `1_imagen/generar_imagen.py` + `*.recipe.json`: workflows con `comfy workflow apply` + modelos fijados (Qwen Edit,
+  FLUX.2 Dev); Z-Image (`motor_texto`, `workflow_zimage`) en formato API armado en Python; hoja de contacto.
 - `2_malla/`: `generar_malla_pixal3d.py` (workflow API armado en Python; modo `alinear`), `generar_malla_trellis.py`
   (venv TRELLIS.2; se relanza con `os.execv` tras un OOM), `retexturizar_ultratex.py` (`limpia.glb` + `sin_fondo.png`
   → `modelo.glb`; el del motor queda en `modelo_motor.glb`; `espalda`/`costados` con las vistas de Qwen).

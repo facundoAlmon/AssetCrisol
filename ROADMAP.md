@@ -49,7 +49,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [ ] `instalar.sh` nativo como alternativa. Repos externos en commits fijos, modelos con `hf download` a una caché
       configurable.
 - [ ] Niveles:
-  - **mínimo:** ComfyUI (Qwen Image Edit) + TRELLIS.2 + Blender → animación procedural, sprites y Godot;
+  - **mínimo:** ComfyUI (Qwen Image Edit, Z-Image Turbo) + TRELLIS.2 + Blender → animación procedural, sprites y Godot;
   - **completo:** + Pixal3D, UltraTex (FLUX.2 Klein), DWPose, Kimodo, FLUX.2 Dev.
 - [ ] Modelos gated (DINOv3, FLUX.2 Klein, el codificador de texto de Kimodo): cómo aceptarlos en Hugging Face.
 - [ ] `crisol doctor`: rutas, versiones, VRAM, nodos de ComfyUI y modelos; qué falta, cómo arreglarlo y qué pasos
@@ -102,6 +102,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 ## Mejoras del motor (en paralelo)
 - [x] UltraTex con las vistas de costado (`malla.ultratex.costados`, opcional).
 - [x] Recorte con margen antes de TRELLIS.2 (`malla.margen`, opcional).
+- [x] Imagen sin referencia con Z-Image Turbo (segundos, Apache-2.0) + Qwen para limpiarla.
 - [ ] Kimodo: decidir si `correr` pasa a recomendado; candidatos para respirar, herido, rodar y lanzar.
 - [ ] Kimodo, traducción: muñeca de los golpes, cierre de brazos en torsos anchos, adaptación a chibis.
 - [ ] Articulaciones de muñecos/juguetes (DWPose no los detecta): vistas de Qwen o Make-It-Animatable v2.
@@ -109,7 +110,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [ ] Pesos con SkinTokens/Puppeteer, solo si las opciones actuales dejan de alcanzar.
 - [x] Rodilla siempre un poco adelante de la línea cadera-tobillo (con DWPose sobre piernas rectas el IK la doblaba
       para atrás al agacharse).
-- [ ] Candidatos de UltraTex: la cara (ojos estrábicos, delineado) cambia mucho con `ultratex.seed`; generar 2-3 seeds
+- [ ] Candidatos de UltraTex: la cara (ojos estrábicos, delineado) cambia mucho con `malla.ultratex.seed`; generar 2-3 seeds
       y armar una hoja de caras de cerca para elegir, como los candidatos de malla.
 - [ ] Brillos pintados: UltraTex hornea en la textura las luces de sus vistas (ropa que parece lustrada); probar a
       sacarlas (delighting) o compensar con la rugosidad.
@@ -137,5 +138,5 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 
 ## Licencias de terceros
 El repo no distribuye modelos. Resumen (detalle en `docs/licencias.md` cuando esté): TRELLIS.2, Pixal3D, rembg y
-BiRefNet MIT; Qwen Image Edit Apache-2.0; FLUX.2 Dev y FLUX.2 Klein no comerciales; DINOv3 con licencia propia
+BiRefNet MIT; Qwen Image Edit y Z-Image Turbo Apache-2.0; FLUX.2 Dev (opcional) y FLUX.2 Klein no comerciales; DINOv3 con licencia propia
 (gated); Kimodo: código Apache-2.0, pesos a verificar.

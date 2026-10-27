@@ -29,7 +29,8 @@ se funde el material para darle forma: acá entra una imagen y salen sprites, mo
 
 > [!CAUTION]
 > El código es **GPL-3.0**, pero los modelos de IA tienen sus propias licencias y **algunos no son comerciales**: la
-> receta por defecto de los humanoides usa UltraTex (FLUX.2 Klein 9B) y una imagen sin referencia usa FLUX.2 Dev.
+> receta por defecto de los humanoides usa UltraTex (FLUX.2 Klein 9B), y FLUX.2 Dev si lo elegís para la imagen sin
+> referencia (por defecto es Z-Image Turbo, Apache-2.0).
 > Leé [Licencias de terceros](#licencias-de-terceros) antes de usar lo generado en un juego que vayas a vender.
 
 ---
@@ -47,7 +48,7 @@ se funde el material para darle forma: acá entra una imagen y salen sprites, mo
 
 ```mermaid
 flowchart LR
-    REF["Referencia<br/>boceto, foto, sprite<br/>o solo texto"] --> IMG["1 · Imagen<br/>ComfyUI: Qwen-Image-Edit<br/>o FLUX.2 Dev"]
+    REF["Referencia<br/>boceto, foto, sprite<br/>o solo texto"] --> IMG["1 · Imagen<br/>ComfyUI: Qwen-Image-Edit<br/>o Z-Image / FLUX.2 Dev"]
     IMG -->|"elegís la seed"| VIS["Vistas<br/>espalda y costados<br/>con Qwen"]
     VIS --> MALLA["2 · Malla<br/>Pixal3D 4 vistas + UltraTex<br/>o TRELLIS.2"]
     MALLA --> BL["3 · Blender headless<br/>rig, pesos, animaciones"]
@@ -85,7 +86,7 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 |---|---|
 | GPU | Con menos de 16 GB la malla no entra; TRELLIS.2 pide 24 GB oficialmente y entra en 16 con `low_vram`. El toolkit de CUDA hace falta para compilar las extensiones de TRELLIS.2. |
 | RAM | Kimodo usa ~16 GB en CPU. |
-| Disco | Estimado: TRELLIS.2 ~24 GB, Pixal3D ~15 GB, UltraTex ~11 GB, Qwen Image Edit y FLUX.2 Dev, más el codificador de texto de Kimodo si lo usás. Conviene que las cachés de modelos vayan a un disco con lugar (`env_modelos` en la config). |
+| Disco | Estimado: TRELLIS.2 ~24 GB, Pixal3D ~15 GB, UltraTex ~11 GB, Z-Image Turbo ~21 GB, Qwen Image Edit y FLUX.2 Dev (opcional), más el codificador de texto de Kimodo si lo usás. Conviene que las cachés de modelos vayan a un disco con lugar (`env_modelos` en la config). |
 | Python | `python3` del sistema con **Pillow** (para `pipeline.py`). Cada herramienta trae su propio entorno. |
 | Blender | **5.1** (headless; el pipeline nunca toca un Blender abierto). |
 | ComfyUI | reciente (con los nodos nativos de Pixal3D, TRELLIS.2 y BiRefNet) y el CLI `comfy` (`comfy-cli`) en su venv. |
@@ -125,7 +126,7 @@ Después: `python3 pipeline.py --help`.
 | `kimodo_dir` | carpeta de Kimodo (con `venv/bin/python`); solo para `pipeline.py movimiento` |
 | `env_modelos` | variables de entorno para las cachés de modelos (`HF_HOME`, `U2NET_HOME`...) |
 | `blender`, `godot` | ejecutables |
-| `modelos_imagen` | nombres de archivo de los modelos de Qwen Image Edit y FLUX.2 Dev dentro de `ComfyUI/models` |
+| `modelos_imagen` | nombres de archivo de los modelos de imagen dentro de `ComfyUI/models`: Qwen Image Edit (`qwen_*`), Z-Image Turbo (`zimage_unet`, `zimage_clip`, `zimage_vae`; si están, es el motor sin referencia por defecto) y FLUX.2 Dev (`flux_*`). Ver `config.ejemplo.json` |
 
 En vez de `config.json` en el repo se puede usar otro archivo con la variable `ASSETCRISOL_CONFIG=/ruta/config.json`
 (útil para tener la config y los datos en una carpeta privada aparte).
@@ -138,7 +139,7 @@ Instalar [ComfyUI](https://github.com/comfyanonymous/ComfyUI) con un venv en `<c
 `<comfyui_dir>/venv/bin/pip install comfy-cli`. `pipeline.py` arranca ComfyUI solo si no está corriendo.
 
 Nodos extra (en `custom_nodes/`):
-- [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF) (FLUX.2 Dev en GGUF);
+- [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF) (FLUX.2 Dev en GGUF; no hace falta si usás solo Z-Image);
 - [ComfyUI-UltraTex](https://github.com/visualbruno/ComfyUI-UltraTex) (probado en el commit `8137da5`; además
   `pip install moderngl xatlas` en el venv de ComfyUI). El horneado usa moderngl con GLX: arrancar ComfyUI con un
   `DISPLAY` (sin X habría que pasarle `backend='egl'`);
@@ -152,14 +153,19 @@ cual).
 <details>
 <summary><b>Lista de modelos de ComfyUI</b> (rutas dentro de <code>ComfyUI/models/</code>)</summary>
 
-Los nombres de Qwen y FLUX.2 Dev se configuran en `modelos_imagen`.
+Los nombres de Qwen, Z-Image Turbo y FLUX.2 Dev se configuran en `modelos_imagen`.
 
 ```
 # Paso 1: imagen
 diffusion_models/qwen_image_edit_2511_int8_convrot.safetensors        Qwen-Image-Edit 2511
 loras/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors     LoRA de 4 pasos
 text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors, vae/qwen_image_vae.safetensors
-unet/flux2DevFP8GGUF_ggufQ5KM.gguf (+ clip/ y vae/ de la misma versión)   FLUX.2 Dev (solo sin referencia)
+diffusion_models/z_image_turbo_bf16.safetensors       Z-Image Turbo (sin referencia, por defecto; repo
+                                                      Comfy-Org/Z-Image-Turbo en Hugging Face, split_files/)
+text_encoders/qwen_3_4b.safetensors                   ídem
+vae/z_image_ae.safetensors                            ídem split_files/vae/ae.safetensors, renombrado
+unet/flux2DevFP8GGUF_ggufQ5KM.gguf (+ clip/ y vae/ de la misma versión)   FLUX.2 Dev (sin referencia, opcional:
+                                                                         imagen.motor "flux2")
 
 # Paso 2: Pixal3D (repos Comfy-Org/Pixal3D, Comfy-Org/MoGe y Comfy-Org/BiRefNet en Hugging Face)
 diffusion_models/pixal3d_int8_convrot.safetensors              1 vista
@@ -261,10 +267,14 @@ Para colgarle cosas en el juego (espada, casco), sumar `python3 pipeline.py ancl
 pasar un cambio puntual (p. ej. una animación) alcanza con `blender` → `sprites` → `iso`.
 
 > [!IMPORTANT]
-> **El estilo se elige antes de generar la imagen.** El prompt lo arma el estilo con `imagen.descripcion`: cambiarlo
-> después solo cambia luces y posproceso, no la textura. Para personas, `moderno` (cartoon 3D con contorno, el
-> recomendado) o `semirealista` (proporciones y materiales reales). `moderno_juguete` es **solo para muñecos de
-> plástico duro**: en una persona la ropa sale lustrada como vinilo.
+> **El prompt del estilo se elige antes de generar la imagen; el render, cuando quieras.** El prompt lo arma el estilo
+> con `imagen.descripcion` y define la textura: `moderno` y `moderno_juguete` comparten el mismo prompt, `semirealista`
+> (proporciones y materiales reales), `animacion3d`, `medieval` y `futurista` tienen cada uno el suyo. Pasar a un
+> estilo con **otro prompt** pide regenerar la imagen; entre estilos con el **mismo prompt** solo cambia el render de
+> Blender (luces, rugosidad, oclusión, posproceso) y alcanza con rehacer `blender` → `sprites` → `iso`. Para
+> personas, `moderno` (cartoon 3D con contorno, el recomendado) o `semirealista`. `moderno_juguete` es **solo para
+> muñecos de plástico duro**: en una persona la ropa se ve lustrada como vinilo (se arregla pasando a `moderno` y
+> rehaciendo el render, sin tocar la imagen).
 
 > [!WARNING]
 > **Una generación por vez en la GPU.** `imagen`, `vistas`, `malla`, `ultratex`, `articulaciones` y `texturas` usan la
@@ -284,14 +294,19 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
 
 1. **Referencia**: recortar al personaje solo (sin cajas, logos ni texto: Qwen los mete en la imagen), entero y con
    aire alrededor. Fondo liso.
-2. **Imagen** (4 seeds; con referencia Qwen Edit, ≈20 s cada una; sin referencia FLUX.2 Dev, ≈3 min cada una):
-   elegir el estilo antes (ver arriba). En la `descripcion`, sacar lo que cambie la pose de la referencia ("arms
+2. **Imagen** (4 seeds; con referencia Qwen Edit, ≈20 s cada una; sin referencia Z-Image Turbo, ≈20 s cada una):
+   elegir el prompt del estilo antes (ver arriba). **Sin referencia**, Z-Image da la primera idea rápido pero suele
+   agregar piezas sueltas (cartucheras, correas, bolsillos) y ropa menos ajustada: elegir una, copiarla como
+   `base_<seed>.png`, ponerla de `referencia` y pasarla por Qwen con un `imagen.prompt` de edición ("Keep this exact
+   character unchanged ... Only make these changes: remove ..., make the trousers fitted ..., symmetrical A-pose
+   ..."). Para eso el json tiene que tener solo `prompt`: si queda `imagen.descripcion`, el prompt lo arma el estilo y
+   `prompt` se ignora (moverla, p. ej., a `_descripcion`). En la `descripcion`, sacar lo que cambie la pose de la referencia ("arms
    down, not on the hips"). Elegir la de **proporciones** correctas (a veces salen cabezonas). **Ojos achinados** por
    la sonrisa: no cambiar de seed, editar la elegida: copiarla como `base_<seed>.png`, ponerla de `referencia` y
    escribir un `prompt` "Keep this exact image unchanged ... Only change the eyes: open the eyes wider ...".
 3. **Vistas** (`pipeline.py vistas`): la espalda no debe repetir lo del pecho y `left`/`right` miran a su borde de la
    imagen. Una mala se borra (`trabajo/imagen/vista_<v>.png`) y se rehace.
-4. **Malla**: mirar `ultratex_vistas.png` y `ultratex_espalda.png`. Sin `ultratex.espalda`, UltraTex inventa la
+4. **Malla**: mirar `ultratex_vistas.png` y `ultratex_espalda.png`. Sin `malla.ultratex.espalda`, UltraTex inventa la
    espalda y suele copiar lo del pecho (un logo, un emblema); con `espalda` la de atrás sale de la vista de Qwen.
    Mirar la **cara de cerca** (ver el consejo de arriba).
 5. **Articulaciones** (`pipeline.py articulaciones`): revisar `guia.png` (y `pose_frente.png`, lo que vio DWPose).
@@ -339,7 +354,7 @@ AssetCrisol/
 ├── plantilla/                personaje.json, objeto.json, vehiculo.json, escenario.json: valores por defecto
 ├── ejemplos/                 Cris, caja y bosque, listos para copiar a datos_dir
 └── herramientas/
-    ├── 1_imagen/     generar_imagen.py + recetas de ComfyUI (qwen_edit, flux2_t2i)
+    ├── 1_imagen/     generar_imagen.py + recetas de ComfyUI (qwen_edit, flux2_t2i); Z-Image en Python
     ├── 2_malla/      generar_malla_pixal3d.py (ComfyUI), generar_malla_trellis.py (venv TRELLIS.2),
     │                 retexturizar_ultratex.py (ComfyUI)
     ├── 3_blender/    blender_main.py (headless), rig_lib.py, anim.py, vehiculo.py, dibujar_guia.py,
@@ -377,8 +392,17 @@ AssetCrisol/
 Genera una imagen por cada seed de `imagen.seeds`:
 - **Con referencia** → Qwen-Image-Edit la redibuja según el prompt y conserva el diseño. Sirve cualquier cosa:
   sprite pixel art, boceto, foto de un muñeco.
-- **Sin referencia** (`imagen.referencia: null`) → FLUX.2 Dev la genera solo desde el prompt (más lento: ≈3 min
-  por seed en 16 GB).
+- **Sin referencia** (`imagen.referencia: null`) → la genera solo desde el prompt el motor de `imagen.motor`:
+  - `"zimage"` (por defecto si la config tiene `modelos_imagen.zimage_unet`): Z-Image Turbo, 8 pasos, ≈20 s por
+    seed, Apache-2.0;
+  - `"flux2"`: FLUX.2 Dev, ≈3,5 min por seed y llena los 16 GB; licencia no comercial.
+
+  Z-Image es ideal para la primera idea, pero suele sumar piezas sueltas (cartucheras, correas, bolsillos) y ropa
+  menos ajustada, que después complican la malla y el rig. Receta para un personaje nuevo sin referencia: elegir una
+  candidata, copiarla como `base_<seed>.png`, ponerla de `imagen.referencia` y regenerar con Qwen y un `imagen.prompt`
+  de edición ("Keep this exact character unchanged ... Only make these changes: remove ..., make the trousers fitted
+  ..., symmetrical A-pose ..."). Ojo: si el json tiene `imagen.descripcion`, el prompt lo arma el estilo e
+  `imagen.prompt` se ignora; para la edición dejar solo `prompt` (p. ej., mover la descripción a `_descripcion`).
 
 Mirá `trabajo/imagen/candidatos.png` y poné la seed ganadora en `imagen.elegida`. También se puede poner el nombre
 de un archivo propio dentro de la carpeta del personaje (`"elegida": "mi_render.png"`) y saltear este paso.
@@ -775,13 +799,15 @@ cambia.
 | `animacion3d` | la base: animación 3D estilizada |
 | `moderno` | cartoon contemporáneo con contorno oscuro de 2 px; **el recomendado para personas** |
 | `semirealista` | render de `moderno` con prompt de proporciones y materiales reales |
-| `moderno_juguete` | `moderno` de plástico duro (oclusión, más contraste y nitidez): **solo para muñecos y juguetes** |
+| `moderno_juguete` | `moderno` de plástico duro, mismo prompt (oclusión, más contraste y nitidez): **solo para muñecos y juguetes** |
 | `medieval` | fantasía pintada a mano, luz cálida |
 | `futurista` | sci-fi, luz fría, acentos neón |
 
 Qué pesa más: el **prompt** define cómo se ve el modelo 3D (la textura sale de esa imagen); luces y posproceso
-emparejan lo que queda. Cambiar el estilo de un personaje ya hecho sin regenerar la imagen solo cambia luces y
-posproceso (`blender` + `sprites`). Para un juego nuevo: copiar un estilo, ajustarlo, ponerlo en la config y generar
+emparejan lo que queda. `moderno` y `moderno_juguete` tienen **exactamente el mismo prompt** (solo cambian rugosidad,
+oclusión, contraste y nitidez del render): pasar de uno a otro no cambia la imagen, alcanza con rehacer `blender` →
+`sprites` → `iso`. `semirealista` comparte el render de `moderno` pero cambia el prompt. En general, cambiar el estilo
+de un personaje ya hecho sin regenerar la imagen solo cambia el render (`blender` + `sprites` + `iso`). Para un juego nuevo: copiar un estilo, ajustarlo, ponerlo en la config y generar
 un personaje y un objeto de prueba para ver que combinen antes de producir el resto.
 
 **Plastilina**: con luz suave, material mate y sin oclusión, un muñeco se ve de plastilina. `moderno_juguete` +
@@ -1023,10 +1049,10 @@ las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para
 | Ojos estrábicos o con delineado grueso | `pipeline.py ultratex <n>` con otra `malla.ultratex.seed` |
 | El personaje "flota" o se hunde en Godot | el offset sale de la última fila opaca del frame quieto; si hay algo debajo de los pies (capa, cola), ajustar `position.y` del Sprite en el `.tscn` |
 | Personaje muy oscuro | TRELLIS.2 pinta la textura más oscura que la imagen; con colores oscuros de por sí no alcanza la compensación del render → aclarar la textura de `modelo.glb` (curva gamma ~0,6) antes de `blender`, o repintar con UltraTex |
-| La espalda repite lo del pecho | UltraTex o Qwen copiaron el frente → `ultratex.espalda: true` y revisar `vista_back.png` |
+| La espalda repite lo del pecho | UltraTex o Qwen copiaron el frente → `malla.ultratex.espalda: true` y revisar `vista_back.png` |
 | La cara sale cachetona, con ojos y boca como manchas | en una imagen de cuerpo entero con proporciones reales la cara ocupa ~50 px → Pixal3D + UltraTex la resuelven mejor que TRELLIS.2 |
 | Personaje sin referencia sale raro | con `referencia: null` y un `imagen.prompt` a mano, no empezar con "Transform this...": usar `imagen.descripcion` |
-| La ropa sale lustrada como vinilo | estilo `moderno_juguete` en una persona → `moderno` o `semirealista` (y regenerar la imagen) |
+| La ropa sale lustrada como vinilo | estilo `moderno_juguete` en una persona → `moderno` (mismo prompt) y rehacer `blender` → `sprites` → `iso`; la imagen no hace falta regenerarla |
 
 </details>
 
@@ -1072,9 +1098,10 @@ asesoramiento legal: **verificá la licencia vigente de cada modelo antes de usa
 comerciales.**
 
 > [!CAUTION]
-> **La receta por defecto de los humanoides usa UltraTex (FLUX.2 Klein 9B, no comercial)**, y una imagen sin
-> referencia usa FLUX.2 Dev (no comercial). Para un proyecto comercial, revisá estas licencias o usá una receta sin
-> esos modelos (p. ej. TRELLIS.2 o Pixal3D sin `ultratex`, y siempre con imagen de referencia).
+> **La receta por defecto de los humanoides usa UltraTex (FLUX.2 Klein 9B, no comercial).** La imagen sin
+> referencia usa por defecto Z-Image Turbo (Apache-2.0); FLUX.2 Dev (no comercial) solo si lo elegís con
+> `imagen.motor: "flux2"`. Para un proyecto comercial, revisá estas licencias o usá una receta sin esos modelos (p.
+> ej. TRELLIS.2 o Pixal3D sin `ultratex`, e imagen con Qwen o Z-Image).
 
 | Componente | Para qué | Licencia |
 |---|---|---|
@@ -1086,7 +1113,8 @@ comerciales.**
 | MoGe | campo visual para Pixal3D | MIT (a verificar) |
 | Qwen Image Edit 2511 | paso 1 con referencia, vistas | Apache-2.0 |
 | LoRA Lightning de Qwen Image Edit | paso 1 en 4 pasos | a verificar |
-| FLUX.2 Dev | paso 1 sin referencia, escenarios `flux` | **no comercial** (FLUX.2 [dev] Non-Commercial License) |
+| Z-Image Turbo | paso 1 sin referencia (por defecto) | Apache-2.0 |
+| FLUX.2 Dev | paso 1 sin referencia (`imagen.motor: "flux2"`), escenarios `flux` | **no comercial** (FLUX.2 [dev] Non-Commercial License) |
 | FLUX.2 Klein base 9B | UltraTex | **no comercial** (licencia de Black Forest Labs) |
 | ComfyUI-UltraTex (nodos) | UltraTex | MIT |
 | LoRA y decoder de UltraTex | UltraTex | a verificar |

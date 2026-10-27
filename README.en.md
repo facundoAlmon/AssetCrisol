@@ -34,8 +34,9 @@ Everything runs on your own machine: no paid APIs, no cloud services. *Crisol* i
 where material is melted down to give it shape: an image goes in, sprites, models and scenes come out.
 
 > [!CAUTION]
-> The code is **GPL-3.0**, but the AI models have their own licenses and **some are non-commercial**: the default
-> humanoid recipe uses UltraTex (FLUX.2 Klein 9B), and an image without a reference uses FLUX.2 Dev. Read
+> The code is **GPL-3.0**, but the AI models have their own licenses and **some are non-commercial**: UltraTex
+> (FLUX.2 Klein 9B), used by the default humanoid recipe, and FLUX.2 Dev if you pick it for images without a
+> reference (the default there is Z-Image Turbo, Apache-2.0). Read
 > [Third-party licenses](#third-party-licenses) before using the output in a game you plan to sell.
 
 ---
@@ -53,7 +54,7 @@ where material is melted down to give it shape: an image goes in, sprites, model
 
 ```mermaid
 flowchart LR
-    REF["Reference<br/>sketch, photo, sprite<br/>or just text"] --> IMG["1 · Image<br/>ComfyUI: Qwen-Image-Edit<br/>or FLUX.2 Dev"]
+    REF["Reference<br/>sketch, photo, sprite<br/>or just text"] --> IMG["1 · Image<br/>ComfyUI: Qwen-Image-Edit<br/>or Z-Image / FLUX.2 Dev"]
     IMG -->|"you pick the seed"| VIS["Views<br/>back and sides<br/>with Qwen"]
     VIS --> MALLA["2 · Mesh<br/>Pixal3D 4 views + UltraTex<br/>or TRELLIS.2"]
     MALLA --> BL["3 · Headless Blender<br/>rig, weights, animations"]
@@ -91,7 +92,7 @@ texture) are always made by a person looking at a candidates sheet.
 |---|---|
 | GPU | With less than 16 GB the mesh step does not fit; TRELLIS.2 officially asks for 24 GB and fits in 16 with `low_vram`. The CUDA toolkit is needed to build TRELLIS.2's extensions. |
 | RAM | Kimodo uses ~16 GB on CPU. |
-| Disk | Estimate: TRELLIS.2 ~24 GB, Pixal3D ~15 GB, UltraTex ~11 GB, Qwen Image Edit and FLUX.2 Dev, plus Kimodo's text encoder if you use it. Model caches should go to a disk with room (`env_modelos` in the config). |
+| Disk | Estimate: TRELLIS.2 ~24 GB, Pixal3D ~15 GB, UltraTex ~11 GB, Z-Image Turbo ~21 GB, Qwen Image Edit and FLUX.2 Dev (optional), plus Kimodo's text encoder if you use it. Model caches should go to a disk with room (`env_modelos` in the config). |
 | Python | system `python3` with **Pillow** (for `pipeline.py`). Each tool brings its own environment. |
 | Blender | **5.1** (headless; the pipeline never touches an open Blender). |
 | ComfyUI | recent (with the native Pixal3D, TRELLIS.2 and BiRefNet nodes) and the `comfy` CLI (`comfy-cli`) in its venv. |
@@ -131,7 +132,7 @@ Then: `python3 pipeline.py --help`.
 | `kimodo_dir` | Kimodo folder (with `venv/bin/python`); only for `pipeline.py movimiento` |
 | `env_modelos` | environment variables for the model caches (`HF_HOME`, `U2NET_HOME`...) |
 | `blender`, `godot` | executables |
-| `modelos_imagen` | file names of the Qwen Image Edit and FLUX.2 Dev models inside `ComfyUI/models` |
+| `modelos_imagen` | file names of the image models inside `ComfyUI/models`: Qwen Image Edit (`qwen_*`), Z-Image Turbo (`zimage_unet`, `zimage_clip`, `zimage_vae`; when set, it is the default engine without a reference) and FLUX.2 Dev (`flux_*`). See `config.ejemplo.json` |
 
 Instead of `config.json` in the repo you can use another file via `ASSETCRISOL_CONFIG=/path/config.json` (handy to
 keep the config and the data in a separate private folder).
@@ -144,7 +145,7 @@ Install [ComfyUI](https://github.com/comfyanonymous/ComfyUI) with a venv in `<co
 `<comfyui_dir>/venv/bin/pip install comfy-cli`. `pipeline.py` starts ComfyUI by itself if it is not running.
 
 Extra nodes (in `custom_nodes/`):
-- [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF) (FLUX.2 Dev as GGUF);
+- [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF) (FLUX.2 Dev as GGUF; not needed if you only use Z-Image);
 - [ComfyUI-UltraTex](https://github.com/visualbruno/ComfyUI-UltraTex) (tested at commit `8137da5`; also
   `pip install moderngl xatlas` in ComfyUI's venv). Baking uses moderngl with GLX: start ComfyUI with a `DISPLAY`
   (without X it would need `backend='egl'`);
@@ -158,14 +159,19 @@ validate as is).
 <details>
 <summary><b>ComfyUI model list</b> (paths inside <code>ComfyUI/models/</code>)</summary>
 
-The Qwen and FLUX.2 Dev names are set in `modelos_imagen`.
+The Qwen, Z-Image Turbo and FLUX.2 Dev names are set in `modelos_imagen`.
 
 ```
 # Step 1: image
 diffusion_models/qwen_image_edit_2511_int8_convrot.safetensors        Qwen-Image-Edit 2511
 loras/Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors     4-step LoRA
 text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors, vae/qwen_image_vae.safetensors
-unet/flux2DevFP8GGUF_ggufQ5KM.gguf (+ clip/ and vae/ of the same release)   FLUX.2 Dev (only without a reference)
+diffusion_models/z_image_turbo_bf16.safetensors       Z-Image Turbo (no reference, default; repo
+                                                      Comfy-Org/Z-Image-Turbo on Hugging Face, split_files/)
+text_encoders/qwen_3_4b.safetensors                   same repo
+vae/z_image_ae.safetensors                            same repo, split_files/vae/ae.safetensors, renamed
+unet/flux2DevFP8GGUF_ggufQ5KM.gguf (+ clip/ and vae/ of the same release)   FLUX.2 Dev (no reference, optional:
+                                                                           imagen.motor "flux2")
 
 # Step 2: Pixal3D (Comfy-Org/Pixal3D, Comfy-Org/MoGe and Comfy-Org/BiRefNet repos on Hugging Face)
 diffusion_models/pixal3d_int8_convrot.safetensors              1 view
@@ -269,10 +275,14 @@ To attach things in the game (a sword, a helmet), add `python3 pipeline.py ancla
 apply a small change (e.g. one animation), `blender` → `sprites` → `iso` is enough.
 
 > [!IMPORTANT]
-> **Pick the style before generating the image.** The prompt is built from the style plus `imagen.descripcion`:
-> changing it later only changes lighting and post-processing, not the texture. For people, `moderno` (3D cartoon
-> with an outline, recommended) or `semirealista` (real proportions and materials). `moderno_juguete` is **only for
-> hard-plastic toys**: on a person the clothes come out glossy like vinyl.
+> **Pick the style's prompt before generating the image; the render, whenever you like.** The prompt is built from
+> the style plus `imagen.descripcion` and defines the texture: `moderno` and `moderno_juguete` share the same prompt,
+> while `semirealista` (real proportions and materials), `animacion3d`, `medieval` and `futurista` each have their
+> own. Switching to a style with a **different prompt** means regenerating the image; between styles with the **same
+> prompt** only the Blender render changes (lighting, roughness, occlusion, post-processing) and redoing `blender` →
+> `sprites` → `iso` is enough. For people, `moderno` (3D cartoon with an outline, recommended) or `semirealista`.
+> `moderno_juguete` is **only for hard-plastic toys**: on a person the clothes look glossy like vinyl (fixed by
+> switching to `moderno` and redoing the render, without touching the image).
 
 > [!WARNING]
 > **One generation at a time on the GPU.** `imagen`, `vistas`, `malla`, `ultratex`, `articulaciones` and `texturas`
@@ -292,14 +302,19 @@ The template already has these values; this is what to look at and what to chang
 
 1. **Reference**: crop the character alone (no boxes, logos or text: Qwen puts them into the image), whole and with
    room around it. Plain background.
-2. **Image** (4 seeds; with a reference Qwen Edit, ~20 s each; without one FLUX.2 Dev, ~3 min each): pick the style
-   first (see above). In `descripcion`, remove anything that changes the reference's pose ("arms down, not on the
+2. **Image** (4 seeds; with a reference Qwen Edit, ~20 s each; without one Z-Image Turbo, ~20 s each): pick the
+   style's prompt first (see above). **Without a reference**, Z-Image gives a quick first idea but tends to add loose
+   pieces (holsters, straps, pockets) and looser clothes: pick one, copy it as `base_<seed>.png`, set it as
+   `referencia` and run it through Qwen with an editing `imagen.prompt` ("Keep this exact character unchanged ...
+   Only make these changes: remove ..., make the trousers fitted ..., symmetrical A-pose ..."). The json must then
+   have only `prompt`: if `imagen.descripcion` is still there, the style builds the prompt and `prompt` is ignored
+   (move it, e.g., to `_descripcion`). In `descripcion`, remove anything that changes the reference's pose ("arms down, not on the
    hips"). Pick the one with the right **proportions** (sometimes the head comes out too big). **Squinting eyes**
    from a smile: don't change the seed, edit the chosen image: copy it as `base_<seed>.png`, set it as `referencia`
    and write a `prompt` like "Keep this exact image unchanged ... Only change the eyes: open the eyes wider ...".
 3. **Views** (`pipeline.py vistas`): the back must not repeat what is on the chest, and `left`/`right` face their own
    edge of the image. Delete a bad one (`trabajo/imagen/vista_<v>.png`) and re-run.
-4. **Mesh**: look at `ultratex_vistas.png` and `ultratex_espalda.png`. Without `ultratex.espalda`, UltraTex invents
+4. **Mesh**: look at `ultratex_vistas.png` and `ultratex_espalda.png`. Without `malla.ultratex.espalda`, UltraTex invents
    the back and often copies the chest (a logo, an emblem); with `espalda` the back comes from Qwen's view. Look at
    the **face up close** (see the tip above).
 5. **Joints** (`pipeline.py articulaciones`): check `guia.png` (and `pose_frente.png`, what DWPose saw). With dolls
@@ -351,7 +366,7 @@ AssetCrisol/
 ├── plantilla/                personaje.json, objeto.json, vehiculo.json, escenario.json: defaults
 ├── ejemplos/                 Cris, crate and forest, ready to copy into datos_dir
 └── herramientas/
-    ├── 1_imagen/     generar_imagen.py + ComfyUI recipes (qwen_edit, flux2_t2i)
+    ├── 1_imagen/     generar_imagen.py + ComfyUI recipes (qwen_edit, flux2_t2i); Z-Image in Python
     ├── 2_malla/      generar_malla_pixal3d.py (ComfyUI), generar_malla_trellis.py (TRELLIS.2 venv),
     │                 retexturizar_ultratex.py (ComfyUI)
     ├── 3_blender/    blender_main.py (headless), rig_lib.py, anim.py, vehiculo.py, dibujar_guia.py,
@@ -389,8 +404,17 @@ AssetCrisol/
 Generates one image per seed in `imagen.seeds`:
 - **With a reference** → Qwen-Image-Edit redraws it following the prompt and keeps the design. Anything works: a
   pixel-art sprite, a sketch, a photo of a figurine.
-- **Without a reference** (`imagen.referencia: null`) → FLUX.2 Dev generates it from the prompt alone (slower: ~3 min
-  per seed on 16 GB).
+- **Without a reference** (`imagen.referencia: null`) → the `imagen.motor` engine generates it from the prompt alone:
+  - `"zimage"` (default when the config has `modelos_imagen.zimage_unet`): Z-Image Turbo, 8 steps, ~20 s per seed,
+    Apache-2.0;
+  - `"flux2"`: FLUX.2 Dev, ~3.5 min per seed and fills the 16 GB; non-commercial license.
+
+  Z-Image is great for the first idea, but it tends to add loose pieces (holsters, straps, pockets) and looser
+  clothes, which later get in the way of the mesh and the rig. Recipe for a new character without a reference: pick a
+  candidate, copy it as `base_<seed>.png`, set it as `imagen.referencia` and regenerate with Qwen and an editing
+  `imagen.prompt` ("Keep this exact character unchanged ... Only make these changes: remove ..., make the trousers
+  fitted ..., symmetrical A-pose ..."). Careful: if the json has `imagen.descripcion`, the style builds the prompt
+  and `imagen.prompt` is ignored; for the edit keep only `prompt` (e.g. move the description to `_descripcion`).
 
 Look at `trabajo/imagen/candidatos.png` and put the winning seed in `imagen.elegida`. You can also put the name of
 your own file inside the character's folder (`"elegida": "my_render.png"`) and skip this step.
@@ -783,13 +807,16 @@ So that everything generated for one game matches, the visual guidelines live in
 | `animacion3d` | the base: stylized 3D animation |
 | `moderno` | contemporary cartoon with a 2 px dark outline; **recommended for people** |
 | `semirealista` | `moderno`'s render with a prompt for real proportions and materials |
-| `moderno_juguete` | hard-plastic `moderno` (occlusion, more contrast and sharpening): **only for dolls and toys** |
+| `moderno_juguete` | hard-plastic `moderno`, same prompt (occlusion, more contrast and sharpening): **only for dolls and toys** |
 | `medieval` | hand-painted fantasy, warm light |
 | `futurista` | sci-fi, cold light, neon accents |
 
 What weighs more: the **prompt** defines how the 3D model looks (the texture comes from that image); lighting and
-post-processing even out the rest. Changing the style of a finished character without regenerating the image only
-changes lighting and post-processing (`blender` + `sprites`). For a new game: copy a style, tune it, set it in the
+post-processing even out the rest. `moderno` and `moderno_juguete` have **exactly the same prompt** (only the
+render's roughness, occlusion, contrast and sharpening change): switching between them doesn't change the image,
+redoing `blender` → `sprites` → `iso` is enough. `semirealista` shares `moderno`'s render but changes the prompt. In
+general, changing the style of a finished character without regenerating the image only changes the render
+(`blender` + `sprites` + `iso`). For a new game: copy a style, tune it, set it in the
 config and generate a test character and prop to check they match before producing the rest.
 
 **Modeling clay**: with soft light, matte material and no occlusion, a toy looks like modeling clay.
@@ -1036,10 +1063,10 @@ isometric `TileMapLayer`; the 1.85 character is ≈145 px tall). To attach thing
 | Cross-eyed eyes or a heavy outline | `pipeline.py ultratex <n>` with another `malla.ultratex.seed` |
 | The character "floats" or sinks in Godot | the offset comes from the last opaque row of the idle frame; if there's something below the feet (a cape, a tail), adjust the Sprite's `position.y` in the `.tscn` |
 | Character too dark | TRELLIS.2 paints the texture darker than the image; with colors that are dark to begin with the render compensation isn't enough → lighten the `modelo.glb` texture (gamma curve ~0.6) before `blender`, or repaint with UltraTex |
-| The back repeats the chest | UltraTex or Qwen copied the front → `ultratex.espalda: true` and check `vista_back.png` |
+| The back repeats the chest | UltraTex or Qwen copied the front → `malla.ultratex.espalda: true` and check `vista_back.png` |
 | The face comes out chubby, with eyes and mouth as blobs | in a full-body image with real proportions the face is ~50 px → Pixal3D + UltraTex handle it better than TRELLIS.2 |
 | A character without a reference comes out odd | with `referencia: null` and a hand-written `imagen.prompt`, don't start with "Transform this...": use `imagen.descripcion` |
-| Clothes come out glossy like vinyl | `moderno_juguete` style on a person → `moderno` or `semirealista` (and regenerate the image) |
+| Clothes come out glossy like vinyl | `moderno_juguete` style on a person → `moderno` (same prompt) and redo `blender` → `sprites` → `iso`; no need to regenerate the image |
 
 </details>
 
@@ -1084,9 +1111,10 @@ AssetCrisol doesn't ship model weights: each one is downloaded separately under 
 not legal advice: **check each model's current license before using the output commercially.**
 
 > [!CAUTION]
-> **The default humanoid recipe uses UltraTex (FLUX.2 Klein 9B, non-commercial)**, and an image without a reference
-> uses FLUX.2 Dev (non-commercial). For a commercial project, review these licenses or use a recipe without those
-> models (e.g. TRELLIS.2 or Pixal3D without `ultratex`, and always with a reference image).
+> **The default humanoid recipe uses UltraTex (FLUX.2 Klein 9B, non-commercial).** An image without a reference uses
+> Z-Image Turbo (Apache-2.0) by default; FLUX.2 Dev (non-commercial) only if you choose it with `imagen.motor:
+> "flux2"`. For a commercial project, review these licenses or use a recipe without those models (e.g. TRELLIS.2 or
+> Pixal3D without `ultratex`, and the image from Qwen or Z-Image).
 
 | Component | Used for | License |
 |---|---|---|
@@ -1098,7 +1126,8 @@ not legal advice: **check each model's current license before using the output c
 | MoGe | field of view for Pixal3D | MIT (to be verified) |
 | Qwen Image Edit 2511 | step 1 with a reference, views | Apache-2.0 |
 | Qwen Image Edit Lightning LoRA | step 1 in 4 steps | to be verified |
-| FLUX.2 Dev | step 1 without a reference, `flux` scenery | **non-commercial** (FLUX.2 [dev] Non-Commercial License) |
+| Z-Image Turbo | step 1 without a reference (default) | Apache-2.0 |
+| FLUX.2 Dev | step 1 without a reference (`imagen.motor: "flux2"`), `flux` scenery | **non-commercial** (FLUX.2 [dev] Non-Commercial License) |
 | FLUX.2 Klein base 9B | UltraTex | **non-commercial** (Black Forest Labs license) |
 | ComfyUI-UltraTex (nodes) | UltraTex | MIT |
 | UltraTex LoRA and decoder | UltraTex | to be verified |
