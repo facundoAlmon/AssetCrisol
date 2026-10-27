@@ -244,7 +244,11 @@ python3 pipeline.py sprites cris     # hoja + preview.gif + retrato
 python3 pipeline.py iso cris         # 8 direcciones isométricas (≈25 s) -> preview_iso.gif
 python3 pipeline.py revisar cris     # hoja de control -> trabajo/revision.png
 python3 pipeline.py blender caja && python3 pipeline.py sprites caja   # -> objetos/caja/preview.png
+python3 pipeline.py tema bosque      # texturas repetibles + colores del tema (trae las texturas elegidas)
 ```
+
+El bosque trae solo las 4 texturas elegidas; la del piso se generó con FLUX.2 Klein (licencia no comercial): es un
+ejemplo para probar, no un asset para un juego comercial.
 
 ### Primer personaje en 10 comandos
 

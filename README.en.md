@@ -252,7 +252,11 @@ python3 pipeline.py sprites cris     # sheet + preview.gif + portrait
 python3 pipeline.py iso cris         # 8 isometric directions (~25 s) -> preview_iso.gif
 python3 pipeline.py revisar cris     # review sheet -> trabajo/revision.png
 python3 pipeline.py blender caja && python3 pipeline.py sprites caja   # -> objetos/caja/preview.png
+python3 pipeline.py tema bosque      # tileable textures + theme colors (the chosen textures are included)
 ```
+
+The forest ships only its 4 chosen textures; the floor one was made with FLUX.2 Klein (non-commercial license): it is
+an example to try things out, not an asset for a commercial game.
 
 ### First character in 10 commands
 
