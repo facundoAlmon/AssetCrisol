@@ -94,15 +94,22 @@ def a_json(J):
     return {n: [[round(c, 4) for c in h], [round(c, 4) for c in t]] for n, (h, t, *_) in J.items()}
 
 
+ADELANTO_RODILLA = 0.011   # fracción de la altura (2 cm en 1,85 m)
+
+
 def rodilla_en_linea(J):
     """La rodilla (cola del muslo = cabeza de la canilla) y su polo, sobre el plano vertical de la cadera y el
     tobillo: el IK dobla la pierna en el plano en que está doblada en reposo. Con la rodilla a un costado de la línea
     (un muñeco con armadura: 2 cm afuera) ese plano queda en diagonal y la rodilla se abre al doblarse o, si el polo
-    la obliga a ir adelante, la canilla entera gira hacia adentro. La rodilla conserva su altura y su adelanto."""
+    la obliga a ir adelante, la canilla entera gira hacia adentro. La rodilla conserva su altura y su adelanto, pero
+    nunca menos de ADELANTO_RODILLA de la altura (la plantilla: 2 cm en 1,85 m): con la pierna recta o la rodilla
+    apenas atrás (DWPose de costado sobre una pierna recta) el IK la doblaba para atrás al agacharse (patas de fauno)."""
     J = dict(J)
     cad, rod, tob = J['thigh.S'][0], J['thigh.S'][1], J['shin.S'][1]
     t = (cad[2] - rod[2]) / (cad[2] - tob[2]) if cad[2] != tob[2] else 0.5
-    nueva = (cad[0] + (tob[0] - cad[0]) * t, rod[1], rod[2])
+    y_linea = cad[1] + (tob[1] - cad[1]) * t                  # frente = -Y: adelante es y menor
+    minimo = ADELANTO_RODILLA * J['head'][1][2]               # la punta de la cabeza = la altura
+    nueva = (cad[0] + (tob[0] - cad[0]) * t, min(rod[1], y_linea - minimo), rod[2])
     J['thigh.S'] = (J['thigh.S'][0], nueva, *J['thigh.S'][2:])
     J['shin.S'] = (nueva, *J['shin.S'][1:])
     for n in ('knee_pole.S',):

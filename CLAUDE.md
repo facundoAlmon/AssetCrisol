@@ -191,6 +191,8 @@ python3 pipeline.py movimiento <anim> --prompt "..." [--duracion s] [--seed n]  
   pierna y probando ángulos (la fórmula clásica daba -73° donde hacía falta -30°). Antes, `rig_lib.rodilla_en_linea`
   lleva la rodilla (y su polo) al plano vertical cadera-tobillo: con la rodilla a un costado el plano de doblez
   queda en diagonal y forzarla adelante gira la canilla hacia adentro.
+  Y nunca menos de `ADELANTO_RODILLA` (1,1 % de la altura) por delante de esa línea: con la pierna recta (DWPose de
+  costado sobre una pierna recta) el IK la doblaba para atrás al agacharse ("patas de fauno" en lanzar).
 - **Codos "de plastilina"**: no eran los pesos sino la mezcla lineal del Armature a 110-135°:
   `use_deform_preserve_volume` (cuaterniones duales, `modelo.preservar_volumen`) marca el codo y conserva el grosor.
 - **Pesos que fallan**: el bone heat da basura en chibis de cuerpo redondo (`modelo.pesos: "distancia"`), mezcla
