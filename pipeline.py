@@ -145,13 +145,25 @@ def paso_nuevo(nombre, referencia=None, objeto=False, escenario=False, vehiculo=
           f'(imagen.descripcion) y correr: pipeline.py imagen {nombre}')
 
 
+def con_numpy():
+    """Los pasos de escenarios usan numpy, que el python3 del sistema puede no tener: se relanza el mismo comando con
+    el python del venv de ComfyUI (trae numpy y Pillow)."""
+    try:
+        import numpy  # noqa: F401
+    except ImportError:
+        py = os.path.join(CFG['comfyui_dir'], 'venv', 'bin', 'python')
+        os.execv(py, [py, os.path.abspath(__file__)] + sys.argv[1:])
+
+
 def paso_texturas(nombre, solo=None):
+    con_numpy()
     import texturas
     pdir, pj = cargar(nombre)
     texturas.main(CFG, nombre, pj, solo.split(',') if solo else None)
 
 
 def paso_tema(nombre):
+    con_numpy()
     import tema
     pdir, pj = cargar(nombre)
     tema.main(pj)
