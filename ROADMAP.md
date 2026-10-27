@@ -28,15 +28,18 @@ Dos tipos de usuario, los dos de primera:
 - [x] `config.ejemplo.json` + `config.json` local (o `ASSETCRISOL_CONFIG`); `datos_dir`: dónde viven
       `personajes/`, `objetos/`, `escenarios/` y `movimientos/candidatos/`.
 - [x] Comentarios, estilos y plantillas sin nombres de personajes ni marcas ajenas; estilo base `animacion3d`.
-- [ ] README (es/en), CLAUDE.md y AGENTS.md para el repo público.
+- [x] README (es/en), CLAUDE.md y AGENTS.md para el repo público.
 - [ ] Comando `crisol` (`crisol todo cris`) como entrada a `pipeline.py`.
-- [ ] Ejemplos versionados: la mascota (Cris), un objeto y un escenario; gifs de muestra (las hojas se regeneran).
+- [x] Ejemplos versionados: la mascota (Cris), un objeto (caja) y un escenario (bosque), probados desde un clon limpio.
+- [ ] Gif de demo para la portada del README (`ejemplos/personajes/cris/preview_iso.gif` existe; elegir/recortar una
+      animación linda) y un textura de piso del bosque con un modelo de licencia comercial.
 
 ## Mascota: Cris
 La/el herrera/o joven del crisol: el ejemplo de los docs y los tests, el logo y el protagonista de la landing.
 Elegida/o para no complicar el pipeline: humanoide de proporciones normales, ropa ajustada (mameluco, guantes, botas,
 antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versión estrena lo nuevo.
-- [ ] Personaje: imagen (candidatos) → vistas → malla → rig → revisión.
+- [x] Personaje: Z-Image (sin referencia) → Qwen (limpieza) → vistas → Pixal3D 4 vistas + UltraTex (seed 2) → rig →
+      revisión (revés 0,2 %). En `ejemplos/personajes/cris`.
 - [ ] Objetos: el crisol con metal brillando (logo), yunque, martillo, horno de fundición, caja de herramientas.
 - [ ] Vehículo (opcional): vagoneta minera o carretilla.
 - [ ] Escenario: el taller (piso de ladrillo o piedra, pared de ladrillo, paleta cálida).
