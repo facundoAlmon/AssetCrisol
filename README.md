@@ -960,8 +960,9 @@ crisol tema bosque                 # -> trabajo/tema/{piso,camino,pared}.png + t
 - **Prompt**: `texturas.<clave>.descripcion` (en inglés) + "seamless tileable top-down/front view texture" +
   `render_textura` del estilo + "large simple shapes, low detail". Sin la `paleta` del estilo (es de personajes);
   el color va en la descripción. Con detalle fino, de lejos el piso se ve como ruido.
-- **Motor**: `sdxl` = DreamShaper XL Turbo (~5 s, admite referencia) o `flux` = FLUX.2 (más prolijo, ~4 min por
-  imagen, sin referencia).
+- **Motor**: `sdxl` = DreamShaper XL Turbo (~5 s, admite referencia), `zimage` = Z-Image Turbo (~15 s, sin
+  referencia, Apache-2.0) o `flux` = FLUX.2 Dev (más prolijo, ~4 min por imagen, sin referencia, no comercial).
+  `texturas.<clave>.motor` lo cambia para una sola textura.
 - **Desde una imagen**: `referencia` (global o por textura) + `recorte` `[x0, y0, x1, y1]` → IP-Adapter (*style
   transfer*, `ip_peso`) copia estilo y colores sin la composición. Mejor con el recorte de ese material. Qwen Image
   Edit no sirve acá: conserva la composición y solo recolorea.
@@ -1126,7 +1127,7 @@ comerciales.**
 | MoGe | campo visual para Pixal3D | MIT (a verificar) |
 | Qwen Image Edit 2511 | paso 1 con referencia, vistas | Apache-2.0 |
 | LoRA Lightning de Qwen Image Edit | paso 1 en 4 pasos | a verificar |
-| Z-Image Turbo | paso 1 sin referencia (por defecto) | Apache-2.0 |
+| Z-Image Turbo | paso 1 sin referencia (por defecto), escenarios `zimage` | Apache-2.0 |
 | FLUX.2 Dev | paso 1 sin referencia (`imagen.motor: "flux2"`), escenarios `flux` | **no comercial** (FLUX.2 [dev] Non-Commercial License) |
 | FLUX.2 Klein base 9B | UltraTex | **no comercial** (licencia de Black Forest Labs) |
 | ComfyUI-UltraTex (nodos) | UltraTex | MIT |

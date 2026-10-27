@@ -1,7 +1,9 @@
 # Paso `texturas` de un escenario: candidatas de cada textura (piso, camino, pared) con ComfyUI.
 #  - motor sdxl (por defecto): DreamShaper XL Turbo, ~5 s; con `referencia`, IP-Adapter (style transfer)
 #    copia estilo y colores de la imagen (o de su `recorte`) sin copiar la composición.
-#  - motor flux: Flux.2 (receta de 1_imagen), más prolijo pero ~4 min por imagen y sin referencia.
+#  - motor zimage: Z-Image Turbo (Apache-2.0), segundos, sin referencia ni negativo.
+#  - motor flux: Flux.2 (receta de 1_imagen), más prolijo pero ~4 min por imagen, sin referencia y no comercial.
+#  `texturas.<clave>.motor` pisa el `motor` del escenario para esa textura.
 # Qwen-Edit no sirve para esto: con una imagen de un escenario conserva la composición y solo la recolorea.
 # Salida: trabajo/texturas/<clave>/cand_<seed>.png (crudas) + trabajo/texturas/candidatos.png (cada una
 # ya repetible, en mosaico de 2×2: así se ve si se nota la repetición). Python del sistema (Pillow + numpy).
@@ -124,7 +126,6 @@ def main(cfg, nombre, esc, claves=None):
     edir = esc['_dir']
     raiz = os.path.join(edir, 'trabajo', 'texturas')
     os.makedirs(raiz, exist_ok=True)
-    motor = esc.get('motor', 'sdxl')
     generar_imagen.asegurar_servidor(cfg, raiz)
     salida_comfy = os.path.join(cfg['comfyui_dir'], 'output')
     filas = []
@@ -135,6 +136,7 @@ def main(cfg, nombre, esc, claves=None):
         with open(os.path.join(out, 'prompt.txt'), 'w') as f:
             f.write(prompt + '\n')
         hacer = claves is None or clave in claves
+        motor = t.get('motor') or esc.get('motor', 'sdxl')
         ref = subir_referencia(cfg, edir, nombre, clave, t, esc) if hacer else None
         if ref and motor != 'sdxl':
             sys.exit('[texturas] la referencia solo anda con motor sdxl (IP-Adapter)')
@@ -148,6 +150,8 @@ def main(cfg, nombre, esc, claves=None):
                 tam = TAMANO['fondo'] if fondo else (1024, 1024)
                 if motor == 'flux':
                     correr_flux(cfg, prompt, seed, prefijo, os.path.join(out, f'wf_s{seed}.json'), tam)
+                elif motor == 'zimage':
+                    correr_sdxl(cfg, generar_imagen.workflow_zimage(cfg, prompt, seed, prefijo, *tam))
                 else:
                     correr_sdxl(cfg, workflow_sdxl(prompt, seed, prefijo, ref, esc.get('ip_peso', 0.8),
                                                    NEGATIVO_FONDO if fondo else NEGATIVO, tam))

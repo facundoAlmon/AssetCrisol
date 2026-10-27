@@ -36,7 +36,7 @@ Dos tipos de usuario, los dos de primera:
 - [ ] Textura de piso del bosque con un modelo de licencia comercial.
 
 ## Cris, la protagonista
-La/el herrera/o joven del crisol: el ejemplo de los docs y los tests, el logo y el protagonista de la landing.
+La herrera joven del crisol: el ejemplo de los docs y los tests, el logo y la protagonista de la landing.
 Elegida/o para no complicar el pipeline: humanoide de proporciones normales, ropa ajustada (mameluco, guantes, botas,
 antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versión estrena lo nuevo.
 - [x] Personaje: Z-Image (sin referencia) → Qwen (limpieza) → vistas → Pixal3D 4 vistas + UltraTex (seed 2) → rig →

@@ -80,8 +80,8 @@ def motor_texto(cfg, pj):
     return pj['imagen'].get('motor') or ('zimage' if cfg['modelos_imagen'].get('zimage_unet') else 'flux2')
 
 
-def workflow_zimage(cfg, prompt, seed, prefijo, lado=1024):
-    """Z-Image Turbo en formato API: 8 pasos, cfg 1, negativo vacío (ConditioningZeroOut)."""
+def workflow_zimage(cfg, prompt, seed, prefijo, lado=1024, alto=None):
+    """Z-Image Turbo en formato API: 8 pasos, cfg 1, negativo vacío (ConditioningZeroOut). `alto` None = cuadrada."""
     M = cfg['modelos_imagen']
     return {
         '1': {'class_type': 'UNETLoader', 'inputs': {'unet_name': M['zimage_unet'], 'weight_dtype': 'default'}},
@@ -90,7 +90,7 @@ def workflow_zimage(cfg, prompt, seed, prefijo, lado=1024):
         '4': {'class_type': 'ModelSamplingAuraFlow', 'inputs': {'model': ['1', 0], 'shift': 3.0}},
         '5': {'class_type': 'CLIPTextEncode', 'inputs': {'clip': ['2', 0], 'text': prompt}},
         '6': {'class_type': 'ConditioningZeroOut', 'inputs': {'conditioning': ['5', 0]}},
-        '7': {'class_type': 'EmptySD3LatentImage', 'inputs': {'width': lado, 'height': lado, 'batch_size': 1}},
+        '7': {'class_type': 'EmptySD3LatentImage', 'inputs': {'width': lado, 'height': alto or lado, 'batch_size': 1}},
         '8': {'class_type': 'KSampler', 'inputs': {'model': ['4', 0], 'positive': ['5', 0], 'negative': ['6', 0],
               'latent_image': ['7', 0], 'seed': seed, 'steps': 8, 'cfg': 1.0, 'sampler_name': 'res_multistep',
               'scheduler': 'simple', 'denoise': 1.0}},

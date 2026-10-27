@@ -974,8 +974,9 @@ Texture keys: `piso` floor, `camino` path, `pared` wall.
 - **Prompt**: `texturas.<key>.descripcion` (in English) + "seamless tileable top-down/front view texture" + the
   style's `render_textura` + "large simple shapes, low detail". Without the style's `paleta` (it's for characters);
   the color goes in the description. With fine detail, the floor looks like noise from a distance.
-- **Engine**: `sdxl` = DreamShaper XL Turbo (~5 s, accepts a reference) or `flux` = FLUX.2 (cleaner, ~4 min per
-  image, no reference).
+- **Engine**: `sdxl` = DreamShaper XL Turbo (~5 s, accepts a reference), `zimage` = Z-Image Turbo (~15 s, no
+  reference, Apache-2.0) or `flux` = FLUX.2 Dev (cleaner, ~4 min per image, no reference, non-commercial).
+  `texturas.<key>.motor` changes it for a single texture.
 - **From an image**: `referencia` (global or per texture) + `recorte` (crop) `[x0, y0, x1, y1]` → IP-Adapter (*style
   transfer*, `ip_peso`) copies style and colors without the composition. Better with a crop of that material. Qwen
   Image Edit doesn't work here: it keeps the composition and only recolors.
@@ -1139,7 +1140,7 @@ not legal advice: **check each model's current license before using the output c
 | MoGe | field of view for Pixal3D | MIT (to be verified) |
 | Qwen Image Edit 2511 | step 1 with a reference, views | Apache-2.0 |
 | Qwen Image Edit Lightning LoRA | step 1 in 4 steps | to be verified |
-| Z-Image Turbo | step 1 without a reference (default) | Apache-2.0 |
+| Z-Image Turbo | step 1 without a reference (default), `zimage` scenery | Apache-2.0 |
 | FLUX.2 Dev | step 1 without a reference (`imagen.motor: "flux2"`), `flux` scenery | **non-commercial** (FLUX.2 [dev] Non-Commercial License) |
 | FLUX.2 Klein base 9B | UltraTex | **non-commercial** (Black Forest Labs license) |
 | ComfyUI-UltraTex (nodes) | UltraTex | MIT |
