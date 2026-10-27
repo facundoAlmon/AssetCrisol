@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+"""crisol: entrada de AssetCrisol (`crisol <paso> <n> [opciones]`, igual que `python3 pipeline.py ...`).
+
+Se puede correr como ./crisol desde el repo o enlazarlo en el PATH (README > Instalación):
+    ln -s "$PWD/crisol" ~/.local/bin/crisol
+"""
+import os, sys
+
+RAIZ = os.path.dirname(os.path.realpath(__file__))   # realpath: sigue el enlace del PATH hasta el repo
+sys.path.insert(0, RAIZ)
+sys.argv[0] = 'crisol'                                 # para que la ayuda y los errores digan `crisol`
+import pipeline  # noqa: E402
+pipeline.main()

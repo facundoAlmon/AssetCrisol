@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """AssetCrisol: imagen -> modelo 3D -> rig/animación -> sprites -> Godot, todo con IA local. Ver README.md.
 
-uso: python3 pipeline.py <paso> <personaje> [opciones]
+uso: crisol <paso> <personaje> [opciones]   (o python3 pipeline.py ...)
 
 configuración: config.json junto a este archivo (copiar config.ejemplo.json) o la ruta en ASSETCRISOL_CONFIG.
 Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defecto, esta carpeta).
@@ -105,7 +105,7 @@ def cargar(nombre):
                 pj['sprites']['alto_en_pantalla_px'] = round(pj['modelo']['altura'] * ppu)
             return pdir, pj
     sys.exit(f'no existe personajes/{nombre}/, objetos/{nombre}/ ni escenarios/{nombre}/ '
-             f'(crear con: pipeline.py nuevo {nombre} [--objeto | --escenario])')
+             f'(crear con: crisol nuevo {nombre} [--objeto | --escenario])')
 
 
 CARPETAS = (('personajes', 'personaje.json'), ('objetos', 'objeto.json'), ('escenarios', 'escenario.json'))
@@ -139,10 +139,10 @@ def paso_nuevo(nombre, referencia=None, objeto=False, escenario=False, vehiculo=
         json.dump(cfg, f, indent=2, ensure_ascii=False)
     if escenario:
         print(f'creado {carpeta}/{nombre}/ -> editar {archivo} (texturas.<clave>.descripcion) y correr: '
-              f'pipeline.py texturas {nombre}')
+              f'crisol texturas {nombre}')
         return
     print(f'creado {carpeta}/{nombre}/ (estilo {CFG.get("estilo", "animacion3d")}) -> editar {archivo} '
-          f'(imagen.descripcion) y correr: pipeline.py imagen {nombre}')
+          f'(imagen.descripcion) y correr: crisol imagen {nombre}')
 
 
 def con_numpy():
@@ -358,7 +358,7 @@ def generar_malla(pdir, pj, nombre):
     if pj.get('vehiculo') and pj['malla'].get('vista'):   # vehículo con TRELLIS.2: la malla sale de una vista de Qwen
         img = os.path.join(pdir, 'trabajo', 'imagen', f'vista_{pj["malla"]["vista"]}.png')
         if not os.path.exists(img):
-            sys.exit(f'[malla] falta {img}: correr antes `pipeline.py vistas {nombre}`')
+            sys.exit(f'[malla] falta {img}: correr antes `crisol vistas {nombre}`')
     liberar_vram_comfyui()
     m = pj['malla']
     env = dict(os.environ, **CFG['env_modelos'])
@@ -419,13 +419,13 @@ def retexturizar_ultratex(pdir, pj, nombre):
     if op.get('espalda'):
         espalda = os.path.join(pdir, 'trabajo', 'imagen', 'vista_back.png')
         if not os.path.exists(espalda):
-            sys.exit('[ultratex] espalda: falta trabajo/imagen/vista_back.png (pipeline.py vistas, con malla.vistas)')
+            sys.exit('[ultratex] espalda: falta trabajo/imagen/vista_back.png (crisol vistas, con malla.vistas)')
     costados = None
     if op.get('costados'):
         costados = {v: os.path.join(pdir, 'trabajo', 'imagen', f'vista_{v}.png') for v in ('left', 'right')}
         for r in costados.values():
             if not os.path.exists(r):
-                sys.exit(f'[ultratex] costados: falta trabajo/imagen/{os.path.basename(r)} (pipeline.py vistas, con '
+                sys.exit(f'[ultratex] costados: falta trabajo/imagen/{os.path.basename(r)} (crisol vistas, con '
                          f'malla.vistas)')
     ut.retexturizar(CFG, nombre, os.path.join(out, 'limpia.glb'), os.path.join(out, 'sin_fondo.png'), modelo,
                     op.get('seed', 1), op.get('resolucion', 1024), pj['malla'].get('textura_px', 4096),

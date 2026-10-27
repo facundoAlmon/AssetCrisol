@@ -26,14 +26,16 @@ corre local: no proponer servicios pagos ni APIs en la nube.
 ## Correr
 
 ```bash
-python3 pipeline.py <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n> [--referencia img] [--objeto|--vehiculo] [--instalar <proyecto>]
-python3 pipeline.py comparar <n>                    # trabajo/candidatos.png de malla.candidatos
-python3 pipeline.py <nuevo --escenario|texturas|tema> <n>
-python3 pipeline.py rehacer <n1,n2,...|todos>       # blender..revisar en lote
-python3 pipeline.py metodo <n> [anim=kimodo|procedural ...]
-python3 pipeline.py movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimodo (CPU)
+crisol <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n> [--referencia img] [--objeto|--vehiculo] [--instalar <proyecto>]
+crisol comparar <n>                                 # trabajo/candidatos.png de malla.candidatos
+crisol <nuevo --escenario|texturas|tema> <n>
+crisol rehacer <n1,n2,...|todos>                    # blender..revisar en lote
+crisol metodo <n> [anim=kimodo|procedural ...]
+crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimodo (CPU)
 ```
 
+- `crisol` (raíz del repo) importa `pipeline` y llama `main()`: es lo mismo que `python3 pipeline.py`; si no está
+  en el PATH, `./crisol`. Los mensajes al usuario nombran `crisol <paso>`.
 - Config: `config.json` junto a `pipeline.py` (de `config.ejemplo.json`) o `ASSETCRISOL_CONFIG`. `datos_dir`
   (relativo a la config) → `DATOS`, donde viven `personajes/`, `objetos/`, `escenarios/`. `<n>` se busca en los tres.
 - `pipeline.py` corre con el python3 del sistema (Pillow); cada paso lanza su herramienta con su intérprete (venv de
@@ -134,7 +136,7 @@ python3 pipeline.py movimiento <anim> --prompt "..." [--duracion s] [--seed n]  
   híbridos bone heat + distancia.
 - `cortar_puentes` solo tapa agujeros < 12 cm (uno grande arma una lámina). `modelo.normales: true` solo si la fila
   de revés muestra caras de afuera borradas (en otros suma manchas).
-- Articulaciones: las rebanadas fallan en chibis/torso ancho → `pipeline.py articulaciones` (DWPose); en muñecos
+- Articulaciones: las rebanadas fallan en chibis/torso ancho → `crisol articulaciones` (DWPose); en muñecos
   DWPose tampoco anda → cargarlas a mano mirando `guia.png`.
 - Brazos (`anim._brazo`): girar en ejes del cuerpo, no del hueso (en pose A hace un cono). Pies: `tobillo_*` es
   respecto de la canilla; medir tras cambiar poses (rango ~ -30..+50).
@@ -155,7 +157,7 @@ python3 pipeline.py movimiento <anim> --prompt "..." [--duracion s] [--seed n]  
 ## Verificar cambios
 
 - Referencias: `cris` (personaje) y `caja` (objeto) en `ejemplos/`; copiarlos con `cp -r ejemplos/* <datos_dir>/`.
-- Blender/animación: `pipeline.py blender cris && pipeline.py sprites cris` y mirar `preview.gif`; también `iso cris`
+- Blender/animación: `crisol blender cris && crisol sprites cris` y mirar `preview.gif`; también `iso cris`
   → `preview_iso.gif` y poses (golpe, patada, brazos arriba). Celdas sueltas: recortar la hoja con `meta.json`.
 - Objetos: `blender caja && sprites caja` → `preview.png`. Articulaciones: `guia <n>` → `trabajo/guia/guia.png`.
 - Tras tocar rig/animaciones: `rehacer <n1,...>` y mirar cada `revision.png`.

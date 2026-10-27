@@ -29,7 +29,7 @@ Dos tipos de usuario, los dos de primera:
       `personajes/`, `objetos/`, `escenarios/` y `movimientos/candidatos/`.
 - [x] Comentarios, estilos y plantillas sin nombres de personajes ni marcas ajenas; estilo base `animacion3d`.
 - [x] README (es/en), CLAUDE.md y AGENTS.md para el repo público.
-- [ ] Comando `crisol` (`crisol todo cris`) como entrada a `pipeline.py`.
+- [x] Comando `crisol` (`crisol todo cris`) como entrada a `pipeline.py`.
 - [x] Ejemplos versionados: la mascota (Cris), un objeto (caja) y un escenario (bosque), probados desde un clon limpio.
 - [x] Gif de demo para la portada del README (`ejemplos/personajes/cris/demo_acciones.gif`; también `demo_paseo` y
       `demo_direcciones`).

@@ -25,5 +25,5 @@ def metodo(nombre, a, bib=None):
         raise ValueError(f'animacion.metodos.{nombre} = {m!r}: tiene que ser {" o ".join(METODOS)}')
     if m == 'kimodo' and nombre not in bib:
         raise ValueError(f'{nombre}: no hay clip de Kimodo en movimientos/biblioteca.json '
-                         f'(generar con `pipeline.py movimiento {nombre} --prompt ...`)')
+                         f'(generar con `crisol movimiento {nombre} --prompt ...`)')
     return m

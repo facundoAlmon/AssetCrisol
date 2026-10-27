@@ -46,7 +46,7 @@ def _cortes_x(verts, z, dz):
 
 def estimar_articulaciones(mesh, altura):
     """Punto de partida: la plantilla escalada a la altura, con piernas y brazos ajustados al ancho
-    real de la malla (rebanadas horizontales). Revisarlo siempre con `pipeline.py guia`."""
+    real de la malla (rebanadas horizontales). Revisarlo siempre con `crisol guia`."""
     k = altura / ALTURA_PLANTILLA
     verts = [mesh.matrix_world @ v.co for v in mesh.data.vertices]
     J = {n: (tuple(c * k for c in h), tuple(c * k for c in t), p, cn, d)

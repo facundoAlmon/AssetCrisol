@@ -104,6 +104,7 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 git clone https://github.com/facundoAlmon/AssetCrisol.git && cd AssetCrisol
 cp config.ejemplo.json config.json      # y completar las rutas
 python3 -c "import PIL"                 # pipeline.py necesita Pillow (apt install python3-pil)
+mkdir -p ~/.local/bin && ln -s "$PWD/crisol" ~/.local/bin/crisol   # el comando `crisol` (o ./crisol desde acá)
 ```
 
 2. **ComfyUI** con su venv, `comfy-cli`, 4 nodos extra y los modelos → [ComfyUI](#2-comfyui-imagen-pixal3d-ultratex-dwpose-escenarios)
@@ -111,7 +112,7 @@ python3 -c "import PIL"                 # pipeline.py necesita Pillow (apt insta
 4. **Blender 5.1** → [Blender](#4-blender)
 5. *(opcional)* **Kimodo** para clips de movimiento nuevos → [Kimodo](#5-kimodo-opcional)
 
-Después: `python3 pipeline.py --help`.
+Después: `crisol --help`.
 
 <details>
 <summary><b>1. config.json</b></summary>
@@ -124,7 +125,7 @@ Después: `python3 pipeline.py --help`.
 | `estilo` | estilo por defecto (`estilos/<nombre>.json`; el ejemplo trae `moderno`), ver [Estilos](#estilos) |
 | `comfyui_dir`, `comfyui_url` | carpeta de ComfyUI (con `venv/bin/python` y `venv/bin/comfy`) y su URL |
 | `trellis2_dir` | carpeta de TRELLIS.2 (con `venv/bin/python`) |
-| `kimodo_dir` | carpeta de Kimodo (con `venv/bin/python`); solo para `pipeline.py movimiento` |
+| `kimodo_dir` | carpeta de Kimodo (con `venv/bin/python`); solo para `crisol movimiento` |
 | `env_modelos` | variables de entorno para las cachés de modelos (`HF_HOME`, `U2NET_HOME`...) |
 | `blender`, `godot` | ejecutables |
 | `modelos_imagen` | nombres de archivo de los modelos de imagen dentro de `ComfyUI/models`: Qwen Image Edit (`qwen_*`), Z-Image Turbo (`zimage_unet`, `zimage_clip`, `zimage_vae`; si están, es el motor sin referencia por defecto) y FLUX.2 Dev (`flux_*`). Ver `config.ejemplo.json` |
@@ -212,7 +213,7 @@ Bajar [Blender 5.1](https://www.blender.org/download/) y poner el ejecutable en 
 #### 5. Kimodo (opcional)
 
 <details>
-<summary>Solo para <b>generar clips de movimiento nuevos</b> con <code>pipeline.py movimiento</code></summary>
+<summary>Solo para <b>generar clips de movimiento nuevos</b> con <code>crisol movimiento</code></summary>
 
 [Kimodo](https://github.com/nv-tlabs/kimodo) (NVIDIA) genera movimiento humano a partir de texto. Los clips elegidos
 ya vienen en `herramientas/3_blender/movimientos/` y Blender los lee sin Kimodo.
@@ -227,7 +228,7 @@ uv pip install -p venv/bin/python -e .
 El codificador de texto es LLM2Vec sobre Llama-3-8B-Instruct. El repo de meta-llama es gated; una alternativa es un
 espejo con los mismos pesos (p. ej. `NousResearch/Meta-Llama-3-8B-Instruct`, misma licencia de Llama 3) con los
 `adapter_config.json` de `McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp` y `...-mntp-supervised` apuntados a esa
-carpeta. `pipeline.py movimiento` corre **todo en CPU** (~2,5 min, ~16 GB de RAM): no compite por la GPU. Los
+carpeta. `crisol movimiento` corre **todo en CPU** (~2,5 min, ~16 GB de RAM): no compite por la GPU. Los
 avisos `MISSING`/`UNEXPECTED` del LoRA al cargar son normales.
 
 </details>
@@ -240,12 +241,12 @@ que se puede correr todo **de Blender en adelante** sin ComfyUI ni TRELLIS.2 (so
 
 ```bash
 cp -r ejemplos/* <datos_dir>/        # personajes/cris, objetos/caja, escenarios/bosque
-python3 pipeline.py blender cris     # rig + animaciones + frames (≈1 min)
-python3 pipeline.py sprites cris     # hoja + preview.gif + retrato
-python3 pipeline.py iso cris         # 8 direcciones isométricas (≈25 s) -> preview_iso.gif
-python3 pipeline.py revisar cris     # hoja de control -> trabajo/revision.png
-python3 pipeline.py blender caja && python3 pipeline.py sprites caja   # -> objetos/caja/preview.png
-python3 pipeline.py tema bosque      # texturas repetibles + colores del tema (trae las texturas elegidas)
+crisol blender cris                  # rig + animaciones + frames (≈1 min)
+crisol sprites cris                  # hoja + preview.gif + retrato
+crisol iso cris                      # 8 direcciones isométricas (≈25 s) -> preview_iso.gif
+crisol revisar cris                  # hoja de control -> trabajo/revision.png
+crisol blender caja && crisol sprites caja   # -> objetos/caja/preview.png
+crisol tema bosque                   # texturas repetibles + colores del tema (trae las texturas elegidas)
 ```
 
 El bosque trae solo las 4 texturas elegidas; la del piso se generó con FLUX.2 Klein (licencia no comercial): es un
@@ -259,21 +260,21 @@ En `ejemplos/personajes/cris/` también están los gifs de demo, armados con sus
 ### Primer personaje en 10 comandos
 
 ```bash
-python3 pipeline.py nuevo bandido --referencia ~/boceto_bandido.png
+crisol nuevo bandido --referencia ~/boceto_bandido.png
 #   editar <datos_dir>/personajes/bandido/personaje.json -> estilo e imagen.descripcion (en inglés: quién es)
-python3 pipeline.py imagen bandido          # candidatas (≈20 s c/u con referencia) -> trabajo/imagen/candidatos.png
+crisol imagen bandido          # candidatas (≈20 s c/u con referencia) -> trabajo/imagen/candidatos.png
 #   elegir: personaje.json -> imagen.elegida = <seed>
-python3 pipeline.py vistas bandido          # espalda y costados con Qwen -> trabajo/imagen/vistas.png (mirarlas)
-python3 pipeline.py malla bandido           # Pixal3D 4 vistas + UltraTex (≈6 min) -> mirar trabajo/malla/ultratex_vistas.png
-python3 pipeline.py articulaciones bandido  # articulaciones con DWPose -> trabajo/guia/guia.png (revisarlas)
-python3 pipeline.py blender bandido         # rig + animaciones + frames (≈1 min)
-python3 pipeline.py sprites bandido         # hoja + preview.gif + retrato
-python3 pipeline.py iso bandido             # 8 direcciones isométricas (≈25 s)
-python3 pipeline.py revisar bandido         # hoja de control -> trabajo/revision.png
-python3 pipeline.py godot bandido           # escenas de Godot en personajes/bandido/godot/
+crisol vistas bandido          # espalda y costados con Qwen -> trabajo/imagen/vistas.png (mirarlas)
+crisol malla bandido           # Pixal3D 4 vistas + UltraTex (≈6 min) -> mirar trabajo/malla/ultratex_vistas.png
+crisol articulaciones bandido  # articulaciones con DWPose -> trabajo/guia/guia.png (revisarlas)
+crisol blender bandido         # rig + animaciones + frames (≈1 min)
+crisol sprites bandido         # hoja + preview.gif + retrato
+crisol iso bandido             # 8 direcciones isométricas (≈25 s)
+crisol revisar bandido         # hoja de control -> trabajo/revision.png
+crisol godot bandido           # escenas de Godot en personajes/bandido/godot/
 ```
 
-Para colgarle cosas en el juego (espada, casco), sumar `python3 pipeline.py anclas bandido` después de `iso`. Para
+Para colgarle cosas en el juego (espada, casco), sumar `crisol anclas bandido` después de `iso`. Para
 pasar un cambio puntual (p. ej. una animación) alcanza con `blender` → `sprites` → `iso`.
 
 > [!IMPORTANT]
@@ -295,7 +296,7 @@ pasar un cambio puntual (p. ej. una animación) alcanza con `blender` → `sprit
 
 > [!TIP]
 > **Mirá la cara de cerca** en `ultratex_vistas.png`: los ojos dependen mucho de `malla.ultratex.seed` (pueden salir
-> estrábicos o con delineado grueso). Si no convencen, `pipeline.py ultratex <n>` con otra seed rehace solo la
+> estrábicos o con delineado grueso). Si no convencen, `crisol ultratex <n>` con otra seed rehace solo la
 > textura (≈6 min, sin rehacer la forma).
 
 ### Qué mirar en cada paso (receta para humanoides)
@@ -314,22 +315,22 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
    down, not on the hips"). Elegir la de **proporciones** correctas (a veces salen cabezonas). **Ojos achinados** por
    la sonrisa: no cambiar de seed, editar la elegida: copiarla como `base_<seed>.png`, ponerla de `referencia` y
    escribir un `prompt` "Keep this exact image unchanged ... Only change the eyes: open the eyes wider ...".
-3. **Vistas** (`pipeline.py vistas`): la espalda no debe repetir lo del pecho y `left`/`right` miran a su borde de la
+3. **Vistas** (`crisol vistas`): la espalda no debe repetir lo del pecho y `left`/`right` miran a su borde de la
    imagen. Una mala se borra (`trabajo/imagen/vista_<v>.png`) y se rehace.
 4. **Malla**: mirar `ultratex_vistas.png` y `ultratex_espalda.png`. Sin `malla.ultratex.espalda`, UltraTex inventa la
    espalda y suele copiar lo del pecho (un logo, un emblema); con `espalda` la de atrás sale de la vista de Qwen.
    Mirar la **cara de cerca** (ver el consejo de arriba).
-5. **Articulaciones** (`pipeline.py articulaciones`): revisar `guia.png` (y `pose_frente.png`, lo que vio DWPose).
+5. **Articulaciones** (`crisol articulaciones`): revisar `guia.png` (y `pose_frente.png`, lo que vio DWPose).
    Con muñecos y juguetes DWPose suele no detectar a nadie: ahí cargarlas a mano (ver
    [3a](#3a-guía-de-articulaciones-pipelinepy-guia)).
 6. **Animación**: los valores por defecto andan; ver [3b](#3b-blender-pipelinepy-blender) si la cara no mira al
    frente o los codos doblan raro.
-7. **Revisar** (`pipeline.py revisar`, después de `sprites` + `iso`): `trabajo/revision.png` junta la cabeza de
+7. **Revisar** (`crisol revisar`, después de `sprites` + `iso`): `trabajo/revision.png` junta la cabeza de
    costado (idle, caminata, correr), los codos doblados, la caminata iso de frente y de espalda, las poses clave y el
    **revés**: 7 poses donde lo que se ve del interior de la malla sale en magenta (agujeros, normales al revés, el
    interior del pantalón al agacharse). Avisa si alguna pose (sin contar rodar) pasa del 3 % de la figura; la boca
    abierta marca siempre y no es un problema. Es lo último que hay que mirar antes de usar el personaje.
-8. **Cambios del rig o las animaciones**: `pipeline.py rehacer a,b,c` (o `todos`) corre `blender` → `sprites` →
+8. **Cambios del rig o las animaciones**: `crisol rehacer a,b,c` (o `todos`) corre `blender` → `sprites` →
    `iso` → `anclas` → `revisar` en cada uno, sigue si uno falla y al final lista las fallas.
 
 ---
@@ -339,25 +340,27 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
 ### Comandos
 
 ```bash
-python3 pipeline.py <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n>
-python3 pipeline.py nuevo <n> [--referencia img] [--objeto | --vehiculo | --escenario]
-python3 pipeline.py comparar <n>                    # rehace trabajo/candidatos.png de malla.candidatos
-python3 pipeline.py rehacer <n1,n2,...|todos>       # blender..revisar en lote
-python3 pipeline.py metodo <n> [anim=kimodo|procedural ...]
-python3 pipeline.py movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
-python3 pipeline.py <texturas|tema> <n> [--solo piso,pared]   # escenarios
-python3 pipeline.py godot <n> [--instalar <proyecto>]
-python3 pipeline.py todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
+crisol <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n>
+crisol nuevo <n> [--referencia img] [--objeto | --vehiculo | --escenario]
+crisol comparar <n>                    # rehace trabajo/candidatos.png de malla.candidatos
+crisol rehacer <n1,n2,...|todos>       # blender..revisar en lote
+crisol metodo <n> [anim=kimodo|procedural ...]
+crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
+crisol <texturas|tema> <n> [--solo piso,pared]   # escenarios
+crisol godot <n> [--instalar <proyecto>]
+crisol todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
 ```
 
-`<n>` se busca en `personajes/`, `objetos/` y `escenarios/` de `datos_dir`. `python3 pipeline.py --help` describe
-cada paso.
+`<n>` se busca en `personajes/`, `objetos/` y `escenarios/` de `datos_dir`. `crisol --help` describe
+cada paso. `crisol` es la entrada a `pipeline.py`: sin el enlace en el PATH, `./crisol` desde el repo o `python3 pipeline.py` hacen lo
+mismo.
 
 <details>
 <summary><b>Estructura del repo y de <code>datos_dir</code></b></summary>
 
 ```
 AssetCrisol/
+├── crisol                    el comando: crisol <paso> <n> (= python3 pipeline.py <paso> <n>)
 ├── pipeline.py               orquestador (python3 del sistema; necesita Pillow)
 ├── config.ejemplo.json       modelo de config.json (no versionado)
 ├── estilos/                  animacion3d.json (base) y los demás (ver Estilos)
@@ -397,7 +400,7 @@ AssetCrisol/
 
 </details>
 
-### 1. Imagen (`pipeline.py imagen`)
+### 1. Imagen (`crisol imagen`)
 
 Genera una imagen por cada seed de `imagen.seeds`:
 - **Con referencia** → Qwen-Image-Edit la redibuja según el prompt y conserva el diseño. Sirve cualquier cosa:
@@ -437,7 +440,7 @@ ilustración plana con contorno, mala para la malla.
 
 </details>
 
-### Vistas (`pipeline.py vistas`)
+### Vistas (`crisol vistas`)
 
 Con `malla.vistas: true` (Pixal3D de 4 vistas, el defecto de los humanoides) genera con Qwen Edit la espalda y los
 costados de la imagen elegida → `trabajo/imagen/vista_{back,left,right}.png` y `vistas.png`, para revisarlas
@@ -446,7 +449,7 @@ costado mirando para el lado equivocado (`left` mira al borde izquierdo de la im
 revés, espejarla). Borrar una para rehacerla. En vehículos, `vistas` hace la cola en tres cuartos (ver
 [Vehículos](#vehículos)).
 
-### 2. Malla (`pipeline.py malla`)
+### 2. Malla (`crisol malla`)
 
 Antes de empezar le pide a ComfyUI que libere la VRAM (`POST /free`) sin cerrarlo. Hay dos motores y un repintado:
 
@@ -499,7 +502,7 @@ la salida). Los objetos macizos no entran a 1024: por eso los objetos van a 512 
 <details>
 <summary><b>UltraTex</b>: cómo funciona y opciones</summary>
 
-`"ultratex": true` o un dict en `malla`; o `pipeline.py ultratex <n>` para rehacer solo la textura. Vuelve a pintar
+`"ultratex": true` o un dict en `malla`; o `crisol ultratex <n>` para rehacer solo la textura. Vuelve a pintar
 la malla del motor desde cero. `blender limpia` la suelda y le saca el interior (`limpia.glb`), FLUX.2 Klein + la
 LoRA de UltraTex pintan 6 vistas guiadas por `sin_fondo.png` (`trabajo/malla/ultratex_vistas.png`: **mirarlas**) y
 se hornean a UV nuevas → `modelo.glb`. La malla del motor queda en `modelo_motor.glb` (de ahí parte cada
@@ -525,19 +528,19 @@ Como las seeds de la imagen: la elección es del usuario. La principal es el res
 cada candidato pisa claves de `malla`, y `desde: "<otro>"` reusa la malla de ese otro y solo le aplica lo suyo
 (típico: `{"desde": "trellis2", "ultratex": {"giro": 45}}`). `malla` genera cada uno en `trabajo/malla_<c>/` (el que
 ya tiene `modelo.glb` no se rehace) y deja el elegido en `trabajo/malla`; en personajes y objetos arma
-`trabajo/candidatos.png` (`pipeline.py comparar <n>` la rehace): una fila por candidato, vista con la cámara iso
+`trabajo/candidatos.png` (`crisol comparar <n>` la rehace): una fila por candidato, vista con la cámara iso
 desde cinco ángulos. Para cambiar de elegida, editar `malla.elegida` y correr `malla` de nuevo (copia, no genera).
 Los candidatos heredan `caras`: Pixal3D con 5000 sale astillado.
 
 </details>
 
-### 3a. Guía de articulaciones (`pipeline.py guia`)
+### 3a. Guía de articulaciones (`crisol guia`)
 
 Renderiza la malla de frente y de costado (ortográfico) con una grilla cada 0.1 unidades y dibuja el esqueleto →
 `trabajo/guia/guia.png`. Verde = huesos que deforman, naranja = controles (IK del pie, polo de rodilla, root),
 amarillo = cabezas de hueso.
 
-`pipeline.py articulaciones` (humanoides) estima las articulaciones con **DWPose** (en ComfyUI) sobre los renders de
+`crisol articulaciones` (humanoides) estima las articulaciones con **DWPose** (en ComfyUI) sobre los renders de
 `guia` (ortográficos, escala conocida): hombros, codos, muñecas, caderas, rodillas y tobillos en metros; columna y
 cuello se reparten entre cadera, cuello y nariz, y la profundidad sale de la vista de costado. En humanoides de
 prueba cayó a menos de 5 cm de las cargadas a mano. Si no detecta a nadie o la pose no pasa la validación
@@ -564,7 +567,7 @@ espejado, el hueso pasaba por el cañón y el brazo de verdad quedaba sin hueso)
 
 </details>
 
-### 3b. Blender (`pipeline.py blender`)
+### 3b. Blender (`crisol blender`)
 
 Blender headless (`-b --factory-startup`) arma la escena, importa y limpia la malla, la riggea, la anima y renderiza
 los frames laterales y el retrato. Todas las animaciones son **en el lugar** (el juego mueve el cuerpo):
@@ -682,16 +685,16 @@ Hoy `caminar` y `morir` son de Kimodo (paso largo, pies que apoyan bien; caída 
 directo de boxeo de Kimodo dura ~2 cuadros y casi no se ve).
 
 ```bash
-python3 pipeline.py metodo bandido                                   # método de cada animación (y el recomendado)
-python3 pipeline.py metodo bandido golpe=kimodo caminar=procedural   # lo guarda en animacion.metodos
-python3 pipeline.py blender bandido && python3 pipeline.py sprites bandido   # + iso y anclas
+crisol metodo bandido                                   # método de cada animación (y el recomendado)
+crisol metodo bandido golpe=kimodo caminar=procedural   # lo guarda en animacion.metodos
+crisol blender bandido && crisol sprites bandido   # + iso y anclas
 ```
 
 <details>
 <summary><b>Clip nuevo con Kimodo</b></summary>
 
 ```bash
-python3 pipeline.py movimiento correr --prompt "A person runs forward at a steady jogging pace." --duracion 3
+crisol movimiento correr --prompt "A person runs forward at a steady jogging pace." --duracion 3
 #   -> <datos_dir>/movimientos/candidatos/correr_s1_{0,1,2}.npz + correr_s1.png (esqueletos de costado, una fila
 #      por muestra; rojo = izquierda). Otra --seed da otras 3.
 #   elegir: copiar el .npz a herramientas/3_blender/movimientos/correr.npz y agregarlo a biblioteca.json
@@ -702,7 +705,7 @@ Prompts en inglés y concretos. Animaciones con clip posible: las de `kimodo_cli
 
 </details>
 
-### 4. Sprites (`pipeline.py sprites`)
+### 4. Sprites (`crisol sprites`)
 
 Junta los frames en una hoja en grilla de **13 columnas** (celdas iguales, eje del personaje centrado, piso en el
 mismo renglón), escribe `<n>_meta.json` (con `animaciones`: frames, fps y loop de cada una), `preview.gif` y copia el
@@ -710,18 +713,18 @@ retrato y el cuerpo de frente. Aplica el posproceso del estilo (color, nitidez, 
 
 El retrato sale por defecto de `trabajo/malla/sin_fondo.png` (la imagen elegida sin fondo) recortada con la caja de
 `retrato.json`: se ve igual que el diseño, sin los defectos de la textura 3D. `retrato.fuente = "modelo"` usa el
-render. `pipeline.py retrato <n>` rehace solo el retrato y el frente.
+render. `crisol retrato <n>` rehace solo el retrato y el frente.
 
 Resolución: `sprites.alto_en_pantalla_px × sprites.superresolucion` píxeles para `modelo.altura`.
 
-### Iso (`pipeline.py iso`)
+### Iso (`crisol iso`)
 
 El mismo rig y las mismas animaciones con cámara **isométrica 2:1** (ortográfica, 30° de elevación) y el personaje
 girado de a 45°: 8 direcciones `e, se, s, sw, w, nw, n, ne` (sentido horario desde la derecha). ≈25 s. Después correr
 `godot`. Opciones en `personaje.json > isometrico` (todas opcionales): `baldosa_px` (128), `superresolucion` (2),
 `elevacion_grados` (30), `animaciones` (por defecto todas), `cabeza_arriba_grados`.
 
-### Anclas (`pipeline.py anclas`)
+### Anclas (`crisol anclas`)
 
 Mismas animaciones y direcciones que `iso`, **sin renderizar** (≈3 s): por cada cuadro guarda la posición y el giro
 de algunos huesos (`hips, chest, neck, head, hand.R/L, foot.R/L`) en el mundo de Blender (origen = pies) y su píxel
@@ -730,11 +733,11 @@ hoja por combinación. Resultado: `trabajo/iso/anclas.json` con `size`, `ppu`, `
 `cabeza` (`ancho`, `fondo`, `alto`) y `cuadros[<carpeta>][<dir>] = [{hueso: [x, y, z, qw, qx, qy, qz, px, py]}, ...]`.
 Correrlo con el mismo `personaje.json` que la hoja iso.
 
-### Revisar (`pipeline.py revisar`)
+### Revisar (`crisol revisar`)
 
 Ver [Qué mirar en cada paso](#qué-mirar-en-cada-paso-receta-para-humanoides), punto 7.
 
-### 5. Godot (`pipeline.py godot`)
+### 5. Godot (`crisol godot`)
 
 Ver [Guía de Godot](#guía-de-godot).
 
@@ -784,7 +787,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `animacion.cabeza_kimodo_grados` | (opcional) retoque extra solo en los clips de Kimodo (+ = baja la cara); normalmente 0 |
 | `animacion.cerrar_piernas` | (opcional) metros que se acerca cada pie al centro al caminar y correr; `null` = automático |
 | `animacion.cerrar_brazos_grados` | (opcional) cuánto se cierran los brazos hacia el cuerpo; `null` = se mide el hueco brazo-torso |
-| `animacion.metodos` | (opcional) `{"<anim>": "procedural" \| "kimodo"}` (se edita con `pipeline.py metodo`) |
+| `animacion.metodos` | (opcional) `{"<anim>": "procedural" \| "kimodo"}` (se edita con `crisol metodo`) |
 | `sprites.alto_en_pantalla_px` | alto del personaje en el juego; `null` = `modelo.altura × estilo.escala.px_por_unidad` |
 | `sprites.superresolucion` | la hoja se renderiza N veces más grande y Godot la reduce |
 | `retrato.cabeza_grados` | (-5) inclinación de la cabeza en el retrato |
@@ -850,10 +853,10 @@ un personaje y un objeto de prueba para ver que combinen antes de producir el re
 Cajas, mesas, cofres, barriles... Mismos pasos 1 y 2; cambia lo que hace Blender (sin esqueleto) y lo que se exporta.
 
 ```bash
-python3 pipeline.py nuevo barril --objeto   # [--referencia img] -> objetos/barril/objeto.json
-python3 pipeline.py imagen barril           # elegir seed -> objeto.json > imagen.elegida
-python3 pipeline.py malla barril            # candidatos -> trabajo/candidatos.png; elegir malla.elegida y repetir
-python3 pipeline.py blender barril && python3 pipeline.py sprites barril && python3 pipeline.py godot barril
+crisol nuevo barril --objeto   # [--referencia img] -> objetos/barril/objeto.json
+crisol imagen barril           # elegir seed -> objeto.json > imagen.elegida
+crisol malla barril            # candidatos -> trabajo/candidatos.png; elegir malla.elegida y repetir
+crisol blender barril && crisol sprites barril && crisol godot barril
 ```
 
 <details>
@@ -894,11 +897,11 @@ dibujado a partir de la imagen elegida.
 Un objeto con un bloque `vehiculo` en su `objeto.json`: autos para un juego 3D que usa el `.glb` (sin sprites).
 
 ```bash
-python3 pipeline.py nuevo <n> --vehiculo   # [--referencia foto] objeto + plantilla/vehiculo.json
-python3 pipeline.py imagen <n>     # tres cuartos de frente, como cualquier objeto; elegir seed
-python3 pipeline.py vistas <n>     # la cola en tres cuartos desde arriba con Qwen -> trabajo/imagen/vista_atras.png
-python3 pipeline.py malla <n>      # los candidatos (~10 min): trabajo/malla_<candidato>/
-python3 pipeline.py blender <n>    # -> trabajo/revision.png (una fila por candidato) + vehiculo.glb del elegido
+crisol nuevo <n> --vehiculo   # [--referencia foto] objeto + plantilla/vehiculo.json
+crisol imagen <n>     # tres cuartos de frente, como cualquier objeto; elegir seed
+crisol vistas <n>     # la cola en tres cuartos desde arriba con Qwen -> trabajo/imagen/vista_atras.png
+crisol malla <n>      # los candidatos (~10 min): trabajo/malla_<candidato>/
+crisol blender <n>    # -> trabajo/revision.png (una fila por candidato) + vehiculo.glb del elegido
 # elegir malla.elegida mirando revision.png y volver a correr blender (segundos)
 ```
 
@@ -945,10 +948,10 @@ repetibles de piso, camino y pared que el juego multiplica por los colores del t
 Los objetos grandes (casas, árboles) siguen siendo `objetos/`.
 
 ```bash
-python3 pipeline.py nuevo bosque --escenario    # [--referencia img] -> escenarios/bosque/escenario.json
-python3 pipeline.py texturas bosque             # 4 candidatas por textura (~5 s c/u) -> trabajo/texturas/candidatos.png
+crisol nuevo bosque --escenario    # [--referencia img] -> escenarios/bosque/escenario.json
+crisol texturas bosque             # 4 candidatas por textura (~5 s c/u) -> trabajo/texturas/candidatos.png
 #   elegir: escenario.json > texturas.<clave>.elegida   (--solo piso,pared rehace solo esas)
-python3 pipeline.py tema bosque                 # -> trabajo/tema/{piso,camino,pared}.png + tema.json, preview.png
+crisol tema bosque                 # -> trabajo/tema/{piso,camino,pared}.png + tema.json, preview.png
 ```
 
 <details>
@@ -979,7 +982,7 @@ python3 pipeline.py tema bosque                 # -> trabajo/tema/{piso,camino,p
 
 ## Guía de Godot
 
-### Personaje de costado (`pipeline.py godot <n>`)
+### Personaje de costado (`crisol godot <n>`)
 
 Genera en `personajes/<n>/godot/personajes/` (replica `res://personajes/...`):
 - `<n>/<n>_visual.tscn`: Node2D con `sprite_personaje.gd` + Sprite2D (13 `hframes`, escalado 1/superresolución,
@@ -1056,7 +1059,7 @@ las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para
 | Se llena el disco del sistema | las cachés de Hugging Face y uv van por defecto a `~/.cache` → `env_modelos` en la config |
 | La cara mira hacia abajo (o al cielo) en los sprites | `animacion.cabeza_arriba_grados` (negativo = levantar la cara) |
 | Ojos como agujeros grises | ver `modelo.ojos` (3b) |
-| Ojos estrábicos o con delineado grueso | `pipeline.py ultratex <n>` con otra `malla.ultratex.seed` |
+| Ojos estrábicos o con delineado grueso | `crisol ultratex <n>` con otra `malla.ultratex.seed` |
 | El personaje "flota" o se hunde en Godot | el offset sale de la última fila opaca del frame quieto; si hay algo debajo de los pies (capa, cola), ajustar `position.y` del Sprite en el `.tscn` |
 | Personaje muy oscuro | TRELLIS.2 pinta la textura más oscura que la imagen; con colores oscuros de por sí no alcanza la compensación del render → aclarar la textura de `modelo.glb` (curva gamma ~0,6) antes de `blender`, o repintar con UltraTex |
 | La espalda repite lo del pecho | UltraTex o Qwen copiaron el frente → `malla.ultratex.espalda: true` y revisar `vista_back.png` |
