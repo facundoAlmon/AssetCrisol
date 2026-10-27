@@ -35,6 +35,8 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
   godot    <n> [--instalar proyecto] exporta a <carpeta>/<n>/godot/ (y copia a un proyecto Godot)
   todo     <n> [--instalar proyecto] malla -> blender -> sprites -> godot (requiere imagen elegida)
 
+  doctor   [--json]                 revisa la instalación: qué falta, cómo arreglarlo y qué pasos quedan deshabilitados
+
 escenarios (nuevo <n> --escenario -> escenarios/<n>/):
   texturas <n> [--solo piso,pared]  candidatas de cada textura (piso, camino, pared) -> elegir en escenario.json
   tema     <n>                      texturas elegidas -> repetibles + colores (trabajo/tema/, preview.png)
@@ -45,10 +47,13 @@ import argparse, json, os, shutil, subprocess, sys, time, urllib.request
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
 H = os.path.join(RAIZ, 'herramientas')
-for sub in ('1_imagen', '2_malla', '3_blender', '4_sprites', '5_godot', '6_escenario'):
+for sub in ('0_entorno', '1_imagen', '2_malla', '3_blender', '4_sprites', '5_godot', '6_escenario'):
     sys.path.insert(0, os.path.join(H, sub))
 
 CONFIG = os.environ.get('ASSETCRISOL_CONFIG') or os.path.join(RAIZ, 'config.json')
+if __name__ in ('__main__', 'pipeline') and sys.argv[1:2] == ['doctor']:   # antes de leer la config: la revisa él
+    import doctor
+    sys.exit(doctor.main(CONFIG, sys.argv[2:]))
 if not os.path.exists(CONFIG):
     sys.exit(f'falta {CONFIG}: copiar config.ejemplo.json a config.json y completar las rutas (README > Instalación)')
 with open(CONFIG) as f:

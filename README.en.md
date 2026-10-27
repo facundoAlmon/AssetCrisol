@@ -118,7 +118,8 @@ mkdir -p ~/.local/bin && ln -s "$PWD/crisol" ~/.local/bin/crisol   # the `crisol
 4. **Blender 5.1** → [Blender](#4-blender)
 5. *(optional)* **Kimodo** for new motion clips → [Kimodo](#5-kimodo-optional)
 
-Then: `crisol --help`.
+Then: `crisol doctor` checks the installation (config, paths, venvs, nodes, models, GPU) and tells you what is
+missing, how to fix it and which steps are disabled. `crisol --help` lists the steps.
 
 <details>
 <summary><b>1. config.json</b></summary>
@@ -357,6 +358,7 @@ crisol metodo <n> [anim=kimodo|procedural ...]
 crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
 crisol <texturas|tema> <n> [--solo piso,pared]   # scenery
 crisol godot <n> [--instalar <project>]
+crisol doctor [--json]                   # checks the installation
 crisol todo <n> [--instalar <project>]   # malla -> blender -> sprites -> godot (needs a chosen image)
 ```
 
@@ -1108,6 +1110,8 @@ the steps and show the person what they need to decide. The instructions for age
 map, contracts that must not be broken and problems already solved) are in [CLAUDE.md](CLAUDE.md) (Spanish);
 [AGENTS.md](AGENTS.md) points there for any agent. The essentials:
 
+- before starting, `crisol doctor --json`: what is installed and which steps can be used (exits with 1 if something
+  required is missing);
 - one generation at a time on the GPU (check ComfyUI's queue and `nvidia-smi` before every GPU step);
 - **don't choose for the person** `imagen.elegida`, `malla.elegida` or the chosen textures: show them the candidates
   sheet and ask;

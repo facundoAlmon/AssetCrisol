@@ -56,7 +56,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
   - **mínimo:** ComfyUI (Qwen Image Edit, Z-Image Turbo) + TRELLIS.2 + Blender → animación procedural, sprites y Godot;
   - **completo:** + Pixal3D, UltraTex (FLUX.2 Klein), DWPose, Kimodo, FLUX.2 Dev.
 - [ ] Modelos gated (DINOv3, FLUX.2 Klein, el codificador de texto de Kimodo): cómo aceptarlos en Hugging Face.
-- [ ] `crisol doctor`: rutas, versiones, VRAM, nodos de ComfyUI y modelos; qué falta, cómo arreglarlo y qué pasos
+- [x] `crisol doctor`: rutas, versiones, VRAM, nodos de ComfyUI y modelos; qué falta, cómo arreglarlo y qué pasos
       quedan deshabilitados. Legible y `--json`.
 - [ ] `docs/licencias.md`: componente → licencia → qué paso lo usa → si permite uso comercial.
 

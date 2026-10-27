@@ -5,6 +5,7 @@ están en [CLAUDE.md](CLAUDE.md): sirven para cualquier agente, no solo Claude C
 está en [README.md](README.md).
 
 Lo esencial:
+- Para ver qué está instalado y qué pasos se pueden usar: `crisol doctor --json`.
 - Una generación por vez en la GPU (revisar la cola de ComfyUI y `nvidia-smi` antes de `imagen`, `vistas`, `malla`,
   `ultratex`, `articulaciones` o `texturas`).
 - No elegir por el usuario `imagen.elegida`, `malla.elegida` ni las texturas elegidas.

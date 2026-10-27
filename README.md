@@ -112,7 +112,8 @@ mkdir -p ~/.local/bin && ln -s "$PWD/crisol" ~/.local/bin/crisol   # el comando 
 4. **Blender 5.1** → [Blender](#4-blender)
 5. *(opcional)* **Kimodo** para clips de movimiento nuevos → [Kimodo](#5-kimodo-opcional)
 
-Después: `crisol --help`.
+Después: `crisol doctor` revisa la instalación (config, rutas, venvs, nodos, modelos, GPU) y dice qué falta, cómo
+arreglarlo y qué pasos quedan deshabilitados. `crisol --help` lista los pasos.
 
 <details>
 <summary><b>1. config.json</b></summary>
@@ -349,6 +350,7 @@ crisol metodo <n> [anim=kimodo|procedural ...]
 crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
 crisol <texturas|tema> <n> [--solo piso,pared]   # escenarios
 crisol godot <n> [--instalar <proyecto>]
+crisol doctor [--json]                    # revisa la instalación
 crisol todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
 ```
 
@@ -1094,6 +1096,8 @@ corren los pasos y le muestran a la persona lo que tiene que decidir. Las instru
 cada paso, mapa del código, contratos que no hay que romper y problemas ya resueltos) están en
 [CLAUDE.md](CLAUDE.md); [AGENTS.md](AGENTS.md) remite ahí para cualquier agente. Lo esencial:
 
+- antes de empezar, `crisol doctor --json`: qué está instalado y qué pasos se pueden usar (sale con 1 si falta algo
+  obligatorio);
 - una generación por vez en la GPU (revisar la cola de ComfyUI y `nvidia-smi` antes de cada paso de GPU);
 - **no elegir por la persona** `imagen.elegida`, `malla.elegida` ni las texturas elegidas: mostrarle la hoja de
   candidatos y preguntar;
