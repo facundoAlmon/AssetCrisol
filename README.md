@@ -249,8 +249,8 @@ crisol blender caja && crisol sprites caja   # -> objetos/caja/preview.png
 crisol tema bosque                   # texturas repetibles + colores del tema (trae las texturas elegidas)
 ```
 
-El bosque trae solo las 4 texturas elegidas; la del piso se generó con FLUX.2 Klein (licencia no comercial): es un
-ejemplo para probar, no un asset para un juego comercial.
+El bosque trae solo las 4 texturas elegidas: el piso con Z-Image Turbo (Apache-2.0) y el resto con DreamShaper XL Turbo
+(CreativeML Open RAIL++-M).
 
 En `ejemplos/personajes/cris/` también están los gifs de demo, armados con sus sprites iso:
 [`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (el de arriba),

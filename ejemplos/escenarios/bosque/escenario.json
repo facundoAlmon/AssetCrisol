@@ -1,5 +1,5 @@
 {
-  "_doc": "Kit de un escenario (texturas repetibles de piso, camino y pared + colores del tema). Copiado por `pipeline.py nuevo <nombre> --escenario`. Ver README.md > Escenarios.",
+  "_doc": "Kit de un escenario (texturas repetibles de piso, camino y pared + colores del tema). Copiado por `crisol nuevo <nombre> --escenario`. Ver README.md > Escenarios.",
   "tipo": "escenario",
   "estilo": null,
   "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/",
@@ -10,28 +10,22 @@
   "ip_peso": 0.8,
   "texturas": {
     "piso": {
-      "descripcion": "forest meadow grass seen from above, soft irregular patches of lighter and darker green blades, a few tiny scattered clover leaves, no flowers, no big shapes",
+      "descripcion": "forest meadow grass seen from above, muted olive and dark green, dense large round grass tufts and clumps with darker shadows between them, a few tiny clover leaves, no flowers",
       "vista": "arriba",
+      "motor": "zimage",
       "referencia": null,
       "recorte": null,
       "seeds": [
+        7,
+        8,
+        9,
+        10,
         11,
         12,
         13,
         14
       ],
-      "elegida": 12,
-      "_antes": {
-        "descripcion": "soft green lawn with a few clover patches",
-        "seeds": [
-          1,
-          2,
-          3,
-          4
-        ],
-        "elegida": 2,
-        "motor": "sdxl"
-      }
+      "elegida": 14
     },
     "camino": {
       "descripcion": "packed light brown dirt with a few scattered round pebbles",

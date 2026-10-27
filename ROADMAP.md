@@ -33,7 +33,7 @@ Dos tipos de usuario, los dos de primera:
 - [x] Ejemplos versionados: un personaje (Cris), un objeto (caja) y un escenario (bosque), probados desde un clon limpio.
 - [x] Gif de demo para la portada del README (`ejemplos/personajes/cris/demo_acciones.gif`; también `demo_paseo` y
       `demo_direcciones`).
-- [ ] Textura de piso del bosque con un modelo de licencia comercial.
+- [x] Textura de piso del bosque con un modelo de licencia comercial (Z-Image Turbo).
 
 ## Cris, la protagonista
 La herrera joven del crisol: el ejemplo de los docs y los tests, el logo y la protagonista de la landing.

@@ -257,8 +257,8 @@ crisol blender caja && crisol sprites caja   # -> objetos/caja/preview.png
 crisol tema bosque                   # tileable textures + theme colors (the chosen textures are included)
 ```
 
-The forest ships only its 4 chosen textures; the floor one was made with FLUX.2 Klein (non-commercial license): it is
-an example to try things out, not an asset for a commercial game.
+The forest ships only its 4 chosen textures: the floor made with Z-Image Turbo (Apache-2.0) and the rest with DreamShaper
+XL Turbo (CreativeML Open RAIL++-M).
 
 `ejemplos/personajes/cris/` also has the demo gifs, made from its iso sprites:
 [`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (the one at the top),

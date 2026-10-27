@@ -1,5 +1,5 @@
 {
-  "_doc": "Configuración de un objeto (caja, mesa, tronco...). Copiada por `pipeline.py nuevo <nombre> --objeto`. Ver README.md > Objetos.",
+  "_doc": "Configuración de un objeto (caja, mesa, tronco...). Copiada por `crisol nuevo <nombre> --objeto`. Ver README.md > Objetos.",
   "tipo": "objeto",
   "imagen": {
     "referencia": null,

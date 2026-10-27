@@ -1,5 +1,5 @@
 {
-  "_doc": "Kit de un escenario (texturas repetibles de piso, camino y pared + colores del tema). Copiado por `pipeline.py nuevo <nombre> --escenario`. Ver README.md > Escenarios.",
+  "_doc": "Kit de un escenario (texturas repetibles de piso, camino y pared + colores del tema). Copiado por `crisol nuevo <nombre> --escenario`. Ver README.md > Escenarios.",
   "tipo": "escenario",
   "estilo": null,
   "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/",
