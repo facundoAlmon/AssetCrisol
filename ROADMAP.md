@@ -30,12 +30,12 @@ Dos tipos de usuario, los dos de primera:
 - [x] Comentarios, estilos y plantillas sin nombres de personajes ni marcas ajenas; estilo base `animacion3d`.
 - [x] README (es/en), CLAUDE.md y AGENTS.md para el repo público.
 - [x] Comando `crisol` (`crisol todo cris`) como entrada a `pipeline.py`.
-- [x] Ejemplos versionados: la mascota (Cris), un objeto (caja) y un escenario (bosque), probados desde un clon limpio.
+- [x] Ejemplos versionados: un personaje (Cris), un objeto (caja) y un escenario (bosque), probados desde un clon limpio.
 - [x] Gif de demo para la portada del README (`ejemplos/personajes/cris/demo_acciones.gif`; también `demo_paseo` y
       `demo_direcciones`).
 - [ ] Textura de piso del bosque con un modelo de licencia comercial.
 
-## Mascota: Cris
+## Cris, la protagonista
 La/el herrera/o joven del crisol: el ejemplo de los docs y los tests, el logo y el protagonista de la landing.
 Elegida/o para no complicar el pipeline: humanoide de proporciones normales, ropa ajustada (mameluco, guantes, botas,
 antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versión estrena lo nuevo.

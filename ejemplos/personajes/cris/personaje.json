@@ -1,5 +1,5 @@
 {
-  "_doc": "Cris, la mascota de AssetCrisol. La imagen salió de Z-Image sin referencia (descripción en imagen._descripcion, seed 102 = base_102.png) y Qwen la limpió con imagen.prompt (elegida 104). Vistas, malla (Pixal3D 4 vistas + UltraTex seed 2) y articulaciones (DWPose) ya hechas: copiar a <datos_dir>/personajes/ y correr blender, sprites, iso, revisar.",
+  "_doc": "Cris, la protagonista de AssetCrisol. La imagen salió de Z-Image sin referencia (descripción en imagen._descripcion, seed 102 = base_102.png) y Qwen la limpió con imagen.prompt (elegida 104). Vistas, malla (Pixal3D 4 vistas + UltraTex seed 2) y articulaciones (DWPose) ya hechas: copiar a <datos_dir>/personajes/ y correr blender, sprites, iso, revisar.",
   "estilo": "semirealista",
   "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/ (render, tema, paleta, luces, posproceso, escala)",
   "imagen": {

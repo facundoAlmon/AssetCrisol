@@ -12,9 +12,9 @@ Animated characters · props · vehicles · scenery kits → sprites, `.glb` fil
 [![Godot 4](https://img.shields.io/badge/Godot-4-478CBF?logo=godotengine&logoColor=white)](#godot-guide)
 [![Blender 5.1](https://img.shields.io/badge/Blender-5.1-F5792A?logo=blender&logoColor=white)](#4-blender)
 
-<img src="ejemplos/personajes/cris/demo_acciones.gif" alt="Cris, the project's mascot, in isometric view: idle, walk, run, punch, kick, jump, roll and arms up" width="300">
+<img src="ejemplos/personajes/cris/demo_acciones.gif" alt="Cris, the project's main character, in isometric view: idle, walk, run, punch, kick, jump, roll and arms up" width="300">
 
-*Cris, the project's mascot: isometric sprites generated end to end with AssetCrisol.*
+*Cris, the project's main character: isometric sprites generated end to end with AssetCrisol.*
 
 [Español](README.md) · [Roadmap](ROADMAP.md) · [Start here](#start-here) · [For AI agents](#for-ai-agents)
 
@@ -242,7 +242,7 @@ the GPU. The `MISSING`/`UNEXPECTED` LoRA warnings on load are normal.
 
 ### Try the examples (no generation needed)
 
-`ejemplos/` (examples) contains **Cris**, the project's mascot (a young blacksmith with copper hair and goggles), a
+`ejemplos/` (examples) contains **Cris**, the project's main character (a young blacksmith with copper hair and goggles), a
 prop (`caja`, a crate) and a scenery kit (`bosque`, a forest), each with its json. Cris and the crate already include
 their `trabajo/malla/modelo.glb`, so you can run everything **from Blender onwards** without ComfyUI or TRELLIS.2
 (just Blender and Pillow):

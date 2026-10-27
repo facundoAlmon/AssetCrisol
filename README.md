@@ -12,9 +12,9 @@ Personajes animados · objetos · vehículos · kits de escenario → sprites, `
 [![Godot 4](https://img.shields.io/badge/Godot-4-478CBF?logo=godotengine&logoColor=white)](#guía-de-godot)
 [![Blender 5.1](https://img.shields.io/badge/Blender-5.1-F5792A?logo=blender&logoColor=white)](#4-blender)
 
-<img src="ejemplos/personajes/cris/demo_acciones.gif" alt="Cris, la mascota del proyecto, en vista isométrica: reposo, caminar, correr, golpe, patada, salto, rodar y brazos arriba" width="300">
+<img src="ejemplos/personajes/cris/demo_acciones.gif" alt="Cris, la protagonista del proyecto, en vista isométrica: reposo, caminar, correr, golpe, patada, salto, rodar y brazos arriba" width="300">
 
-*Cris, la mascota del proyecto: sprites isométricos generados de punta a punta con AssetCrisol.*
+*Cris, la protagonista del proyecto: sprites isométricos generados de punta a punta con AssetCrisol.*
 
 [English](README.en.md) · [Roadmap](ROADMAP.md) · [Empezá acá](#empezá-acá) · [Para agentes de IA](#para-agentes-de-ia)
 
@@ -235,7 +235,7 @@ avisos `MISSING`/`UNEXPECTED` del LoRA al cargar son normales.
 
 ### Probar con los ejemplos (sin generar nada)
 
-`ejemplos/` trae a **Cris**, la mascota del proyecto (una herrera joven de pelo cobrizo con antiparras), un objeto
+`ejemplos/` trae a **Cris**, la protagonista del proyecto (una herrera joven de pelo cobrizo con antiparras), un objeto
 (`caja`) y un escenario (`bosque`), cada uno con su json. Cris y la caja traen ya su `trabajo/malla/modelo.glb`, así
 que se puede correr todo **de Blender en adelante** sin ComfyUI ni TRELLIS.2 (solo Blender y Pillow):
 
