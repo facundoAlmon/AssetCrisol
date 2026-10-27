@@ -107,11 +107,33 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [ ] Articulaciones de muñecos/juguetes (DWPose no los detecta): vistas de Qwen o Make-It-Animatable v2.
 - [ ] Separar la seed de estructura y la de forma también en TRELLIS.2.
 - [ ] Pesos con SkinTokens/Puppeteer, solo si las opciones actuales dejan de alcanzar.
+- [x] Rodilla siempre un poco adelante de la línea cadera-tobillo (con DWPose sobre piernas rectas el IK la doblaba
+      para atrás al agacharse).
+- [ ] Candidatos de UltraTex: la cara (ojos estrábicos, delineado) cambia mucho con `ultratex.seed`; generar 2-3 seeds
+      y armar una hoja de caras de cerca para elegir, como los candidatos de malla.
+- [ ] Brillos pintados: UltraTex hornea en la textura las luces de sus vistas (ropa que parece lustrada); probar a
+      sacarlas (delighting) o compensar con la rugosidad.
+- [ ] Ropa: capas que se atraviesan a los costados (remera bajo un chaleco), la boca de un pantalón ancho al levantar la
+      pierna y placas rígidas que se cruzan en golpes (robots).
+- [ ] Manos: siempre abiertas (el rig no tiene dedos); evaluar un puño por forma o huesos de dedos simples.
+- [ ] Opciones dudosas: `modelo.simetria` y `render.oscuro_brillante` (probadas sin uso claro): documentar o sacar.
 
 ## Ideas para después
 - Galería comunitaria de estilos y recetas.
 - Tiempos medidos en otras placas (12 GB, 24 GB) para ampliar los requisitos con datos.
 - Aviso de uso responsable: propiedad intelectual de personajes ajenos y fotos de personas reales.
+
+## Descartado (y por qué)
+- **Re-texturizar con el pipeline de texturas de TRELLIS.2**: sale más oscuro y borroso que UltraTex.
+- **Pixal3D con dos tres cuartos** (vehículos): las cámaras no son consistentes y aparecen fantasmas.
+- **TRELLIS.2 a 1536**: el remesh no entra en 16 GB; simplificando antes sale limpio pero no mejor que 1024.
+- **Mesh2Motion, UniRig, RigNet, MagicArticulate, AniGS**: o el encaje es a mano, o los superan SkinTokens/Puppeteer,
+  o no dan una malla con rig.
+- **Rigify, Auto-Rig Pro, Voxel Heat Diffuse, Rokoko**: manuales o pagos.
+- **3D Print Toolbox, LODTailor, reconstrucción en quads**: no detectan las capas internas o no hacen falta para
+  renderizar sprites (la salida 3D va a necesitar reducción de polígonos: ver fase 5).
+- **Filtros automáticos de pesos "implausibles"** y mezclas bone heat + distancia: marcan miles de vértices buenos o
+  dejan los brazos de los chibis como aletas. Los chibis con brazos fundidos al cuerpo se regeneran con brazos separados.
 
 ## Licencias de terceros
 El repo no distribuye modelos. Resumen (detalle en `docs/licencias.md` cuando esté): TRELLIS.2, Pixal3D, rembg y
