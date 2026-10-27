@@ -12,3 +12,4 @@ herramientas/3_blender/movimientos/candidatos/
 .codegraph/
 # notas personales de quien lo usa (no se versionan)
 CLAUDE.local.md
+.claude/settings.local.json
