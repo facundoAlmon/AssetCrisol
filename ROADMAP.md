@@ -13,7 +13,7 @@ Dos tipos de usuario, los dos de primera:
 ## Principios
 - **Todo local y open source** en el código (GPL-3.0). Los modelos que se usan tienen sus propias licencias: algunos
   no permiten uso comercial; la receta por defecto prioriza la calidad y **avisa** cuando un asset sale de un modelo
-  no comercial (ver [licencias](#licencias-de-terceros)).
+  no comercial (ver [licencias](docs/licencias.md)).
 - **La persona decide**: imagen, candidatos de malla, texturas. Ni la UI ni un agente eligen por ella.
 - **Una generación por vez en la GPU** (con 16 GB, dos a la vez se quedan sin memoria o tardan 20 veces más).
 - Código, comentarios y CLI en español; README, landing y docs en español e inglés.
@@ -31,6 +31,7 @@ Dos tipos de usuario, los dos de primera:
 - [x] README (es/en), CLAUDE.md y AGENTS.md para el repo público.
 - [x] Comando `crisol` (`crisol todo cris`) como entrada a `pipeline.py`.
 - [x] Ejemplos versionados: un personaje (Cris), un objeto (caja) y un escenario (bosque), probados desde un clon limpio.
+- [ ] Rehacer la caja de ejemplo con TRELLIS.2 (la malla actual salió del motor viejo, Hunyuan3D-2).
 - [x] Gif de demo para la portada del README (`ejemplos/personajes/cris/demo_acciones.gif`; también `demo_paseo` y
       `demo_direcciones`).
 - [x] Textura de piso del bosque con un modelo de licencia comercial (Z-Image Turbo).
@@ -58,7 +59,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [ ] Modelos gated (DINOv3, FLUX.2 Klein, el codificador de texto de Kimodo): cómo aceptarlos en Hugging Face.
 - [x] `crisol doctor`: rutas, versiones, VRAM, nodos de ComfyUI y modelos; qué falta, cómo arreglarlo y qué pasos
       quedan deshabilitados. Legible y `--json`.
-- [ ] `docs/licencias.md`: componente → licencia → qué paso lo usa → si permite uso comercial.
+- [x] `docs/licencias.md` (y `docs/licenses.md`): componente → licencia → qué paso lo usa → si permite uso comercial.
 
 ## 3. CLI para agentes
 - [ ] `--json` en todos los pasos (estado, archivos generados, avisos), códigos de salida claros, sin preguntas
@@ -143,6 +144,6 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
   dejan los brazos de los chibis como aletas. Los chibis con brazos fundidos al cuerpo se regeneran con brazos separados.
 
 ## Licencias de terceros
-El repo no distribuye modelos. Resumen (detalle en `docs/licencias.md` cuando esté): TRELLIS.2, Pixal3D, rembg y
+El repo no distribuye modelos. Resumen (detalle en [`docs/licencias.md`](docs/licencias.md)): TRELLIS.2, Pixal3D, rembg y
 BiRefNet MIT; Qwen Image Edit y Z-Image Turbo Apache-2.0; FLUX.2 Dev (opcional) y FLUX.2 Klein no comerciales; DINOv3 con licencia propia
-(gated); Kimodo: código Apache-2.0, pesos a verificar.
+(gated); Kimodo: código Apache-2.0, pesos NVIDIA Open Model License (comercial).

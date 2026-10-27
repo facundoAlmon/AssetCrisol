@@ -1112,37 +1112,12 @@ coherente con Blender.
 
 ## Licencias de terceros
 
-AssetCrisol no incluye pesos de modelos: cada uno se baja aparte y tiene su licencia. Lo que sigue es una guía, no
-asesoramiento legal: **verificá la licencia vigente de cada modelo antes de usar los resultados con fines
-comerciales.**
+AssetCrisol no incluye pesos de modelos: cada uno se baja aparte y tiene su licencia, y **algunos no permiten uso
+comercial**. El detalle (cada componente, qué paso lo usa, si permite uso comercial y con qué modelos se hizo cada
+ejemplo) está en **[docs/licencias.md](docs/licencias.md)**. Es una guía, no asesoramiento legal.
 
 > [!CAUTION]
-> **La receta por defecto de los humanoides usa UltraTex (FLUX.2 Klein 9B, no comercial).** La imagen sin
-> referencia usa por defecto Z-Image Turbo (Apache-2.0); FLUX.2 Dev (no comercial) solo si lo elegís con
-> `imagen.motor: "flux2"`. Para un proyecto comercial, revisá estas licencias o usá una receta sin esos modelos (p.
-> ej. TRELLIS.2 o Pixal3D sin `ultratex`, e imagen con Qwen o Z-Image).
+> **La receta recomendada para humanoides usa UltraTex (FLUX.2 Klein 9B, no comercial)**, y FLUX.2 Dev (no comercial)
+> se usa solo si lo elegís (`imagen.motor: "flux2"`, escenarios `flux`). Para un juego comercial: TRELLIS.2 o Pixal3D
+> sin `malla.ultratex`, imagen con Qwen o Z-Image, y escenarios `sdxl` o `zimage`.
 
-| Componente | Para qué | Licencia |
-|---|---|---|
-| TRELLIS.2 (código y pesos) | malla (motor `trellis2`) | MIT |
-| DINOv3 | codificador de imagen de TRELLIS.2 y Pixal3D | licencia propia de Meta, acceso gated |
-| Pixal3D | malla (motor `pixal3d`) | MIT |
-| rembg | quitar el fondo | MIT (los modelos u2net, la suya) |
-| BiRefNet | quitar el fondo | MIT |
-| MoGe | campo visual para Pixal3D | MIT (a verificar) |
-| Qwen Image Edit 2511 | paso 1 con referencia, vistas | Apache-2.0 |
-| LoRA Lightning de Qwen Image Edit | paso 1 en 4 pasos | a verificar |
-| Z-Image Turbo | paso 1 sin referencia (por defecto), escenarios `zimage` | Apache-2.0 |
-| FLUX.2 Dev | paso 1 sin referencia (`imagen.motor: "flux2"`), escenarios `flux` | **no comercial** (FLUX.2 [dev] Non-Commercial License) |
-| FLUX.2 Klein base 9B | UltraTex | **no comercial** (licencia de Black Forest Labs) |
-| ComfyUI-UltraTex (nodos) | UltraTex | MIT |
-| LoRA y decoder de UltraTex | UltraTex | a verificar |
-| DWPose (comfyui_controlnet_aux) | paso `articulaciones` | Apache-2.0 (a verificar los pesos) |
-| DreamShaper XL Turbo | escenarios `sdxl` | CreativeML Open RAIL++-M (a verificar) |
-| IP-Adapter | escenarios con referencia | Apache-2.0 |
-| Kimodo (código) | clips de movimiento | Apache-2.0 |
-| Kimodo (pesos) | clips de movimiento | **a verificar** |
-| Llama 3 8B Instruct + LLM2Vec | codificador de texto de Kimodo | Llama 3 Community License (y la de LLM2Vec) |
-| ComfyUI | servidor de generación | GPL-3.0 |
-| Blender | rig, animación y render | GPL |
-| Godot | motor de destino (opcional) | MIT |

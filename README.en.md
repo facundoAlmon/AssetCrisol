@@ -1126,36 +1126,12 @@ consistent with Blender.
 
 ## Third-party licenses
 
-AssetCrisol doesn't ship model weights: each one is downloaded separately under its own license. This is guidance,
-not legal advice: **check each model's current license before using the output commercially.**
+AssetCrisol ships no model weights: each one is downloaded separately and has its own license, and **some do not
+allow commercial use**. The details (each component, which step uses it, whether it allows commercial use and which
+models made each example) are in **[docs/licenses.md](docs/licenses.md)**. It's a guide, not legal advice.
 
 > [!CAUTION]
-> **The default humanoid recipe uses UltraTex (FLUX.2 Klein 9B, non-commercial).** An image without a reference uses
-> Z-Image Turbo (Apache-2.0) by default; FLUX.2 Dev (non-commercial) only if you choose it with `imagen.motor:
-> "flux2"`. For a commercial project, review these licenses or use a recipe without those models (e.g. TRELLIS.2 or
-> Pixal3D without `ultratex`, and the image from Qwen or Z-Image).
+> **The recommended humanoid recipe uses UltraTex (FLUX.2 Klein 9B, non-commercial)**, and FLUX.2 Dev
+> (non-commercial) is only used if you pick it (`imagen.motor: "flux2"`, `flux` scenery). For a commercial game:
+> TRELLIS.2 or Pixal3D without `malla.ultratex`, the image with Qwen or Z-Image, and `sdxl` or `zimage` scenery.
 
-| Component | Used for | License |
-|---|---|---|
-| TRELLIS.2 (code and weights) | mesh (`trellis2` engine) | MIT |
-| DINOv3 | image encoder of TRELLIS.2 and Pixal3D | Meta's own license, gated access |
-| Pixal3D | mesh (`pixal3d` engine) | MIT |
-| rembg | background removal | MIT (the u2net models, their own) |
-| BiRefNet | background removal | MIT |
-| MoGe | field of view for Pixal3D | MIT (to be verified) |
-| Qwen Image Edit 2511 | step 1 with a reference, views | Apache-2.0 |
-| Qwen Image Edit Lightning LoRA | step 1 in 4 steps | to be verified |
-| Z-Image Turbo | step 1 without a reference (default), `zimage` scenery | Apache-2.0 |
-| FLUX.2 Dev | step 1 without a reference (`imagen.motor: "flux2"`), `flux` scenery | **non-commercial** (FLUX.2 [dev] Non-Commercial License) |
-| FLUX.2 Klein base 9B | UltraTex | **non-commercial** (Black Forest Labs license) |
-| ComfyUI-UltraTex (nodes) | UltraTex | MIT |
-| UltraTex LoRA and decoder | UltraTex | to be verified |
-| DWPose (comfyui_controlnet_aux) | `articulaciones` step | Apache-2.0 (weights to be verified) |
-| DreamShaper XL Turbo | `sdxl` scenery | CreativeML Open RAIL++-M (to be verified) |
-| IP-Adapter | scenery from a reference | Apache-2.0 |
-| Kimodo (code) | motion clips | Apache-2.0 |
-| Kimodo (weights) | motion clips | **to be verified** |
-| Llama 3 8B Instruct + LLM2Vec | Kimodo's text encoder | Llama 3 Community License (and LLM2Vec's) |
-| ComfyUI | generation server | GPL-3.0 |
-| Blender | rig, animation and render | GPL |
-| Godot | target engine (optional) | MIT |
