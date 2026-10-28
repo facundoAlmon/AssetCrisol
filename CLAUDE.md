@@ -165,6 +165,15 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
 - Comparar RGBA canal por canal: `getbbox()` de una diferencia RGBA solo mira el alfa.
 - VRAM 16 GB: ComfyUI con Qwen ~12 GB; `paso_malla` hace `POST /free`. Cachés de modelos en `env_modelos`, no `~/.cache`.
 
+### Instalación y Docker
+- El disco del sistema de la PC de referencia es chico: la caché de `uv` (~15 GB por instalación) y los temporales de
+  nvcc van a `--destino` (`UV_CACHE_DIR`, `TMPDIR`); nunca a `~/.cache`. Los MCP de Godot/Blender corren con `uvx`
+  y bloquean `~/.cache/uv` (`uv cache prune` espera; limpiar por paquete con `uv cache clean --force <pkgs>`).
+- `hf auth whoami` sale con 0 sin sesión: mirar si dice `Not logged in`/`Invalid`.
+- Contenedor (corre como el dueño de `/datos`, no root): numba cachea junto a su código (`NUMBA_CACHE_DIR` al
+  volumen), Triton compila C en el primer uso (`gcc` en la imagen), lo que el entrypoint crea en `/modelos` tiene que
+  crearse después de bajar a ese usuario. Sin pantalla: Blender y UltraTex por EGL (`NVIDIA_DRIVER_CAPABILITIES=all`).
+
 ## Verificar cambios
 
 - **Antes de commitear cambios de Blender, sprites, iso, Godot o escenarios**: `python3 tests/humo.py` (~3 min; usa la
@@ -176,3 +185,8 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
 - Tras tocar rig/animaciones: `rehacer <n1,...>` y mirar cada `revision.png`.
 - Godot: proyecto vacío temporal, `godot <n> --instalar <dir>` y un `-s script.gd` headless que instancie.
 - Sin gastar minutos de malla: personaje temporal con `personaje.json` + `trabajo/malla/modelo.glb` copiados; borrarlo al terminar.
+- `instalar.sh`: `--plan` con la config real (no tiene que tocar nada) y, si cambia la instalación, en limpio con una
+  config de prueba (`ASSETCRISOL_CONFIG=<tmp>/config.json ./instalar.sh --destino <tmp> --nivel minimo --solo
+  comfyui,trellis,blender,config`, ~20 min) y una `malla` de TRELLIS.2 con esa config.
+- Docker: `docker build -t assetcrisol:prueba .` y correr `doctor`, `blender`/`sprites` y una `malla` con UltraTex
+  montando los modelos de la PC en `/modelos/comfyui`, `/modelos/hf`, `/modelos/u2net` y `/modelos/dwpose`.

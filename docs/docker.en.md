@@ -18,8 +18,7 @@ of yours.
 ## Usage
 
 ```bash
-docker pull ghcr.io/facundoalmon/assetcrisol && docker tag ghcr.io/facundoalmon/assetcrisol assetcrisol
-# or build it: docker build -t assetcrisol .   (~20 min)
+docker build -t assetcrisol .            # ~20 min (not published on GHCR yet)
 
 # an alias to avoid repeating: GPU, models in a volume, assets in ./assets
 mkdir -p assets
@@ -40,8 +39,9 @@ crisol todo bandido
 ## Publishing (maintainers)
 
 `docker/publicar.sh <version>` builds it here and pushes it (23 GB: too big for GitHub's free runners). GHCR by
-default; `REGISTRO=docker.io/<user>` or `registry.gitlab.com/<user>/<project>` for another one. Run `docker login`
-first. On GHCR the package starts private: the first time, make it public on its GitHub page.
+default (`ghcr.io/facundoalmon/assetcrisol`; the first one will be `0.1.0-alpha.1`); for another registry,
+`REGISTRO=docker.io/<user>` or `registry.gitlab.com/<user>/<project>`. Run `docker login` first. On GHCR the package
+starts private: the first time, make it public on its GitHub page.
 
 ## Notes
 

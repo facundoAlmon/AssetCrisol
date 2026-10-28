@@ -18,8 +18,7 @@ carpeta tuya.
 ## Uso
 
 ```bash
-docker pull ghcr.io/facundoalmon/assetcrisol && docker tag ghcr.io/facundoalmon/assetcrisol assetcrisol
-# o construirla: docker build -t assetcrisol .   (~20 min)
+docker build -t assetcrisol .            # ~20 min (todavía no está publicada en GHCR)
 
 # un alias para no repetir: GPU, modelos en un volumen, assets en ./assets
 mkdir -p assets
@@ -40,8 +39,9 @@ crisol todo bandido
 ## Publicar (mantenedores)
 
 `docker/publicar.sh <versión>` la construye acá y la sube (23 GB: no entra en los runners gratis de GitHub). Por
-defecto a GHCR; `REGISTRO=docker.io/<usuario>` o `registry.gitlab.com/<usuario>/<proyecto>` para otro. Antes,
-`docker login`. En GHCR el paquete nace privado: la primera vez, hacerlo público en su página de GitHub.
+defecto a GHCR (`ghcr.io/facundoalmon/assetcrisol`; la primera será `0.1.0-alpha.1`); para otro registro,
+`REGISTRO=docker.io/<usuario>` o `registry.gitlab.com/<usuario>/<proyecto>`. Antes, `docker login`. En GHCR el
+paquete nace privado: la primera vez, hacerlo público en su página de GitHub.
 
 ## Notas
 

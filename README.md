@@ -198,13 +198,15 @@ En vez de `config.json` en el repo se puede usar otro archivo con la variable `A
 #### 2. ComfyUI (imagen, Pixal3D, UltraTex, DWPose, escenarios)
 
 Instalar [ComfyUI](https://github.com/comfyanonymous/ComfyUI) con un venv en `<comfyui_dir>/venv` y el CLI:
-`<comfyui_dir>/venv/bin/pip install comfy-cli`. `pipeline.py` arranca ComfyUI solo si no está corriendo.
+`<comfyui_dir>/venv/bin/pip install comfy-cli` (probado con 1.20.0).
+`pipeline.py` arranca ComfyUI solo si no está corriendo.
 
 Nodos extra (en `custom_nodes/`):
 - [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF) (FLUX.2 Dev en GGUF; no hace falta si usás solo Z-Image);
 - [ComfyUI-UltraTex](https://github.com/visualbruno/ComfyUI-UltraTex) (probado en el commit `8137da5`; además
   `pip install moderngl xatlas` en el venv de ComfyUI). El horneado usa moderngl con GLX: arrancar ComfyUI con un
-  `DISPLAY` (sin X habría que pasarle `backend='egl'`);
+  `DISPLAY`. Sin pantalla (un servidor) tiene que ser EGL: `instalar.sh` cambia `ultratex_core/render.py` para que
+  pase `backend='egl'` cuando no hay `DISPLAY`;
 - [comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux) (DWPose, paso `articulaciones`);
 - [ComfyUI_IPAdapter_plus](https://github.com/cubiq/ComfyUI_IPAdapter_plus) (escenarios con referencia).
 
@@ -1159,6 +1161,9 @@ corren los pasos y le muestran a la persona lo que tiene que decidir. Las instru
 cada paso, mapa del código, contratos que no hay que romper y problemas ya resueltos) están en
 [CLAUDE.md](CLAUDE.md); [AGENTS.md](AGENTS.md) remite ahí para cualquier agente. Lo esencial:
 
+- para instalar: `./instalar.sh --plan` y después `./instalar.sh` (sin preguntas si el token de Hugging Face va en
+  `HF_TOKEN`; la persona tiene que aceptar en Hugging Face las condiciones de los modelos gated); o la imagen Docker
+  ([docs/docker.md](docs/docker.md));
 - antes de empezar, `crisol doctor --json`: qué está instalado y qué pasos se pueden usar (sale con 1 si falta algo
   obligatorio);
 - una generación por vez en la GPU (revisar la cola de ComfyUI y `nvidia-smi` antes de cada paso de GPU);

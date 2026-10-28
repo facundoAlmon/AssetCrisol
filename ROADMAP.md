@@ -52,8 +52,9 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
       paso en la placa de referencia. Falta probar otras distribuciones.
 - [x] **Imagen Docker** (`Dockerfile`, `docs/docker.md`): instalar.sh en el build, sin modelos (volumen que llena
       `docker run ... modelos`), corre como el dueño de `/datos`. Probada: Blender, TRELLIS.2 + UltraTex (EGL).
-- [ ] Publicarla en GHCR con `docker/publicar.sh` (se construye acá: 23 GB no entran en los runners gratis de
-      GitHub) y hacer público el paquete.
+- [ ] **Pendiente:** publicarla en GHCR como `0.1.0-alpha.1` (+ `latest`) con `docker/publicar.sh` (se construye acá:
+      23 GB no entran en los runners gratis de GitHub). Falta `docker login ghcr.io` con un token `write:packages`;
+      después, hacer público el paquete y cambiar en `docs/docker.md` el `docker build` por `docker pull`.
 - [x] `instalar.sh` nativo: repos externos en commits fijos, venvs con `uv`, extensiones de TRELLIS.2 compiladas para
       la GPU, modelos con `hf download`; reconoce lo ya instalado y se puede volver a correr. Probado en limpio
       (ComfyUI, TRELLIS.2 generando una malla, Blender); falta una prueba completa con todos los modelos.

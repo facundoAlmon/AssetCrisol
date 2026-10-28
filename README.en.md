@@ -205,13 +205,15 @@ keep the config and the data in a separate private folder).
 #### 2. ComfyUI (image, Pixal3D, UltraTex, DWPose, scenery)
 
 Install [ComfyUI](https://github.com/comfyanonymous/ComfyUI) with a venv in `<comfyui_dir>/venv` and the CLI:
-`<comfyui_dir>/venv/bin/pip install comfy-cli`. `pipeline.py` starts ComfyUI by itself if it is not running.
+`<comfyui_dir>/venv/bin/pip install comfy-cli` (tested with 1.20.0).
+`pipeline.py` starts ComfyUI by itself if it is not running.
 
 Extra nodes (in `custom_nodes/`):
 - [ComfyUI-GGUF](https://github.com/city96/ComfyUI-GGUF) (FLUX.2 Dev as GGUF; not needed if you only use Z-Image);
 - [ComfyUI-UltraTex](https://github.com/visualbruno/ComfyUI-UltraTex) (tested at commit `8137da5`; also
-  `pip install moderngl xatlas` in ComfyUI's venv). Baking uses moderngl with GLX: start ComfyUI with a `DISPLAY`
-  (without X it would need `backend='egl'`);
+  `pip install moderngl xatlas` in ComfyUI's venv). Baking uses moderngl with GLX: start ComfyUI with a `DISPLAY`.
+  Without a display (a server) it must be EGL: `instalar.sh` patches `ultratex_core/render.py` to pass
+  `backend='egl'` when there is no `DISPLAY`;
 - [comfyui_controlnet_aux](https://github.com/Fannovel16/comfyui_controlnet_aux) (DWPose, `articulaciones` step);
 - [ComfyUI_IPAdapter_plus](https://github.com/cubiq/ComfyUI_IPAdapter_plus) (scenery from a reference).
 
@@ -1175,6 +1177,9 @@ the steps and show the person what they need to decide. The instructions for age
 map, contracts that must not be broken and problems already solved) are in [CLAUDE.md](CLAUDE.md) (Spanish);
 [AGENTS.md](AGENTS.md) points there for any agent. The essentials:
 
+- to install: `./instalar.sh --plan` and then `./instalar.sh` (no prompts if the Hugging Face token is in `HF_TOKEN`;
+  the person has to accept the gated models' terms on Hugging Face); or the Docker image
+  ([docs/docker.en.md](docs/docker.en.md));
 - before starting, `crisol doctor --json`: what is installed and which steps can be used (exits with 1 if something
   required is missing);
 - one generation at a time on the GPU (check ComfyUI's queue and `nvidia-smi` before every GPU step);
