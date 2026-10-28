@@ -1,0 +1,5 @@
+{
+  "_base": "personaje",
+  "_doc": "Chibi o cabezón (cabeza grande, piernas cortas). Los brazos tienen que quedar separados del cuerpo: pegados no tienen arreglo de pesos. Las articulaciones por rebanadas fallan con el torso ancho: después de la malla, `crisol articulaciones` (DWPose) y mirar guia.png. Si el bone heat da basura en un cuerpo redondo: modelo.pesos \"distancia\" (README > Cuando los pesos fallan).",
+  "_agregar_descripcion": ", chibi proportions with a big head and short legs, both arms held clearly away from the body, a visible gap between each arm and the torso"
+}

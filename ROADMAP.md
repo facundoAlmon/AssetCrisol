@@ -73,7 +73,8 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] `crisol estado [<n>]`: qué pasos están hechos, cuáles quedaron viejos y qué falta decidir.
 - [x] Cola de GPU dentro del pipeline: antes de generar chequea otros `crisol`, ComfyUI y la GPU, y espera (o sale
       con `--sin-esperar`).
-- [ ] Recetas por tipo de asset (humanoide, chibi, objeto, vehículo, escenario) que arman el json solas.
+- [x] Recetas por tipo de asset (`crisol nuevo --receta`: humanoide, chibi, robot, juguete, objeto, vegetación,
+      vehículo, escenario) que arman el json solas; `--descripcion` sin editar el json.
 - [x] Avisos de licencia en el meta de cada asset (qué modelos lo hicieron, si es apto para venta).
 - [ ] Servidor MCP con las operaciones de alto nivel (crear, listar candidatos, elegir, generar, exportar), que
       devuelva las imágenes para mostrárselas a la persona.

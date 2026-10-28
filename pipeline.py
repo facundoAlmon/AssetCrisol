@@ -6,7 +6,9 @@ uso: crisol <paso> <personaje> [opciones]   (o python3 pipeline.py ...)
 configuración: config.json junto a este archivo (copiar config.ejemplo.json) o la ruta en ASSETCRISOL_CONFIG.
 Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defecto, esta carpeta).
 
-  nuevo    <n> [--referencia img] [--objeto]  crea personajes/<n>/ (u objetos/<n>/) desde la plantilla
+  nuevo    <n> [--receta r] [--descripcion "..."] [--referencia img]   crea personajes/<n>/ (u objetos/<n>/) con
+                                    la receta del tipo (plantilla/recetas: humanoide, chibi, robot, juguete,
+                                    objeto, vegetacion, vehiculo, escenario); --objeto/--vehiculo/--escenario = atajos
   imagen   <n>                      candidatas con ComfyUI (una por seed) -> elegir en personaje.json
   vistas   <n>                      (Pixal3D 4 vistas) espalda y costados con Qwen -> trabajo/imagen/vistas.png,
                                     para revisarlas antes de la malla (la malla las reusa; borrar una para rehacerla)
@@ -143,19 +145,50 @@ def paso_estado(nombre, como_json=False):
     return todos
 
 
-def paso_nuevo(nombre, referencia=None, objeto=False, escenario=False, vehiculo=False):
-    carpeta, archivo = CARPETAS[2 if escenario else 1 if objeto else 0]
+RECETAS_DIR = os.path.join(RAIZ, 'plantilla', 'recetas')
+RECETAS = sorted(x[:-5] for x in os.listdir(RECETAS_DIR) if x.endswith('.json'))
+
+
+def cargar_receta(receta):
+    """plantilla/recetas/<receta>.json: `_base` (personaje | objeto | escenario, la plantilla que pisa), `_doc`,
+    `_agregar_descripcion` (se suma al final de imagen.descripcion) y `_borrar` (claves con puntos a sacar)."""
+    with open(os.path.join(RECETAS_DIR, f'{receta}.json')) as f:
+        return json.load(f)
+
+
+def carpeta_de_receta(receta):
+    base = cargar_receta(receta)['_base']
+    return next(i for i, (_, archivo) in enumerate(CARPETAS) if archivo == f'{base}.json')
+
+
+def paso_nuevo(nombre, referencia=None, receta='humanoide', descripcion=None):
+    r = cargar_receta(receta)
+    carpeta, archivo = CARPETAS[carpeta_de_receta(receta)]
+    escenario = carpeta == 'escenarios'
+    if descripcion and escenario:
+        salida.salir(salida.USO, 'nuevo: --descripcion no aplica a escenarios (cada textura tiene la suya en '
+                                 'texturas.<clave>.descripcion)')
     pdir = os.path.join(DATOS, carpeta, nombre)
     if any(os.path.exists(os.path.join(DATOS, c, nombre)) for c, _ in CARPETAS):
         sys.exit(f'ya existe un personaje, objeto o escenario llamado {nombre}')
-    os.makedirs(os.path.join(pdir, 'trabajo'))
-    shutil.copy(os.path.join(RAIZ, 'plantilla', archivo), pdir)
-    cfg_path = os.path.join(pdir, archivo)
-    with open(cfg_path) as f:
+    with open(os.path.join(RAIZ, 'plantilla', archivo)) as f:
         cfg = json.load(f)
-    if vehiculo:   # objeto + la receta de autos (plantilla/vehiculo.json)
-        with open(os.path.join(RAIZ, 'plantilla', 'vehiculo.json')) as f:
-            cfg = _fusionar(cfg, json.load(f))
+    agregar = r.pop('_agregar_descripcion', '')
+    for clave in r.pop('_borrar', []):
+        *ruta, ultima = clave.split('.')
+        d = cfg
+        for k in ruta:
+            d = d.get(k, {})
+        d.pop(ultima, None)
+    del r['_base']
+    cfg = _fusionar(cfg, r)   # su _doc pisa al de la plantilla
+    cfg['_receta'] = receta
+    if descripcion:
+        cfg['imagen']['descripcion'] = descripcion
+    if agregar:
+        cfg['imagen']['descripcion'] += agregar
+    os.makedirs(os.path.join(pdir, 'trabajo'))
+    cfg_path = os.path.join(pdir, archivo)
     if escenario:
         if referencia:  # estilo y colores de las texturas (IP-Adapter); mejor con `recorte` por textura
             shutil.copy(referencia, os.path.join(pdir, 'referencia.png'))
@@ -168,12 +201,16 @@ def paso_nuevo(nombre, referencia=None, objeto=False, escenario=False, vehiculo=
         cfg['imagen']['referencia'] = None
     with open(cfg_path, 'w') as f:
         json.dump(cfg, f, indent=2, ensure_ascii=False)
+    print(f'creado {carpeta}/{nombre}/ con la receta {receta}: {cfg["_doc"]}')
     if escenario:
-        print(f'creado {carpeta}/{nombre}/ -> editar {archivo} (texturas.<clave>.descripcion) y correr: '
-              f'crisol texturas {nombre}')
+        print(f'  -> editar {archivo} (texturas.<clave>.descripcion) y correr: crisol texturas {nombre}')
         return
-    print(f'creado {carpeta}/{nombre}/ (estilo {CFG.get("estilo", "animacion3d")}) -> editar {archivo} '
-          f'(imagen.descripcion) y correr: crisol imagen {nombre}')
+    estilo = cfg.get('estilo') or CFG.get('estilo', 'animacion3d')
+    if descripcion:
+        print(f'  estilo {estilo} -> correr: crisol imagen {nombre}')
+    else:
+        print(f'  estilo {estilo} -> editar {archivo} (imagen.descripcion, o pasar --descripcion) y correr: '
+              f'crisol imagen {nombre}')
 
 
 ESPERAR_GPU = True   # --sin-esperar: salir con gpu.GPU_OCUPADA en vez de esperar
@@ -774,9 +811,12 @@ def main():
     ap.add_argument('--seed', type=int, default=1, help='paso movimiento')
     ap.add_argument('--muestras', type=int, default=3, help='paso movimiento: variantes de la semilla')
     ap.add_argument('--referencia', help='imagen de referencia (paso nuevo)')
-    ap.add_argument('--objeto', action='store_true', help='paso nuevo: crear un objeto (objetos/<n>/) en vez de un personaje')
-    ap.add_argument('--vehiculo', action='store_true', help='paso nuevo: un objeto con la receta de autos (README > Vehículos)')
-    ap.add_argument('--escenario', action='store_true', help='paso nuevo: crear un escenario (escenarios/<n>/)')
+    ap.add_argument('--receta', choices=RECETAS,
+                    help='paso nuevo: tipo de asset (plantilla/recetas/<receta>.json, con su _doc); por defecto humanoide')
+    ap.add_argument('--descripcion', help='paso nuevo: imagen.descripcion (qué es, en inglés); la receta le suma su parte')
+    ap.add_argument('--objeto', action='store_true', help='paso nuevo: = --receta objeto')
+    ap.add_argument('--vehiculo', action='store_true', help='paso nuevo: = --receta vehiculo (README > Vehículos)')
+    ap.add_argument('--escenario', action='store_true', help='paso nuevo: = --receta escenario')
     ap.add_argument('--solo', metavar='CLAVES', help='paso texturas: solo estas (p. ej. piso,pared); las demás quedan')
     ap.add_argument('--instalar', metavar='PROYECTO_GODOT', help='copiar el resultado a este proyecto Godot')
     ap.add_argument('--json', action='store_true',
@@ -785,6 +825,10 @@ def main():
     ap.add_argument('--sin-esperar', action='store_true',
                     help='pasos de GPU: si está ocupada, salir con código 3 en vez de esperar')
     a = ap.parse_args()
+    atajos = [r for r, si in (('objeto', a.objeto), ('vehiculo', a.vehiculo), ('escenario', a.escenario)) if si]
+    if len(atajos) + bool(a.receta) > 1:
+        ap.error('nuevo: una sola receta (--receta, --objeto, --vehiculo o --escenario)')
+    a.receta = a.receta or (atajos[0] if atajos else 'humanoide')
     global ESPERAR_GPU
     ESPERAR_GPU = not a.sin_esperar
     if a.paso == 'estado':
@@ -822,7 +866,7 @@ def carpetas_del_paso(a):
     if a.paso == 'movimiento':
         return [os.path.join(DATOS, 'movimientos', 'candidatos')]
     if a.paso == 'nuevo':
-        return [os.path.join(DATOS, CARPETAS[2 if a.escenario else 1 if a.objeto or a.vehiculo else 0][0], a.personaje)]
+        return [os.path.join(DATOS, CARPETAS[carpeta_de_receta(a.receta)][0], a.personaje)]
     if a.paso == 'rehacer':
         d = os.path.join(DATOS, 'personajes')
         return [d] if a.personaje == 'todos' else [os.path.join(d, n) for n in a.personaje.split(',') if n]
@@ -869,7 +913,7 @@ def ejecutar(a):
     revisar_instalacion(a)
     revisar_previos(a.paso, a.personaje)
     if a.paso == 'nuevo':
-        paso_nuevo(a.personaje, a.referencia, a.objeto or a.vehiculo, a.escenario, a.vehiculo)
+        paso_nuevo(a.personaje, a.referencia, a.receta, a.descripcion)
     elif a.paso == 'texturas':
         paso_texturas(a.personaje, a.solo)
     elif a.paso == 'tema':

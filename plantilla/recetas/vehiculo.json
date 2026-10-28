@@ -1,7 +1,9 @@
 {
-  "_doc": "Se fusiona sobre plantilla/objeto.json con `crisol nuevo <n> --vehiculo` (README > Vehículos): auto para un juego 3D. Pasos: imagen -> vistas (la cola en tres cuartos de Qwen) -> malla (los candidatos) -> blender (revision.png: una fila por candidato) -> elegir malla.elegida y volver a correr blender.",
+  "_base": "objeto",
+  "_doc": "Auto (`crisol nuevo <n> --vehiculo` o `--receta vehiculo`; README > Vehículos) para un juego 3D. Pasos: imagen -> vistas (la cola en tres cuartos de Qwen) -> malla (los candidatos) -> blender (revision.png: una fila por candidato) -> elegir malla.elegida y volver a correr blender.",
+  "_agregar_descripcion": ", glossy paint, no logos, no text, whole car visible, three-quarter front side view, no ground, no base",
   "imagen": {
-    "descripcion": "<QUÉ AUTO, en inglés, p. ej. a die-cast toy hatchback: glossy bright sky blue paint, big rear wing, black windows, chunky toy proportions, glossy paint, no logos, no text, whole car visible, three-quarter front side view, no ground, no base>",
+    "descripcion": "<QUÉ AUTO, en inglés, p. ej. a die-cast toy hatchback: glossy bright sky blue paint, big rear wing, black windows, chunky toy proportions>",
     "seeds": [
       101,
       202,

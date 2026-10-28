@@ -359,6 +359,29 @@ crisol godot bandit            # Godot scenes in personajes/bandit/godot/
 To attach things in the game (a sword, a helmet), add `crisol anclas bandit` (anchors) after `iso`. To
 apply a small change (e.g. one animation), `blender` → `sprites` → `iso` is enough.
 
+### Recipes per asset type
+
+`crisol nuevo <n> --receta <r>` builds the json with what is known to work for each type
+(`plantilla/recetas/<r>.json`, on top of the character, prop or scenery template). `--descripcion "..."` fills in
+`imagen.descripcion` (in English) and the recipe appends its own part: an agent can create an asset without editing
+the json. The recipe is stored in `_receta` and its explanation in `_doc`.
+
+| recipe | base | what it sets |
+|---|---|---|
+| `humanoide` | character | the template as is (default): Pixal3D 4 views + UltraTex |
+| `chibi` | character | asks for arms away from the body; points to `articulaciones` (DWPose) and `pesos: "distancia"` |
+| `robot` | character | `modelo.pesos_rigidos` (plates that don't bend); arms away from the body |
+| `juguete` | character | `moderno_juguete` style (plastic only: on people it makes clothes glossy) |
+| `objeto` | prop | TRELLIS.2 at 512 + `ultratex` and `pixal3d` candidates (= `--objeto`) |
+| `vegetacion` | prop | smooth foliage masses, `birefnet-general` cutout, no `pixal3d` candidate |
+| `vehiculo` | prop | the car recipe (= `--vehiculo`, see [Vehicles](#vehicles)) |
+| `escenario` | scenery | the texture kit (= `--escenario`) |
+
+```bash
+crisol nuevo pirate --receta chibi --descripcion "a little pirate girl with a red bandana and a striped shirt"
+crisol imagen pirate
+```
+
 > [!IMPORTANT]
 > **Pick the style's prompt before generating the image; the render, whenever you like.** The prompt is built from
 > the style plus `imagen.descripcion` and defines the texture: `moderno` and `moderno_juguete` share the same prompt,
@@ -424,7 +447,7 @@ The template already has these values; this is what to look at and what to chang
 
 ```bash
 crisol <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n>
-crisol nuevo <n> [--referencia img] [--objeto | --vehiculo | --escenario]
+crisol nuevo <n> [--receta r] [--descripcion "..."] [--referencia img]   # or --objeto | --vehiculo | --escenario
 crisol comparar <n>                    # rebuilds trabajo/candidatos.png from malla.candidatos
 crisol rehacer <n1,n2,...|todos>       # blender..revisar in batch
 crisol metodo <n> [anim=kimodo|procedural ...]
@@ -1002,7 +1025,7 @@ image usually works better.
 A prop with a `vehiculo` block in its `objeto.json`: cars for a 3D game that uses the `.glb` (no sprites).
 
 ```bash
-crisol nuevo <n> --vehiculo   # [--referencia photo] prop + plantilla/vehiculo.json
+crisol nuevo <n> --vehiculo   # [--referencia photo] prop + plantilla/recetas/vehiculo.json
 crisol imagen <n>     # three-quarter front view, like any prop; pick a seed
 crisol vistas <n>     # three-quarter rear view from above with Qwen -> trabajo/imagen/vista_atras.png
 crisol malla <n>      # the candidates (~10 min): trabajo/malla_<candidate>/

@@ -348,6 +348,29 @@ crisol godot bandido           # escenas de Godot en personajes/bandido/godot/
 Para colgarle cosas en el juego (espada, casco), sumar `crisol anclas bandido` después de `iso`. Para
 pasar un cambio puntual (p. ej. una animación) alcanza con `blender` → `sprites` → `iso`.
 
+### Recetas por tipo
+
+`crisol nuevo <n> --receta <r>` arma el json con lo que ya se sabe que anda para cada tipo
+(`plantilla/recetas/<r>.json`, sobre la plantilla de personaje, objeto o escenario). `--descripcion "..."` completa
+`imagen.descripcion` (en inglés) y la receta le suma lo suyo al final: así un agente crea el asset sin editar el json.
+La receta queda en `_receta` y su explicación en `_doc`.
+
+| receta | base | qué pone |
+|---|---|---|
+| `humanoide` | personaje | la plantilla tal cual (por defecto): Pixal3D 4 vistas + UltraTex |
+| `chibi` | personaje | pide brazos separados del cuerpo; avisa `articulaciones` (DWPose) y `pesos: "distancia"` |
+| `robot` | personaje | `modelo.pesos_rigidos` (placas que no se doblan); brazos separados |
+| `juguete` | personaje | estilo `moderno_juguete` (solo plástico: en personas lustra la ropa) |
+| `objeto` | objeto | TRELLIS.2 a 512 + candidatos `ultratex` y `pixal3d` (= `--objeto`) |
+| `vegetacion` | objeto | masas lisas de follaje, recorte `birefnet-general`, sin el candidato `pixal3d` |
+| `vehiculo` | objeto | la receta de autos (= `--vehiculo`, ver [Vehículos](#vehículos)) |
+| `escenario` | escenario | el kit de texturas (= `--escenario`) |
+
+```bash
+crisol nuevo pirata --receta chibi --descripcion "a little pirate girl with a red bandana and a striped shirt"
+crisol imagen pirata
+```
+
 > [!IMPORTANT]
 > **El prompt del estilo se elige antes de generar la imagen; el render, cuando quieras.** El prompt lo arma el estilo
 > con `imagen.descripcion` y define la textura: `moderno` y `moderno_juguete` comparten el mismo prompt, `semirealista`
@@ -412,7 +435,7 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
 
 ```bash
 crisol <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n>
-crisol nuevo <n> [--referencia img] [--objeto | --vehiculo | --escenario]
+crisol nuevo <n> [--receta r] [--descripcion "..."] [--referencia img]   # o --objeto | --vehiculo | --escenario
 crisol comparar <n>                    # rehace trabajo/candidatos.png de malla.candidatos
 crisol rehacer <n1,n2,...|todos>       # blender..revisar en lote
 crisol metodo <n> [anim=kimodo|procedural ...]
@@ -987,7 +1010,7 @@ dibujado a partir de la imagen elegida.
 Un objeto con un bloque `vehiculo` en su `objeto.json`: autos para un juego 3D que usa el `.glb` (sin sprites).
 
 ```bash
-crisol nuevo <n> --vehiculo   # [--referencia foto] objeto + plantilla/vehiculo.json
+crisol nuevo <n> --vehiculo   # [--referencia foto] objeto + plantilla/recetas/vehiculo.json
 crisol imagen <n>     # tres cuartos de frente, como cualquier objeto; elegir seed
 crisol vistas <n>     # la cola en tres cuartos desde arriba con Qwen -> trabajo/imagen/vista_atras.png
 crisol malla <n>      # los candidatos (~10 min): trabajo/malla_<candidato>/

@@ -1,0 +1,4 @@
+{
+  "_base": "escenario",
+  "_doc": "Kit de escenario (piso, camino, pared): texturas -> elegir -> tema. --descripcion no aplica: cada textura tiene la suya en texturas.<clave>.descripcion."
+}

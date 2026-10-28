@@ -1,0 +1,4 @@
+{
+  "_base": "personaje",
+  "_doc": "Humanoide de proporciones normales (la receta por defecto de `crisol nuevo`): Pixal3D 4 vistas + UltraTex. Pasos: imagen -> vistas (mirar trabajo/imagen/vistas.png) -> malla -> blender -> sprites -> iso -> revisar. README > Qué mirar en cada paso."
+}

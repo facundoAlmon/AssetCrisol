@@ -1,0 +1,11 @@
+{
+  "_base": "objeto",
+  "_doc": "Árbol, arbusto o planta: masas lisas de follaje (las hojas sueltas dan cáscaras con agujeros), recorte con birefnet-general, TRELLIS.2 a 512. Sin el candidato pixal3d: con follaje no entra en 16 GB. Para árboles de fondo suele andar mejor un sprite dibujado desde la imagen elegida.",
+  "_agregar_descripcion": ", big smooth puffy rounded foliage clumps, no individual leaves, solid silhouette",
+  "_borrar": [
+    "malla.candidatos.pixal3d"
+  ],
+  "malla": {
+    "fondo": "birefnet-general"
+  }
+}

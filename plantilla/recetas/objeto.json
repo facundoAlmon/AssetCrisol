@@ -1,0 +1,4 @@
+{
+  "_base": "objeto",
+  "_doc": "Objeto sin rig (caja, mueble, herramienta): TRELLIS.2 a 512 + candidatos ultratex y pixal3d. Pasos: imagen -> malla (mirar trabajo/candidatos.png y elegir malla.elegida) -> blender -> sprites."
+}

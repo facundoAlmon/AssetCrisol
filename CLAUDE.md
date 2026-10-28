@@ -28,6 +28,7 @@ corre local: no proponer servicios pagos ni APIs en la nube.
 
 ```bash
 crisol <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n> [--referencia img] [--objeto|--vehiculo] [--instalar <proyecto>]
+crisol nuevo <n> --receta <humanoide|chibi|robot|juguete|objeto|vegetacion|vehiculo|escenario> [--descripcion "..."]
 crisol estado [<n>] [--json]                        # qué está hecho, qué quedó viejo, qué falta elegir
 crisol comparar <n>                                 # trabajo/candidatos.png de malla.candidatos
 crisol <nuevo --escenario|texturas|tema> <n>
@@ -95,7 +96,9 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
   ejemplos ya renderizados en datos_dir).
 - `5_godot/`: `exportar_godot.py`, `exportar_objeto.py`, `sprite_personaje.gd`, `sprite_personaje_iso.gd`, `objeto_iso.gd`.
 - `6_escenario/`: `texturas.py`, `repetible.py`, `tema.py`.
-- `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,vehiculo,escenario}.json`, `ejemplos/`.
+- `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,escenario}.json`, `ejemplos/`.
+- `plantilla/recetas/*.json` (`crisol nuevo --receta`): `_base` (qué plantilla pisan), `_doc`, `_agregar_descripcion`,
+  `_borrar`. Lo que se aprenda de un tipo de asset (un gotcha con arreglo por json) va a su receta y a la tabla del README.
 
 ## Contratos (cambiarlos rompe juegos o pasos siguientes)
 

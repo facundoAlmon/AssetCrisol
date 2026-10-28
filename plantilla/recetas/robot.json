@@ -1,0 +1,8 @@
+{
+  "_base": "personaje",
+  "_doc": "Robot o armadura de bloques: cada vértice entero en su hueso (modelo.pesos_rigidos), así las placas no se doblan en C. Las placas que se cruzan en los golpes no tienen arreglo todavía: mirar revision.png.",
+  "_agregar_descripcion": ", arms held clearly away from the body, clearly separated rigid limb segments",
+  "modelo": {
+    "pesos_rigidos": true
+  }
+}

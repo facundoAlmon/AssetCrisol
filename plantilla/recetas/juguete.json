@@ -1,0 +1,6 @@
+{
+  "_base": "personaje",
+  "_doc": "Muñeco o figura de plástico (estilo moderno_juguete: en una persona la ropa sale lustrada, usar humanoide). DWPose no suele detectar muñecos: si `crisol articulaciones` no encuentra a nadie, cargarlas a mano mirando guia.png (README > 3a).",
+  "estilo": "moderno_juguete",
+  "_agregar_descripcion": ", arms held clearly away from the body"
+}

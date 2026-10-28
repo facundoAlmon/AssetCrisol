@@ -176,6 +176,19 @@ def main():
             if est['siguiente'] and not (RAPIDO and est['tipo'] == 'personaje'):
                 fallas.append(f"estado {est['nombre']}: queda {est['siguiente']}")
                 print(f"  ✘ estado {est['nombre']}: queda {est['siguiente']}")
+        print('[humo] recetas')   # después de estado: los assets nuevos quedan sin imagen
+        sys.path.insert(0, RAIZ)
+        from pipeline import RECETAS, cargar_receta
+        for r in RECETAS:
+            args = ['nuevo', f'receta_{r}', '--receta', r] + ([] if r == 'escenario' else ['--descripcion', 'a test'])
+            d = paso_json(env, *args)
+            if d and d['estado']['siguiente'] != f"crisol {'texturas' if r == 'escenario' else 'imagen'} receta_{r}":
+                fallas.append(f"nuevo --receta {r}: siguiente {d['estado']['siguiente']}")
+            agregar = cargar_receta(r).get('_agregar_descripcion')
+            if d and agregar:
+                with open(d['archivos'][0]) as f:
+                    if not json.load(f)['imagen']['descripcion'].endswith(agregar):
+                        fallas.append(f'nuevo --receta {r}: la descripción no termina con _agregar_descripcion')
         godot = cfg.get('godot')
         if not RAPIDO and godot and os.path.exists(godot) and not fallas:
             print('[humo] Godot: proyecto vacío temporal')
