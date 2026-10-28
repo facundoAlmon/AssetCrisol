@@ -40,5 +40,5 @@ está en `ghcr.io/facundoalmon/assetcrisol:0.1.0-alpha.1`.
 - Hojas con `.json` estilo Aseprite para otros motores; `render.emisivo`; vitrina de los ejemplos.
 - `tests/humo.py`: test de humo sin generación (~3 min).
 
-[Sin publicar]: https://github.com/facundoAlmon/AssetCrisol/compare/56f020f...main
-[0.1.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/tree/56f020f
+[Sin publicar]: https://github.com/facundoAlmon/AssetCrisol/compare/v0.1.0-alpha.1...main
+[0.1.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.1.0-alpha.1
