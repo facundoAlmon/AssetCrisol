@@ -224,7 +224,9 @@ fi
 
 # --- 2. acceso a Hugging Face (modelos gated) --------------------------------------------------------------------
 # solo si falta bajar alguno gated (un token se pide recién ahí: el resto se baja sin cuenta)
-sesion_hf() { ! hf auth whoami 2>&1 | grep -qiE 'not logged|invalid'; }
+# whoami sale con 0 sin sesión y con error si el token es inválido: se mira el texto (fuera de un pipe: con pipefail
+# el error de hf haría fallar el grep aunque encuentre "Invalid")
+sesion_hf() { local s; s=$(hf auth whoami 2>&1) || true; ! grep -qiE 'not logged|invalid' <<< "$s"; }
 gated=""
 if toca modelos && [ ! -d "$HF_HOME_DIR/hub/models--${GATED_MINIMO//\//--}/snapshots" ]; then gated=$GATED_MINIMO; fi
 if toca modelos && [ $NIVEL = completo ] && [ ! -f "$COMFY/models/diffusion_models/flux-2-klein-base-9b-fp8.safetensors" ]; then
