@@ -22,6 +22,8 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ### Arreglado
 - `instalar.sh` daba por buena una sesión de Hugging Face con un token vencido o inválido; ahora pide login.
+- Con `comfyui_url` en otro puerto que el 8188, la imagen con referencia, las vistas, Pixal3D y las texturas con
+  FLUX.2 buscaban ComfyUI en el 8188 (`comfy run` sin `--host`/`--port`).
 
 ## [0.1.0-alpha.1] - 2026-10-28
 

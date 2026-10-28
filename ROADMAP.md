@@ -56,8 +56,9 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] Publicada en GHCR (`ghcr.io/facundoalmon/assetcrisol`, pública): `0.1.0-alpha.1` + `latest`, con
       `docker/publicar.sh` (se construye acá: 23 GB no entran en los runners gratis de GitHub).
 - [x] `instalar.sh` nativo: repos externos en commits fijos, venvs con `uv`, extensiones de TRELLIS.2 compiladas para
-      la GPU, modelos con `hf download`; reconoce lo ya instalado y se puede volver a correr. Probado en limpio
-      (ComfyUI, TRELLIS.2 generando una malla, Blender); falta una prueba completa con todos los modelos.
+      la GPU, modelos con `hf download`; reconoce lo ya instalado y se puede volver a correr. Probado en limpio con
+      el nivel completo (2026-10-28, 44 min): imagen con Z-Image y con Qwen, malla con TRELLIS.2 + UltraTex + Pixal3D,
+      Blender y sprites.
 - [x] Niveles (`--nivel`): **mínimo** ComfyUI (Qwen Image Edit, Z-Image Turbo) + TRELLIS.2 + Blender; **completo**
       + Pixal3D, UltraTex (FLUX.2 Klein), DWPose y escenarios; `--flux2` suma FLUX.2 Dev.
 - [x] Kimodo en `instalar.sh` (`--kimodo`; el codificador de texto sale del espejo de Llama 3 de NousResearch, sin

@@ -68,7 +68,6 @@ def prompt_vista(v, pj=None):
 
 def generar_vistas(cfg, nombre, pj, img, dir_img):
     """Espalda y costados de la imagen elegida con Qwen Edit (si no están ya); en un vehículo, también el frente."""
-    comfy = generar_imagen.comfy_cli(cfg)
     salida = os.path.join(cfg['comfyui_dir'], 'output')
     rutas = {}
     if not all(os.path.exists(os.path.join(dir_img, f'vista_{v}.png')) for v in vistas_de(pj)):
@@ -81,7 +80,7 @@ def generar_vistas(cfg, nombre, pj, img, dir_img):
             seed = pj['malla'].get('seed_vistas', pj['malla'].get('seed', 1))
             generar_imagen.armar_workflow(cfg, nombre, pj, seed, wf, prefijo, ref=img, prompt=prompt_vista(v, pj))
             print(f'[malla] vista {v} con Qwen Edit...', flush=True)
-            generar_imagen.run_json([comfy, '--json', '--where', 'local', 'run', '--workflow', wf, '--wait'])
+            generar_imagen.comfy_run(cfg, wf)
             ult = max(glob.glob(os.path.join(salida, prefijo + '_*.png')), key=os.path.getmtime)
             shutil.copy(ult, dst)
         rutas[v] = dst

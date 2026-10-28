@@ -4,13 +4,20 @@
 #    licencia no comercial) generan desde el prompt.
 # Una imagen por seed -> personajes/<n>/trabajo/imagen/cand_<seed>.png + candidatos.png (hoja de contacto).
 # Se llama desde pipeline.py (python3 del sistema; usa el CLI `comfy` del venv de ComfyUI).
-import glob, json, os, shutil, subprocess, sys, time, urllib.request
+import glob, json, os, shutil, subprocess, sys, time, urllib.parse, urllib.request
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 
 
 def comfy_cli(cfg):
     return os.path.join(cfg['comfyui_dir'], 'venv', 'bin', 'comfy')
+
+
+def comfy_run(cfg, wf):
+    """`comfy run` contra el ComfyUI de `comfyui_url` (sin --host/--port, comfy-cli va siempre al 8188)."""
+    u = urllib.parse.urlsplit(cfg['comfyui_url'])
+    return run_json([comfy_cli(cfg), '--json', '--where', 'local', 'run', '--workflow', wf, '--wait',
+                     '--host', u.hostname, '--port', str(u.port or 8188)])
 
 
 def servidor_vivo(cfg):
@@ -143,7 +150,6 @@ def main(cfg, nombre, pj):
     motor = 'qwen edit' if pj['imagen'].get('referencia') else motor_texto(cfg, pj)
     print(f'[imagen] estilo {pj["_estilo"]["nombre"]}, motor {motor}; prompt (en trabajo/imagen/prompt.txt):\n  {prompt}')
     asegurar_servidor(cfg, out_dir)
-    comfy = comfy_cli(cfg)
     salida_comfy = os.path.join(cfg['comfyui_dir'], 'output')
     hechas = []
     for seed in pj['imagen']['seeds']:
@@ -158,7 +164,7 @@ def main(cfg, nombre, pj):
             generar_malla_pixal3d.correr(cfg, w)
         else:
             armar_workflow(cfg, nombre, pj, seed, wf, prefijo)
-            run_json([comfy, '--json', '--where', 'local', 'run', '--workflow', wf, '--wait'])
+            comfy_run(cfg, wf)
         ult = max(glob.glob(os.path.join(salida_comfy, prefijo + '_*.png')), key=os.path.getmtime)
         dst = os.path.join(out_dir, f'cand_{seed}.png')
         shutil.copy(ult, dst)

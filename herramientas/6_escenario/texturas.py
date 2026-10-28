@@ -101,7 +101,7 @@ def correr_flux(cfg, prompt, seed, prefijo, wf_path, tam=(1024, 1024)):
         a, widget = addr.split('.')
         generar_imagen.run_json([comfy, '--json', '--where', 'local', 'workflow', 'set-widget', wf_path,
                                  f'{alias[a]}.{widget}', val])
-    generar_imagen.run_json([comfy, '--json', '--where', 'local', 'run', '--workflow', wf_path, '--wait'])
+    generar_imagen.comfy_run(cfg, wf_path)
 
 
 def subir_referencia(cfg, edir, nombre, clave, t, esc):
