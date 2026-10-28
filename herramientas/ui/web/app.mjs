@@ -47,9 +47,10 @@ function CrisolMini() {
   const g = useGlobal()
   const tr = g.cola.trabajos.find(x => x.estado === 'corriendo')
   const pendientes = g.cola.trabajos.filter(x => x.estado === 'pendiente').length
-  return html`<a class="crisol-mini" href="#/cola">
+  const quien = (tr ? tr.nombre : '') + (pendientes ? ` +${pendientes}` : '')
+  return html`<a class="crisol-mini" href="#/cola" title=${tr ? `${nombrePaso(tr.paso, tr.tipo)}: ${quien}` : null}>
     <div class="linea"><b>${tr ? nombrePaso(tr.paso, tr.tipo) : t('cola.nada')}</b>
-      <span class="tenue">${tr ? tr.nombre : ''}${pendientes ? ` +${pendientes}` : ''}</span></div>
+      ${quien && html`<span class="tenue">${quien}</span>`}</div>
     <${Colada} tr=${tr} cola=${g.cola} />
   </a>`
 }

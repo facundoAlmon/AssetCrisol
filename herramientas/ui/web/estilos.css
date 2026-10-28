@@ -283,8 +283,9 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .lightbox.zoom img { max-width: none; max-height: none; }
 
 /* ---------- cola y crisol ---------- */
-.crisol-mini { padding: 12px; border-radius: var(--r); background: var(--superficie-2); border: 1px solid var(--linea); text-decoration: none; display: grid; gap: 8px; }
-.crisol-mini .linea { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.crisol-mini { padding: 12px; border-radius: var(--r); background: var(--superficie-2); border: 1px solid var(--linea); text-decoration: none; display: grid; gap: 8px; min-width: 0; overflow: hidden; }
+.crisol-mini .linea { display: grid; gap: 1px; font-size: 13px; min-width: 0; }
+.crisol-mini .linea > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .colada { height: 8px; border-radius: 999px; background: var(--superficie-3); overflow: hidden; position: relative; }
 .colada > i {
   position: absolute; inset: 0 auto 0 0; border-radius: inherit;
