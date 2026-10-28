@@ -84,7 +84,7 @@ texture) are always made by a person looking at a candidates sheet.
 | GPU | **NVIDIA with 16 GB of VRAM** (tested on an RTX 4080 Super, driver 580) + CUDA 12.x toolkit |
 | RAM | tested with 64 GB; 32 GB should be enough |
 | Disk | ~90 GB (minimum level) or ~135 GB (full) for tools and models, + ~0.5-1 GB per character |
-| Software | `python3` with Pillow, **Blender 5.1**, ComfyUI with `comfy-cli`, TRELLIS.2; optional: Kimodo and **Godot 4** |
+| Software | `python3` with Pillow, **Blender 5.1**, ComfyUI with `comfy-cli`, TRELLIS.2; optional: Kimodo, **Godot 4** and `uv` (for `crisol mcp`) |
 
 <details>
 <summary><b>Detailed requirements</b></summary>

@@ -78,7 +78,7 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 | GPU | **NVIDIA con 16 GB de VRAM** (probado en una RTX 4080 Super, driver 580) + toolkit de CUDA 12.x |
 | RAM | probado con 64 GB; 32 GB debería alcanzar |
 | Disco | ~90 GB (nivel mínimo) o ~135 GB (completo) para herramientas y modelos, + ~0,5-1 GB por personaje |
-| Software | `python3` con Pillow, **Blender 5.1**, ComfyUI con `comfy-cli`, TRELLIS.2; opcionales: Kimodo y **Godot 4** |
+| Software | `python3` con Pillow, **Blender 5.1**, ComfyUI con `comfy-cli`, TRELLIS.2; opcionales: Kimodo, **Godot 4** y `uv` (para `crisol mcp`) |
 
 <details>
 <summary><b>Requisitos en detalle</b></summary>

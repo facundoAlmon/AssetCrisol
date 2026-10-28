@@ -35,6 +35,7 @@ crisol <nuevo --escenario|texturas|tema> <n>
 crisol rehacer <n1,n2,...|todos>                    # blender..revisar en lote
 crisol metodo <n> [anim=kimodo|procedural ...]
 crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimodo (CPU)
+crisol mcp                                          # servidor MCP por stdio (herramientas/mcp)
 ```
 
 - `crisol` (raíz del repo) importa `pipeline` y llama `main()`: es lo mismo que `python3 pipeline.py`; si no está

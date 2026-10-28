@@ -174,6 +174,10 @@ def herramientas(R, cfg):
     R.tiene['kimodo'] = bool(py and os.path.exists(py))
     R.anotar(G, 'Kimodo (opcional)', OK if R.tiene['kimodo'] else AVISO, kd if R.tiene['kimodo'] else 'sin instalar',
              '' if R.tiene['kimodo'] else 'solo para `crisol movimiento` (README > Kimodo)')
+    uv = shutil.which('uv')
+    R.tiene['uv'] = bool(uv)
+    R.anotar(G, 'uv (opcional)', OK if uv else AVISO, uv or 'sin instalar',
+             '' if uv else 'solo para `crisol mcp`: curl -LsSf https://astral.sh/uv/install.sh | sh')
 
 
 def comfyui(R, cfg):
@@ -297,6 +301,7 @@ PASOS = [
     ('texturas (zimage)', [['comfyui', 'modelos_zimage']], 'Z-Image Turbo'),
     ('tema', [['pillow', 'numpy']], 'numpy (en el python3 del sistema o en el venv de ComfyUI)'),
     ('movimiento', [['kimodo']], 'Kimodo'),
+    ('mcp', [['uv']], 'uv (pone el SDK de MCP)'),
 ]
 # sin estos, la receta recomendada no anda: el resto son opcionales (avisan pero no hacen fallar a doctor)
 OBLIGATORIOS = {'nuevo, metodo', 'imagen (con referencia)', 'vistas', 'malla (TRELLIS.2)',
