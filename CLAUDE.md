@@ -96,6 +96,8 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
   ejemplos ya renderizados en datos_dir).
 - `5_godot/`: `exportar_godot.py`, `exportar_objeto.py`, `sprite_personaje.gd`, `sprite_personaje_iso.gd`, `objeto_iso.gd`.
 - `6_escenario/`: `texturas.py`, `repetible.py`, `tema.py`.
+- `mcp/servidor.py` (`crisol mcp`, con `uv run` y el SDK fijado en `pipeline.MCP_SDK`): herramientas MCP sobre
+  `crisol <paso> --json`; `elegir` solo con lo que dijo la persona. Al sumar un paso, también a su `PASOS`.
 - `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,escenario}.json`, `ejemplos/`.
 - `plantilla/recetas/*.json` (`crisol nuevo --receta`): `_base` (qué plantilla pisan), `_doc`, `_agregar_descripcion`,
   `_borrar`. Lo que se aprenda de un tipo de asset (un gotcha con arreglo por json) va a su receta y a la tabla del README.

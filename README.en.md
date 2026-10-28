@@ -455,6 +455,7 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
 crisol <texturas|tema> <n> [--solo piso,pared]   # scenery
 crisol godot <n> [--instalar <project>]
 crisol doctor [--json]                   # checks the installation
+crisol mcp                               # MCP server for agents (For AI agents > MCP server)
 crisol estado [<n>] [--json]             # steps done, stale, and what is left to choose (without <n>: all)
 crisol todo <n> [--instalar <project>]   # malla -> blender -> sprites -> godot (needs a chosen image)
 ```
@@ -1237,6 +1238,30 @@ map, contracts that must not be broken and problems already solved) are in [CLAU
 - **don't choose for the person** `imagen.elegida`, `malla.elegida` or the chosen textures: show them the candidates
   sheet and ask;
 - look at the visual results (`candidatos.png`, `preview.gif`, `revision.png`) before accepting them.
+
+### MCP server
+
+`crisol mcp` is a stdio [MCP](https://modelcontextprotocol.io) server with the high-level operations, for agents that
+don't run commands (or to avoid building the commands by hand). It returns the images (candidates, views, review
+sheet, the frames of a gif) so the agent can show them to the person. It needs `uv` (which provides the MCP SDK); the
+steps run with the system python3, as always.
+
+```bash
+claude mcp add assetcrisol -- /path/to/AssetCrisol/crisol mcp           # Claude Code
+# another client: {"command": "/path/to/AssetCrisol/crisol", "args": ["mcp"]}
+# another config: -e ASSETCRISOL_CONFIG=/path/config.json
+```
+
+| tool | what it does |
+|---|---|
+| `recetas` | the asset types and what each recipe sets |
+| `crear` | `crisol nuevo` with a recipe, a description (in English) and a reference |
+| `estado` | done/stale steps, `siguiente` and what is left to decide, with the sheets as images |
+| `correr` / `esperar` | one step (`imagen`, `malla`, `blender`, `iso`...); long ones keep running in the background and are awaited by id |
+| `ver` | an image from the asset's folder (a gif, as a grid of frames) |
+| `elegir` | records what **the person chose** (`imagen.elegida`, `malla.elegida`, `texturas.<clave>.elegida`) |
+| `ajustar` | changes json values with dotted keys (not the choices) |
+| `doctor` | checks the installation |
 
 ---
 

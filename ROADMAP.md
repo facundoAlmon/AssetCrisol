@@ -76,8 +76,8 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] Recetas por tipo de asset (`crisol nuevo --receta`: humanoide, chibi, robot, juguete, objeto, vegetación,
       vehículo, escenario) que arman el json solas; `--descripcion` sin editar el json.
 - [x] Avisos de licencia en el meta de cada asset (qué modelos lo hicieron, si es apto para venta).
-- [ ] Servidor MCP con las operaciones de alto nivel (crear, listar candidatos, elegir, generar, exportar), que
-      devuelva las imágenes para mostrárselas a la persona.
+- [x] Servidor MCP (`crisol mcp`) con las operaciones de alto nivel (recetas, crear, estado, correr/esperar, ver,
+      elegir, ajustar), que devuelve las imágenes para mostrárselas a la persona.
 
 ## 4. UI
 - [ ] Web local servida por el mismo pipeline (se abre en el navegador; sin cuentas ni nube), sobre la CLI.

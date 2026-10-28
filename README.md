@@ -443,6 +443,7 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
 crisol <texturas|tema> <n> [--solo piso,pared]   # escenarios
 crisol godot <n> [--instalar <proyecto>]
 crisol doctor [--json]                    # revisa la instalación
+crisol mcp                                # servidor MCP para agentes (Para agentes de IA > Servidor MCP)
 crisol estado [<n>] [--json]              # pasos hechos, viejos y qué falta elegir (sin <n>: todos)
 crisol todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
 ```
@@ -1219,6 +1220,30 @@ cada paso, mapa del código, contratos que no hay que romper y problemas ya resu
 - **no elegir por la persona** `imagen.elegida`, `malla.elegida` ni las texturas elegidas: mostrarle la hoja de
   candidatos y preguntar;
 - mirar los resultados visuales (`candidatos.png`, `preview.gif`, `revision.png`) antes de darlos por buenos.
+
+### Servidor MCP
+
+`crisol mcp` es un servidor [MCP](https://modelcontextprotocol.io) por stdio con las operaciones de alto nivel, para
+agentes que no corren comandos (o para no armar los comandos a mano). Devuelve las imágenes (candidatos, vistas,
+revisión, los cuadros de un gif) para que el agente se las muestre a la persona. Necesita `uv` (pone el SDK de MCP);
+los pasos corren con el python3 del sistema, como siempre.
+
+```bash
+claude mcp add assetcrisol -- /ruta/a/AssetCrisol/crisol mcp            # Claude Code
+# otro cliente: {"command": "/ruta/a/AssetCrisol/crisol", "args": ["mcp"]}
+# otra config: -e ASSETCRISOL_CONFIG=/ruta/config.json
+```
+
+| herramienta | qué hace |
+|---|---|
+| `recetas` | los tipos de asset y qué pone cada receta |
+| `crear` | `crisol nuevo` con receta, descripción (en inglés) y referencia |
+| `estado` | pasos hechos/viejos, `siguiente` y lo que falta decidir, con las hojas como imágenes |
+| `correr` / `esperar` | un paso (`imagen`, `malla`, `blender`, `iso`...); los largos siguen en segundo plano y se esperan con el id |
+| `ver` | una imagen de la carpeta del asset (un gif, como grilla de cuadros) |
+| `elegir` | anota lo que **eligió la persona** (`imagen.elegida`, `malla.elegida`, `texturas.<clave>.elegida`) |
+| `ajustar` | cambia valores del json con claves de puntos (no las elecciones) |
+| `doctor` | revisa la instalación |
 
 ---
 

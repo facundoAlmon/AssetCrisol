@@ -39,6 +39,7 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
 
   estado   [<n>] [--json]           qué pasos están hechos, cuáles quedaron viejos y qué falta elegir (sin <n>: todos)
   doctor   [--json]                 revisa la instalación: qué falta, cómo arreglarlo y qué pasos quedan deshabilitados
+  mcp                               servidor MCP por stdio para agentes (crear, estado, correr, ver, elegir...; con uv)
 
 escenarios (nuevo <n> --escenario -> escenarios/<n>/):
   texturas <n> [--solo piso,pared]  candidatas de cada textura (piso, camino, pared) -> elegir en escenario.json
@@ -62,6 +63,13 @@ if not os.path.exists(CONFIG):
     sys.exit(f'falta {CONFIG}: copiar config.ejemplo.json a config.json y completar las rutas (README > Instalación)')
 with open(CONFIG) as f:
     CFG = json.load(f)
+MCP_SDK = ('mcp==2.3.0', 'pillow==11.3.0')
+if __name__ in ('__main__', 'pipeline') and sys.argv[1:2] == ['mcp']:   # servidor MCP por stdio (herramientas/mcp)
+    if not shutil.which('uv'):
+        sys.exit('crisol mcp necesita uv (pone el SDK de MCP): curl -LsSf https://astral.sh/uv/install.sh | sh')
+    os.environ['CRISOL_PYTHON'] = sys.executable   # los pasos siguen con este python
+    os.execvp('uv', ['uv', 'run', '--quiet', '--no-project', *(x for d in MCP_SDK for x in ('--with', d)),
+                     'python', os.path.join(H, 'mcp', 'servidor.py')])
 # dónde viven personajes/, objetos/, escenarios/ y movimientos/candidatos/ (relativo a la config)
 DATOS = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(CONFIG)), CFG.get('datos_dir') or RAIZ))
 
