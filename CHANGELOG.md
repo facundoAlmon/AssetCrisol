@@ -15,9 +15,11 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   `elegir`, `ajustar` y `doctor`, con las imágenes para mostrarle a la persona (README > Para agentes de IA).
 - `instalar.sh --kimodo`: Kimodo para `crisol movimiento` (~19 GB, en CPU, sin token de Hugging Face).
 - `crisol doctor` revisa `uv` (opcional, para `crisol mcp`).
+- `CONTRIBUTING.md`, plantillas de issues (error con `crisol doctor --json`, propuesta) y este CHANGELOG.
 
 ### Cambiado
 - `plantilla/vehiculo.json` pasó a `plantilla/recetas/vehiculo.json`.
+- `instalar.sh` probado en limpio con el nivel completo (44 min, ~138 GB).
 - Los tiempos de Pixal3D en objetos (README): el candidato `pixal3d` a 1536 tarda 1-8 min según el volumen.
 
 ### Arreglado

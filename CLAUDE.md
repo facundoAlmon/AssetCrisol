@@ -98,7 +98,9 @@ crisol mcp                                          # servidor MCP por stdio (he
 - `5_godot/`: `exportar_godot.py`, `exportar_objeto.py`, `sprite_personaje.gd`, `sprite_personaje_iso.gd`, `objeto_iso.gd`.
 - `6_escenario/`: `texturas.py`, `repetible.py`, `tema.py`.
 - `mcp/servidor.py` (`crisol mcp`, con `uv run` y el SDK fijado en `pipeline.MCP_SDK`): herramientas MCP sobre
-  `crisol <paso> --json`; `elegir` solo con lo que dijo la persona. Al sumar un paso, también a su `PASOS`.
+  `crisol <paso> --json`; `elegir` solo con lo que dijo la persona. Al sumar un paso, también a su `PASOS`. Los pasos
+  corren con el python que lanzó `crisol mcp` (`CRISOL_PYTHON`): desde un `uv run` no tiene Pillow (probarlo con
+  `/usr/bin/python3 crisol mcp`).
 - `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,escenario}.json`, `ejemplos/`.
 - `plantilla/recetas/*.json` (`crisol nuevo --receta`): `_base` (qué plantilla pisan), `_doc`, `_agregar_descripcion`,
   `_borrar`. Lo que se aprenda de un tipo de asset (un gotcha con arreglo por json) va a su receta y a la tabla del README.
@@ -175,6 +177,8 @@ crisol mcp                                          # servidor MCP por stdio (he
 
 ### Imagen, escenarios y entorno
 - Las recetas dejan los loaders en el primer valor del combo: `generar_imagen.py` fija los modelos (`modelos_imagen`).
+- `comfy run` sin `--host`/`--port` va siempre al 8188 aunque `comfyui_url` diga otro: usar `generar_imagen.comfy_run`.
+  (`workflow apply`/`set-widget` no lo necesitan: usan una copia guardada de los nodos.)
 - Foto de referencia + estilo de dibujo → pedir "3D ... no outlines, not a 2D drawing" o sale plano con contorno.
 - Escenarios: detalle **relativo al promedio en lineal** (se multiplica color × detalle × 2); detalle fino = ruido
   desde la cámara iso (`contraste` 0,5, formas grandes). Para sacar texturas de una imagen: IP-Adapter, no Qwen-Edit.
@@ -185,7 +189,8 @@ crisol mcp                                          # servidor MCP por stdio (he
 - El disco del sistema de la PC de referencia es chico: la caché de `uv` (~15 GB por instalación) y los temporales de
   nvcc van a `--destino` (`UV_CACHE_DIR`, `TMPDIR`); nunca a `~/.cache`. Los MCP de Godot/Blender corren con `uvx`
   y bloquean `~/.cache/uv` (`uv cache prune` espera; limpiar por paquete con `uv cache clean --force <pkgs>`).
-- `hf auth whoami` sale con 0 sin sesión: mirar si dice `Not logged in`/`Invalid`.
+- `hf auth whoami` sale con 0 sin sesión y con error si el token es inválido: mirar el texto (`Not logged in`/`Invalid`)
+  fuera de un pipe (con `pipefail`, el error de hf invierte un `! hf ... | grep`).
 - Contenedor (corre como el dueño de `/datos`, no root): numba cachea junto a su código (`NUMBA_CACHE_DIR` al
   volumen), Triton compila C en el primer uso (`gcc` en la imagen), lo que el entrypoint crea en `/modelos` tiene que
   crearse después de bajar a ese usuario. Sin pantalla: Blender y UltraTex por EGL (`NVIDIA_DRIVER_CAPABILITIES=all`).
