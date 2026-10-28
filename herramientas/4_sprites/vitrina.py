@@ -8,8 +8,8 @@ Antes: copiar los ejemplos a datos_dir y correr `blender` + `sprites` (+ `iso` d
 escenarios (`tests/humo.py --dejar` deja todo hecho en una carpeta temporal: ASSETCRISOL_CONFIG=<esa>/config.json).
 
 Salida: cris_acciones.gif (acciones mirando al sudoeste), cris_paseo.gif (camina por el piso), cris_direcciones.gif
-(las 8 direcciones), taller.gif (Cris entre sus objetos, a la misma escala), <objeto>.gif (gira en sus 4 direcciones) y
-<escenario>.png (las texturas elegidas, repetidas).
+(las 8 direcciones), taller.gif (Cris entre sus objetos, a la misma escala), <objeto>.gif (gira en sus 4 direcciones),
+<vehiculo>.jpg (tres cuartos de la revisión de `blender`) y <escenario>.png (las texturas elegidas, repetidas).
 """
 import json, math, os, sys
 from PIL import Image, ImageDraw, ImageFilter
@@ -17,6 +17,7 @@ from PIL import Image, ImageDraw, ImageFilter
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OBJETOS = ('horno', 'yunque', 'crisol', 'caja_herramientas', 'martillo')   # orden en taller.gif (de izquierda a derecha)
 ESCENARIOS = ('taller', 'bosque')
+VEHICULOS = ('camioneta',)
 FONDO = (46, 52, 60)
 S = 0.5                     # escala de salida: la de los sprites en el juego (render a 2×)
 
@@ -227,6 +228,16 @@ def escenario(d, n, out):
     print(f'[vitrina] {os.path.basename(out)}: {im.size}, {os.path.getsize(out) // 1024} KB')
 
 
+def vehiculo(d, n, out):
+    """La vista en tres cuartos de revision.png (el vehículo es un .glb para juegos 3D: no tiene sprites)."""
+    im = Image.open(os.path.join(d, 'objetos', n, 'trabajo', 'revision_tres_cuartos.png')).convert('RGB')
+    w, h = im.width * 0.6, im.height * 0.6     # el vehículo ocupa el centro: recortar el piso de alrededor
+    cx, cy = im.width * 0.48, im.height * 0.53
+    im = im.crop((round(cx - w / 2), round(cy - h / 2), round(cx + w / 2), round(cy + h / 2)))
+    im.save(out, quality=88, optimize=True)
+    print(f'[vitrina] {os.path.basename(out)}: {im.size}, {os.path.getsize(out) // 1024} KB')
+
+
 def main():
     salida = sys.argv[sys.argv.index('--salida') + 1] if '--salida' in sys.argv else os.path.join(RAIZ, 'docs', 'vitrina',
                                                                                                     'img')
@@ -243,6 +254,8 @@ def main():
     for n in OBJETOS:
         giro(Objeto(d, n, alto_px=170), os.path.join(salida, f'{n}.gif'), textura)
     taller(cris, objs, os.path.join(salida, 'taller.gif'), textura)
+    for n in VEHICULOS:
+        vehiculo(d, n, os.path.join(salida, f'{n}.jpg'))
     for n in ESCENARIOS:
         escenario(d, n, os.path.join(salida, f'{n}.png'))
 

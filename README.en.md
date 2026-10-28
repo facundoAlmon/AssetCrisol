@@ -244,7 +244,7 @@ the GPU. The `MISSING`/`UNEXPECTED` LoRA warnings on load are normal.
 ### Try the examples (no generation needed)
 
 `ejemplos/` (examples) contains **Cris**, the project's main character (a young blacksmith with copper hair and goggles), her
-props (`crisol` crucible, `yunque` anvil, `martillo` hammer, `horno` furnace, `caja_herramientas` toolbox), a crate
+props (`crisol` crucible, `yunque` anvil, `martillo` hammer, `horno` furnace, `caja_herramientas` toolbox), her `camioneta` pickup truck (vehicle recipe), a crate
 (`caja`) and two scenery kits (`bosque`, a forest, and `taller`, Cris's workshop), each with its json. Cris and the
 props already include their `trabajo/malla/modelo.glb`, so you can run everything **from Blender onwards** without ComfyUI or TRELLIS.2
 (just Blender and Pillow):

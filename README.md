@@ -237,7 +237,7 @@ avisos `MISSING`/`UNEXPECTED` del LoRA al cargar son normales.
 ### Probar con los ejemplos (sin generar nada)
 
 `ejemplos/` trae a **Cris**, la protagonista del proyecto (una herrera joven de pelo cobrizo con antiparras), sus
-objetos (`crisol`, `yunque`, `martillo`, `horno`, `caja_herramientas`), una `caja` y dos escenarios (`bosque` y
+objetos (`crisol`, `yunque`, `martillo`, `horno`, `caja_herramientas`), su `camioneta` (receta de vehículos), una `caja` y dos escenarios (`bosque` y
 `taller`, el taller de Cris), cada uno con su json. Cris y los objetos traen ya su `trabajo/malla/modelo.glb`, así
 que se puede correr todo **de Blender en adelante** sin ComfyUI ni TRELLIS.2 (solo Blender y Pillow):
 

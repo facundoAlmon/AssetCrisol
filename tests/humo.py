@@ -111,9 +111,16 @@ def main():
             if paso(env, 'godot', 'cris'):
                 hay(c, os.path.join(g, 'cris_visual.tscn'))
         for obj in sorted(os.listdir(os.path.join(D, 'objetos'))):
-            print(f'[humo] objeto: {obj}')
+            o = os.path.join(D, 'objetos', obj)
+            with open(os.path.join(o, 'objeto.json')) as f:
+                vehiculo = 'vehiculo' in json.load(f)
+            print(f"[humo] {'vehículo' if vehiculo else 'objeto'}: {obj}")
+            if vehiculo:   # sin sprites: el juego usa el .glb
+                if paso(env, 'blender', obj):
+                    hay(o, os.path.join('trabajo', 'vehiculo.glb'), os.path.join('trabajo', 'tarjeta.png'))
+                    revisar_imagen(os.path.join(o, 'trabajo', 'revision.png'))
+                continue
             if paso(env, 'blender', obj) and paso(env, 'sprites', obj) and paso(env, 'godot', obj):
-                o = os.path.join(D, 'objetos', obj)
                 hay(o, 'preview.png', os.path.join('godot', 'objetos', obj, f'{obj}_iso.tscn'))
                 revisar_imagen(os.path.join(o, 'preview.png'))
         for esc in ('bosque', 'taller'):

@@ -66,6 +66,7 @@ los scripts que importan `bpy`, no a los renders).
 | `personajes/cris/demo_*.gif`, `preview_iso.gif` | renders de Cris | **no** (ídem) |
 | `objetos/crisol`, `yunque`, `caja_herramientas` | Z-Image Turbo → TRELLIS.2 + **UltraTex** | **no** (por UltraTex) |
 | `objetos/martillo`, `horno` | Z-Image Turbo → Pixal3D | sí |
+| `objetos/camioneta` | Z-Image Turbo + Qwen Image Edit → TRELLIS.2 + **UltraTex** | **no** (por UltraTex) |
 | `objetos/caja` | malla del motor anterior (Hunyuan3D-2), pendiente de rehacer con TRELLIS.2 | a revisar |
 | `escenarios/bosque` | Z-Image Turbo (piso), DreamShaper XL Turbo (camino, pared, fondo) | sí |
 | `escenarios/taller` | Z-Image Turbo | sí |

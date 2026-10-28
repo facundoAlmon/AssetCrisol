@@ -44,7 +44,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
       revisión (revés 0,2 %). En `ejemplos/personajes/cris`.
 - [x] Objetos: crisol, yunque, martillo, horno de fundición, caja de herramientas. En `ejemplos/objetos/`.
 - [ ] Crisol del logo: el metal fundido no brilla (ningún motor lo pinta incandescente): material emisivo en Blender.
-- [ ] Vehículo: un auto para Cris (receta de vehículos).
+- [x] Vehículo: la camioneta de Cris (receta de vehículos). En `ejemplos/objetos/camioneta`.
 - [x] Escenario: el taller (piso de piedra, camino y pared de ladrillo; Z-Image Turbo). En `ejemplos/escenarios/taller`.
 
 ## 2. Requisitos e instalación (humanos y agentes)
