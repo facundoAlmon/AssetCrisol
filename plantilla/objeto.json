@@ -21,7 +21,7 @@
     "resolucion": 512,
     "textura_px": 2048,
     "seed": 1234,
-    "_doc": "TRELLIS.2: resolucion 512 | 1024 | 1536 (más = más detalle y VRAM; los objetos macizos a 1024 no entran en 16 GB). Candidatos (README > paso 2): ultratex = la de TRELLIS.2 repintada (cofre mejor, computadora peor) y pixal3d = Pixal3D de una vista (mejor geometría en el cofre; el paso malla lo endereza). malla genera los tres y arma trabajo/candidatos.png: elegir malla.elegida y correr malla de nuevo (copia). Sacar candidatos para ahorrar GPU (~1 y ~4 min). \"motor\":",
+    "_doc": "TRELLIS.2: resolucion 512 | 1024 | 1536 (más = más detalle y VRAM; los objetos macizos a 1024 no entran en 16 GB). Candidatos (README > paso 2): ultratex = la de TRELLIS.2 repintada (cofre mejor, computadora peor) y pixal3d = Pixal3D de una vista (mejor geometría en el cofre; el paso malla lo endereza). malla genera los tres y arma trabajo/candidatos.png: elegir malla.elegida y correr malla de nuevo (copia). Sacar candidatos para ahorrar GPU (ultratex ~1-6 min, pixal3d ~1-8 min según el volumen). \"motor\":",
     "candidatos": {
       "ultratex": {
         "desde": "trellis2",

@@ -116,7 +116,7 @@ Cada personaje con malla ocupa ~0,5-1 GB en `datos_dir`.
 | `instalar.sh` | lo que tarde en bajar ~135 GB (a 50 MB/s, ≈45 min) + ~10 min de compilar TRELLIS.2 |
 | `imagen` | ≈20 s por seed (Qwen Image Edit o Z-Image Turbo); FLUX.2 Dev ≈3,5 min |
 | `vistas` | ≈1 min (espalda y costados con Qwen) |
-| `malla` | Pixal3D ≈2 min (1 vista) o ≈3 min (4 vistas); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min |
+| `malla` | Pixal3D ≈2 min (1 vista) o ≈3 min (4 vistas); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min. Objetos con sus 3 candidatos: ≈10-15 min (el `pixal3d` a 1536 tarda 1-8 min según el volumen: un barril macizo ≈7) |
 | `blender` | ≈1 min (rig, pesos, todas las animaciones) |
 | `iso` / `anclas` | ≈25 s / ≈3 s |
 | `texturas` | ≈5 s por imagen (DreamShaper), ≈15 s (Z-Image) |
@@ -561,7 +561,7 @@ Antes de empezar le pide a ComfyUI que libere la VRAM (`POST /free`) sin cerrarl
 
 | | motor | tiempo | cuándo |
 |---|---|---|---|
-| **Pixal3D** | `"motor": "pixal3d"` (defecto de personajes) | ≈2 min con 1 vista, ≈3 min + 1 de vistas con 4 | caras finas, ojos de verdad, estampados nítidos |
+| **Pixal3D** | `"motor": "pixal3d"` (defecto de personajes) | ≈2 min con 1 vista, ≈3 min + 1 de vistas con 4 (un objeto macizo a 1536, hasta ≈8) | caras finas, ojos de verdad, estampados nítidos |
 | **TRELLIS.2** | `"motor": "trellis2"` | ≈3 min | objetos (a 512), vehículos (a 1024), alternativa general |
 | **UltraTex** | `"ultratex": true` o un dict | ≈1-6 min | repinta la malla del motor; la mejor textura para humanoides |
 

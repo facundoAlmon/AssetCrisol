@@ -122,7 +122,7 @@ Each character with a mesh takes ~0.5-1 GB in `datos_dir`.
 | `instalar.sh` | however long ~135 GB take to download (at 50 MB/s, ≈45 min) + ~10 min to compile TRELLIS.2 |
 | `imagen` | ≈20 s per seed (Qwen Image Edit or Z-Image Turbo); FLUX.2 Dev ≈3.5 min |
 | `vistas` | ≈1 min (back and sides with Qwen) |
-| `malla` | Pixal3D ≈2 min (1 view) or ≈3 min (4 views); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min |
+| `malla` | Pixal3D ≈2 min (1 view) or ≈3 min (4 views); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min. Props with their 3 candidates: ≈10-15 min (the `pixal3d` one at 1536 takes 1-8 min depending on volume: a solid barrel ≈7) |
 | `blender` | ≈1 min (rig, weights, all animations) |
 | `iso` / `anclas` | ≈25 s / ≈3 s |
 | `texturas` | ≈5 s per image (DreamShaper), ≈15 s (Z-Image) |
@@ -577,7 +577,7 @@ repaint:
 
 | | engine | time | when |
 |---|---|---|---|
-| **Pixal3D** | `"motor": "pixal3d"` (character default) | ~2 min with 1 view, ~3 min + 1 for views with 4 | fine faces, real eyes, sharp prints |
+| **Pixal3D** | `"motor": "pixal3d"` (character default) | ~2 min with 1 view, ~3 min + 1 for views with 4 (a solid prop at 1536, up to ~8) | fine faces, real eyes, sharp prints |
 | **TRELLIS.2** | `"motor": "trellis2"` | ~3 min | props (at 512), vehicles (at 1024), general alternative |
 | **UltraTex** | `"ultratex": true` or a dict | ~1-6 min | repaints the engine's mesh; the best texture for humanoids |
 

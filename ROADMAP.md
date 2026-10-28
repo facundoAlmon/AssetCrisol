@@ -123,6 +123,8 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [ ] Kimodo, traducción: muñeca de los golpes, cierre de brazos en torsos anchos, adaptación a chibis.
 - [ ] Articulaciones de muñecos/juguetes (DWPose no los detecta): vistas de Qwen o Make-It-Animatable v2.
 - [ ] Separar la seed de estructura y la de forma también en TRELLIS.2.
+- [ ] Candidato `pixal3d` de los objetos a 1024 en vez de 1536: a 1536 tarda 1-8 min según el volumen (la subida
+      domina); probar en 2-3 objetos si conserva la geometría que lo hace útil (el cofre).
 - [ ] Pesos con SkinTokens/Puppeteer, solo si las opciones actuales dejan de alcanzar.
 - [x] Rodilla siempre un poco adelante de la línea cadera-tobillo (con DWPose sobre piernas rectas el IK la doblaba
       para atrás al agacharse).
