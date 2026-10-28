@@ -345,3 +345,100 @@ def main(ruta_config, args):
     print('\n' + ('Falta algo obligatorio (✘): ver arriba cómo arreglarlo.' if fallo else
                   'Todo lo obligatorio está. Los ! son opcionales o avisos.'))
     return 1 if fallo else 0
+
+
+# Revisión rápida antes de un paso: solo lo que ese paso necesita con la config del asset, para cortar con un mensaje
+# claro (qué falta y cómo arreglarlo) en vez de un traceback a mitad de camino.
+def _necesita(paso, pj, cfg):
+    """Capacidades (R.tiene) que necesita `paso` para este asset."""
+    if paso in ('guia', 'blender', 'retrato', 'iso', 'anclas', 'revisar', 'comparar', 'rehacer'):
+        return {'blender'}
+    if paso == 'articulaciones':
+        return {'comfyui', 'nodo_dwpose', 'blender'}
+    if paso == 'ultratex':
+        return {'comfyui', 'nodo_ultratex', 'modelos_ultratex', 'blender'}
+    if paso == 'vistas':
+        return {'comfyui', 'modelos_qwen'}
+    if paso == 'movimiento':
+        return {'kimodo'}
+    if paso == 'imagen':
+        img = pj.get('imagen', {})
+        if img.get('referencia'):
+            return {'comfyui', 'modelos_qwen'}
+        motor = img.get('motor') or ('zimage' if cfg.get('modelos_imagen', {}).get('zimage_unet') else 'flux2')
+        return {'comfyui', 'modelos_zimage'} if motor == 'zimage' else {'comfyui', 'modelos_flux2', 'nodo_gguf'}
+    if paso in ('malla', 'todo'):
+        m = pj.get('malla', {})
+        variantes = [m] + [dict(m, **c) for c in (m.get('candidatos') or {}).values()]
+        nec = {'blender'}
+        for v in variantes:
+            if v.get('motor', 'trellis2') == 'pixal3d':
+                nec |= {'comfyui', 'pixal3d_nodos', 'modelos_pixal3d'}
+            elif not v.get('desde'):
+                nec.add('trellis2')
+            if v.get('vistas') and v.get('motor') == 'pixal3d':
+                nec |= {'modelos_qwen'}
+            if v.get('ultratex'):
+                nec |= {'comfyui', 'nodo_ultratex', 'modelos_ultratex'}
+        return nec
+    if paso == 'texturas':
+        nec = {'comfyui'}
+        for t in pj.get('texturas', {}).values():
+            motor = t.get('motor') or pj.get('motor', 'sdxl')
+            if motor == 'sdxl':
+                nec.add('modelos_sdxl')
+                if t.get('referencia') or pj.get('referencia'):
+                    nec |= {'modelos_ipadapter', 'nodo_ipadapter'}
+            elif motor == 'zimage':
+                nec.add('modelos_zimage')
+            else:
+                nec |= {'modelos_flux2', 'nodo_gguf'}
+        return nec
+    return set()
+
+
+def _items_de(R, cap):
+    """Los renglones de la revisión que explican una capacidad que falta."""
+    def de(grupo, *nombres):
+        return [i for i in R.items if i['grupo'] == grupo and i['estado'] != OK and (not nombres or i['nombre'] in nombres)]
+    if cap == 'comfyui':
+        return de('ComfyUI', 'carpeta', 'venv', 'comfy-cli')
+    if cap.startswith('modelos_'):
+        return de('Modelos de ComfyUI', cap[8:])
+    if cap.startswith('nodo_'):
+        return de('ComfyUI', f'nodo {NODOS[cap[5:]][1].rsplit("/", 1)[1]}', 'UltraTex: paquetes')
+    if cap == 'pixal3d_nodos':
+        return de('ComfyUI', 'nodos de Pixal3D')
+    if cap == 'trellis2':
+        return de('TRELLIS.2')
+    return de('Herramientas', {'blender': 'Blender', 'kimodo': 'Kimodo (opcional)', 'godot': 'Godot (opcional)'}[cap])
+
+
+def revisar_paso(cfg, paso, pj, instalar=False):
+    """Lo que le falta a la instalación para `paso` con este asset: [] si está todo, o renglones
+    {nombre, detalle, arreglo}. Rápido: no pide versiones salvo en los grupos que el paso usa."""
+    nec = _necesita(paso, pj, cfg) | ({'godot'} if instalar else set())
+    if not nec:
+        return []
+    R = Revision()
+    if nec & {'blender', 'kimodo', 'godot'}:
+        G = 'Herramientas'
+        R.tiene['blender'] = ejecutable(R, G, 'Blender', cfg.get('blender'), True,
+                                        './instalar.sh --solo blender,config (o Blender 5.1 en `blender` de config.json)')
+        R.tiene['godot'] = ejecutable(R, G, 'Godot (opcional)', cfg.get('godot'), False, 'Godot 4.x en `godot` de config.json')
+        kd = cfg.get('kimodo_dir')
+        R.tiene['kimodo'] = R.anotar(G, 'Kimodo (opcional)', OK if kd and not placeholder(kd) and os.path.exists(
+            os.path.join(kd, 'venv', 'bin', 'python')) else FALTA, kd or 'sin configurar', 'README > Kimodo')
+    if any(c == 'comfyui' or c.startswith(('modelos_', 'nodo_', 'pixal3d')) for c in nec):
+        comfyui(R, cfg)
+    if 'trellis2' in nec:
+        trellis(R, cfg)
+    faltan, vistos = [], set()
+    for cap in sorted(c for c in nec if not R.tiene.get(c)):
+        if cap != 'comfyui' and cap.startswith(('modelos_', 'nodo_', 'pixal3d')) and not R.tiene.get('comfyui'):
+            continue   # sin ComfyUI no se revisan sus nodos ni modelos: alcanza con decir que falta ComfyUI
+        for i in _items_de(R, cap) or [{'nombre': cap, 'detalle': 'no está', 'arreglo': ''}]:
+            if i['nombre'] not in vistos:
+                vistos.add(i['nombre'])
+                faltan.append({k: i[k] for k in ('nombre', 'detalle', 'arreglo')})
+    return faltan

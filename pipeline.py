@@ -801,7 +801,20 @@ def main():
             def estado_de():
                 return estado.estado(*cargar(a.personaje), a.personaje)
         salida.correr_json(a.paso, a.personaje, carpetas_del_paso(a), lambda: ejecutar(a), estado_de)
-    ejecutar(a)
+    if os.environ.get('CRISOL_TRAZA'):
+        return ejecutar(a)
+    try:
+        ejecutar(a)
+    except Exception as e:  # noqa: BLE001 (un error que el paso no previó: mensaje corto + traceback en un log)
+        import tempfile, traceback
+        carpetas = [c for c in carpetas_del_paso(a) if os.path.isdir(os.path.join(c, 'trabajo'))]
+        log = os.path.join(carpetas[0], 'trabajo', f'error_{a.paso}.log') if len(carpetas) == 1 else \
+            os.path.join(tempfile.gettempdir(), f'crisol_error_{a.paso}.log')
+        with open(log, 'w') as f:
+            traceback.print_exc(file=f)
+        salida.salir(salida.ERROR, f'[{a.paso}] error inesperado: {type(e).__name__}: {e}\n'
+                                   f'  traceback en {log} (CRISOL_TRAZA=1 lo muestra acá); `crisol doctor` revisa la '
+                                   f'instalación y `crisol estado {a.personaje}` qué pasos faltan')
 
 
 def carpetas_del_paso(a):
@@ -816,12 +829,45 @@ def carpetas_del_paso(a):
     return [os.path.join(DATOS, c, a.personaje) for c, _ in CARPETAS if os.path.isdir(os.path.join(DATOS, c, a.personaje))]
 
 
+def revisar_instalacion(a):
+    """Antes del paso: ¿la instalación tiene lo que este paso necesita con la config de este asset? Si no, sale con
+    salida.FALTA_INSTALAR diciendo qué falta y cómo arreglarlo (en vez de fallar a mitad de camino)."""
+    import doctor
+    pj = {} if a.paso in ('nuevo', 'movimiento', 'rehacer', 'estado') else cargar(a.personaje)[1]
+    faltan = doctor.revisar_paso(CFG, a.paso, pj, instalar=bool(a.instalar))
+    if faltan:
+        salida.salir(salida.FALTA_INSTALAR, f'[{a.paso}] a la instalación le falta:\n' + '\n'.join(
+            f"  ✘ {f['nombre']}: {f['detalle']}" + (f"\n      → {f['arreglo']}" if f['arreglo'] else '') for f in faltan) +
+            '\n  (`crisol doctor` revisa todo)')
+
+
+def revisar_previos(paso, nombre):
+    """La salida del paso anterior que `paso` lee: si no está, sale con salida.FALTA_PASO nombrando qué correr."""
+    if paso in ('nuevo', 'movimiento', 'rehacer', 'estado', 'imagen', 'texturas', 'tema', 'metodo', 'todo', 'malla',
+                'vistas', 'comparar', 'ultratex'):
+        return   # sin entrada de un paso anterior, o ya lo revisan ellos (imagen elegida, modelo.glb, vistas)
+    pdir, pj = cargar(nombre)
+    t = os.path.join(pdir, 'trabajo')
+    g = os.path.join(dir_godot(pdir), 'objetos' if pj['_objeto'] else 'personajes', nombre)
+    necesita = {'sprites': [('blender', os.path.join(t, 'render', 'render.json') if pj['_objeto'] else
+                             os.path.join(t, f'{nombre}.blend'))],
+                'revisar': [('sprites', os.path.join(g, f'{nombre}_meta.json')),
+                            ('iso', os.path.join(g, 'iso', f'{nombre}_iso_meta.json'))],
+                'godot': [('sprites', os.path.join(g, f'{nombre}_meta.json'))]
+                }.get(paso, [('malla', os.path.join(t, 'malla', 'modelo.glb'))])   # guia, blender, iso, anclas...
+    for previo, ruta in necesita:
+        if not os.path.exists(ruta):
+            salida.falta_paso(f'[{paso}] falta {os.path.relpath(ruta, pdir)}: correr antes `crisol {previo} {nombre}`')
+
+
 def ejecutar(a):
     es_escenario = os.path.exists(os.path.join(DATOS, 'escenarios', a.personaje, 'escenario.json'))
     if a.cambios and a.paso != 'metodo':
         salida.salir(salida.USO, f'{a.paso}: argumentos de más: {" ".join(a.cambios)}')
     if a.paso not in ('nuevo', 'movimiento') and es_escenario != (a.paso in PASOS_ESCENARIO):
         salida.salir(salida.USO, f'{a.paso}: es un paso de {"personajes y objetos" if es_escenario else "escenarios"}')
+    revisar_instalacion(a)
+    revisar_previos(a.paso, a.personaje)
     if a.paso == 'nuevo':
         paso_nuevo(a.personaje, a.referencia, a.objeto or a.vehiculo, a.escenario, a.vehiculo)
     elif a.paso == 'texturas':

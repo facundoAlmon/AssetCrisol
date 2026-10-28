@@ -439,7 +439,10 @@ With `--json`, any step leaves a single JSON object on stdout and sends everythi
 stderr: `ok`, `codigo`, `error`, `archivos` (what it wrote; folders with many frames are summarized in `carpetas`),
 `mirar` (the sheets to review or show), `mensajes` and `estado` (the one from `crisol estado` after the step). Exit
 codes are 0 ok, 1 failed, 2 bad arguments, 3 GPU busy (with `--sin-esperar`), 4 something left to choose
-(`imagen.elegida`, a texture) and 5 a previous step is missing. No step asks questions.
+(`imagen.elegida`, a texture), 5 a previous step is missing and 6 the installation lacks something the step needs
+(before starting, each step checks only what it uses and says how to fix it; `crisol doctor` checks everything). No
+step asks questions. An error the step didn't foresee is reported in one line, with the traceback in
+`trabajo/error_<paso>.log` (`CRISOL_TRAZA=1` shows it in the terminal).
 
 Step names: `nuevo` new, `imagen` image, `vistas` views, `malla` mesh, `guia` guide, `articulaciones` joints,
 `retrato` portrait, `anclas` anchors, `revisar` review, `todo` all, `comparar` compare, `rehacer` redo, `metodo`

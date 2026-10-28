@@ -427,7 +427,10 @@ Con `--json`, cualquier paso deja en stdout un solo JSON y manda todo lo demás 
 `ok`, `codigo`, `error`, `archivos` (lo que escribió; las carpetas con muchos cuadros van resumidas en `carpetas`),
 `mirar` (las hojas para revisar o mostrar), `mensajes` y `estado` (el de `crisol estado` después del paso). Los
 códigos de salida son 0 bien, 1 falló, 2 argumentos mal, 3 GPU ocupada (con `--sin-esperar`), 4 falta elegir algo
-(`imagen.elegida`, una textura) y 5 falta un paso anterior. Ningún paso hace preguntas. `crisol` es la entrada a `pipeline.py`: sin el enlace en el PATH, `./crisol` desde el repo o `python3 pipeline.py` hacen lo
+(`imagen.elegida`, una textura), 5 falta un paso anterior y 6 a la instalación le falta algo que el paso necesita
+(antes de empezar, cada paso revisa solo lo suyo y dice cómo arreglarlo; `crisol doctor` revisa todo). Ningún paso
+hace preguntas. Un error que el paso no previó sale en una línea con el traceback en `trabajo/error_<paso>.log`
+(`CRISOL_TRAZA=1` lo muestra en la terminal). `crisol` es la entrada a `pipeline.py`: sin el enlace en el PATH, `./crisol` desde el repo o `python3 pipeline.py` hacen lo
 mismo.
 
 <details>

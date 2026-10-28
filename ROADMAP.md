@@ -97,7 +97,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] Test de humo sin generación (`tests/humo.py`): `blender` → `sprites` → `iso` → `revisar` → `godot` de Cris, la caja,
       `tema` del bosque y el taller, e instancia las escenas en un proyecto Godot vacío (~3 min).
 - [ ] Correrlo en GitHub Actions (Blender headless sin GPU: probar EEVEE por software o Workbench).
-- [ ] Errores claros cuando falta una herramienta o un modelo, en vez de un traceback.
+- [x] Errores claros cuando falta una herramienta o un modelo, en vez de un traceback.
 - [ ] Ajustes según la VRAM detectada (hoy el pipeline asume 16 GB).
 
 ## 7. Documentación, landing y v0.1

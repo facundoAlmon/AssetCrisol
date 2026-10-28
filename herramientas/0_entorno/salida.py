@@ -7,6 +7,7 @@ USO = 2            # argumentos mal (argparse)
 GPU_OCUPADA = 3    # con --sin-esperar (gpu.py)
 FALTA_ELEGIR = 4   # falta una decisión de la persona (imagen.elegida, texturas.<clave>.elegida...)
 FALTA_PASO = 5     # falta la salida de un paso anterior (correr ese paso primero)
+FALTA_INSTALAR = 6 # a la instalación le falta algo que el paso necesita (`crisol doctor`)
 
 # imágenes para mostrarle a la persona o mirar antes de dar el paso por bueno
 PARA_MIRAR = ('candidatos.png', 'vistas.png', 'revision.png', 'guia.png', 'preview.gif', 'preview_iso.gif',
@@ -106,7 +107,7 @@ def correr_json(paso, nombre, carpetas, fn, estado_de=None):
     archivos, carpetas_n = cambios(antes, foto(carpetas))
     if codigo and error is None:          # salir(): falta elegir, falta un paso, GPU ocupada
         error = motivo or {FALTA_ELEGIR: 'falta elegir', FALTA_PASO: 'falta un paso anterior',
-                 GPU_OCUPADA: 'GPU ocupada', USO: 'argumentos'}.get(codigo, 'falló')
+                 GPU_OCUPADA: 'GPU ocupada', USO: 'argumentos', FALTA_INSTALAR: 'falta instalar algo'}.get(codigo, 'falló')
     r = {'paso': paso, 'nombre': nombre, 'ok': codigo == OK, 'codigo': codigo, 'error': error,
          'archivos': archivos, 'carpetas': carpetas_n,
          'mirar': [p for p in archivos if os.path.basename(p) in PARA_MIRAR], 'mensajes': copia.lineas}
