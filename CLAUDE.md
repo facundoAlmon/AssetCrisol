@@ -123,7 +123,10 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
   Ojos achinados en la imagen elegida → editarla con Qwen ("only change the eyes") como `base_<seed>.png`.
 - Vegetación: hojas sueltas → cáscaras con agujeros; pedir masas lisas de follaje ("no individual leaves, solid
   silhouette"), `malla.fondo` `birefnet-general`, TRELLIS.2 a 512.
-- Vehículos: malla desde la cola en tres cuartos (`malla.vista: "atras"`). Buscar agujeros con Workbench +
+- Reducir caras de un GLB (p. ej. para versionar un ejemplo): soldar (`remove_doubles`) antes del Decimate; sin eso
+  se abren las costuras UV y `sacar_interior` borra media malla. Comparar el `preview.png` antes y después.
+- Vehículos: la receta supone un auto (los prompts de `vistas` dicen "toy car"): una vagoneta sale auto; otros
+  vehículos, como objeto común. Malla desde la cola en tres cuartos (`malla.vista: "atras"`). Buscar agujeros con Workbench +
   `show_backface_culling` y fondo verde.
 
 ### Rig, pesos y animación
