@@ -4,7 +4,7 @@
 # estado.py y las elecciones y ajustes de operaciones.py, como en el MCP. Corre con el python3 del sistema (Pillow
 # para las miniaturas). Solo acepta pedidos con Host local y, si cambian algo, con Origin de la misma página: corre
 # comandos en esta PC.
-import argparse, ast, glob, io, json, mimetypes, os, re, subprocess, sys, tempfile, threading, time, uuid
+import argparse, ast, glob, io, ipaddress, json, mimetypes, os, re, socket, subprocess, sys, tempfile, threading, time, uuid
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -278,8 +278,8 @@ class Doctor:
 # ---------- servidor ----------
 
 class App:
-    def __init__(self, puerto):
-        self.puerto = puerto
+    def __init__(self, puerto, red=False):
+        self.puerto, self.red = puerto, red
         self.env = dict(os.environ, CRISOL_PYTHON=op.PY)
         self.cola = Cola(os.path.join(pipeline.DATOS, '.crisol_ui'), env=self.env)
         self.cola.al_terminar = lambda t: self.cambio()
@@ -329,13 +329,26 @@ class Manejador(BaseHTTPRequestHandler):
 
     # --- seguridad ---
     def host_local(self):
+        """Host de esta PC (contra DNS rebinding: un dominio ajeno que apunte acá no pasa). Con --host 0.0.0.0 (u
+        otra interfaz) también una IP cualquiera o el nombre de la PC, para entrar desde la red local."""
         host = (self.headers.get('Host') or '').lower()
-        return host in {f'127.0.0.1:{self.app.puerto}', f'localhost:{self.app.puerto}', f'[::1]:{self.app.puerto}'}
+        nombre, _, puerto = host.rpartition(':')
+        if puerto != str(self.app.puerto):
+            return False
+        if nombre in ('127.0.0.1', 'localhost', '[::1]'):
+            return True
+        if not self.app.red:
+            return False
+        try:
+            ipaddress.ip_address(nombre.strip('[]'))
+            return True
+        except ValueError:
+            pc = socket.gethostname().lower()
+            return nombre in (pc, pc + '.local', pc + '.lan')
 
     def origen_propio(self):
-        origen = self.headers.get('Origin')
-        return origen in {f'http://127.0.0.1:{self.app.puerto}', f'http://localhost:{self.app.puerto}',
-                          f'http://[::1]:{self.app.puerto}'}
+        """Los pedidos que cambian algo, solo desde la misma página (Origin = el Host al que se habló)."""
+        return self.headers.get('Origin') == 'http://' + (self.headers.get('Host') or '').lower()
 
     def despachar(self, metodo):
         if not self.host_local():
@@ -657,13 +670,28 @@ class Manejador(BaseHTTPRequestHandler):
 def main():
     ap = argparse.ArgumentParser(prog='crisol ui', description='UI web local de AssetCrisol')
     ap.add_argument('--puerto', type=int, default=8190)
+    ap.add_argument('--host', default='127.0.0.1',
+                    help='interfaz donde escuchar (0.0.0.0: toda la red local; sin contraseña: solo en una red de confianza)')
     ap.add_argument('--no-abrir', action='store_true', help='no abrir el navegador')
     a = ap.parse_args()
-    Manejador.app = App(a.puerto)
-    srv = ThreadingHTTPServer(('127.0.0.1', a.puerto), Manejador)
+    red = a.host not in ('127.0.0.1', 'localhost', '::1')
+    Manejador.app = App(a.puerto, red)
+    clase = ThreadingHTTPServer
+    if ':' in a.host:   # IPv6 ('::' = todas)
+        clase = type('ServidorV6', (ThreadingHTTPServer,), {'address_family': socket.AF_INET6})
+    srv = clase((a.host, a.puerto), Manejador)
     srv.daemon_threads = True
     url = f'http://127.0.0.1:{a.puerto}/'
     print(f'crisol ui en {url} (datos: {pipeline.DATOS}); Ctrl+C para cerrar', flush=True)
+    if red:
+        try:   # la IP de esta PC en la red (sin mandar nada: connect de UDP solo elige la interfaz)
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sk:
+                sk.connect(('10.255.255.255', 1))
+                ip = sk.getsockname()[0]
+        except OSError:
+            ip = socket.gethostname()
+        print(f'  en la red: http://{ip}:{a.puerto}/ (escucha en {a.host})\n'
+              '  AVISO: sin contraseña; cualquiera en esta red puede correr pasos y cambiar los assets.', flush=True)
     if not a.no_abrir:
         import webbrowser
         threading.Timer(0.5, webbrowser.open, (url,)).start()

@@ -334,6 +334,7 @@ Todo lo de esta guía se puede hacer también desde una página en el navegador,
 
 ```bash
 crisol ui                    # abre http://127.0.0.1:8190/ (--puerto N, --no-abrir)
+crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma red
 ```
 
 ![crisol ui: la vista de un personaje con su cadena de pasos y el reproductor iso](docs/vitrina/img/ui.png)
@@ -353,7 +354,8 @@ crisol ui                    # abre http://127.0.0.1:8190/ (--puerto N, --no-abr
   tiempo transcurrido y el estimado (de las duraciones medidas en esta PC), el log en vivo y cancelar.
 - **Instalación**: lo que revisa `crisol doctor`; los pasos que no se pueden correr quedan apagados con el motivo.
 
-Corre solo en esta PC (escucha en `127.0.0.1`, sin cuentas ni internet), en español o inglés y con tema claro u
+Corre en esta PC (escucha en `127.0.0.1`, sin cuentas ni internet; con `--host 0.0.0.0`, en toda la red local y
+**sin contraseña**: solo en una red de confianza), en español o inglés y con tema claro u
 oscuro. La cola y el historial quedan en `<datos_dir>/.crisol_ui/`. `python3 tests/ui.py` la prueba sin GPU (~10 s).
 
 ### Primer personaje en 10 comandos

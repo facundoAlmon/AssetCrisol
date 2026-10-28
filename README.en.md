@@ -345,6 +345,7 @@ Everything in this guide can also be done from a page in the browser, without a 
 
 ```bash
 crisol ui                    # opens http://127.0.0.1:8190/ (--puerto N, --no-abrir)
+crisol ui --host 0.0.0.0     # also from another PC or a phone on the same network
 ```
 
 ![crisol ui: a character with its step chain and the iso player](docs/vitrina/img/ui.png)
@@ -364,7 +365,8 @@ crisol ui                    # opens http://127.0.0.1:8190/ (--puerto N, --no-ab
   program), with the elapsed and estimated time (from the durations measured on this PC), the live log and cancel.
 - **Setup**: what `crisol doctor` checks; steps that cannot run are disabled with the reason.
 
-It only runs on this PC (it listens on `127.0.0.1`, no accounts or internet), in Spanish or English, with a light or
+It runs on this PC (it listens on `127.0.0.1`, no accounts or internet; with `--host 0.0.0.0`, on the whole local
+network and **without a password**: only on a trusted network), in Spanish or English, with a light or
 dark theme. The queue and its history live in `<datos_dir>/.crisol_ui/`. `python3 tests/ui.py` tests it without a
 GPU (~10 s).
 
