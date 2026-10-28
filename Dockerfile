@@ -38,6 +38,9 @@ COPY . /app
 # graphics: EGL para Blender (EEVEE) y el horneado de UltraTex
 ENV NVIDIA_DRIVER_CAPABILITIES=all UV_PYTHON_INSTALL_DIR=/opt/python UV_LINK_MODE=copy \
     ASSETCRISOL_CONFIG=/app/docker/config.json PATH=/app:$PATH
+LABEL org.opencontainers.image.source=https://github.com/facundoAlmon/AssetCrisol \
+      org.opencontainers.image.description="AssetCrisol: imagen de referencia -> assets de juego (sin modelos)" \
+      org.opencontainers.image.licenses=GPL-3.0-only
 VOLUME ["/modelos", "/datos"]
 WORKDIR /datos
 ENTRYPOINT ["/app/docker/entrypoint.sh"]

@@ -18,7 +18,8 @@ carpeta tuya.
 ## Uso
 
 ```bash
-docker build -t assetcrisol .            # ~20 min (o bajarla de GHCR cuando esté publicada)
+docker pull ghcr.io/facundoalmon/assetcrisol && docker tag ghcr.io/facundoalmon/assetcrisol assetcrisol
+# o construirla: docker build -t assetcrisol .   (~20 min)
 
 # un alias para no repetir: GPU, modelos en un volumen, assets en ./assets
 mkdir -p assets
@@ -35,6 +36,12 @@ crisol todo bandido
 - Los archivos generados quedan a nombre del dueño de la carpeta montada en `/datos`.
 - Para probar sin generar: `cp -r ejemplos/* assets/` y `crisol blender cris && crisol sprites cris`.
 - Una terminal adentro: `crisol bash`.
+
+## Publicar (mantenedores)
+
+`docker/publicar.sh <versión>` la construye acá y la sube (23 GB: no entra en los runners gratis de GitHub). Por
+defecto a GHCR; `REGISTRO=docker.io/<usuario>` o `registry.gitlab.com/<usuario>/<proyecto>` para otro. Antes,
+`docker login`. En GHCR el paquete nace privado: la primera vez, hacerlo público en su página de GitHub.
 
 ## Notas
 
