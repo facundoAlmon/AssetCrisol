@@ -937,6 +937,7 @@ config and generate a test character and prop to check they match before produci
 | `render.metal`, `render.entorno` | (optional) Metallic and a gradient environment `[[height 0-1, gray], ...]`: metal reflects the environment, and a light band on the horizon makes the highlights | Blender |
 | `render.metal_gris`, `render.rugosidad_metal` | (optional) `[sat_metal, sat_non_metal]`: metal only on the gray/white parts of the texture (metal armor over skin) | Blender |
 | `render.oscuro_brillante` | (optional) `{valor, saturacion, rugosidad}`: dark, colorless areas with a different roughness (leather, black plastic) | Blender |
+| `render.emisivo` | (optional) `{tono: [min, max], saturacion, valor, fuerza}`: whatever has that color in the texture glows (molten metal, embers, lava, screens); hue in degrees (orange-yellow: `[15, 60]`), strength ~1 (more washes the color out) | Blender |
 | `render.oclusion` | (optional) `{distancia, fuerza}`: darkens grooves and joints (Ambient Occlusion node over the base color) | Blender |
 | `posproceso` | `saturacion`, `contraste`, `brillo`, `nitidez` (optional), `tinte` + `tinte_fuerza`, `contorno_px` + `contorno_color` | sprites |
 | `escala.px_por_unidad`, `escala.baldosa_px` | same on-screen size for every asset | Blender, sprites |

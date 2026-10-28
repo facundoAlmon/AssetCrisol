@@ -205,6 +205,8 @@ def importar():
                 oscuro_brillante(m, b, ESTILO['oscuro_brillante'])
             if ESTILO.get('oclusion'):
                 oclusion(m, b, ESTILO['oclusion'])
+            if ESTILO.get('emisivo'):
+                emisivo(m, b, ESTILO['emisivo'])
     return col, mesh
 
 
@@ -820,6 +822,38 @@ def oscuro_brillante(m, b, ob):
     mix.inputs['To Min'].default_value = ESTILO['rugosidad']; mix.inputs['To Max'].default_value = ob.get('rugosidad', 0.12)
     nt.links.new(por.outputs['Value'], mix.inputs['Value'])
     nt.links.new(mix.outputs['Result'], b.inputs['Roughness'])
+
+
+def emisivo(m, b, em):
+    """render > emisivo {tono: [min, max] (grados), saturacion, valor, fuerza}: lo que tiene ese color en la textura
+    brilla (emisión = el color base × fuerza): metal fundido, brasas, lava, pantallas. Ningún motor pinta algo
+    incandescente: la textura lo trae naranja plano. Máscara = tono adentro del rango × saturación >= saturacion ×
+    brillo (V) >= valor, con bordes suaves. Lo apagado no cambia."""
+    if not b.inputs['Base Color'].is_linked:
+        return
+    nt = m.node_tree
+    src = b.inputs['Base Color'].links[0].from_socket
+    sep = nt.nodes.new('ShaderNodeSeparateColor'); sep.mode = 'HSV'
+    nt.links.new(src, sep.inputs['Color'])
+    t0, t1 = (x / 360 for x in em.get('tono', [15, 60]))
+    mascaras = []
+    for canal, desde, hasta in ((0, t0 - 0.02, t0 + 0.02), (0, t1 + 0.02, t1 - 0.02),
+                                (1, em.get('saturacion', 0.5) - 0.1, em.get('saturacion', 0.5)),
+                                (2, em.get('valor', 0.6) - 0.1, em.get('valor', 0.6))):
+        mr = nt.nodes.new('ShaderNodeMapRange'); mr.interpolation_type = 'SMOOTHSTEP'
+        mr.inputs['From Min'].default_value, mr.inputs['From Max'].default_value = desde, hasta
+        nt.links.new(sep.outputs[canal], mr.inputs['Value'])
+        mascaras.append(mr.outputs['Result'])
+    total = mascaras[0]
+    for otra in mascaras[1:]:
+        por = nt.nodes.new('ShaderNodeMath'); por.operation = 'MULTIPLY'
+        nt.links.new(total, por.inputs[0]); nt.links.new(otra, por.inputs[1])
+        total = por.outputs['Value']
+    fuerza = nt.nodes.new('ShaderNodeMath'); fuerza.operation = 'MULTIPLY'
+    fuerza.inputs[1].default_value = em.get('fuerza', 1.0)
+    nt.links.new(total, fuerza.inputs[0])
+    nt.links.new(src, b.inputs['Emission Color'])
+    nt.links.new(fuerza.outputs['Value'], b.inputs['Emission Strength'])
 
 
 def oclusion(m, b, oc):

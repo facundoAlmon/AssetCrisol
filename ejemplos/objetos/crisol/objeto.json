@@ -55,5 +55,14 @@
     "sombra": true
   },
   "_escalas": "px_por_unidad / baldosa_px en null = los del estilo",
-  "colision": true
+  "colision": true,
+  "render": {
+    "emisivo": {
+      "tono": [15, 60],
+      "saturacion": 0.5,
+      "valor": 0.6,
+      "fuerza": 1.0
+    },
+    "_emisivo": "el metal fundido brilla: lo naranja-amarillo saturado y claro de la textura emite luz (README > render.emisivo)"
+  }
 }

@@ -925,6 +925,7 @@ un personaje y un objeto de prueba para ver que combinen antes de producir el re
 | `render.metal`, `render.entorno` | (opcionales) Metallic y ambiente en degradé `[[altura 0-1, gris], ...]`: el metal refleja el entorno, y una franja clara en el horizonte hace los brillos | Blender |
 | `render.metal_gris`, `render.rugosidad_metal` | (opcionales) `[sat_metal, sat_no_metal]`: metal solo en lo gris/blanco de la textura (armadura metálica sobre piel) | Blender |
 | `render.oscuro_brillante` | (opcional) `{valor, saturacion, rugosidad}`: lo oscuro y sin color con otra rugosidad (cuero, plástico negro) | Blender |
+| `render.emisivo` | (opcional) `{tono: [min, max], saturacion, valor, fuerza}`: lo de ese color en la textura brilla (metal fundido, brasas, lava, pantallas); tono en grados (naranja-amarillo: `[15, 60]`), fuerza ~1 (más lava el color) | Blender |
 | `render.oclusion` | (opcional) `{distancia, fuerza}`: oscurece ranuras y uniones (nodo Ambient Occlusion sobre el color base) | Blender |
 | `posproceso` | `saturacion`, `contraste`, `brillo`, `nitidez` (opcional), `tinte` + `tinte_fuerza`, `contorno_px` + `contorno_color` | sprites |
 | `escala.px_por_unidad`, `escala.baldosa_px` | mismo tamaño en pantalla para todos los assets | Blender, sprites |
