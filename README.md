@@ -236,17 +236,18 @@ avisos `MISSING`/`UNEXPECTED` del LoRA al cargar son normales.
 
 ### Probar con los ejemplos (sin generar nada)
 
-`ejemplos/` trae a **Cris**, la protagonista del proyecto (una herrera joven de pelo cobrizo con antiparras), un objeto
-(`caja`) y dos escenarios (`bosque` y `taller`, el taller de Cris), cada uno con su json. Cris y la caja traen ya su `trabajo/malla/modelo.glb`, así
+`ejemplos/` trae a **Cris**, la protagonista del proyecto (una herrera joven de pelo cobrizo con antiparras), sus
+objetos (`crisol`, `yunque`, `martillo`, `horno`, `caja_herramientas`), una `caja` y dos escenarios (`bosque` y
+`taller`, el taller de Cris), cada uno con su json. Cris y los objetos traen ya su `trabajo/malla/modelo.glb`, así
 que se puede correr todo **de Blender en adelante** sin ComfyUI ni TRELLIS.2 (solo Blender y Pillow):
 
 ```bash
-cp -r ejemplos/* <datos_dir>/        # personajes/cris, objetos/caja, escenarios/bosque
+cp -r ejemplos/* <datos_dir>/        # personajes/, objetos/, escenarios/
 crisol blender cris                  # rig + animaciones + frames (≈1 min)
 crisol sprites cris                  # hoja + preview.gif + retrato
 crisol iso cris                      # 8 direcciones isométricas (≈25 s) -> preview_iso.gif
 crisol revisar cris                  # hoja de control -> trabajo/revision.png
-crisol blender caja && crisol sprites caja   # -> objetos/caja/preview.png
+crisol blender yunque && crisol sprites yunque   # -> objetos/yunque/preview.png (igual los otros)
 crisol tema bosque                   # texturas repetibles + colores del tema (trae las texturas elegidas)
 crisol tema taller                   # lo mismo: piso de piedra, camino y pared de ladrillo
 ```

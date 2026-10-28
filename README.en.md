@@ -243,18 +243,19 @@ the GPU. The `MISSING`/`UNEXPECTED` LoRA warnings on load are normal.
 
 ### Try the examples (no generation needed)
 
-`ejemplos/` (examples) contains **Cris**, the project's main character (a young blacksmith with copper hair and goggles), a
-prop (`caja`, a crate) and two scenery kits (`bosque`, a forest, and `taller`, Cris's workshop), each with its json. Cris and the crate already include
-their `trabajo/malla/modelo.glb`, so you can run everything **from Blender onwards** without ComfyUI or TRELLIS.2
+`ejemplos/` (examples) contains **Cris**, the project's main character (a young blacksmith with copper hair and goggles), her
+props (`crisol` crucible, `yunque` anvil, `martillo` hammer, `horno` furnace, `caja_herramientas` toolbox), a crate
+(`caja`) and two scenery kits (`bosque`, a forest, and `taller`, Cris's workshop), each with its json. Cris and the
+props already include their `trabajo/malla/modelo.glb`, so you can run everything **from Blender onwards** without ComfyUI or TRELLIS.2
 (just Blender and Pillow):
 
 ```bash
-cp -r ejemplos/* <datos_dir>/        # personajes/cris, objetos/caja, escenarios/bosque
+cp -r ejemplos/* <datos_dir>/        # personajes/, objetos/, escenarios/
 crisol blender cris                  # rig + animations + frames (~1 min)
 crisol sprites cris                  # sheet + preview.gif + portrait
 crisol iso cris                      # 8 isometric directions (~25 s) -> preview_iso.gif
 crisol revisar cris                  # review sheet -> trabajo/revision.png
-crisol blender caja && crisol sprites caja   # -> objetos/caja/preview.png
+crisol blender yunque && crisol sprites yunque   # -> objetos/yunque/preview.png (same for the others)
 crisol tema bosque                   # tileable textures + theme colors (the chosen textures are included)
 crisol tema taller                   # same: stone floor, brick path and wall
 ```

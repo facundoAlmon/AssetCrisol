@@ -1,0 +1,59 @@
+{
+  "_doc": "De Cris: imagen con Z-Image Turbo (seed 11), malla TRELLIS.2 + UltraTex (candidato ultratex). Ya trae trabajo/malla/modelo.glb: copiar a <datos_dir>/objetos/ y correr blender y sprites.",
+  "tipo": "objeto",
+  "estilo": "semirealista",
+  "_estilo": "null = el de config.json; o el nombre de un archivo de estilos/",
+  "imagen": {
+    "referencia": null,
+    "motor": "zimage",
+    "_motor": "solo sin referencia: zimage (Z-Image Turbo, segundos, Apache-2.0) | flux2 (FLUX.2 Dev, ~3 min, no comercial). Con referencia siempre Qwen Image Edit",
+    "descripcion": "a blacksmith's clay crucible: a thick round ceramic pot, dark sooty outside, filled to the brim with bright glowing molten orange-yellow metal, glowing hot rim",
+    "_descripcion": "El prompt se arma solo: estilo (render, tema, paleta) + descripcion + encuadre (objeto solo, tres cuartos desde arriba). Queda en trabajo/imagen/prompt.txt.",
+    "seeds": [
+      11,
+      12,
+      13,
+      14
+    ],
+    "elegida": 11
+  },
+  "malla": {
+    "caras": 20000,
+    "resolucion": 512,
+    "textura_px": 2048,
+    "seed": 1234,
+    "_doc": "TRELLIS.2: resolucion 512 | 1024 | 1536 (más = más detalle y VRAM; los objetos macizos a 1024 no entran en 16 GB). Candidatos (README > paso 2): ultratex = la de TRELLIS.2 repintada (cofre mejor, computadora peor) y pixal3d = Pixal3D de una vista (mejor geometría en el cofre; el paso malla lo endereza). malla genera los tres y arma trabajo/candidatos.png: elegir malla.elegida y correr malla de nuevo (copia). Sacar candidatos para ahorrar GPU (~1 y ~4 min). \"motor\":",
+    "candidatos": {
+      "ultratex": {
+        "desde": "trellis2",
+        "ultratex": {
+          "seed": 1,
+          "giro": 45
+        }
+      },
+      "pixal3d": {
+        "motor": "pixal3d",
+        "resolucion": 1536,
+        "seed": 1,
+        "caras": 200000
+      }
+    },
+    "elegida": "ultratex"
+  },
+  "modelo": {
+    "altura": 0.4,
+    "giro_grados": 0
+  },
+  "lateral": {
+    "px_por_unidad": null,
+    "superresolucion": 3
+  },
+  "isometrico": {
+    "baldosa_px": null,
+    "superresolucion": 2,
+    "direcciones": 4,
+    "sombra": true
+  },
+  "_escalas": "px_por_unidad / baldosa_px en null = los del estilo",
+  "colision": true
+}

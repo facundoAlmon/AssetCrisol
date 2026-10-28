@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Test de humo sin GPU: corre los pasos de Blender en adelante sobre los ejemplos versionados (Cris, la caja, el
-bosque y el taller traen su malla o sus texturas elegidas) en una carpeta temporal y revisa lo que dejan.
+"""Test de humo sin GPU: corre los pasos de Blender en adelante sobre los ejemplos versionados (Cris, los objetos,
+el bosque y el taller traen su malla o sus texturas elegidas) en una carpeta temporal y revisa lo que dejan.
 
 uso: python3 tests/humo.py [--rapido] [--dejar]
-  --rapido  sin iso, revisar ni Godot (solo blender + sprites + godot de cris y caja, tema): ~1,5 min
+  --rapido  sin iso, revisar ni Godot (solo blender + sprites + godot de cris y los objetos, tema): ~2 min
   --dejar   no borrar la carpeta temporal (para mirar los resultados)
 
 Usa la config de siempre (config.json o ASSETCRISOL_CONFIG) para Blender y Godot, con un `datos_dir` temporal: no
@@ -110,11 +110,12 @@ def main():
                     hay(c, os.path.join('trabajo', 'revision.png'))
             if paso(env, 'godot', 'cris'):
                 hay(c, os.path.join(g, 'cris_visual.tscn'))
-        print('[humo] objeto: caja')
-        if paso(env, 'blender', 'caja') and paso(env, 'sprites', 'caja') and paso(env, 'godot', 'caja'):
-            o = os.path.join(D, 'objetos', 'caja')
-            hay(o, 'preview.png', os.path.join('godot', 'objetos', 'caja', 'caja_iso.tscn'))
-            revisar_imagen(os.path.join(o, 'preview.png'))
+        for obj in sorted(os.listdir(os.path.join(D, 'objetos'))):
+            print(f'[humo] objeto: {obj}')
+            if paso(env, 'blender', obj) and paso(env, 'sprites', obj) and paso(env, 'godot', obj):
+                o = os.path.join(D, 'objetos', obj)
+                hay(o, 'preview.png', os.path.join('godot', 'objetos', obj, f'{obj}_iso.tscn'))
+                revisar_imagen(os.path.join(o, 'preview.png'))
         for esc in ('bosque', 'taller'):
             print(f'[humo] escenario: {esc}')
             if paso(env, 'tema', esc):

@@ -63,6 +63,8 @@ scripts that import `bpy`, not the renders).
 |---|---|---|
 | `personajes/cris` | Z-Image Turbo + Qwen Image Edit → Pixal3D 4 views + **UltraTex** | **no** (because of UltraTex) |
 | `personajes/cris/demo_*.gif`, `preview_iso.gif` | renders of Cris | **no** (same) |
+| `objetos/crisol`, `yunque`, `caja_herramientas` | Z-Image Turbo → TRELLIS.2 + **UltraTex** | **no** (because of UltraTex) |
+| `objetos/martillo`, `horno` | Z-Image Turbo → Pixal3D | yes |
 | `objetos/caja` | mesh from the previous engine (Hunyuan3D-2), to be redone with TRELLIS.2 | to be checked |
 | `escenarios/bosque` | Z-Image Turbo (floor), DreamShaper XL Turbo (path, wall, backdrop) | yes |
 | `escenarios/taller` | Z-Image Turbo | yes |

@@ -30,7 +30,7 @@ Dos tipos de usuario, los dos de primera:
 - [x] Comentarios, estilos y plantillas sin nombres de personajes ni marcas ajenas; estilo base `animacion3d`.
 - [x] README (es/en), CLAUDE.md y AGENTS.md para el repo público.
 - [x] Comando `crisol` (`crisol todo cris`) como entrada a `pipeline.py`.
-- [x] Ejemplos versionados: un personaje (Cris), un objeto (caja) y un escenario (bosque), probados desde un clon limpio.
+- [x] Ejemplos versionados: Cris, sus objetos, una caja y dos escenarios (bosque, taller), probados con `tests/humo.py`.
 - [ ] Rehacer la caja de ejemplo con TRELLIS.2 (la malla actual salió del motor viejo, Hunyuan3D-2).
 - [x] Gif de demo para la portada del README (`ejemplos/personajes/cris/demo_acciones.gif`; también `demo_paseo` y
       `demo_direcciones`).
@@ -42,7 +42,8 @@ Elegida/o para no complicar el pipeline: humanoide de proporciones normales, rop
 antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versión estrena lo nuevo.
 - [x] Personaje: Z-Image (sin referencia) → Qwen (limpieza) → vistas → Pixal3D 4 vistas + UltraTex (seed 2) → rig →
       revisión (revés 0,2 %). En `ejemplos/personajes/cris`.
-- [ ] Objetos: el crisol con metal brillando (logo), yunque, martillo, horno de fundición, caja de herramientas.
+- [x] Objetos: crisol, yunque, martillo, horno de fundición, caja de herramientas. En `ejemplos/objetos/`.
+- [ ] Crisol del logo: el metal fundido no brilla (ningún motor lo pinta incandescente): material emisivo en Blender.
 - [ ] Vehículo: un auto para Cris (receta de vehículos).
 - [x] Escenario: el taller (piso de piedra, camino y pared de ladrillo; Z-Image Turbo). En `ejemplos/escenarios/taller`.
 
@@ -95,6 +96,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [ ] Ajustes según la VRAM detectada (hoy el pipeline asume 16 GB).
 
 ## 7. Documentación, landing y v0.1
+- [x] Vitrina de los ejemplos (`docs/vitrina/`, imágenes con `herramientas/4_sprites/vitrina.py`), para la landing.
 - [ ] Landing en GitHub Pages: qué hace, galería antes/después, requisitos, "empezá acá" para personas y agentes.
 - [ ] Docs bilingües: instalación, primer asset, recetas por tipo, referencia de `personaje.json` y estilos,
       problemas conocidos, preguntas sobre licencias.
