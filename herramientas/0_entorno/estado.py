@@ -57,6 +57,8 @@ def _cadena_malla(pdir, pj, decidir):
                             'opciones': [os.path.basename(c)[5:-4] for c in cands]})
     elif img is None:
         pasos[0] = {'paso': 'imagen', 'estado': 'falta', 'nota': f'imagen.elegida = {elegida!r} no existe'}
+        if os.path.exists(os.path.join(t, 'malla', 'modelo.glb')):   # p. ej. los ejemplos: traen la malla sola
+            pasos[0].update(estado='hecho', nota=pasos[0]['nota'] + ', pero la malla ya está')
     m = pj.get('malla', {})
     vistas = bool(pj.get('vehiculo')) or (m.get('motor') == 'pixal3d' and m.get('vistas'))
     pasos.append(_paso('vistas', os.path.join(t, 'imagen', 'vistas.png'), [img], aplica=vistas))
@@ -69,8 +71,6 @@ def _cadena_malla(pdir, pj, decidir):
         hechos = [n for n in nombres if os.path.exists(os.path.join(t, f'malla_{n}', 'modelo.glb'))]
         p = _paso('malla', glb, ent, nota=f'candidatos hechos: {", ".join(hechos) or "ninguno"} de {", ".join(nombres)}'
                                             f'; elegida: {m.get("elegida", nombres[0])}')
-        if len(hechos) < len(nombres) and p['estado'] == 'hecho':
-            p['estado'], p['nota'] = 'falta', f'faltan candidatos: {", ".join(n for n in nombres if n not in hechos)}'
         pasos.append(p)
         if 'elegida' not in m and hechos:
             hoja = os.path.join(t, 'revision.png' if pj.get('vehiculo') else 'candidatos.png')
@@ -120,17 +120,20 @@ def objeto(pdir, pj, nombre):
 def escenario(pdir, esc, nombre):
     t = os.path.join(pdir, 'trabajo')
     hoja = os.path.join(t, 'texturas', 'candidatos.png')
-    decidir, faltan = [], []
+    decidir, faltan, todas = [], [], []
     for clave, tx in esc.get('texturas', {}).items():
         cands = glob.glob(os.path.join(t, 'texturas', clave, '*.png'))
+        todas += cands
         if not cands:
             faltan.append(clave)
         elif tx.get('elegida') is None:
             decidir.append({'clave': f'texturas.{clave}.elegida', 'mirar': hoja, 'opciones': tx.get('seeds', [])})
-    p = _paso('texturas', hoja)
-    if faltan and p['estado'] != 'falta':
-        p['estado'], p['nota'] = 'falta', f'sin candidatas: {", ".join(faltan)}'
-    return [p, _paso('tema', os.path.join(t, 'tema', 'tema.json'), [hoja])], decidir
+    ultima = max(todas, key=os.path.getmtime) if todas else None
+    if faltan:
+        p = {'paso': 'texturas', 'estado': 'falta', 'nota': f'sin candidatas: {", ".join(faltan)}'}
+    else:
+        p = _paso('texturas', ultima)
+    return [p, _paso('tema', os.path.join(t, 'tema', 'tema.json'), [ultima])], decidir
 
 
 def estado(pdir, pj, nombre):

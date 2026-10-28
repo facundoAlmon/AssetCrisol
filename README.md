@@ -421,7 +421,13 @@ crisol todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot
 ```
 
 `<n>` se busca en `personajes/`, `objetos/` y `escenarios/` de `datos_dir`. `crisol --help` describe
-cada paso. `crisol` es la entrada a `pipeline.py`: sin el enlace en el PATH, `./crisol` desde el repo o `python3 pipeline.py` hacen lo
+cada paso.
+
+Con `--json`, cualquier paso deja en stdout un solo JSON y manda todo lo demás (también Blender y ComfyUI) a stderr:
+`ok`, `codigo`, `error`, `archivos` (lo que escribió; las carpetas con muchos cuadros van resumidas en `carpetas`),
+`mirar` (las hojas para revisar o mostrar), `mensajes` y `estado` (el de `crisol estado` después del paso). Los
+códigos de salida son 0 bien, 1 falló, 2 argumentos mal, 3 GPU ocupada (con `--sin-esperar`), 4 falta elegir algo
+(`imagen.elegida`, una textura) y 5 falta un paso anterior. Ningún paso hace preguntas. `crisol` es la entrada a `pipeline.py`: sin el enlace en el PATH, `./crisol` desde el repo o `python3 pipeline.py` hacen lo
 mismo.
 
 <details>
@@ -1165,6 +1171,8 @@ cada paso, mapa del código, contratos que no hay que romper y problemas ya resu
 - para instalar: `./instalar.sh --plan` y después `./instalar.sh` (sin preguntas si el token de Hugging Face va en
   `HF_TOKEN`; la persona tiene que aceptar en Hugging Face las condiciones de los modelos gated); o la imagen Docker
   ([docs/docker.md](docs/docker.md));
+- los pasos con `--json` (un JSON por stdout con lo que escribieron y qué mirar) y los códigos de salida de
+  *Referencia > Comandos*;
 - antes de empezar, `crisol doctor --json`: qué está instalado y qué pasos se pueden usar (sale con 1 si falta algo
   obligatorio);
 - `crisol estado <n> --json`: qué pasos están hechos, cuáles quedaron viejos (su salida es anterior a la del paso

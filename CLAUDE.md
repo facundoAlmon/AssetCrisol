@@ -67,6 +67,8 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
 `generar_movimiento.py` (venv Kimodo) y `blender_main`/`rig_lib`/`anim`/`kimodo_clip`/`vehiculo` (Blender).
 - `0_entorno/doctor.py` (`crisol doctor [--json]`): revisa config, rutas, venvs, nodos, modelos y GPU; corre antes
   de leer la config. `PASOS` dice qué necesita cada paso: actualizarlo al sumar un paso, modelo o nodo.
+- `0_entorno/salida.py`: códigos de salida (`falta_elegir` 4, `falta_paso` 5, GPU 3) y `--json` de los pasos (stdout
+  solo el JSON; prints y subprocesos a stderr). Los mensajes de los pasos siguen siendo `print`.
 - `0_entorno/gpu.py`: `reservar(cfg, paso)` al empezar cada paso que genera (un paso nuevo de GPU tiene que llamarlo).
 - `0_entorno/estado.py` (`crisol estado [<n>] [--json]`): pasos hechos/viejos (por fecha de la salida contra la del
   paso previo) y qué falta elegir; al sumar un paso o cambiar dónde escribe, actualizar su cadena.

@@ -3,7 +3,7 @@
 el bosque y el taller traen su malla o sus texturas elegidas) en una carpeta temporal y revisa lo que dejan.
 
 uso: python3 tests/humo.py [--rapido] [--dejar]
-  --rapido  sin iso, revisar ni Godot (solo blender + sprites + godot de cris y los objetos, tema): ~2 min
+  --rapido  sin iso, anclas, revisar ni Godot (solo blender + sprites + godot de cris y los objetos, tema): ~2 min
   --dejar   no borrar la carpeta temporal (para mirar los resultados)
 
 Usa la config de siempre (config.json o ASSETCRISOL_CONFIG) para Blender y Godot, con un `datos_dir` temporal: no
@@ -27,6 +27,21 @@ def paso(env, *args):
         fallas.append(f"crisol {' '.join(args)}")
         print('\n'.join('      ' + l for l in (r.stdout + r.stderr).strip().splitlines()[-15:]))
     return ok
+
+
+def paso_json(env, *args):
+    """crisol <args> --json: stdout tiene que ser un solo JSON con ok y el estado del asset."""
+    r = subprocess.run([sys.executable, CRISOL, *args, '--json'], env=env, capture_output=True, text=True)
+    try:
+        d = json.loads(r.stdout)
+    except ValueError:
+        d = None
+    ok = r.returncode == 0 and d is not None and (not isinstance(d, dict) or d.get('ok') is not False)
+    print(f"  {'✔' if ok else '✘'} crisol {' '.join(args)} --json")
+    if not ok:
+        fallas.append(f"crisol {' '.join(args)} --json")
+        print('\n'.join('      ' + l for l in (r.stdout[-1500:] + r.stderr[-1500:]).strip().splitlines()[-15:]))
+    return d if ok else None
 
 
 def hay(base, *rutas):
@@ -106,6 +121,8 @@ def main():
                 for a in meta['animaciones'].values():
                     revisar_imagen(os.path.join(c, g, 'iso', a['imagen']), meta['frame_width'] * a['frames'],
                                    meta['frame_height'] * 8)
+                if paso(env, 'anclas', 'cris'):
+                    hay(c, os.path.join('trabajo', 'iso', 'anclas.json'))
                 if paso(env, 'revisar', 'cris'):
                     hay(c, os.path.join('trabajo', 'revision.png'))
             if paso(env, 'godot', 'cris'):
@@ -125,10 +142,19 @@ def main():
                 revisar_imagen(os.path.join(o, 'preview.png'))
         for esc in ('bosque', 'taller'):
             print(f'[humo] escenario: {esc}')
-            if paso(env, 'tema', esc):
+            d = paso_json(env, 'tema', esc)
+            if d:
                 e = os.path.join(D, 'escenarios', esc)
                 hay(e, 'preview.png', os.path.join('trabajo', 'tema', 'tema.json'))
                 revisar_imagen(os.path.join(e, 'preview.png'))
+                if os.path.join(e, 'preview.png') not in d['mirar'] or d['estado']['siguiente']:
+                    fallas.append(f'tema {esc} --json: sin preview.png en mirar o con un paso pendiente')
+        print('[humo] estado')
+        todos = paso_json(env, 'estado') or []
+        for est in todos:
+            if est['siguiente'] and not (RAPIDO and est['tipo'] == 'personaje'):
+                fallas.append(f"estado {est['nombre']}: queda {est['siguiente']}")
+                print(f"  ✘ estado {est['nombre']}: queda {est['siguiente']}")
         godot = cfg.get('godot')
         if not RAPIDO and godot and os.path.exists(godot) and not fallas:
             print('[humo] Godot: proyecto vacío temporal')

@@ -5,8 +5,7 @@
 #  - un proceso CUDA que no sea el servidor de ComfyUI, Blender ni Godot (TRELLIS.2, otro programa...).
 # ComfyUI con la cola vacía no cuenta aunque tenga modelos cargados: `malla` los descarga con POST /free.
 import fcntl, json, os, subprocess, sys, tempfile, time, urllib.request
-
-GPU_OCUPADA = 3   # código de salida con --sin-esperar
+from salida import GPU_OCUPADA, salir
 CANDADO = os.path.join(tempfile.gettempdir(), 'assetcrisol_gpu.lock')
 NO_CUENTAN = ('blender', 'godot')
 _candado = None   # el archivo abierto: el candado dura lo que el proceso
@@ -106,8 +105,7 @@ def reservar(cfg, paso, esperar=True, cada=15):
                 print(f'[gpu] libre tras {time.time() - desde:.0f} s', flush=True)
             return
         if not esperar:
-            print(f'[{paso}] GPU ocupada: {motivo}', file=sys.stderr, flush=True)
-            sys.exit(GPU_OCUPADA)
+            salir(GPU_OCUPADA, f'[{paso}] GPU ocupada: {motivo}')
         if motivo != anterior:
             print(f'[gpu] ocupada ({motivo}): espero antes de `{paso}` (Ctrl+C para cortar; '
                   f'--sin-esperar sale con código {GPU_OCUPADA})', flush=True)

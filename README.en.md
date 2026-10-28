@@ -435,6 +435,12 @@ crisol todo <n> [--instalar <project>]   # malla -> blender -> sprites -> godot 
 describes every step. `crisol` is the entry point to `pipeline.py`: without the link in your PATH,
 `./crisol` from the repo or `python3 pipeline.py` do the same.
 
+With `--json`, any step leaves a single JSON object on stdout and sends everything else (Blender and ComfyUI too) to
+stderr: `ok`, `codigo`, `error`, `archivos` (what it wrote; folders with many frames are summarized in `carpetas`),
+`mirar` (the sheets to review or show), `mensajes` and `estado` (the one from `crisol estado` after the step). Exit
+codes are 0 ok, 1 failed, 2 bad arguments, 3 GPU busy (with `--sin-esperar`), 4 something left to choose
+(`imagen.elegida`, a texture) and 5 a previous step is missing. No step asks questions.
+
 Step names: `nuevo` new, `imagen` image, `vistas` views, `malla` mesh, `guia` guide, `articulaciones` joints,
 `retrato` portrait, `anclas` anchors, `revisar` review, `todo` all, `comparar` compare, `rehacer` redo, `metodo`
 method, `movimiento` motion, `texturas` textures, `tema` theme.
@@ -1182,6 +1188,8 @@ map, contracts that must not be broken and problems already solved) are in [CLAU
 - to install: `./instalar.sh --plan` and then `./instalar.sh` (no prompts if the Hugging Face token is in `HF_TOKEN`;
   the person has to accept the gated models' terms on Hugging Face); or the Docker image
   ([docs/docker.en.md](docs/docker.en.md));
+- steps with `--json` (one JSON on stdout with what they wrote and what to look at) and the exit codes in
+  *Reference > Commands*;
 - before starting, `crisol doctor --json`: what is installed and which steps can be used (exits with 1 if something
   required is missing);
 - `crisol estado <n> --json`: which steps are done, which are stale (their output is older than the previous

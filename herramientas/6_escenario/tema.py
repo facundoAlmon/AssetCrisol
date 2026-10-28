@@ -9,6 +9,7 @@ import json, os, sys
 import numpy as np
 from PIL import Image, ImageDraw
 from repetible import repetible
+import salida
 
 # clave del escenario -> campo de tema.json (textura, color)
 CAMPOS = {'piso': ('floor_detail', 'floor_color'), 'camino': ('path_detail', 'path_color'),
@@ -82,7 +83,7 @@ def main(esc):
             continue
         seed = t.get('elegida')
         if seed is None:
-            sys.exit(f'[tema] falta elegir {clave}: escenario.json > texturas.{clave}.elegida (mirar trabajo/texturas/candidatos.png)')
+            salida.falta_elegir(f'[tema] falta elegir {clave}: escenario.json > texturas.{clave}.elegida (mirar trabajo/texturas/candidatos.png)')
         src = os.path.join(edir, 'trabajo', 'texturas', clave, f'cand_{seed}.png')
         if not os.path.isfile(src):
             src = os.path.join(edir, str(seed))  # o un archivo propio de la carpeta del escenario

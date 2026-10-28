@@ -50,6 +50,7 @@ RAIZ = os.path.dirname(os.path.abspath(__file__))
 H = os.path.join(RAIZ, 'herramientas')
 for sub in ('0_entorno', '1_imagen', '2_malla', '3_blender', '4_sprites', '5_godot', '6_escenario'):
     sys.path.insert(0, os.path.join(H, sub))
+import salida   # noqa: E402 (códigos de salida y --json)
 
 CONFIG = os.environ.get('ASSETCRISOL_CONFIG') or os.path.join(RAIZ, 'config.json')
 if __name__ in ('__main__', 'pipeline') and sys.argv[1:2] == ['doctor']:   # antes de leer la config: la revisa él
@@ -220,8 +221,8 @@ def paso_imagen(nombre):
 def imagen_elegida(pdir, pj):
     seed = pj['imagen'].get('elegida')
     if seed is None:
-        sys.exit('falta elegir la imagen: poné la seed en personaje.json > imagen.elegida '
-                 '(o el nombre de un archivo de la carpeta del personaje)')
+        salida.falta_elegir('falta elegir la imagen: poné la seed en personaje.json > imagen.elegida '
+                            '(o el nombre de un archivo de la carpeta del personaje); mirar trabajo/imagen/candidatos.png')
     for p in (os.path.join(pdir, 'trabajo', 'imagen', f'cand_{seed}.png'), os.path.join(pdir, str(seed))):
         if os.path.isfile(p):
             return p
@@ -299,6 +300,8 @@ def paso_rehacer(lista):
         print(f'[rehacer] {n} listo ({time.time() - t:.0f} s): trabajo/revision.png', flush=True)
     print(f'[rehacer] {len(nombres) - len(fallas)}/{len(nombres)} bien' +
           ''.join(f'\n  {n}: {p} ({e})' for n, p, e in fallas))
+    if fallas:
+        salida.salir(salida.ERROR, f'[rehacer] fallaron: {", ".join(n for n, _, _ in fallas)}')
 
 
 def candidatos_malla(pj):
@@ -324,6 +327,7 @@ def candidatos_malla(pj):
 
 def paso_malla(nombre):
     pdir, pj = cargar(nombre)
+    imagen_elegida(pdir, pj)   # que no espere la GPU para después salir por falta de elegir
     reservar_gpu('malla')
     lista = candidatos_malla(pj)
     if not lista:
@@ -402,7 +406,7 @@ def generar_malla(pdir, pj, nombre):
     if pj.get('vehiculo') and pj['malla'].get('vista'):   # vehículo con TRELLIS.2: la malla sale de una vista de Qwen
         img = os.path.join(pdir, 'trabajo', 'imagen', f'vista_{pj["malla"]["vista"]}.png')
         if not os.path.exists(img):
-            sys.exit(f'[malla] falta {img}: correr antes `crisol vistas {nombre}`')
+            salida.falta_paso(f'[malla] falta {img}: correr antes `crisol vistas {nombre}`')
     liberar_vram_comfyui()
     m = pj['malla']
     env = dict(os.environ, **CFG['env_modelos'])
@@ -463,13 +467,13 @@ def retexturizar_ultratex(pdir, pj, nombre):
     if op.get('espalda'):
         espalda = os.path.join(pdir, 'trabajo', 'imagen', 'vista_back.png')
         if not os.path.exists(espalda):
-            sys.exit('[ultratex] espalda: falta trabajo/imagen/vista_back.png (crisol vistas, con malla.vistas)')
+            salida.falta_paso('[ultratex] espalda: falta trabajo/imagen/vista_back.png (crisol vistas, con malla.vistas)')
     costados = None
     if op.get('costados'):
         costados = {v: os.path.join(pdir, 'trabajo', 'imagen', f'vista_{v}.png') for v in ('left', 'right')}
         for r in costados.values():
             if not os.path.exists(r):
-                sys.exit(f'[ultratex] costados: falta trabajo/imagen/{os.path.basename(r)} (crisol vistas, con '
+                salida.falta_paso(f'[ultratex] costados: falta trabajo/imagen/{os.path.basename(r)} (crisol vistas, con '
                          f'malla.vistas)')
     ut.retexturizar(CFG, nombre, os.path.join(out, 'limpia.glb'), os.path.join(out, 'sin_fondo.png'), modelo,
                     op.get('seed', 1), op.get('resolucion', 1024), pj['malla'].get('textura_px', 4096),
@@ -485,7 +489,7 @@ def retexturizar_ultratex(pdir, pj, nombre):
 def paso_ultratex(nombre):
     pdir, pj = cargar(nombre)
     if not os.path.exists(os.path.join(pdir, 'trabajo', 'malla', 'modelo.glb')):
-        sys.exit('[ultratex] falta trabajo/malla/modelo.glb: correr antes `malla`')
+        salida.falta_paso('[ultratex] falta trabajo/malla/modelo.glb: correr antes `malla`')
     reservar_gpu('ultratex')
     liberar_vram_comfyui()
     retexturizar_ultratex(pdir, pj, nombre)
@@ -753,7 +757,9 @@ def main():
     ap.add_argument('--escenario', action='store_true', help='paso nuevo: crear un escenario (escenarios/<n>/)')
     ap.add_argument('--solo', metavar='CLAVES', help='paso texturas: solo estas (p. ej. piso,pared); las demás quedan')
     ap.add_argument('--instalar', metavar='PROYECTO_GODOT', help='copiar el resultado a este proyecto Godot')
-    ap.add_argument('--json', action='store_true', help='paso estado: salida en JSON')
+    ap.add_argument('--json', action='store_true',
+                    help='salida en JSON por stdout (lo demás va a stderr): ok, código, archivos escritos, qué mirar y '
+                         'el estado del asset después del paso')
     ap.add_argument('--sin-esperar', action='store_true',
                     help='pasos de GPU: si está ocupada, salir con código 3 en vez de esperar')
     a = ap.parse_args()
@@ -763,11 +769,37 @@ def main():
         return paso_estado(a.personaje, a.json)
     if not a.personaje:
         ap.error(f'{a.paso}: falta el nombre')
+    if a.paso in ('texturas', 'tema'):
+        con_numpy()   # se relanza con otro python: antes de redirigir la salida
+    if a.json:
+        estado_de = None
+        if a.paso not in ('movimiento', 'rehacer'):
+            import estado
+
+            def estado_de():
+                return estado.estado(*cargar(a.personaje), a.personaje)
+        salida.correr_json(a.paso, a.personaje, carpetas_del_paso(a), lambda: ejecutar(a), estado_de)
+    ejecutar(a)
+
+
+def carpetas_del_paso(a):
+    """Dónde escribe el paso (para listar los archivos que dejó con --json)."""
+    if a.paso == 'movimiento':
+        return [os.path.join(DATOS, 'movimientos', 'candidatos')]
+    if a.paso == 'nuevo':
+        return [os.path.join(DATOS, CARPETAS[2 if a.escenario else 1 if a.objeto or a.vehiculo else 0][0], a.personaje)]
+    if a.paso == 'rehacer':
+        d = os.path.join(DATOS, 'personajes')
+        return [d] if a.personaje == 'todos' else [os.path.join(d, n) for n in a.personaje.split(',') if n]
+    return [os.path.join(DATOS, c, a.personaje) for c, _ in CARPETAS if os.path.isdir(os.path.join(DATOS, c, a.personaje))]
+
+
+def ejecutar(a):
     es_escenario = os.path.exists(os.path.join(DATOS, 'escenarios', a.personaje, 'escenario.json'))
     if a.cambios and a.paso != 'metodo':
-        sys.exit(f'{a.paso}: argumentos de más: {" ".join(a.cambios)}')
+        salida.salir(salida.USO, f'{a.paso}: argumentos de más: {" ".join(a.cambios)}')
     if a.paso not in ('nuevo', 'movimiento') and es_escenario != (a.paso in PASOS_ESCENARIO):
-        sys.exit(f'{a.paso}: es un paso de {"personajes y objetos" if es_escenario else "escenarios"}')
+        salida.salir(salida.USO, f'{a.paso}: es un paso de {"personajes y objetos" if es_escenario else "escenarios"}')
     if a.paso == 'nuevo':
         paso_nuevo(a.personaje, a.referencia, a.objeto or a.vehiculo, a.escenario, a.vehiculo)
     elif a.paso == 'texturas':
