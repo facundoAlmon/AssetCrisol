@@ -40,6 +40,8 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
   estado   [<n>] [--json]           qué pasos están hechos, cuáles quedaron viejos y qué falta elegir (sin <n>: todos)
   doctor   [--json]                 revisa la instalación: qué falta, cómo arreglarlo y qué pasos quedan deshabilitados
   mcp                               servidor MCP por stdio para agentes (crear, estado, correr, ver, elegir...; con uv)
+  ui       [--puerto 8190] [--no-abrir]  UI web local en el navegador (herramientas/ui): crear, correr pasos, elegir,
+                                    ver resultados y ajustar, sin terminal ni json
 
 escenarios (nuevo <n> --escenario -> escenarios/<n>/):
   texturas <n> [--solo piso,pared]  candidatas de cada textura (piso, camino, pared) -> elegir en escenario.json
@@ -70,6 +72,9 @@ if __name__ in ('__main__', 'pipeline') and sys.argv[1:2] == ['mcp']:   # servid
     os.environ['CRISOL_PYTHON'] = sys.executable   # los pasos siguen con este python
     os.execvp('uv', ['uv', 'run', '--quiet', '--no-project', *(x for d in MCP_SDK for x in ('--with', d)),
                      'python', os.path.join(H, 'mcp', 'servidor.py')])
+if __name__ in ('__main__', 'pipeline') and sys.argv[1:2] == ['ui']:   # UI web local (herramientas/ui)
+    os.environ['CRISOL_PYTHON'] = sys.executable
+    os.execv(sys.executable, [sys.executable, os.path.join(H, 'ui', 'servidor.py'), *sys.argv[2:]])
 # dónde viven personajes/, objetos/, escenarios/ y movimientos/candidatos/ (relativo a la config)
 DATOS = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(CONFIG)), CFG.get('datos_dir') or RAIZ))
 
