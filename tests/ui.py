@@ -55,7 +55,8 @@ def probar_cancelar(tmp):
     sys.path[:0] = [os.path.join(RAIZ, 'herramientas', '0_entorno'), os.path.join(RAIZ, 'herramientas', 'ui')]
     import operaciones as op
     from cola import Cola
-    falso = os.path.join(tmp, 'falso.py')
+    os.makedirs(os.path.join(tmp, 'falso'))
+    falso = os.path.join(tmp, 'falso', 'pipeline.py')   # se llama como el de verdad: la cola reconoce su PID por eso
     with open(falso, 'w') as f:
         f.write('import time, sys\nprint("[falso] empiezo", file=sys.stderr, flush=True)\ntime.sleep(60)\n')
     op.PY, op.PIPELINE = sys.executable, falso
@@ -74,9 +75,29 @@ def probar_cancelar(tmp):
             break
         time.sleep(0.1)
     chequear(a['estado'] == 'cancelado', 'cola: cancelar el que corre (killpg)', a['estado'])
-    chequear('[falso] empiezo' in c.log(a['id']), 'cola: log del trabajo')
+    import re
+    chequear(re.search(r'^\d\d:\d\d:\d\d \[falso\] empiezo', c.log(a['id']), re.M), 'cola: log con la hora', c.log(a['id']))
     c2 = Cola(os.path.join(tmp, 'cola_prueba'))   # el historial sobrevive a un reinicio
     chequear([t['estado'] for t in c2.trabajos] == ['cancelado', 'cancelado'], 'cola: historial en cola.json')
+    # la UI se cierra con un paso corriendo: al volver a abrirla se lo sigue esperando (no arranca otro encima)
+    d, e = c2.agregar(['iso', 'y'], 'y', 'personaje'), c2.agregar(['anclas', 'y'], 'y', 'personaje')
+    for _ in range(50):
+        if d['estado'] == 'corriendo':
+            break
+        time.sleep(0.1)
+    c3 = Cola(os.path.join(tmp, 'cola_prueba'))   # c2 sigue viva, como el proceso huérfano de una UI cerrada
+    d3, e3 = c3.buscar(d['id']), c3.buscar(e['id'])
+    time.sleep(1.5)
+    chequear(d3['estado'] == 'corriendo' and e3['estado'] == 'pendiente', 'cola: reabrir espera al paso que sigue corriendo',
+             f'{d3["estado"]} {e3["estado"]}')
+    c2.quitar(e['id'])
+    c3.trabajos.remove(e3)   # que c3 no lo lance: lo maneja c2
+    c3.quitar(d3['id'])
+    for _ in range(100):
+        if d3['estado'] != 'corriendo':
+            break
+        time.sleep(0.1)
+    chequear(d3['estado'] in ('cancelado', 'fallo'), 'cola: cancelar un paso que quedó de antes', d3['estado'])
 
 
 def main():

@@ -362,7 +362,9 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   animations and the method of each one (procedural or Kimodo). The full json stays as an advanced mode (with the
   changes shown before saving).
 - **Queue**: steps run one at a time (and wait for the GPU like the ones started from the terminal or another
-  program), with the elapsed and estimated time (from the durations measured on this PC), the live log and cancel.
+  program), with the elapsed and estimated time (from the durations measured on this PC), the live log (each line
+  with its time) and cancel. If `crisol ui` is closed, the running step goes on until it ends and the waiting ones
+  start when it is opened again.
 - **Setup**: what `crisol doctor` checks; steps that cannot run are disabled with the reason.
 
 It runs on this PC (it listens on `127.0.0.1`, no accounts or internet; with `--host 0.0.0.0`, on the whole local

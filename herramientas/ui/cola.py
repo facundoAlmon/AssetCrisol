@@ -1,8 +1,9 @@
 # Cola de trabajos de la UI: corre los pasos de crisol de a uno (una generación por vez en la GPU; Blender también la
 # usa con EEVEE). Cada trabajo es `crisol <args> --json` con la salida a <datos_dir>/.crisol_ui/trabajos/<id>.{json,log};
-# la cola y el historial quedan en cola.json (sobreviven a un reinicio) y las duraciones reales en duraciones.json
+# la cola y el historial quedan en cola.json (sobreviven a un reinicio: un paso que siguió corriendo con la UI cerrada
+# se vuelve a esperar por su PID y los pendientes arrancan cuando termina) y las duraciones reales en duraciones.json
 # (para estimar el tiempo de los próximos). Cancelar mata el grupo de procesos del paso por su PID.
-import json, os, re, signal, statistics, threading, time
+import json, os, re, signal, statistics, subprocess, threading, time
 
 import operaciones as op
 
@@ -13,6 +14,41 @@ BASE = {'imagen': 90, 'vistas': 60, 'malla': 360, 'ultratex': 240, 'guia': 30, '
 BASE_TIPO = {('malla', 'objeto'): 720, ('malla', 'vehiculo'): 720, ('blender', 'objeto'): 20}
 MAX_HISTORIAL = 200
 MEDIDAS = 10             # duraciones que se guardan por paso y tipo
+
+
+class _Huerfano:
+    """Un paso que siguió corriendo después de cerrar la UI (corre en su propia sesión): se lo espera por su PID."""
+    def __init__(self, pid):
+        self.pid = pid
+
+    def poll(self):
+        return None if os.path.exists(f'/proc/{self.pid}') and not _zombi(self.pid) else 0
+
+    def wait(self, timeout=None):
+        fin = None if timeout is None else time.time() + timeout
+        while self.poll() is None:
+            if fin is not None and time.time() > fin:
+                raise subprocess.TimeoutExpired(str(self.pid), timeout)
+            time.sleep(1)
+        return None   # el código sale del JSON del paso
+
+
+def _zombi(pid):
+    try:
+        with open(f'/proc/{pid}/stat') as f:
+            return f.read().rsplit(')', 1)[1].split()[0] == 'Z'
+    except (OSError, IndexError):
+        return False
+
+
+def _sigue(t):
+    """¿El PID del trabajo sigue siendo ese paso de crisol? (los PID se reusan)"""
+    try:
+        with open(f'/proc/{t["pid"]}/cmdline', 'rb') as f:
+            cmd = f.read().split(b'\0')
+    except (OSError, TypeError):
+        return False
+    return any(c.endswith(b'pipeline.py') for c in cmd) and all(a.encode() in cmd for a in t['args'][:2])
 
 
 class Cola:
@@ -29,8 +65,14 @@ class Cola:
         self._ids = 0
         self.duraciones = self._leer('duraciones.json', {})
         for t in self._leer('cola.json', []):
-            if t['estado'] == 'corriendo':   # la UI se cerró con un paso en marcha: no se sabe cómo terminó
-                t.update(estado='interrumpido', fin=t.get('fin') or time.time())
+            if t['estado'] == 'corriendo':
+                if t.get('pid') and _sigue(t):   # la UI se cerró con el paso en marcha y sigue: se lo espera
+                    proc = self._procs[t['id']] = _Huerfano(t['pid'])
+                    threading.Thread(target=lambda t=t, p=proc: (p.wait(), self._terminar(t, None)), daemon=True).start()
+                elif os.path.exists(self.ruta(t['id'], 'json')) and os.path.getsize(self.ruta(t['id'], 'json')):
+                    self._terminar(t, None, avisar=False)   # terminó mientras la UI estaba cerrada
+                else:
+                    t.update(estado='interrumpido', fin=t.get('fin') or time.time())
             self.trabajos.append(t)
             self._ids = max(self._ids, int(t['id'][1:]))
         threading.Thread(target=self._trabajar, daemon=True).start()
@@ -124,27 +166,34 @@ class Cola:
     def _trabajar(self):
         while True:
             with self._cv:
-                while not any(t['estado'] == 'pendiente' for t in self.trabajos):
+                while not any(t['estado'] == 'pendiente' for t in self.trabajos) or self.corriendo():
                     self._cv.wait()
                 t = next(t for t in self.trabajos if t['estado'] == 'pendiente')
                 t.update(estado='corriendo', inicio=time.time())
-                proc = op.lanzar(t['args'], os.path.join(self.dir_trabajos, t['id']), env=self.env, start_new_session=True)
+                proc = op.lanzar(t['args'], os.path.join(self.dir_trabajos, t['id']), env=self.env, sello=True,
+                                 start_new_session=True)
                 t['pid'] = proc.pid
                 self._procs[t['id']] = proc
                 self._guardar()
             codigo = proc.wait()
             self._terminar(t, codigo)
 
-    def _terminar(self, t, codigo):
+    def _terminar(self, t, codigo, avisar=True):
+        """codigo None: un paso que no lanzó esta UI (siguió corriendo tras cerrarla); el código sale de su JSON."""
         try:
             with open(self.ruta(t['id'], 'json')) as f:
                 d = json.load(f)
         except (OSError, ValueError):
             d = None
+        if codigo is None:
+            codigo = (d or {}).get('codigo', 1)
         est = (d or {}).get('estado') or {}
         with self._cv:
             self._procs.pop(t['id'], None)
-            fin = time.time()
+            try:   # la hora en que el paso escribió su JSON (si terminó con la UI cerrada, no es ahora)
+                fin = os.path.getmtime(self.ruta(t['id'], 'json')) if d is not None else time.time()
+            except OSError:
+                fin = time.time()
             cancelado = t.pop('cancelando', False)
             t.update(fin=fin, codigo=codigo,
                      estado='cancelado' if cancelado else 'hecho' if codigo == 0 else 'fallo',
@@ -159,6 +208,8 @@ class Cola:
                 self.duraciones[clave] = (self.duraciones.get(clave, []) + [round(fin - t['inicio'] - espera, 1)])[-MEDIDAS:]
                 with open(os.path.join(self.carpeta, 'duraciones.json'), 'w') as f:
                     json.dump(self.duraciones, f)
-            self._guardar()
-        if self.al_terminar:
+            if avisar:
+                self._guardar()
+                self._cv.notify_all()
+        if avisar and self.al_terminar:
             self.al_terminar(t)

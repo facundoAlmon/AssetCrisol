@@ -351,7 +351,9 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   animaciones del iso y método de cada una (procedural o Kimodo). El json completo queda como modo avanzado (con los
   cambios a la vista antes de guardar).
 - **Cola**: los pasos corren de a uno (también los que lance la terminal u otro programa esperan a la GPU), con el
-  tiempo transcurrido y el estimado (de las duraciones medidas en esta PC), el log en vivo y cancelar.
+  tiempo transcurrido y el estimado (de las duraciones medidas en esta PC), el log en vivo (con la hora de cada
+  línea) y cancelar. Si se cierra `crisol ui`, el paso que corre sigue hasta terminar y los que esperan arrancan al
+  volver a abrirla.
 - **Instalación**: lo que revisa `crisol doctor`; los pasos que no se pueden correr quedan apagados con el motivo.
 
 Corre en esta PC (escucha en `127.0.0.1`, sin cuentas ni internet; con `--host 0.0.0.0`, en toda la red local y

@@ -2,7 +2,7 @@
 # a la UI web (herramientas/ui): correr un paso y leer su JSON, lanzarlo en segundo plano a archivos, encontrar el json
 # de un asset, anotar lo que eligió la persona y ajustar valores. Solo stdlib: lo importan el python del sistema y el
 # de `uv run` del MCP.
-import json, os, subprocess
+import json, os, subprocess, sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PIPELINE = os.path.join(RAIZ, 'pipeline.py')
@@ -20,12 +20,20 @@ def crisol(*args, timeout=120, env=None):
         return None, (r.stdout + r.stderr)[-3000:]
 
 
-def lanzar(args, base, env=None, **kw):
+def lanzar(args, base, env=None, sello=False, **kw):
     """crisol <args> --json en segundo plano: el JSON a `base`.json y lo demás a `base`.log (a archivos: un pipe lleno
-    trabaría el paso). Devuelve el Popen."""
+    trabaría el paso). Con sello=True, cada línea del log con su hora (sello.py, en otro proceso que lee del paso y
+    termina con él). Devuelve el Popen del paso."""
     with open(base + '.json', 'w') as out, open(base + '.log', 'w') as err:
-        return subprocess.Popen([PY, PIPELINE, *args, '--json'], stdout=out, stderr=err, stdin=subprocess.DEVNULL,
-                                env=env, **kw)
+        if not sello:
+            return subprocess.Popen([PY, PIPELINE, *args, '--json'], stdout=out, stderr=err, stdin=subprocess.DEVNULL,
+                                    env=env, **kw)
+        proc = subprocess.Popen([PY, PIPELINE, *args, '--json'], stdout=out, stderr=subprocess.PIPE,
+                                stdin=subprocess.DEVNULL, env=env, **kw)
+        subprocess.Popen([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sello.py')],
+                         stdin=proc.stderr, stdout=err, start_new_session=True)
+        proc.stderr.close()
+        return proc
 
 
 def json_del_asset(datos, carpetas, nombre):
