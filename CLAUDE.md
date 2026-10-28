@@ -27,6 +27,7 @@ corre local: no proponer servicios pagos ni APIs en la nube.
 
 ```bash
 crisol <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n> [--referencia img] [--objeto|--vehiculo] [--instalar <proyecto>]
+crisol estado [<n>] [--json]                        # qué está hecho, qué quedó viejo, qué falta elegir
 crisol comparar <n>                                 # trabajo/candidatos.png de malla.candidatos
 crisol <nuevo --escenario|texturas|tema> <n>
 crisol rehacer <n1,n2,...|todos>                    # blender..revisar en lote
@@ -65,6 +66,8 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
 `generar_movimiento.py` (venv Kimodo) y `blender_main`/`rig_lib`/`anim`/`kimodo_clip`/`vehiculo` (Blender).
 - `0_entorno/doctor.py` (`crisol doctor [--json]`): revisa config, rutas, venvs, nodos, modelos y GPU; corre antes
   de leer la config. `PASOS` dice qué necesita cada paso: actualizarlo al sumar un paso, modelo o nodo.
+- `0_entorno/estado.py` (`crisol estado [<n>] [--json]`): pasos hechos/viejos (por fecha de la salida contra la del
+  paso previo) y qué falta elegir; al sumar un paso o cambiar dónde escribe, actualizar su cadena.
 - `instalar.sh` (raíz, bash): instalación nativa por niveles. Commits fijados y tabla de modelos (`MODELOS_COMFY`,
   repo → nombre final) arriba: al sumar un modelo o nodo, también ahí (y en `doctor.MODELOS`/`NODOS`). `--plan` lo
   prueba sin instalar; con la config de esta PC reconoce lo instalado y no lo toca.

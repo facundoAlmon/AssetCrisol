@@ -416,6 +416,7 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
 crisol <texturas|tema> <n> [--solo piso,pared]   # escenarios
 crisol godot <n> [--instalar <proyecto>]
 crisol doctor [--json]                    # revisa la instalación
+crisol estado [<n>] [--json]              # pasos hechos, viejos y qué falta elegir (sin <n>: todos)
 crisol todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
 ```
 
@@ -1166,6 +1167,8 @@ cada paso, mapa del código, contratos que no hay que romper y problemas ya resu
   ([docs/docker.md](docs/docker.md));
 - antes de empezar, `crisol doctor --json`: qué está instalado y qué pasos se pueden usar (sale con 1 si falta algo
   obligatorio);
+- `crisol estado <n> --json`: qué pasos están hechos, cuáles quedaron viejos (su salida es anterior a la del paso
+  previo), qué falta elegir (`decidir`, con la hoja a mostrar) y el comando que sigue (`siguiente`);
 - una generación por vez en la GPU (revisar la cola de ComfyUI y `nvidia-smi` antes de cada paso de GPU);
 - **no elegir por la persona** `imagen.elegida`, `malla.elegida` ni las texturas elegidas: mostrarle la hoja de
   candidatos y preguntar;

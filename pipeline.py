@@ -35,6 +35,7 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
   godot    <n> [--instalar proyecto] exporta a <carpeta>/<n>/godot/ (y copia a un proyecto Godot)
   todo     <n> [--instalar proyecto] malla -> blender -> sprites -> godot (requiere imagen elegida)
 
+  estado   [<n>] [--json]           qué pasos están hechos, cuáles quedaron viejos y qué falta elegir (sin <n>: todos)
   doctor   [--json]                 revisa la instalación: qué falta, cómo arreglarlo y qué pasos quedan deshabilitados
 
 escenarios (nuevo <n> --escenario -> escenarios/<n>/):
@@ -115,6 +116,30 @@ def cargar(nombre):
 
 CARPETAS = (('personajes', 'personaje.json'), ('objetos', 'objeto.json'), ('escenarios', 'escenario.json'))
 PASOS_ESCENARIO = ('nuevo', 'texturas', 'tema')
+
+
+def paso_estado(nombre, como_json=False):
+    import estado
+    if nombre:
+        pdir, pj = cargar(nombre)
+        e = estado.estado(pdir, pj, nombre)
+        print(json.dumps(e, indent=1, ensure_ascii=False) if como_json else estado.texto(e))
+        return e
+    todos = []
+    for carpeta, archivo in CARPETAS:
+        d = os.path.join(DATOS, carpeta)
+        for n in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+            if os.path.exists(os.path.join(d, n, archivo)):
+                pdir, pj = cargar(n)
+                todos.append(estado.estado(pdir, pj, n))
+    if como_json:
+        print(json.dumps(todos, indent=1, ensure_ascii=False))
+    for e in [] if como_json else todos:
+        hechos = [p['paso'] for p in e['pasos'] if p['estado'] == 'hecho']
+        pend = ', '.join(d['clave'] for d in e['decidir'])
+        print(f'{e["nombre"]:24s} {e["tipo"]:9s} hasta {hechos[-1] if hechos else "-":9s} ' +
+              (f'decidir {pend}' if pend else f'siguiente: {e["siguiente"]}' if e['siguiente'] else 'listo'))
+    return todos
 
 
 def paso_nuevo(nombre, referencia=None, objeto=False, escenario=False, vehiculo=False):
@@ -699,8 +724,8 @@ def paso_godot(nombre, instalar=None):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('paso', choices=['nuevo', 'imagen', 'vistas', 'revisar', 'rehacer', 'malla', 'ultratex', 'guia', 'articulaciones', 'blender', 'sprites', 'retrato',
-                                     'iso', 'anclas', 'godot', 'todo', 'comparar', 'texturas', 'tema', 'metodo', 'movimiento'])
-    ap.add_argument('personaje', help='personaje, objeto o escenario (en `movimiento`, la animación)')
+                                     'iso', 'anclas', 'godot', 'todo', 'comparar', 'texturas', 'tema', 'metodo', 'movimiento', 'estado'])
+    ap.add_argument('personaje', nargs='?', help='personaje, objeto o escenario (en `movimiento`, la animación)')
     ap.add_argument('cambios', nargs='*', help='paso metodo: anim=kimodo|procedural')
     ap.add_argument('--prompt', help='paso movimiento: descripción del movimiento (en inglés)')
     ap.add_argument('--duracion', type=float, default=4.0, help='paso movimiento: segundos (máx. 10)')
@@ -712,7 +737,12 @@ def main():
     ap.add_argument('--escenario', action='store_true', help='paso nuevo: crear un escenario (escenarios/<n>/)')
     ap.add_argument('--solo', metavar='CLAVES', help='paso texturas: solo estas (p. ej. piso,pared); las demás quedan')
     ap.add_argument('--instalar', metavar='PROYECTO_GODOT', help='copiar el resultado a este proyecto Godot')
+    ap.add_argument('--json', action='store_true', help='paso estado: salida en JSON')
     a = ap.parse_args()
+    if a.paso == 'estado':
+        return paso_estado(a.personaje, a.json)
+    if not a.personaje:
+        ap.error(f'{a.paso}: falta el nombre')
     es_escenario = os.path.exists(os.path.join(DATOS, 'escenarios', a.personaje, 'escenario.json'))
     if a.cambios and a.paso != 'metodo':
         sys.exit(f'{a.paso}: argumentos de más: {" ".join(a.cambios)}')

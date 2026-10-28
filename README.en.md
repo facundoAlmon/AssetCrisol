@@ -426,6 +426,7 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
 crisol <texturas|tema> <n> [--solo piso,pared]   # scenery
 crisol godot <n> [--instalar <project>]
 crisol doctor [--json]                   # checks the installation
+crisol estado [<n>] [--json]             # steps done, stale, and what is left to choose (without <n>: all)
 crisol todo <n> [--instalar <project>]   # malla -> blender -> sprites -> godot (needs a chosen image)
 ```
 
@@ -1182,6 +1183,8 @@ map, contracts that must not be broken and problems already solved) are in [CLAU
   ([docs/docker.en.md](docs/docker.en.md));
 - before starting, `crisol doctor --json`: what is installed and which steps can be used (exits with 1 if something
   required is missing);
+- `crisol estado <n> --json`: which steps are done, which are stale (their output is older than the previous
+  step's), what is left to choose (`decidir`, with the sheet to show) and the next command (`siguiente`);
 - one generation at a time on the GPU (check ComfyUI's queue and `nvidia-smi` before every GPU step);
 - **don't choose for the person** `imagen.elegida`, `malla.elegida` or the chosen textures: show them the candidates
   sheet and ask;
