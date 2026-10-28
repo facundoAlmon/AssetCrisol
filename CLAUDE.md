@@ -66,7 +66,8 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
 `herramientas/` por paso. Intérprete: python3 del sistema salvo `generar_malla_trellis.py` (venv TRELLIS.2),
 `generar_movimiento.py` (venv Kimodo) y `blender_main`/`rig_lib`/`anim`/`kimodo_clip`/`vehiculo` (Blender).
 - `0_entorno/doctor.py` (`crisol doctor [--json]`): revisa config, rutas, venvs, nodos, modelos y GPU; corre antes
-  de leer la config. `PASOS` (y `_necesita`, la revisión rápida antes de cada paso) dice qué necesita cada paso: actualizarlos al sumar un paso, modelo o nodo.
+  de leer la config. `PASOS` (y `_necesita`, la revisión rápida antes de cada paso) dice qué necesita cada paso:
+  actualizarlos al sumar un paso, modelo o nodo.
 - `0_entorno/licencias.py` (`MODELOS`, sale de `docs/licencias.md`): bloque `licencias` del meta (sprites, iso),
   `trabajo/tema/licencias.json` y `trabajo/licencias.json` (vehículos). Al sumar un modelo, también ahí.
 - `0_entorno/salida.py`: códigos de salida (`falta_elegir` 4, `falta_paso` 5, GPU 3, falta instalar 6: `doctor.revisar_paso`) y `--json` de los pasos (stdout
@@ -90,7 +91,7 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
   animación; `movimientos/biblioteca.json`), `generar_movimiento.py` (venv Kimodo), `articulaciones_pose.py`
   (DWPose), `dibujar_guia.py`, `vehiculo.py`.
 - `4_sprites/`: `armar_tira.py` (`ANIMACIONES`, hoja, retrato), `armar_iso.py`, `armar_objeto.py`, `revisar.py`
-  (`revision.png`), `posproceso.py` (color, nitidez, contorno del estilo), `vitrina.py` (gifs de `docs/vitrina/` desde los
+  (`revision.png`), `aseprite.py` (`.json` estilo Aseprite junto a cada hoja), `posproceso.py` (color, nitidez, contorno del estilo), `vitrina.py` (gifs de `docs/vitrina/` desde los
   ejemplos ya renderizados en datos_dir).
 - `5_godot/`: `exportar_godot.py`, `exportar_objeto.py`, `sprite_personaje.gd`, `sprite_personaje_iso.gd`, `objeto_iso.gd`.
 - `6_escenario/`: `texturas.py`, `repetible.py`, `tema.py`.

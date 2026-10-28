@@ -71,6 +71,22 @@ def revisar_imagen(ruta, ancho_min=64, alto_min=64):
         print(f'  ✘ {os.path.basename(ruta)}: {im.size}' + (' vacía' if plana else ''))
 
 
+def revisar_aseprite(ruta, etiqueta):
+    """El .json estilo Aseprite: que nombre la hoja de al lado, tenga la etiqueta y cuadros dentro de la imagen."""
+    from PIL import Image
+    try:
+        with open(ruta) as f:
+            d = json.load(f)
+        W, H = Image.open(os.path.join(os.path.dirname(ruta), d['meta']['image'])).size
+        assert any(t['name'] == etiqueta for t in d['meta']['frameTags']), f'sin la etiqueta {etiqueta}'
+        assert all(c['frame']['x'] + c['frame']['w'] <= W and c['frame']['y'] + c['frame']['h'] <= H
+                   for c in d['frames']), 'cuadros fuera de la hoja'
+        assert d['meta']['frameTags'][-1]['to'] < len(d['frames']), 'etiqueta fuera de los cuadros'
+    except (OSError, ValueError, KeyError, AssertionError) as e:
+        fallas.append(f'{ruta}: {e}')
+        print(f'  ✘ {os.path.basename(ruta)}: {e}')
+
+
 def godot_headless(godot, proyecto, escenas):
     """Proyecto vacío + las escenas instaladas: las instancia una por una y sale con error si alguna no carga."""
     lineas = ['extends SceneTree', '', 'func _init():', '\tvar mal := 0']
@@ -111,6 +127,7 @@ def main():
             c = os.path.join(D, 'personajes', 'cris')
             g = os.path.join('godot', 'personajes', 'cris')
             hay(c, 'preview.gif', os.path.join(g, 'cris_meta.json'), os.path.join(g, 'cris_sheet.png'))
+            revisar_aseprite(os.path.join(c, g, 'cris_sheet.json'), 'walk')
             revisar_imagen(os.path.join(c, g, 'cris_sheet.png'), 512, 512)
             if not RAPIDO and paso(env, 'iso', 'cris'):
                 hay(c, 'preview_iso.gif', os.path.join(g, 'iso', 'cris_iso_meta.json'))
@@ -118,6 +135,7 @@ def main():
                     meta = json.load(f)
                 if len(meta['direcciones']) != 8 or 'walk' not in meta['animaciones']:
                     fallas.append('iso: meta sin 8 direcciones o sin walk')
+                revisar_aseprite(os.path.join(c, g, 'iso', 'cris_iso_walk.json'), 'walk_s')
                 for a in meta['animaciones'].values():
                     revisar_imagen(os.path.join(c, g, 'iso', a['imagen']), meta['frame_width'] * a['frames'],
                                    meta['frame_height'] * 8)
@@ -139,6 +157,9 @@ def main():
                 continue
             if paso(env, 'blender', obj) and paso(env, 'sprites', obj) and paso(env, 'godot', obj):
                 hay(o, 'preview.png', os.path.join('godot', 'objetos', obj, f'{obj}_iso.tscn'))
+                with open(os.path.join(o, 'godot', 'objetos', obj, f'{obj}_meta.json')) as f:
+                    revisar_aseprite(os.path.join(o, 'godot', 'objetos', obj, f'{obj}_iso.json'),
+                                     json.load(f)['iso']['direcciones'][0])
                 revisar_imagen(os.path.join(o, 'preview.png'))
         for esc in ('bosque', 'taller'):
             print(f'[humo] escenario: {esc}')

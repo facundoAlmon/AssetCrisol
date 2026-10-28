@@ -5,7 +5,7 @@ import json, os
 from PIL import Image, ImageDraw
 
 import armar_tira
-import posproceso
+import aseprite, posproceso
 
 # carpeta de Blender -> nombre en Godot (el salto isométrico usa las 8 poses: incluye el aterrizaje)
 NOMBRES = {'idle': 'idle', 'caminar': 'walk', 'saltar': 'jump', 'respirar': 'idle_loop', 'correr': 'run',
@@ -53,6 +53,7 @@ def armar(pdir, nombre, pj, dir_iso):
         meta['animaciones'][n] = {'imagen': archivo, 'frames': len(filas[0]), 'fps': fps, 'loop': loop}
     with open(os.path.join(dir_iso, f'{nombre}_iso_meta.json'), 'w') as f:
         json.dump(meta, f, indent=1)
+    aseprite.iso(meta, dir_iso)
     preview(ims, (x0, y0, x1, y1), (ox - x0, oy - y0), os.path.join(pdir, 'preview_iso.gif'))
     print(f'[iso] {len(ims)} hojas de {len(dirs)} direcciones, celdas de {cw}x{ch} '
           f'(en pantalla ~{round(ch / sr)} px de alto) -> {dir_iso}')

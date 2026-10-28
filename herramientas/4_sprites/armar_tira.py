@@ -6,7 +6,7 @@
 import json, os
 from PIL import Image, ImageDraw
 
-import posproceso
+import aseprite, posproceso
 
 COLUMNAS = 13
 # nombre en Godot, carpeta de frames, índices dentro de la carpeta, fps, loop, nombres de cada frame
@@ -122,6 +122,7 @@ def armar(pdir, nombre, pj, dir_godot):
     retratos(pdir, nombre, pj, dir_godot, meta)
     with open(os.path.join(dir_godot, f'{nombre}_meta.json'), 'w') as f:
         json.dump(meta, f, indent=1)
+    aseprite.personaje(meta, dir_godot)
     preview(frames, (x0, y0, x1, y1), meta, os.path.join(pdir, 'preview.gif'))
     print(f'[sprites] hoja {tira.size[0]}x{tira.size[1]} ({len(frames)} frames de {cw}x{ch}, '
           f'{COLUMNAS}x{filas}), en pantalla ~{round(ch * esc)} px')

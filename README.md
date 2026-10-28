@@ -795,6 +795,13 @@ render. `crisol retrato <n>` rehace solo el retrato y el frente.
 
 Resolución: `sprites.alto_en_pantalla_px × sprites.superresolucion` píxeles para `modelo.altura`.
 
+**Otros motores**: junto a cada hoja queda un `.json` estilo Aseprite (json-array), que leen Phaser
+(`load.aseprite` + `anims.createFromAseprite`), Defold y los importadores de Aseprite/TexturePacker de Unity y otros.
+Trae un cuadro con nombre y duración por celda, una etiqueta (`frameTags`) por animación y un slice `pie` con el
+pivote: los pies del personaje (el mismo origen que en Godot) o el centro de la base del objeto. `<n>_sheet.json` es
+la hoja de costado; en iso hay un `<n>_iso_<anim>.json` por animación, con una etiqueta `<anim>_<dir>` por dirección;
+los objetos tienen `<n>_iso.json`, con una etiqueta por dirección. La escala sugerida va en `meta.assetcrisol.escala`.
+
 ### Iso (`crisol iso`)
 
 El mismo rig y las mismas animaciones con cámara **isométrica 2:1** (ortográfica, 30° de elevación) y el personaje

@@ -3,7 +3,7 @@
 import json, math, os
 from PIL import Image, ImageDraw
 
-import posproceso
+import aseprite, posproceso
 
 DIRECCIONES = ['e', 'se', 's', 'sw', 'w', 'nw', 'n', 'ne']
 
@@ -67,6 +67,7 @@ def armar(pdir, nombre, pj, dir_godot):
                    'baldosa_px': pj.get('isometrico', {}).get('baldosa_px', 128)}
     with open(os.path.join(dir_godot, f'{nombre}_meta.json'), 'w') as f:
         json.dump(meta, f, indent=1)
+    aseprite.objeto(meta, dir_godot)
     preview(dir_godot, nombre, meta, os.path.join(pdir, 'preview.png'))
     print(f'[sprites] {nombre}: lateral {tam_lateral}, iso {n} direcciones de {cw}x{ch} -> {dir_godot}')
     return meta

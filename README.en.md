@@ -807,6 +807,13 @@ the box in `retrato.json`: it looks exactly like the design, without the 3D text
 
 Resolution: `sprites.alto_en_pantalla_px × sprites.superresolucion` pixels for `modelo.altura`.
 
+**Other engines**: next to every sheet there is an Aseprite-style `.json` (json-array), read by Phaser
+(`load.aseprite` + `anims.createFromAseprite`), Defold, and the Aseprite/TexturePacker importers of Unity and others.
+It has a named frame with its duration per cell, one tag (`frameTags`) per animation and a `pie` slice with the
+pivot: the character's feet (the same origin as in Godot) or the center of the object's base. `<n>_sheet.json` is the
+side sheet; for iso there is one `<n>_iso_<anim>.json` per animation, with one `<anim>_<dir>` tag per direction;
+objects have `<n>_iso.json`, with one tag per direction. The suggested scale is in `meta.assetcrisol.escala`.
+
 ### Iso (`crisol iso`)
 
 The same rig and animations with a **2:1 isometric** camera (orthographic, 30° elevation) and the character rotated

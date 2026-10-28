@@ -91,7 +91,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [ ] Revisión de cerca: lo que en un sprite no se nota (codos, ropa que atraviesa, costuras de textura).
 - [ ] Esqueleto compatible: mapeo a Mixamo, Humanoid de Unity y `SkeletonProfileHumanoid` de Godot (sin dedos ni cara).
 - [ ] Materiales completos (normal, AO, metal) como opción.
-- [ ] Sprites para otros motores: hoja + json estilo Aseprite/TexturePacker (Unity, Phaser, Defold...).
+- [x] Sprites para otros motores: hoja + json estilo Aseprite/TexturePacker (Unity, Phaser, Defold...).
 
 ## 6. Robustez
 - [x] Test de humo sin generación (`tests/humo.py`): `blender` → `sprites` → `iso` → `revisar` → `godot` de Cris, la caja,
