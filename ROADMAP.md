@@ -87,8 +87,9 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] Cola de trabajos con progreso y tiempo estimado (duraciones medidas en la PC); logs a un clic.
 - [x] Biblioteca de assets (miniaturas, estado, rehacer un paso o en lote).
 - [x] Ajustes comunes sin json (seed, estilo, altura, animaciones y su método); el json queda como modo avanzado.
-- [ ] Candidatos de malla como tarjetas (hoy la hoja `candidatos.png` entera con un botón por candidato, salvo
-      vehículos) y visor 3D del `.glb`.
+- [x] Visor 3D del `.glb` (three.js): el resultado y los candidatos de malla uno al lado del otro.
+- [ ] Candidatos de malla como tarjetas con imagen (hoy la hoja `candidatos.png` entera con un botón por candidato,
+      salvo vehículos; en 3D ya se ven de a uno).
 - [ ] Pasar un clip de Kimodo a la biblioteca de movimientos desde la UI (hoy a mano: README > Blender > Animaciones: dos métodos).
 
 ## 5. Salida 3D y otros motores

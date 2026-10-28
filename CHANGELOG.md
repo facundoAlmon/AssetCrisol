@@ -12,7 +12,8 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   crear con referencia o descripción, la cadena de pasos con correr/rehacer, las candidatas para elegir (y cambiar
   una elección), visor de resultados con el reproductor iso por dirección, ajustes comunes sin json (y el json
   completo como modo avanzado), cola de pasos de a uno con tiempo estimado, log en vivo y cancelar, movimientos de
-  Kimodo y la revisión de la instalación. En español e inglés, tema claro y oscuro, también en el celular
+  Kimodo y la revisión de la instalación. Visor 3D del `.glb` (three.js vendorizado) en el resultado y para comparar
+  los candidatos de malla uno al lado del otro. En español e inglés, tema claro y oscuro, también en el celular
   (README > Empezá acá > En el navegador). `tests/ui.py` la prueba sin GPU.
 - **Recetas por tipo**: `crisol nuevo <n> --receta humanoide|chibi|robot|juguete|objeto|vegetacion|vehiculo|escenario`
   arma el json con lo que anda para cada tipo (`plantilla/recetas/`); `--descripcion` completa `imagen.descripcion`

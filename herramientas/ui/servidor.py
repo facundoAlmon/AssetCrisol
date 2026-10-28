@@ -22,6 +22,7 @@ MAX_SUBIDA = 40 * 1024 * 1024
 NOMBRE = re.compile(r'^[a-z0-9][a-z0-9_]{0,47}$')
 IMAGENES = ('.png', '.gif', '.jpg', '.jpeg', '.webp')
 mimetypes.add_type('text/javascript', '.mjs')
+mimetypes.add_type('model/gltf-binary', '.glb')
 
 # pasos que la UI puede encolar para un asset (más rehacer y movimiento, que van aparte)
 PASOS_ASSET = set(op.PASOS)
@@ -87,15 +88,19 @@ def visuales(pdir, pj, nombre, tipo):
     if tipo == 'personaje':
         gd = f'godot/personajes/{nombre}'
         grupo('animacion', 'preview.gif')
+        grupo('3d', f'{t}/malla/modelo.glb')
         grupo('iso', 'preview_iso.gif')
         grupo('retrato', f'{gd}/{nombre}_retrato.png', f'{gd}/{nombre}_frente.png')
         grupo('revision', f'{t}/revision.png')
         grupo('hoja', f'{gd}/{nombre}_sheet.png')
         grupo('guia', f'{t}/guia/guia.png')
     elif tipo == 'vehiculo':
+        armado = os.path.isfile(os.path.join(pdir, t, 'vehiculo.glb'))   # con las ruedas en su nodo, si ya está
+        grupo('3d', f'{t}/vehiculo.glb' if armado else f'{t}/malla/modelo.glb')
         grupo('tarjeta', f'{t}/tarjeta.png')
         grupo('revision', f'{t}/revision.png')
     elif tipo == 'objeto':
+        grupo('3d', f'{t}/malla/modelo.glb')
         grupo('objeto', 'preview.png', *sorted(rel(pdir, r) for r in glob.glob(os.path.join(pdir, t, 'render', 'iso_*.png'))),
               f'{t}/render/lateral.png')
         grupo('comparar', f'{t}/candidatos.png')
@@ -121,19 +126,22 @@ def iso_meta(pdir, nombre):
 
 
 def opciones_decidir(pdir, pj, d):
-    """Cada opción de una decisión con su imagen propia (o None si solo está la hoja)."""
+    """Cada opción de una decisión con su imagen propia (o None si solo está la hoja) y, en las mallas, su .glb para
+    el visor 3D (el vehículo armado de ese candidato si ya está, si no la malla)."""
     t = os.path.join(pdir, 'trabajo')
     clave, ops = d['clave'], []
     for o in d['opciones']:
-        img = None
+        img = glb = None
         if clave == 'imagen.elegida':
             img = existe(t, 'imagen', f'cand_{o}.png') and f'trabajo/imagen/cand_{o}.png'
         elif clave == 'malla.elegida':
             img = existe(t, f'tarjeta_{o}.png') and f'trabajo/tarjeta_{o}.png'
+            glb = (existe(t, f'vehiculo_{o}.glb') and f'trabajo/vehiculo_{o}.glb') or \
+                (existe(t, f'malla_{o}', 'modelo.glb') and f'trabajo/malla_{o}/modelo.glb')
         elif clave.startswith('texturas.'):
             k = clave.split('.')[1]
             img = existe(t, 'texturas', k, f'cand_{o}.png') and f'trabajo/texturas/{k}/cand_{o}.png'
-        ops.append({'valor': o, 'imagen': img})
+        ops.append({'valor': o, 'imagen': img, 'glb': glb})
     return ops
 
 

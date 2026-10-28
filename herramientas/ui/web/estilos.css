@@ -363,3 +363,22 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* visor 3d */
+.visor3d { position: relative; border-radius: var(--r); overflow: hidden; height: min(68vh, 620px); min-height: 280px; }
+.visor3d .lienzo3d { position: absolute; inset: 0; touch-action: none; cursor: grab; }
+.visor3d .lienzo3d:active { cursor: grabbing; }
+.visor3d canvas { display: block; width: 100% !important; height: 100% !important; }
+.visor3d .herramientas { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; }
+.visor3d .estado3d { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; color: var(--texto-2); font-size: 14px; padding: 16px; text-align: center; }
+.visor3d .estado3d .colada { width: 180px; }
+.visor3d .estado3d.error { color: var(--error); display: flex; align-items: center; justify-content: center; }
+.visor3d .estado3d.error svg { width: 18px; height: 18px; flex: none; }
+.visor3d .titulo3d { position: absolute; top: 12px; left: 12px; padding: 2px 8px; border-radius: 6px; background: var(--superficie-2); }
+.visor3d .ayuda3d { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--texto-3); pointer-events: none; }
+.comparar3d { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px; }
+.comparar3d .visor3d { height: 380px; border-radius: 0; }
+@media (max-width: 860px) {
+  .visor3d { height: 420px; }
+  .comparar3d .visor3d { height: 340px; }
+}
