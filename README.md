@@ -103,7 +103,7 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 | Mínimo | ~69 | Qwen Image Edit + LoRA (31), Z-Image Turbo (21), pesos de TRELLIS.2 con DINOv3 (17) |
 | Completo | +~46 | Pixal3D con MoGe y BiRefNet (15), FLUX.2 Klein para UltraTex (19), DreamShaper XL + IP-Adapter (10), DWPose y rembg (~2) |
 | `--flux2` | +42 | FLUX.2 Dev Q5 + su codificador de texto |
-| Kimodo | +~25 | a mano: su venv, el codificador de texto (Llama 3 8B) y el modelo |
+| `--kimodo` | +~19 | Kimodo: su venv, el codificador de texto (Llama 3 8B) y el modelo |
 
 Total: **~90 GB** el mínimo, **~135 GB** el completo. La instalación deja ~15 GB de paquetes en `<destino>/.uv-cache`
 (no en el disco del sistema): se pueden borrar con `UV_CACHE_DIR=<destino>/.uv-cache uv cache clean`.
@@ -145,8 +145,9 @@ instalarlo. Se puede volver a correr: lo que ya está se saltea, y si un paso fa
 | `--nivel minimo` | Qwen Image Edit + Z-Image Turbo + TRELLIS.2 + Blender (~90 GB): imagen, malla, animación, sprites, Godot |
 | `--nivel completo` | por defecto: + Pixal3D, UltraTex, DWPose y escenarios (~135 GB) |
 | `--flux2` | + FLUX.2 Dev y ComfyUI-GGUF (~42 GB, licencia no comercial) |
+| `--kimodo` | + Kimodo, para clips de movimiento nuevos (~19 GB; corre en CPU) |
 | `--destino DIR` | dónde van las herramientas y la caché de modelos (conviene un disco con lugar) |
-| `--solo comfyui,modelos,trellis,blender,config` | solo esos componentes |
+| `--solo comfyui,modelos,trellis,blender,kimodo,config` | solo esos componentes |
 
 Modelos **gated** (hay que aceptar las condiciones en su página de Hugging Face con tu cuenta): DINOv3
 (`facebook/dinov3-vitl16-pretrain-lvd1689m`, para TRELLIS.2) y, en el nivel completo, FLUX.2 Klein
@@ -154,7 +155,7 @@ Modelos **gated** (hay que aceptar las condiciones en su página de Hugging Face
 aceptar alguno.
 
 Si `config.json` ya apunta a un ComfyUI o un TRELLIS.2 instalado, los usa sin tocar su código ni su venv: solo suma
-los nodos y modelos que falten. Kimodo y Godot (opcionales) se instalan a mano.
+los nodos y modelos que falten (lo mismo con Kimodo). Godot (opcional) se instala a mano.
 
 ### Instalación a mano
 
@@ -280,17 +281,20 @@ Bajar [Blender 5.1](https://www.blender.org/download/) y poner el ejecutable en 
 [Kimodo](https://github.com/nv-tlabs/kimodo) (NVIDIA) genera movimiento humano a partir de texto. Los clips elegidos
 ya vienen en `herramientas/3_blender/movimientos/` y Blender los lee sin Kimodo.
 
+`./instalar.sh --kimodo` (o `--solo kimodo,config` sobre una instalación hecha) lo instala con todo lo de abajo y
+completa `kimodo_dir`. A mano:
+
 ```bash
 git clone https://github.com/nv-tlabs/kimodo.git && cd kimodo
 uv venv -p 3.11 --python-preference only-managed venv   # un Python con headers (compila MotionCorrection)
-uv pip install -p venv/bin/python torch --index-url https://download.pytorch.org/whl/cu128
+uv pip install -p venv/bin/python torch --index-url https://download.pytorch.org/whl/cpu   # corre en CPU
 uv pip install -p venv/bin/python -e .
 ```
 
-El codificador de texto es LLM2Vec sobre Llama-3-8B-Instruct. El repo de meta-llama es gated; una alternativa es un
-espejo con los mismos pesos (p. ej. `NousResearch/Meta-Llama-3-8B-Instruct`, misma licencia de Llama 3) con los
-`adapter_config.json` de `McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp` y `...-mntp-supervised` apuntados a esa
-carpeta. `crisol movimiento` corre **todo en CPU** (~2,5 min, ~16 GB de RAM): no compite por la GPU. Los
+El codificador de texto es LLM2Vec sobre Llama-3-8B-Instruct, en `<kimodo>/text_encoders/<repo>`. El repo de
+meta-llama es gated; `instalar.sh` usa un espejo con los mismos pesos (`NousResearch/Meta-Llama-3-8B-Instruct`, misma
+licencia de Llama 3) y apunta a esa carpeta el `adapter_config.json` de `McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp`
+y `...-mntp-supervised`. El modelo (`nvidia/Kimodo-SOMA-RP-v1.2`) va a la caché de `env_modelos.HF_HOME`. `crisol movimiento` corre **todo en CPU** (~2,5 min, ~16 GB de RAM): no compite por la GPU. Los
 avisos `MISSING`/`UNEXPECTED` del LoRA al cargar son normales.
 
 </details>

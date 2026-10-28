@@ -60,7 +60,8 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
       (ComfyUI, TRELLIS.2 generando una malla, Blender); falta una prueba completa con todos los modelos.
 - [x] Niveles (`--nivel`): **mínimo** ComfyUI (Qwen Image Edit, Z-Image Turbo) + TRELLIS.2 + Blender; **completo**
       + Pixal3D, UltraTex (FLUX.2 Klein), DWPose y escenarios; `--flux2` suma FLUX.2 Dev.
-- [ ] Kimodo en `instalar.sh` (hoy a mano; su codificador de texto es Llama 3, gated).
+- [x] Kimodo en `instalar.sh` (`--kimodo`; el codificador de texto sale del espejo de Llama 3 de NousResearch, sin
+      token).
 - [x] Modelos gated (DINOv3, FLUX.2 Klein): `instalar.sh` pide el token y dice cuál falta aceptar.
 - [x] `crisol doctor`: rutas, versiones, VRAM, nodos de ComfyUI y modelos; qué falta, cómo arreglarlo y qué pasos
       quedan deshabilitados. Legible y `--json`.

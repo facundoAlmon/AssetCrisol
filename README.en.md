@@ -109,7 +109,7 @@ texture) are always made by a person looking at a candidates sheet.
 | Minimum | ~69 | Qwen Image Edit + LoRA (31), Z-Image Turbo (21), TRELLIS.2 weights with DINOv3 (17) |
 | Full | +~46 | Pixal3D with MoGe and BiRefNet (15), FLUX.2 Klein for UltraTex (19), DreamShaper XL + IP-Adapter (10), DWPose and rembg (~2) |
 | `--flux2` | +42 | FLUX.2 Dev Q5 + its text encoder |
-| Kimodo | +~25 | by hand: its venv, the text encoder (Llama 3 8B) and the model |
+| `--kimodo` | +~19 | Kimodo: its venv, the text encoder (Llama 3 8B) and the model |
 
 Total: **~90 GB** minimum, **~135 GB** full. Installing leaves ~15 GB of packages in `<destino>/.uv-cache` (not on the
 system disk): remove them with `UV_CACHE_DIR=<destino>/.uv-cache uv cache clean`.
@@ -152,8 +152,9 @@ skipped, and a failed step resumes from where it stopped.
 | `--nivel minimo` | Qwen Image Edit + Z-Image Turbo + TRELLIS.2 + Blender (~90 GB): image, mesh, animation, sprites, Godot |
 | `--nivel completo` | default: + Pixal3D, UltraTex, DWPose and scenery (~135 GB) |
 | `--flux2` | + FLUX.2 Dev and ComfyUI-GGUF (~42 GB, non-commercial license) |
+| `--kimodo` | + Kimodo, for new motion clips (~19 GB; runs on CPU) |
 | `--destino DIR` | where the tools and the model cache go (pick a disk with room) |
-| `--solo comfyui,modelos,trellis,blender,config` | only those components |
+| `--solo comfyui,modelos,trellis,blender,kimodo,config` | only those components |
 
 **Gated** models (accept the terms on their Hugging Face page with your account): DINOv3
 (`facebook/dinov3-vitl16-pretrain-lvd1689m`, for TRELLIS.2) and, at the full level, FLUX.2 Klein
@@ -161,7 +162,8 @@ skipped, and a failed step resumes from where it stopped.
 license still needs to be accepted.
 
 If `config.json` already points to an installed ComfyUI or TRELLIS.2, they are used as they are (their code and venv
-are not touched): only missing node packs and models are added. Kimodo and Godot (optional) are installed by hand.
+are not touched): only missing node packs and models are added (same with Kimodo). Godot (optional) is installed
+by hand.
 
 ### Manual install
 
@@ -288,17 +290,20 @@ Download [Blender 5.1](https://www.blender.org/download/) and put the executable
 [Kimodo](https://github.com/nv-tlabs/kimodo) (NVIDIA) generates human motion from text. The chosen clips already ship
 in `herramientas/3_blender/movimientos/` and Blender reads them without Kimodo.
 
+`./instalar.sh --kimodo` (or `--solo kimodo,config` on top of an existing install) installs it with everything below
+and fills in `kimodo_dir`. By hand:
+
 ```bash
 git clone https://github.com/nv-tlabs/kimodo.git && cd kimodo
 uv venv -p 3.11 --python-preference only-managed venv   # a Python with headers (builds MotionCorrection)
-uv pip install -p venv/bin/python torch --index-url https://download.pytorch.org/whl/cu128
+uv pip install -p venv/bin/python torch --index-url https://download.pytorch.org/whl/cpu   # runs on CPU
 uv pip install -p venv/bin/python -e .
 ```
 
-The text encoder is LLM2Vec on top of Llama-3-8B-Instruct. The meta-llama repo is gated; an alternative is a mirror
-with the same weights (e.g. `NousResearch/Meta-Llama-3-8B-Instruct`, same Llama 3 license) with the
-`adapter_config.json` files of `McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp` and `...-mntp-supervised` pointed
-at that folder. `crisol movimiento` runs **entirely on CPU** (~2.5 min, ~16 GB of RAM): it does not compete for
+The text encoder is LLM2Vec on top of Llama-3-8B-Instruct, in `<kimodo>/text_encoders/<repo>`. The meta-llama repo
+is gated; `instalar.sh` uses a mirror with the same weights (`NousResearch/Meta-Llama-3-8B-Instruct`, same Llama 3
+license) and points the `adapter_config.json` of `McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp` and
+`...-mntp-supervised` at that folder. The model (`nvidia/Kimodo-SOMA-RP-v1.2`) goes to the `env_modelos.HF_HOME` cache. `crisol movimiento` runs **entirely on CPU** (~2.5 min, ~16 GB of RAM): it does not compete for
 the GPU. The `MISSING`/`UNEXPECTED` LoRA warnings on load are normal.
 
 </details>

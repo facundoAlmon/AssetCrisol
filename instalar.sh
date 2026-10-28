@@ -6,6 +6,7 @@
 #   ./instalar.sh                        nivel completo en ~/assetcrisol-herramientas
 #   ./instalar.sh --nivel minimo         Qwen + Z-Image + TRELLIS.2 + Blender (sin Pixal3D, UltraTex ni escenarios)
 #   ./instalar.sh --destino /disco/grande --flux2 --solo modelos
+#   ./instalar.sh --kimodo               también Kimodo (crisol movimiento, en CPU; +~19 GB)
 #   ./instalar.sh --plan                 muestra qué haría, sin hacer nada
 #
 # Si config.json ya apunta a un ComfyUI, TRELLIS.2 o Blender existentes, los usa: no toca su código ni su venv,
@@ -42,6 +43,14 @@ declare -A EXT_TRELLIS=(
 BLENDER_VERSION=5.1.2
 BLENDER_URL=https://download.blender.org/release/Blender5.1/blender-$BLENDER_VERSION-linux-x64.tar.xz
 HF_HUB="huggingface_hub[hf_xet]==0.36.2"
+KIMODO_REPO=https://github.com/nv-tlabs/kimodo.git
+KIMODO_COMMIT=e1c219c99b4b94ba48be1fb6a1cbc64ecee4c954
+KIMODO_TORCH="torch==2.11.0"                                    # de CPU: crisol movimiento no usa la GPU
+KIMODO_MODELO=nvidia/Kimodo-SOMA-RP-v1.2                        # a la caché de Hugging Face (HF_HOME)
+# codificador de texto (LLM2Vec sobre Llama 3 8B Instruct) en <kimodo>/text_encoders: el espejo de NousResearch
+# tiene los mismos pesos que meta-llama (gated) y la misma licencia
+KIMODO_LLAMA=NousResearch/Meta-Llama-3-8B-Instruct
+KIMODO_LLM2VEC="McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp-supervised"
 
 # Modelos de ComfyUI: nivel | carpeta en models/ | nombre final | repo (hf: Hugging Face, ms: ModelScope) | archivo.
 # Los nombres finales son los que esperan doctor.py y config.ejemplo.json (modelos_imagen).
@@ -82,16 +91,18 @@ GATED_MINIMO="facebook/dinov3-vitl16-pretrain-lvd1689m"
 GATED_COMPLETO="black-forest-labs/FLUX.2-klein-base-9b-fp8"
 
 # --- argumentos --------------------------------------------------------------------------------------------------
-NIVEL=completo; DESTINO=$HOME/assetcrisol-herramientas; FLUX2=0; PLAN=0; SOLO=""
-ayuda() { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; cat <<EOF
+NIVEL=completo; DESTINO=$HOME/assetcrisol-herramientas; FLUX2=0; KIMODO=0; PLAN=0; SOLO=""
+ayuda() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; cat <<EOF
 
 Opciones:
   --nivel minimo|completo   completo (por defecto) suma Pixal3D, UltraTex, DWPose y escenarios (~135 GB en total;
                             mínimo ~90 GB)
   --destino DIR             dónde van ComfyUI, TRELLIS.2, Blender y la caché de modelos (default $DESTINO)
   --flux2                   también FLUX.2 Dev (+ ComfyUI-GGUF, ~42 GB; licencia no comercial; opcional)
+  --kimodo                  también Kimodo, para clips de movimiento nuevos (crisol movimiento, en CPU; ~19 GB;
+                            opcional: los clips incluidos se leen sin él)
   --solo a,b                solo esos componentes: comfyui, modelos (también los pesos de TRELLIS.2), trellis,
-                            blender, config
+                            blender, kimodo, config
   --plan                    mostrar qué se haría, sin instalar ni bajar nada
 EOF
 }
@@ -100,6 +111,7 @@ while [ $# -gt 0 ]; do
     --nivel) NIVEL=$2; shift 2 ;;
     --destino) DESTINO=$2; shift 2 ;;
     --flux2) FLUX2=1; shift ;;
+    --kimodo) KIMODO=1; shift ;;
     --solo) SOLO=",$2,"; shift 2 ;;
     --plan) PLAN=1; shift ;;
     -h|--help) ayuda; exit 0 ;;
@@ -119,6 +131,7 @@ error() { printf '  \033[31m✘\033[0m %s\n' "$*" >&2; }
 morir() { error "$*"; exit 1; }
 hacer() { if [ $PLAN = 1 ]; then info "[plan] $*"; else "$@"; fi; }
 toca() { [ -z "$SOLO" ] || [[ $SOLO == *",$1,"* ]]; }
+[[ $SOLO == *",kimodo,"* ]] && KIMODO=1   # Kimodo es opcional: solo con --kimodo o --solo kimodo
 incluye() {   # incluye <nivel de un ítem>: si entra en lo pedido
   case $1 in minimo) return 0 ;; completo) [ $NIVEL = completo ] ;; flux2) [ $FLUX2 = 1 ] ;; *) return 1 ;; esac
 }
@@ -141,13 +154,16 @@ hfpy() { HF_HOME=$HF_HOME_DIR uv run --quiet --no-project --with "$HF_HUB" pytho
 
 # --- rutas: las de config.json si existen, si no las de --destino ----------------------------------------------
 COMFY=$(cfg comfyui_dir); TRELLIS=$(cfg trellis2_dir); BLENDER=$(cfg blender); HF_HOME_DIR=$(cfg env_modelos.HF_HOME)
+KIMODO_DIR=$(cfg kimodo_dir)
 U2NET_DIR=$(cfg env_modelos.U2NET_HOME)
-COMFY_AJENO=0; TRELLIS_AJENO=0
+COMFY_AJENO=0; TRELLIS_AJENO=0; KIMODO_AJENO=0
 if [ -n "$COMFY" ] && [ -d "$COMFY" ] && [ ! -f "$COMFY/.assetcrisol" ]; then COMFY_AJENO=1; fi
 if [ -n "$TRELLIS" ] && [ -d "$TRELLIS" ] && [ ! -f "$TRELLIS/.assetcrisol" ]; then TRELLIS_AJENO=1; fi
+if [ -n "$KIMODO_DIR" ] && [ -d "$KIMODO_DIR" ] && [ ! -f "$KIMODO_DIR/.assetcrisol" ]; then KIMODO_AJENO=1; fi
 [ -n "$COMFY" ] || COMFY=$DESTINO/ComfyUI
 [ -n "$TRELLIS" ] || TRELLIS=$DESTINO/TRELLIS.2
 [ -n "$BLENDER" ] || BLENDER=$DESTINO/blender-$BLENDER_VERSION-linux-x64/blender
+[ -n "$KIMODO_DIR" ] || KIMODO_DIR=$DESTINO/kimodo
 [ -n "$HF_HOME_DIR" ] || HF_HOME_DIR=$DESTINO/hf-cache
 [ -n "$U2NET_DIR" ] || U2NET_DIR=$DESTINO/u2net
 
@@ -182,6 +198,7 @@ command -v uv >/dev/null && ok "uv $(uv --version | cut -d' ' -f2)"
 existe=$DESTINO; while [ ! -d "$existe" ]; do existe=$(dirname "$existe"); done   # con --plan puede no existir
 LIBRE=$(df -BG --output=avail "$existe" | tail -1 | tr -dc 0-9)
 NECESITA=$([ $NIVEL = completo ] && echo 135 || echo 90); [ $FLUX2 = 1 ] && NECESITA=$((NECESITA + 42))
+[ $KIMODO = 1 ] && NECESITA=$((NECESITA + 20))
 if [ -n "$LIBRE" ] && [ "$LIBRE" -lt "$NECESITA" ]; then
   aviso "$DESTINO tiene $LIBRE GB libres; una instalación nueva usa ~$NECESITA GB (otro disco: --destino)"
 else ok "$DESTINO (${LIBRE:-?} GB libres)"; fi
@@ -196,6 +213,13 @@ if toca trellis && [ ! -f "$TRELLIS/.assetcrisol" ] && [ $TRELLIS_AJENO = 0 ]; t
       Instalarlo de https://developer.nvidia.com/cuda-downloads (p. ej. sudo apt install cuda-toolkit-12-8) o
       indicar CUDA_HOME=/ruta. Con 13.x no compila contra el torch de TRELLIS.2."
   [ "${CC%%.*}" -lt 12 ] || aviso "GPU de compute capability $CC (RTX 50): el torch 2.6 de TRELLIS.2 no la soporta; sin probar"
+fi
+
+# MotionCorrection (parte de Kimodo) es C++ con CMake
+if [ $KIMODO = 1 ] && toca kimodo && [ ! -f "$KIMODO_DIR/.assetcrisol" ] && [ $KIMODO_AJENO = 0 ]; then
+  command -v cmake >/dev/null || morir "Kimodo necesita cmake: sudo apt install cmake"
+  command -v g++ >/dev/null || morir "Kimodo necesita g++: sudo apt install build-essential"
+  ok "cmake y g++ (Kimodo)"
 fi
 
 # --- 2. acceso a Hugging Face (modelos gated) --------------------------------------------------------------------
@@ -353,15 +377,59 @@ if toca blender; then
   fi
 fi
 
-# --- 7. config.json ------------------------------------------------------------------------------------------------
+# --- 7. Kimodo (opcional) ------------------------------------------------------------------------------------------
+if [ $KIMODO = 1 ] && toca kimodo; then
+  titulo "Kimodo ($KIMODO_DIR)"
+  if [ $KIMODO_AJENO = 1 ]; then
+    info "ya instalado (no lo puso este script): no se toca"
+  elif [ -f "$KIMODO_DIR/.assetcrisol" ] && grep -qx "$KIMODO_COMMIT" "$KIMODO_DIR/.assetcrisol"; then
+    ok "ya instalado ($KIMODO_COMMIT)"
+  else
+    [ -d "$KIMODO_DIR/.git" ] || clonar "$KIMODO_REPO" "$KIMODO_COMMIT" "$KIMODO_DIR"
+    hacer git -C "$KIMODO_DIR" -c advice.detachedHead=false checkout --quiet "$KIMODO_COMMIT"
+    PY=$KIMODO_DIR/venv/bin/python
+    # un Python con headers: MotionCorrection se compila contra él
+    [ -x "$PY" ] || hacer uv venv --quiet -p 3.11 --python-preference only-managed --seed "$KIMODO_DIR/venv"
+    hacer uv pip install --quiet -p "$PY" $KIMODO_TORCH --index-url https://download.pytorch.org/whl/cpu
+    info "kimodo y MotionCorrection (compila unos minutos)..."
+    hacer mkdir -p "$DESTINO/.tmp"
+    hacer env TMPDIR="$DESTINO/.tmp" uv pip install --quiet -p "$PY" -e "$KIMODO_DIR"
+    for r in $KIMODO_LLAMA $KIMODO_LLM2VEC; do
+      d=$KIMODO_DIR/text_encoders/$r
+      if [ -f "$d/.completo" ]; then ok "codificador $r"; continue; fi
+      if [ $PLAN = 1 ]; then info "[plan] bajar $r a $d"; continue; fi
+      info "bajando $r..."
+      hf download "$r" --local-dir "$d" >/dev/null && touch "$d/.completo"
+      ok "codificador $r"
+    done
+    # los adaptadores de LLM2Vec apuntan a meta-llama/... (gated): al espejo local
+    [ $PLAN = 1 ] || python3 - "$KIMODO_DIR/text_encoders" "$KIMODO_LLAMA" $KIMODO_LLM2VEC <<'EOF'
+import json, os, sys
+raiz, llama, *adaptadores = sys.argv[1:]
+for a in adaptadores:
+    ruta = os.path.join(raiz, a, 'adapter_config.json')
+    c = json.load(open(ruta))
+    c['base_model_name_or_path'] = os.path.join(raiz, llama)
+    json.dump(c, open(ruta, 'w'), indent=2)
+EOF
+    [ $PLAN = 1 ] || echo "$KIMODO_COMMIT" > "$KIMODO_DIR/.assetcrisol"
+    ok "Kimodo $KIMODO_COMMIT"
+  fi
+  if [ -d "$HF_HOME_DIR/hub/models--${KIMODO_MODELO//\//--}/snapshots" ]; then ok "pesos $KIMODO_MODELO"
+  elif [ $PLAN = 1 ]; then info "[plan] bajar $KIMODO_MODELO a $HF_HOME_DIR"
+  else info "bajando $KIMODO_MODELO..."; hf download "$KIMODO_MODELO" >/dev/null; ok "pesos $KIMODO_MODELO"; fi
+fi
+
+# --- 8. config.json ------------------------------------------------------------------------------------------------
 if toca config; then
   titulo "Config ($CONFIG)"
   if [ $PLAN = 1 ]; then info "[plan] completar en config.json las rutas vacías o de ejemplo"
   else
     # completa solo lo que falta o sigue con /ruta/a...: lo que el usuario ya puso no se pisa
-    python3 - "$CONFIG" "$RAIZ/config.ejemplo.json" "$COMFY" "$TRELLIS" "$BLENDER" "$HF_HOME_DIR" "$U2NET_DIR" "$FLUX2" <<'EOF'
+    python3 - "$CONFIG" "$RAIZ/config.ejemplo.json" "$COMFY" "$TRELLIS" "$BLENDER" "$HF_HOME_DIR" "$U2NET_DIR" "$FLUX2" \
+      "$([ -x "$KIMODO_DIR/venv/bin/python" ] && echo "$KIMODO_DIR")" <<'EOF'
 import json, os, sys
-ruta, ejemplo, comfy, trellis, blender, hf, u2net, flux2 = sys.argv[1:]
+ruta, ejemplo, comfy, trellis, blender, hf, u2net, flux2, kimodo = sys.argv[1:]
 cfg = json.load(open(ruta if os.path.exists(ruta) else ejemplo))
 vacio = lambda v: not v or (isinstance(v, str) and v.startswith('/ruta/a'))
 cambios = []
@@ -379,6 +447,8 @@ for k, v in json.load(open(ejemplo)).get('modelos_imagen', {}).items():   # los 
 env = cfg.setdefault('env_modelos', {})
 poner(env, 'HF_HOME', hf, 'env_modelos.HF_HOME')
 poner(env, 'U2NET_HOME', u2net, 'env_modelos.U2NET_HOME')
+if kimodo:
+    poner(cfg, 'kimodo_dir', kimodo, 'kimodo_dir')
 for k in ('kimodo_dir', 'godot'):   # opcionales que este script no instala: sin el placeholder, doctor avisa
     if vacio(cfg.get(k)) and k in cfg:
         cfg.pop(k)
@@ -398,7 +468,7 @@ EOF
   fi
 fi
 
-# --- 8. doctor ------------------------------------------------------------------------------------------------------
+# --- 9. doctor ------------------------------------------------------------------------------------------------------
 titulo "crisol doctor"
 if [ $PLAN = 1 ]; then info "[plan] ./crisol doctor"; exit 0; fi
 ASSETCRISOL_CONFIG=$CONFIG python3 "$RAIZ/pipeline.py" doctor || true
@@ -407,5 +477,5 @@ cat <<EOF
 La caché de paquetes se puede borrar: UV_CACHE_DIR=$UV_CACHE_DIR uv cache clean
 Listo. Probar sin generar nada:  cp -r ejemplos/* <datos_dir>/ && crisol blender cris && crisol sprites cris
 Comando corto: ln -s "$RAIZ/crisol" ~/.local/bin/crisol   (README > Instalación)
-Opcional, a mano: Kimodo (crisol movimiento) y Godot 4 (godot --instalar): ver README.
+Opcional: Kimodo con ./instalar.sh --kimodo (crisol movimiento); Godot 4 a mano (godot --instalar): ver README.
 EOF
