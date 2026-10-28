@@ -16,7 +16,7 @@ Animated characters · props · vehicles · scenery kits → sprites, `.glb` fil
 
 *Cris, the project's main character: isometric sprites generated end to end with AssetCrisol.*
 
-[Español](README.md) · [Roadmap](ROADMAP.md) · [Start here](#start-here) · [For AI agents](#for-ai-agents)
+[Español](README.md) · [Roadmap](ROADMAP.md) · [Start here](#start-here) · [For AI agents](#for-ai-agents) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 
 </div>
 

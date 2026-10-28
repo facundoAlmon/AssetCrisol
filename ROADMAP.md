@@ -98,7 +98,6 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 ## 6. Robustez
 - [x] Test de humo sin generación (`tests/humo.py`): `blender` → `sprites` → `iso` → `revisar` → `godot` de Cris, la caja,
       `tema` del bosque y el taller, e instancia las escenas en un proyecto Godot vacío (~3 min).
-- [ ] Correrlo en GitHub Actions (Blender headless sin GPU: probar EEVEE por software o Workbench).
 - [x] Errores claros cuando falta una herramienta o un modelo, en vez de un traceback.
 - [ ] Ajustes según la VRAM detectada (hoy el pipeline asume 16 GB).
 
@@ -110,7 +109,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [ ] Demos: proyecto Godot de ejemplo (Cris caminando por el taller iso) y videos cortos con la UI y con un agente.
 - [ ] Prueba en limpio: instalar desde cero (Docker y nativo) siguiendo solo la doc, una vez una persona y otra un
       agente sin contexto.
-- [ ] CONTRIBUTING, plantillas de issues (con `crisol doctor --json`), CHANGELOG. Issues en español o inglés.
+- [x] CONTRIBUTING, plantillas de issues (con `crisol doctor --json`), CHANGELOG. Issues en español o inglés.
 - [ ] Tag `v0.1`.
 - [ ] Post de lanzamiento (es/en) y difusión (Reddit, Show HN, itch.io, comunidades de gamedev, Discords de ComfyUI
       y Godot); después, un devlog por versión.
@@ -147,6 +146,8 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - Aviso de uso responsable: propiedad intelectual de personajes ajenos y fotos de personas reales.
 
 ## Descartado (y por qué)
+- **CI en GitHub Actions**: todo se prueba local (`tests/humo.py` antes de cada PR); los runners gratis no tienen
+  GPU y el proyecto no depende de servicios externos.
 - **Re-texturizar con el pipeline de texturas de TRELLIS.2**: sale más oscuro y borroso que UltraTex.
 - **Pixal3D con dos tres cuartos** (vehículos): las cámaras no son consistentes y aparecen fantasmas.
 - **TRELLIS.2 a 1536**: el remesh no entra en 16 GB; simplificando antes sale limpio pero no mejor que 1024.

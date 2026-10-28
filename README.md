@@ -16,7 +16,7 @@ Personajes animados · objetos · vehículos · kits de escenario → sprites, `
 
 *Cris, la protagonista del proyecto: sprites isométricos generados de punta a punta con AssetCrisol.*
 
-[English](README.en.md) · [Roadmap](ROADMAP.md) · [Empezá acá](#empezá-acá) · [Para agentes de IA](#para-agentes-de-ia)
+[English](README.en.md) · [Roadmap](ROADMAP.md) · [Empezá acá](#empezá-acá) · [Para agentes de IA](#para-agentes-de-ia) · [Contribuir](CONTRIBUTING.md) · [Cambios](CHANGELOG.md)
 
 </div>
 

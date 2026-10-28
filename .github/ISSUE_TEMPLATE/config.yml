@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Instalación y requisitos / Install and requirements
+    url: https://github.com/facundoAlmon/AssetCrisol#empezá-acá
+    about: Antes de reportar un problema de instalación, corré crisol doctor. / Run crisol doctor before reporting an install problem.

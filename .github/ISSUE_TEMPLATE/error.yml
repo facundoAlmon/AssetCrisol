@@ -1,0 +1,61 @@
+name: Error / Bug
+description: Algo falla o sale mal / Something fails or looks wrong
+labels: [error]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por avisar. Español o inglés. / Thanks for reporting. English or Spanish.
+        No subas fotos de personas reales ni personajes con derechos ajenos. / Don't attach photos of real people or third-party characters.
+  - type: input
+    id: paso
+    attributes:
+      label: Paso / Step
+      description: "p. ej. / e.g. crisol malla bandido"
+    validations:
+      required: true
+  - type: textarea
+    id: que_paso
+    attributes:
+      label: Qué pasó y qué esperabas / What happened and what you expected
+      description: Si es visual, una captura (preview.gif, revision.png, candidatos.png). / If it's visual, a screenshot.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Error
+      description: "El mensaje y, si existe, trabajo/error_<paso>.log o el log del paso (trabajo/malla/trellis2.log, trabajo/blender_<modo>.log, trabajo/imagen/comfyui.log). / The message and the step's log."
+      render: text
+  - type: textarea
+    id: doctor
+    attributes:
+      label: crisol doctor --json
+      description: La salida completa. / The full output.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: estado
+    attributes:
+      label: crisol estado <n> --json
+      render: json
+  - type: textarea
+    id: json
+    attributes:
+      label: personaje.json / objeto.json
+      render: json
+  - type: input
+    id: version
+    attributes:
+      label: Versión / Version
+      description: "git rev-parse --short HEAD, o la etiqueta de la imagen Docker / or the Docker image tag"
+    validations:
+      required: true
+  - type: dropdown
+    id: instalacion
+    attributes:
+      label: Instalación / Install
+      options: [instalar.sh, Docker, a mano / by hand]
+    validations:
+      required: true

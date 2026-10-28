@@ -1,0 +1,26 @@
+name: Propuesta / Feature request
+description: Algo nuevo o un cambio / Something new or a change
+labels: [propuesta]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Mirá antes el ROADMAP (y su sección Descartado). Todo tiene que correr local, sin servicios pagos.
+        Check the ROADMAP first (and its Descartado section). Everything must run locally, with no paid services.
+  - type: textarea
+    id: que
+    attributes:
+      label: Qué querés lograr / What you want to achieve
+      description: El asset o el problema, no solo la solución. / The asset or the problem, not just the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: como
+    attributes:
+      label: Idea de cómo / How it could work
+      description: Modelos, pasos o archivos que tocaría; licencias de los modelos nuevos. / Models, steps or files involved; licenses of any new model.
+  - type: textarea
+    id: ejemplos
+    attributes:
+      label: Ejemplos / Examples
+      description: Imágenes de referencia o resultados actuales. / Reference images or current results.

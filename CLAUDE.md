@@ -4,8 +4,8 @@ Guía para agentes (Claude Code u otros; `AGENTS.md` remite acá). Pipeline loca
 referencia en assets de juego: ComfyUI (imagen) → Pixal3D o TRELLIS.2 (malla, repintada con UltraTex) → Blender
 headless (rig, pesos, animaciones, render) → hojas de sprites e iso → Godot. También objetos sin rig, vehículos y
 kits de escenario. `README.md` es la doc de usuario (instalación, cada paso, opciones de `personaje.json`): leerlo
-antes de cambios grandes y actualizarlo cuando cambie el comportamiento. Código, comentarios y docs en español. Todo
-corre local: no proponer servicios pagos ni APIs en la nube.
+antes de cambios grandes y actualizarlo cuando cambie el comportamiento (y `CHANGELOG.md` > *Sin publicar*). Código,
+comentarios y docs en español. Todo corre local: no proponer servicios pagos ni APIs en la nube.
 
 ## Reglas
 
