@@ -90,7 +90,8 @@ Opciones:
                             mínimo ~90 GB)
   --destino DIR             dónde van ComfyUI, TRELLIS.2, Blender y la caché de modelos (default $DESTINO)
   --flux2                   también FLUX.2 Dev (+ ComfyUI-GGUF, ~42 GB; licencia no comercial; opcional)
-  --solo a,b                solo esos componentes: comfyui, modelos, trellis, blender, config
+  --solo a,b                solo esos componentes: comfyui, modelos (también los pesos de TRELLIS.2), trellis,
+                            blender, config
   --plan                    mostrar qué se haría, sin instalar ni bajar nada
 EOF
 }
@@ -159,13 +160,19 @@ titulo "Requisitos"
 [ "$(uname -s)-$(uname -m)" = Linux-x86_64 ] || morir "solo Linux x86_64 (ver README > Requisitos)"
 for c in git curl tar xz python3; do command -v $c >/dev/null || morir "falta $c: sudo apt install $c"; done
 python3 -c 'import PIL' 2>/dev/null && ok "python3 con Pillow" || aviso "el python3 del sistema no tiene Pillow (pipeline.py lo necesita): sudo apt install python3-pil"
-command -v nvidia-smi >/dev/null || morir "no hay nvidia-smi: instalar el driver de NVIDIA"
-IFS=, read -r GPU VRAM DRIVER CC < <(nvidia-smi --query-gpu=name,memory.total,driver_version,compute_cap --format=csv,noheader,nounits | head -1)
-GPU=${GPU# }; VRAM=${VRAM// /}; DRIVER=${DRIVER// /}; CC=${CC// /}
-ok "GPU $GPU, $(((VRAM + 512) / 1024)) GB, driver $DRIVER, compute capability $CC"
-[ "$VRAM" -ge 15800 ] || aviso "con menos de 16 GB de VRAM la malla puede no entrar"
-if [ "${DRIVER%%.*}" -ge 580 ]; then TORCH_INDEX=https://download.pytorch.org/whl/cu130
-else TORCH_INDEX=https://download.pytorch.org/whl/cu126; fi
+if [ -n "${CRISOL_CUDA_ARCH:-}" ]; then
+  # sin GPU a la vista (docker build): arquitecturas y CUDA de torch fijados por variables
+  CC=$CRISOL_CUDA_ARCH; TORCH_INDEX=https://download.pytorch.org/whl/${CRISOL_TORCH_CUDA:-cu126}
+  ok "sin detectar GPU: compilar para $CC, torch de ComfyUI ${CRISOL_TORCH_CUDA:-cu126}"
+else
+  command -v nvidia-smi >/dev/null || morir "no hay nvidia-smi: instalar el driver de NVIDIA"
+  IFS=, read -r GPU VRAM DRIVER CC < <(nvidia-smi --query-gpu=name,memory.total,driver_version,compute_cap --format=csv,noheader,nounits | head -1)
+  GPU=${GPU# }; VRAM=${VRAM// /}; DRIVER=${DRIVER// /}; CC=${CC// /}
+  ok "GPU $GPU, $(((VRAM + 512) / 1024)) GB, driver $DRIVER, compute capability $CC"
+  [ "$VRAM" -ge 15800 ] || aviso "con menos de 16 GB de VRAM la malla puede no entrar"
+  if [ "${DRIVER%%.*}" -ge 580 ]; then TORCH_INDEX=https://download.pytorch.org/whl/cu130
+  else TORCH_INDEX=https://download.pytorch.org/whl/cu126; fi
+fi
 if ! command -v uv >/dev/null; then
   aviso "falta uv (gestor de entornos de Python): se instala en ~/.local/bin"
   hacer sh -c 'curl -LsSf https://astral.sh/uv/install.sh | sh'
@@ -195,7 +202,7 @@ fi
 # solo si falta bajar alguno gated (un token se pide recién ahí: el resto se baja sin cuenta)
 sesion_hf() { ! hf auth whoami 2>&1 | grep -qiE 'not logged|invalid'; }
 gated=""
-if toca trellis && [ ! -d "$HF_HOME_DIR/hub/models--${GATED_MINIMO//\//--}/snapshots" ]; then gated=$GATED_MINIMO; fi
+if toca modelos && [ ! -d "$HF_HOME_DIR/hub/models--${GATED_MINIMO//\//--}/snapshots" ]; then gated=$GATED_MINIMO; fi
 if toca modelos && [ $NIVEL = completo ] && [ ! -f "$COMFY/models/diffusion_models/flux-2-klein-base-9b-fp8.safetensors" ]; then
   gated="$gated $GATED_COMPLETO"
 fi
@@ -239,7 +246,7 @@ if toca comfyui; then
     [ -x "$COMFY/venv/bin/python" ] || hacer uv venv --quiet -p $COMFYUI_PY --seed "$COMFY/venv"
     info "torch ($TORCH_INDEX)..."
     hacer uv pip install --quiet -p "$COMFY/venv/bin/python" $TORCH_COMFY --index-url "$TORCH_INDEX"
-    hacer uv pip install --quiet -p "$COMFY/venv/bin/python" -r "$COMFY/requirements.txt" comfy-cli "$HF_HUB"
+    hacer uv pip install --quiet -p "$COMFY/venv/bin/python" -r "$COMFY/requirements.txt" comfy-cli==1.20.0 "$HF_HUB"
     [ $PLAN = 1 ] || echo "$COMFYUI_COMMIT" > "$COMFY/.assetcrisol"
     ok "ComfyUI $COMFYUI_COMMIT"
   fi
@@ -250,7 +257,12 @@ if toca comfyui; then
     if ls "$COMFY/custom_nodes" 2>/dev/null | grep -qix "$nodo"; then ok "nodo $nodo"; continue; fi
     clonar "$repo" "$commit" "$dir"
     [ -f "$dir/requirements.txt" ] && hacer uv pip install --quiet -p "$COMFY/venv/bin/python" -r "$dir/requirements.txt"
-    [ "$nodo" = ComfyUI-UltraTex ] && hacer uv pip install --quiet -p "$COMFY/venv/bin/python" moderngl xatlas
+    if [ "$nodo" = ComfyUI-UltraTex ]; then
+      hacer uv pip install --quiet -p "$COMFY/venv/bin/python" moderngl xatlas
+      # hornea con OpenGL por X11; sin pantalla (servidor, contenedor) tiene que ser EGL
+      hacer sed -i "s/create_standalone_context(require=330)/create_standalone_context(require=330, **({} if __import__('os').environ.get('DISPLAY') else {'backend': 'egl'}))/" \
+        "$dir/ultratex_core/render.py"
+    fi
     ok "nodo $nodo ($commit)"
   done
 fi
@@ -278,6 +290,16 @@ if toca modelos; then
     if [ -n "$nivel" ] && incluye "$nivel"; then bajar_modelo "$carpeta" "$nombre" "$origen" "$archivo"; fi
   done <<< "$MODELOS_COMFY"
   rm -rf "$COMFY/models/.descargas"
+  titulo "Pesos de TRELLIS.2 ($HF_HOME_DIR)"
+  while read -r repo archivos; do
+    [ -n "$repo" ] || continue
+    if [ -d "$HF_HOME_DIR/hub/models--${repo//\//--}/snapshots" ]; then ok "pesos $repo"; continue; fi
+    if [ $PLAN = 1 ]; then info "[plan] bajar $repo a $HF_HOME_DIR"; continue; fi
+    info "bajando $repo..."
+    # shellcheck disable=SC2086
+    hf download "$repo" $archivos >/dev/null
+    ok "pesos $repo"
+  done <<< "$PESOS_TRELLIS"
 fi
 
 # --- 5. TRELLIS.2 --------------------------------------------------------------------------------------------------
@@ -315,15 +337,6 @@ if toca trellis; then
     [ $PLAN = 1 ] || echo "$TRELLIS_COMMIT" > "$TRELLIS/.assetcrisol"
     ok "TRELLIS.2 $TRELLIS_COMMIT"
   fi
-  while read -r repo archivos; do
-    [ -n "$repo" ] || continue
-    if [ -d "$HF_HOME_DIR/hub/models--${repo//\//--}/snapshots" ]; then ok "pesos $repo"; continue; fi
-    if [ $PLAN = 1 ]; then info "[plan] bajar $repo a $HF_HOME_DIR"; continue; fi
-    info "bajando $repo..."
-    # shellcheck disable=SC2086
-    hf download "$repo" $archivos >/dev/null
-    ok "pesos $repo"
-  done <<< "$PESOS_TRELLIS"
 fi
 
 # --- 6. Blender ----------------------------------------------------------------------------------------------------

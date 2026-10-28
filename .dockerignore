@@ -1,0 +1,13 @@
+# lo que no entra en la imagen (Dockerfile)
+.git
+.codegraph
+.claude
+CLAUDE.local.md
+/config.json
+__pycache__
+*.pyc
+/personajes
+/objetos
+/escenarios
+/movimientos
+herramientas/3_blender/movimientos/candidatos

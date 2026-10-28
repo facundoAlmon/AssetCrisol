@@ -50,8 +50,10 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 ## 2. Requisitos e instalación (humanos y agentes)
 - [x] Requisitos explícitos (README > Requisitos en detalle): GPU, driver/CUDA, RAM, disco por nivel, tiempo de cada
       paso en la placa de referencia. Falta probar otras distribuciones.
-- [ ] **Imagen Docker** publicada en GHCR (nvidia-container-toolkit), sin modelos: van en un volumen que llena
-      `instalar.sh --solo modelos`. Camino recomendado.
+- [x] **Imagen Docker** (`Dockerfile`, `docs/docker.md`): instalar.sh en el build, sin modelos (volumen que llena
+      `docker run ... modelos`), corre como el dueño de `/datos`. Probada: Blender, TRELLIS.2 + UltraTex (EGL).
+- [ ] Publicarla en GHCR (23 GB: los runners gratis de GitHub tienen ~14 GB de disco; construirla acá y subirla, o
+      liberar espacio en el runner).
 - [x] `instalar.sh` nativo: repos externos en commits fijos, venvs con `uv`, extensiones de TRELLIS.2 compiladas para
       la GPU, modelos con `hf download`; reconoce lo ya instalado y se puede volver a correr. Probado en limpio
       (ComfyUI, TRELLIS.2 generando una malla, Blender); falta una prueba completa con todos los modelos.

@@ -1,0 +1,23 @@
+{
+  "_doc": "Config de la imagen Docker (rutas dentro del contenedor). Ver docs/docker.md.",
+  "datos_dir": "/datos",
+  "estilo": "moderno",
+  "comfyui_dir": "/opt/crisol/ComfyUI",
+  "comfyui_url": "http://127.0.0.1:8188",
+  "trellis2_dir": "/opt/crisol/TRELLIS.2",
+  "env_modelos": {
+    "HF_HOME": "/modelos/hf",
+    "U2NET_HOME": "/modelos/u2net"
+  },
+  "blender": "/opt/crisol/blender-5.1.2-linux-x64/blender",
+  "modelos_imagen": {
+    "qwen_unet": "qwen_image_edit_2511_int8_convrot.safetensors",
+    "qwen_lora": "Qwen-Image-Edit-2511-Lightning-4steps-V1.0-bf16.safetensors",
+    "flux_unet": "flux2-dev-Q5_K_M.gguf",
+    "flux_clip": "mistral_3_small_flux2_fp8.safetensors",
+    "flux_vae": "flux2-vae.safetensors",
+    "zimage_unet": "z_image_turbo_bf16.safetensors",
+    "zimage_clip": "qwen_3_4b.safetensors",
+    "zimage_vae": "z_image_ae.safetensors"
+  }
+}

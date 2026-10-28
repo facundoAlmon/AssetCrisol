@@ -68,6 +68,8 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
 - `instalar.sh` (raíz, bash): instalación nativa por niveles. Commits fijados y tabla de modelos (`MODELOS_COMFY`,
   repo → nombre final) arriba: al sumar un modelo o nodo, también ahí (y en `doctor.MODELOS`/`NODOS`). `--plan` lo
   prueba sin instalar; con la config de esta PC reconoce lo instalado y no lo toca.
+- `Dockerfile` + `docker/` (`entrypoint.sh`, `config.json` con las rutas de adentro): la imagen corre instalar.sh sin
+  GPU (`CRISOL_CUDA_ARCH`); modelos en el volumen `/modelos`, datos en `/datos`, pasos como el dueño de `/datos`.
 - `1_imagen/generar_imagen.py` + `*.recipe.json`: workflows con `comfy workflow apply` + modelos fijados (Qwen Edit,
   FLUX.2 Dev); Z-Image (`motor_texto`, `workflow_zimage`) en formato API armado en Python; hoja de contacto.
 - `2_malla/`: `generar_malla_pixal3d.py` (workflow API armado en Python; modo `alinear`), `generar_malla_trellis.py`

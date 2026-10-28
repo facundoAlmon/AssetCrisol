@@ -132,6 +132,8 @@ Each character with a mesh takes ~0.5-1 GB in `datos_dir`.
 
 ### Automatic install (recommended)
 
+With Docker: see [docs/docker.en.md](docs/docker.en.md) (the image ships everything but the models). Without Docker:
+
 ```bash
 git clone https://github.com/facundoAlmon/AssetCrisol.git && cd AssetCrisol
 ./instalar.sh --plan                    # what it will do, without doing anything

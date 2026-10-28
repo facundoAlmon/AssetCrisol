@@ -273,7 +273,7 @@ def trellis(R, cfg):
     faltan = [r for r in HF_TRELLIS if not os.path.isdir(os.path.join(hf, 'hub', 'models--' + r.replace('/', '--')))]
     ok_hf = R.anotar(G, 'pesos (Hugging Face)', OK if not faltan else FALTA,
                      hf if not faltan else 'faltan ' + ', '.join(faltan),
-                     f'./instalar.sh --solo trellis (DINOv3 es gated: aceptar sus condiciones en Hugging Face)')
+                     f'./instalar.sh --solo modelos (DINOv3 es gated: aceptar sus condiciones en Hugging Face)')
     R.tiene['trellis2'] = ok_tf and ok_hf and R.tiene['rembg']
 
 

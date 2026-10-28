@@ -1,5 +1,5 @@
 # configuración local (copiar config.ejemplo.json)
-config.json
+/config.json
 __pycache__/
 *.pyc
 # datos generados, si datos_dir apunta a esta carpeta (por defecto)
