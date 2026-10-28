@@ -88,9 +88,14 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] Biblioteca de assets (miniaturas, estado, rehacer un paso o en lote).
 - [x] Ajustes comunes sin json (seed, estilo, altura, animaciones y su método); el json queda como modo avanzado.
 - [x] Visor 3D del `.glb` (three.js): el resultado y los candidatos de malla uno al lado del otro.
+- [x] Candidatos de malla desde la UI (motor, seed, resolución, repintados con UltraTex; rehacer uno).
+- [x] `crisol ui --host 0.0.0.0` (la red local); la cola retoma el paso que siguió corriendo con la UI cerrada.
+- [ ] Contraseña o token para `--host 0.0.0.0` (hoy, cualquiera en la red puede correr pasos).
+- [ ] Hora en los logs que escriben los pasos en `trabajo/*.log` (los de la cola ya la tienen).
 - [ ] Candidatos de malla como tarjetas con imagen (hoy la hoja `candidatos.png` entera con un botón por candidato,
       salvo vehículos; en 3D ya se ven de a uno).
-- [ ] Pasar un clip de Kimodo a la biblioteca de movimientos desde la UI (hoy a mano: README > Blender > Animaciones: dos métodos).
+- [ ] Pasar un clip de Kimodo a la biblioteca de movimientos desde la UI (hoy a mano: README > Blender >
+      Animaciones: dos métodos).
 
 ## 5. Salida 3D y otros motores
 - [ ] Personaje como GLB con rig y animaciones (las mismas de los sprites).

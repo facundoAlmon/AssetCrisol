@@ -105,8 +105,10 @@ crisol ui [--puerto 8190] [--no-abrir]              # UI web local (herramientas
 - `0_entorno/operaciones.py`: lo común del MCP y la UI (correr/lanzar `crisol <paso> --json`, json del asset,
   `elegir` con las claves de elección, `ajustar` que no elige, `PASOS`).
 - `ui/` (`crisol ui`, python3 del sistema, stdlib + Pillow): `servidor.py` (API JSON sobre la CLI y `estado.py`, SSE,
-  miniaturas; solo Host local y Origin propio), `cola.py` (un paso por vez, `<datos_dir>/.crisol_ui/`, cancelar con
-  `killpg`, duraciones medidas) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; el visor 3D
+  miniaturas; Host local, o IP/nombre de la PC con `--host 0.0.0.0`, y Origin = Host), `cola.py` (un paso por vez,
+  `<datos_dir>/.crisol_ui/`, cancelar con `killpg`, duraciones medidas; al reabrir, un paso que siguió corriendo se
+  espera por su PID; el log de cada paso pasa por `0_entorno/sello.py`, que le pone la hora a cada línea en otro
+  proceso para que el paso no muera si se cierra la UI) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; el visor 3D
   `componentes/visor3d.mjs` con three.js de `web/vendor/three/`, cargado recién al abrirlo; textos en
   `web/i18n/{es,en}.mjs` con las mismas claves). Un paso nuevo: a `operaciones.PASOS`, su nombre en i18n
   (`paso.<p>`, `pasodoc.<p>`) y, si no está en la cadena de `estado.py`, a `EXTRA` de `componentes/asset.mjs`.

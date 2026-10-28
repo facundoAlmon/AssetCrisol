@@ -123,14 +123,15 @@ function Decision({ d, dec, recargar, listo }) {
           </button>
           <footer><span class="mono">${o.valor}</span>
             <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">${boton3d(o)}
-            ${esActual(o)
+            ${en3d.includes(o.valor) ? '' : esActual(o)
               ? html`<${Chip} clase="hecho">${t('decidir.actual')}<//>`
               : html`<button class="boton chico primario" disabled=${guardando !== null} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}</span>
           </footer></article>`)}</div>`
       : html`${dec.mirar && html`<button class="hoja-decidir damero" onClick=${() => verGrande(urlArchivo(d.nombre, dec.mirar), t('decidir.hoja'))}>
             <img src=${urlMini(d.nombre, dec.mirar, 1400)} alt=${t('decidir.hoja')} /></button>`}
           <div class="botones-opcion">${dec.opciones.map(o => html`<span class="botones-opcion" key=${o.valor}>
-            ${esActual(o) ? html`<${Chip} clase="hecho">${t('decidir.actual')}: ${o.valor}<//>`
+            ${en3d.includes(o.valor) ? ''   // abierto en 3D: se elige desde su visor, abajo
+              : esActual(o) ? html`<${Chip} clase="hecho">${t('decidir.actual')}: ${o.valor}<//>`
               : html`<button class="boton primario" disabled=${guardando !== null}
                   onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}: ${o.valor}</button>`}${boton3d(o)}</span>`)}</div>`}
     ${en3d.length > 0 && html`<div class="comparar3d">${en3d.map(v => dec.opciones.find(o => o.valor === v)).filter(Boolean).map(o =>

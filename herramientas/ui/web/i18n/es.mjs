@@ -138,6 +138,7 @@ export default {
   'visor.3d_girar': 'Girar solo',
   'visor.3d_reiniciar': 'Volver a encuadrar',
   'visor.3d_ayuda': 'Arrastrá para girar, la rueda o dos dedos para acercar',
+  'visor.3d_ayuda_tactil': 'Deslizá de costado para girar, dos dedos para acercar',
   'decidir.ver_3d': 'Ver en 3D',
   'decidir.ocultar_3d': 'Ocultar 3D',
   'decidir.comparar_3d': 'Comparar en 3D',

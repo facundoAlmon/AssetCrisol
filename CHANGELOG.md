@@ -18,6 +18,8 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - Editor de **candidatos de malla** en la UI (Ajustes > Malla): motor, seed y resolución de cada uno (también el
   principal), repintados con UltraTex `desde` otro, cuáles ya están generados y **Rehacer** uno (borra su
   `trabajo/malla_<c>/` y pone Malla 3D en la cola).
+- `crisol ui --host 0.0.0.0`: la UI desde otra PC o el celular en la misma red (sin contraseña: avisa al arrancar).
+- Los logs de los pasos que lanza la UI llevan la hora de cada línea.
 - **Recetas por tipo**: `crisol nuevo <n> --receta humanoide|chibi|robot|juguete|objeto|vegetacion|vehiculo|escenario`
   arma el json con lo que anda para cada tipo (`plantilla/recetas/`); `--descripcion` completa `imagen.descripcion`
   sin editar el json. `--objeto`, `--vehiculo` y `--escenario` siguen como atajos.
@@ -33,6 +35,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - Los tiempos de Pixal3D en objetos (README): el candidato `pixal3d` a 1536 tarda 1-8 min según el volumen.
 
 ### Arreglado
+- `crisol ui`: al reabrirla con un paso que siguió corriendo, quedaba "interrumpido" y el siguiente de la cola
+  arrancaba encima; ahora lo espera. En el celular, deslizar en vertical sobre el visor 3D baja la página (girar es
+  de costado). Al comparar mallas en 3D, "Elegir esta" aparecía dos veces.
 - `instalar.sh` daba por buena una sesión de Hugging Face con un token vencido o inválido; ahora pide login.
 - Con `comfyui_url` en otro puerto que el 8188, la imagen con referencia, las vistas, Pixal3D y las texturas con
   FLUX.2 buscaban ComfyUI en el 8188 (`comfy run` sin `--host`/`--port`).

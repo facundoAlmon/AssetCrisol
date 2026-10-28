@@ -54,6 +54,9 @@ export function Visor3D({ url, titulo, alto }) {
       controles.enableDamping = true
       controles.screenSpacePanning = true
       controles.autoRotateSpeed = 1.5
+      // con el dedo: deslizar de costado gira y en vertical baja la página (touch-action: pan-y en el CSS); dos
+      // dedos acercan y giran
+      controles.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_ROTATE }
       let inicial = null   // {pos, centro} para reiniciar
       const medir = () => {
         const w = el.clientWidth || 300, h = el.clientHeight || 300
@@ -126,6 +129,6 @@ export function Visor3D({ url, titulo, alto }) {
       <button class="icono-boton" style="background:var(--superficie-2)" title=${t('visor.3d_reiniciar')}
         onClick=${() => api.current?.reiniciar()}><${Icono} n="centrar" titulo=${t('visor.3d_reiniciar')} /></button>
     </div>`}
-    ${estado === 'listo' && html`<span class="ayuda3d">${t('visor.3d_ayuda')}</span>`}
+    ${estado === 'listo' && html`<span class="ayuda3d">${t(matchMedia('(pointer: coarse)').matches ? 'visor.3d_ayuda_tactil' : 'visor.3d_ayuda')}</span>`}
   </div>`
 }

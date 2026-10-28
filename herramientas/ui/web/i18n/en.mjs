@@ -137,6 +137,7 @@ export default {
   'visor.3d_girar': 'Spin',
   'visor.3d_reiniciar': 'Reframe',
   'visor.3d_ayuda': 'Drag to rotate, wheel or two fingers to zoom',
+  'visor.3d_ayuda_tactil': 'Swipe sideways to rotate, two fingers to zoom',
   'decidir.ver_3d': 'View in 3D',
   'decidir.ocultar_3d': 'Hide 3D',
   'decidir.comparar_3d': 'Compare in 3D',
