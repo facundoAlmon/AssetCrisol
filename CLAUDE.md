@@ -109,6 +109,8 @@ crisol ui [--puerto 8190] [--no-abrir]              # UI web local (herramientas
   `killpg`, duraciones medidas) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; textos en
   `web/i18n/{es,en}.mjs` con las mismas claves). Un paso nuevo: a `operaciones.PASOS`, su nombre en i18n
   (`paso.<p>`, `pasodoc.<p>`) y, si no está en la cadena de `estado.py`, a `EXTRA` de `componentes/asset.mjs`.
+  `componentes/candidatos.mjs` edita `malla.candidatos` con el formato de `pipeline.candidatos_malla` (lo que un
+  candidato no pisa lo hereda del principal: solo escribe las claves que cambian) y nunca `malla.elegida`.
   Probar con `python3 tests/ui.py` (sin GPU) y mirar capturas (claro/oscuro, 390 px) antes de dar un cambio por bueno.
 - `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,escenario}.json`, `ejemplos/`.
 - `plantilla/recetas/*.json` (`crisol nuevo --receta`): `_base` (qué plantilla pisan), `_doc`, `_agregar_descripcion`,

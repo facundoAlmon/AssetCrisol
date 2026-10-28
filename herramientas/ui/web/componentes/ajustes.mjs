@@ -2,6 +2,7 @@
 // animación. El json completo queda como modo avanzado, con un diff antes de guardar. Las elecciones (imagen, malla,
 // texturas) no se cambian acá: van por Decidir.
 import { html, useState, useEffect, useMemo, api, t, aviso, Icono, Cargando } from '../comunes.mjs'
+import { Candidatos, CLAVES_CANDIDATOS } from './candidatos.mjs'
 
 const leer = (obj, clave) => clave.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj)
 
@@ -29,13 +30,10 @@ function campos(d, estilos, animaciones) {
     lista.push({ g: 'imagen', clave: 'imagen.motor', tipo: 'select', etiqueta: 'aj.motor_imagen',
       opciones: [['', t('aj.defecto')], ['zimage', 'Z-Image Turbo'], ['flux2', 'FLUX.2 Dev']] })
   }
-  if (!m.candidatos) {
-    lista.push({ g: 'malla', clave: 'malla.motor', tipo: 'select', etiqueta: 'aj.motor_malla', opciones: [['pixal3d', 'Pixal3D'], ['trellis2', 'TRELLIS.2']] })
-  }
-  lista.push({ g: 'malla', clave: 'malla.seed', tipo: 'entero', etiqueta: 'aj.seed_malla', ayuda: 'aj.seed_malla_ayuda' })
+  // motor, seed, resolución y UltraTex del principal y de los candidatos: el editor de candidatos (candidatos.mjs)
+  lista.push({ g: 'malla', clave: 'malla.candidatos', tipo: 'candidatos' })
   if (ut) {
-    lista.push({ g: 'malla', clave: 'malla.ultratex.seed', tipo: 'entero', etiqueta: 'aj.seed_ultratex', ayuda: 'aj.seed_ultratex_ayuda' },
-      { g: 'malla', clave: 'malla.ultratex.espalda', tipo: 'bool', etiqueta: 'aj.espalda' },
+    lista.push({ g: 'malla', clave: 'malla.ultratex.espalda', tipo: 'bool', etiqueta: 'aj.espalda' },
       { g: 'malla', clave: 'malla.ultratex.costados', tipo: 'bool', etiqueta: 'aj.costados' })
   }
   lista.push({ g: 'modelo', clave: 'modelo.altura', tipo: 'numero', paso: 0.01, etiqueta: 'aj.altura' })
@@ -158,6 +156,7 @@ export function Ajustes({ d, recargar }) {
   const [cambios, setCambios] = useState({})
   const [avanzado, setAvanzado] = useState(false)
   const [guardando, setGuardando] = useState(false)
+  const [errorCand, setErrorCand] = useState(null)
   useEffect(() => {
     Promise.all([api('estilos'), api('animaciones')]).then(([estilos, animaciones]) => setCat({ estilos, animaciones }), e => aviso(e.message, 'error'))
   }, [])
@@ -182,12 +181,17 @@ export function Ajustes({ d, recargar }) {
     ${grupos.map(g => html`<section class="grupo-ajustes" key=${g}>
       <h3>${t('aj.g.' + g)}</h3>
       <div class="fila">${lista.filter(c => c.g === g).map(c => html`<div key=${c.clave}
-          style=${c.tipo === 'area' || c.tipo === 'animaciones' ? 'grid-column:1/-1' : ''}>
-        <${Campo} c=${c} valor=${valor(c)} cambiar=${v => setCambios({ ...cambios, [c.clave]: v })} /></div>`)}</div>
+          style=${['area', 'animaciones', 'candidatos'].includes(c.tipo) ? 'grid-column:1/-1' : ''}>
+        ${c.tipo === 'candidatos'
+          ? html`<${Candidatos} key=${d.modificado + JSON.stringify(d.json.malla || {})} d=${d} onCambio=${(patch, error) => {
+              setCambios(prev => ({ ...Object.fromEntries(Object.entries(prev).filter(([k]) => !CLAVES_CANDIDATOS.includes(k))), ...patch }))
+              setErrorCand(error)
+            }} />`
+          : html`<${Campo} c=${c} valor=${valor(c)} cambiar=${v => setCambios({ ...cambios, [c.clave]: v })} />`}</div>`)}</div>
       ${g === 'animaciones' && html`<${Metodos} d=${d} />`}
     </section>`)}
     <div class="barra-guardar">
-      <button class="boton primario" disabled=${!sucio || guardando} onClick=${guardar}><${Icono} n="check" />${t('aj.guardar')}</button>
+      <button class="boton primario" disabled=${!sucio || guardando || !!errorCand} title=${errorCand || ''} onClick=${guardar}><${Icono} n="check" />${t('aj.guardar')}</button>
       ${sucio && html`<button class="boton fantasma" onClick=${() => setCambios({})}>${t('aj.descartar')}</button>`}
       <button class="boton fantasma" style="margin-left:auto" onClick=${() => setAvanzado(true)}>${t('aj.avanzado')}</button>
     </div>

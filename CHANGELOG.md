@@ -14,6 +14,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   completo como modo avanzado), cola de pasos de a uno con tiempo estimado, log en vivo y cancelar, movimientos de
   Kimodo y la revisión de la instalación. En español e inglés, tema claro y oscuro, también en el celular
   (README > Empezá acá > En el navegador). `tests/ui.py` la prueba sin GPU.
+- Editor de **candidatos de malla** en la UI (Ajustes > Malla): motor, seed y resolución de cada uno (también el
+  principal), repintados con UltraTex `desde` otro, cuáles ya están generados y **Rehacer** uno (borra su
+  `trabajo/malla_<c>/` y pone Malla 3D en la cola).
 - **Recetas por tipo**: `crisol nuevo <n> --receta humanoide|chibi|robot|juguete|objeto|vegetacion|vehiculo|escenario`
   arma el json con lo que anda para cada tipo (`plantilla/recetas/`); `--descripcion` completa `imagen.descripcion`
   sin editar el json. `--objeto`, `--vehiculo` y `--escenario` siguen como atajos.

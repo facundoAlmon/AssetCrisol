@@ -357,9 +357,14 @@ crisol ui                    # opens http://127.0.0.1:8190/ (--puerto N, --no-ab
   **Your call** shows the candidates (image, mesh, textures) for the person to choose, and a choice already made can
   be changed. The viewer shows the result: the character in 8 directions (pick animation and direction), the gif,
   the portrait, the review sheet, the views.
-- **Settings** without json: style, description, seeds, mesh engine and seed, UltraTex seed, height, head angle, iso
-  animations and the method of each one (procedural or Kimodo). The full json stays as an advanced mode (with the
-  changes shown before saving).
+- **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
+  one (procedural or Kimodo). The full json stays as an advanced mode (with the changes shown before saving).
+- **Mesh candidates** (Settings > Mesh): the main one and the ones to compare, each with its engine (TRELLIS.2
+  512/1024, Pixal3D 1024/1536), seed and resolution, or as an UltraTex repaint of another candidate
+  (`malla.candidatos` with `desde`), with "repaint with UltraTex afterwards" and its seed. It shows which ones are
+  already generated and flags the missing ones; since `malla` does not redo one that already has
+  `trabajo/malla_<c>/`, **Redo** deletes it (with the ones that repaint it) and queues 3D mesh. The chosen one is not
+  changed here: it is picked in **Your call**.
 - **Queue**: steps run one at a time (and wait for the GPU like the ones started from the terminal or another
   program), with the elapsed and estimated time (from the durations measured on this PC), the live log and cancel.
 - **Setup**: what `crisol doctor` checks; steps that cannot run are disabled with the reason.
