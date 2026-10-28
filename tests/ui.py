@@ -191,6 +191,31 @@ def main():
         c, _ = pedir(base, 'api/assets/caja/json', 'PUT', {'json': nuevo})
         chequear(c == 400, 'json completo no cambia elecciones: 400')
 
+        print('candidatos de malla')
+        cands = {'pixal3d': {'motor': 'pixal3d', 'resolucion': 1024, 'seed': 1, 'caras': 200000},
+                 'ultratex': {'desde': 'trellis2', 'ultratex': {'seed': 2, 'giro': 45}}}
+        c, _ = pedir(base, 'api/assets/caja/json', 'PATCH', {'cambios': {'malla.motor': 'trellis2', 'malla.candidatos': cands}})
+        chequear(c == 200 and json.load(open(json_caja))['malla']['candidatos'] == cands, 'guardar malla.candidatos')
+        trabajo_caja = os.path.join(cfg['datos_dir'], 'objetos', 'caja', 'trabajo')
+        for n in ('pixal3d', 'ultratex'):   # como si `malla` los hubiera generado
+            os.makedirs(os.path.join(trabajo_caja, f'malla_{n}'), exist_ok=True)
+            open(os.path.join(trabajo_caja, f'malla_{n}', 'modelo.glb'), 'wb').close()
+        c, d = pedir(base, 'api/assets/caja')
+        chequear(c == 200 and set(d.get('mallas_hechas', {})) == {'pixal3d', 'ultratex'}, 'candidatos ya generados en el detalle')
+        for malo in ('..', '..%2F..%2Fimagen', 'no_existe', 'Pixal3D'):
+            c, _ = pedir(base, f'api/assets/caja/malla/{malo}/rehacer', 'POST', {})
+            chequear(c in (400, 404), f'rehacer candidato {malo}: rechazado', str(c))
+        chequear(os.path.isfile(os.path.join(trabajo_caja, 'malla', 'modelo.glb')) and
+                 os.path.isdir(os.path.join(trabajo_caja, 'malla_pixal3d')), 'rehacer rechazado no borró nada')
+        c, d = pedir(base, 'api/assets/caja/malla/trellis2/rehacer', 'POST', {})   # trellis2 no está hecho: el desde sí
+        chequear(c == 200 and d['borrados'] == ['ultratex'] and os.path.isdir(os.path.join(trabajo_caja, 'malla_pixal3d')),
+                 'rehacer borra el candidato y los que se hacen desde él', json.dumps(d))
+        c, d = pedir(base, 'api/assets/caja/malla/pixal3d/rehacer', 'POST', {}, origen=False)
+        chequear(c == 403, 'rehacer sin Origin: 403')
+        c, d = pedir(base, 'api/assets/caja/malla/pixal3d/rehacer', 'POST', {})
+        chequear(c == 200 and d['borrados'] == ['pixal3d'] and not os.path.exists(os.path.join(trabajo_caja, 'malla_pixal3d')),
+                 'rehacer un candidato generado')
+
         print('crear')
         c, _ = pedir(base, 'api/subidas', 'POST', b'no es una imagen', tipo='image/png')
         chequear(c == 400, 'subida que no es imagen: 400')

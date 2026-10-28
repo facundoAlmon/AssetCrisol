@@ -383,3 +383,23 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
   .visor3d { height: 420px; }
   .comparar3d .visor3d { height: 340px; }
 }
+
+/* candidatos de malla */
+.candidatos-malla { gap: 8px; }
+.lista-candidatos { display: grid; gap: 12px; margin-top: 6px; }
+.candidato { border: 1px solid var(--linea); border-radius: var(--r); background: var(--superficie-2); padding: 12px 14px; display: grid; gap: 12px; }
+.candidato.principal { border-color: color-mix(in srgb, var(--brasa) 35%, var(--linea)); }
+.candidato > header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.candidato > header b { font-family: var(--mono); font-size: 15px; }
+.candidato .nombre-cand { width: auto; max-width: 220px; min-height: 34px; padding: 4px 10px; }
+.candidato .acciones-cand { margin-left: auto; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.candidato .fila { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 12px 14px; align-items: start; }
+.candidato .casilla { align-self: end; }
+.candidato .confirmar { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.aviso-cand { display: flex; gap: 8px; align-items: flex-start; color: var(--brasa); margin: 0; }
+.aviso-cand svg { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+.botones-cand { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+/* la columna del grupo no crece con el ancho mínimo del editor (en el celular se salía de la pantalla) */
+.grupo-ajustes { grid-template-columns: minmax(0, 1fr); }
+.grupo-ajustes .fila > div, .candidatos-malla, .candidato { min-width: 0; }
+.barra-guardar { flex-wrap: wrap; }

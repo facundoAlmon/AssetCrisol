@@ -4,7 +4,8 @@
 # estado.py y las elecciones y ajustes de operaciones.py, como en el MCP. Corre con el python3 del sistema (Pillow
 # para las miniaturas). Solo acepta pedidos con Host local y, si cambian algo, con Origin de la misma página: corre
 # comandos en esta PC.
-import argparse, ast, glob, io, ipaddress, json, mimetypes, os, re, socket, subprocess, sys, tempfile, threading, time, uuid
+import argparse, ast, glob, io, ipaddress, json, mimetypes, os, re, shutil, socket, subprocess, sys, tempfile, threading, \
+    time, uuid
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -184,6 +185,21 @@ def resumen_asset(n):
             'modificado': max((os.path.getmtime(os.path.join(pdir, x)) for x in os.listdir(pdir)), default=0)}
 
 
+def mallas_hechas(pdir):
+    """{candidato: fecha} de los candidatos de malla ya generados (trabajo/malla_<c>/modelo.glb: `malla` no los
+    rehace)."""
+    out = {}
+    for r in glob.glob(os.path.join(pdir, 'trabajo', 'malla_*', 'modelo.glb')):
+        out[os.path.basename(os.path.dirname(r))[len('malla_'):]] = os.path.getmtime(r)
+    return out
+
+
+def nombres_candidatos(pj):
+    """El principal (su nombre es el motor) y los de malla.candidatos, como los arma pipeline.candidatos_malla."""
+    m = pj.get('malla') or {}
+    return [m.get('motor', 'trellis2')] + list(m.get('candidatos') or {})
+
+
 def detalle_asset(n):
     pdir, pj = cargar(n)
     e = est.estado(pdir, pj, n)
@@ -206,7 +222,8 @@ def detalle_asset(n):
     return {**resumen_asset(n), 'carpeta': pdir, 'json': op.leer(ruta), 'archivo_json': os.path.basename(ruta),
             'pasos': e['pasos'], 'decidir': e['decidir'], 'visuales': visuales(pdir, pj, n, e['tipo']),
             'iso': iso_meta(pdir, n) if e['tipo'] == 'personaje' else None,
-            'elecciones': elecciones(pdir, pj, e['tipo']), 'licencias': licencias, 'logs': logs}
+            'elecciones': elecciones(pdir, pj, e['tipo']), 'licencias': licencias, 'logs': logs,
+            'mallas_hechas': mallas_hechas(pdir) if e['tipo'] != 'escenario' else {}}
 
 
 # ---------- catálogos ----------
@@ -430,6 +447,8 @@ class Manejador(BaseHTTPRequestHandler):
                 return self.json({'ok': True})
             if p[2:] == ['json'] and m == 'PUT':
                 return self.reemplazar_json(ruta, self.cuerpo_json())
+            if len(p) == 5 and p[2] == 'malla' and p[4] == 'rehacer' and m == 'POST':
+                return self.rehacer_candidato(n, p[3])
             if p[2:] == ['metodos']:
                 return self.metodos(n, self.cuerpo_json().get('cambios') if m == 'POST' else None)
             if p[2:] == ['log'] and m == 'GET':
@@ -625,6 +644,30 @@ class Manejador(BaseHTTPRequestHandler):
         op.guardar(ruta, nuevo)
         self.app.cambio()
         return self.json({'ok': True})
+
+    def rehacer_candidato(self, n, candidato):
+        """Borra trabajo/malla_<candidato>/ (y los que se hacen `desde` él) para que el próximo `malla` los genere de
+        nuevo: `malla` no rehace un candidato que ya tiene modelo.glb aunque su json haya cambiado."""
+        pdir, _ = cargar(n)
+        crudo = op.leer(op.json_del_asset(pipeline.DATOS, pipeline.CARPETAS, n))
+        if not re.fullmatch(r'[a-z0-9][a-z0-9_]{0,31}', candidato) or candidato not in nombres_candidatos(crudo):
+            raise ValueError(f'{candidato}: no es un candidato de malla de {n}')
+        if any(t['estado'] in ('pendiente', 'corriendo') and t['args'][:1] in (['malla'], ['todo']) and t['nombre'] == n
+               for t in self.app.cola.trabajos):
+            raise ValueError(f'{n} tiene un paso de malla en la cola: esperar a que termine')
+        cands = (crudo.get('malla') or {}).get('candidatos') or {}
+        borrar = [candidato] + [c for c, v in cands.items() if isinstance(v, dict) and v.get('desde') == candidato]
+        base = os.path.realpath(os.path.join(pdir, 'trabajo'))
+        borrados = []
+        for c in borrar:
+            d = os.path.realpath(os.path.join(base, f'malla_{c}'))
+            if os.path.dirname(d) != base:
+                raise ValueError(f'{c}: fuera de la carpeta del asset')
+            if os.path.isdir(d):
+                shutil.rmtree(d)
+                borrados.append(c)
+        self.app.cambio()
+        return self.json({'borrados': borrados})
 
     def metodos(self, n, cambios):
         """`crisol metodo <n> [anim=metodo ...]`: [{animacion, metodo, notas}] (las notas dicen el recomendado)."""

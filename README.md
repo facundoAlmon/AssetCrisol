@@ -348,9 +348,13 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   elección ya hecha se puede cambiar. El visor muestra el resultado: el personaje en 8 direcciones (animación y
   dirección a elección), el modelo **en 3D** (girar y acercar con el mouse o el dedo), el gif, el retrato, la hoja
   de revisión, las vistas. Los candidatos de malla se pueden comparar en 3D uno al lado del otro antes de elegir.
-- **Ajustes** sin json: estilo, descripción, seeds, motor y seed de la malla, seed de UltraTex, altura, cabeza,
-  animaciones del iso y método de cada una (procedural o Kimodo). El json completo queda como modo avanzado (con los
-  cambios a la vista antes de guardar).
+- **Ajustes** sin json: estilo, descripción, seeds, altura, cabeza, animaciones del iso y método de cada una
+  (procedural o Kimodo). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
+- **Candidatos de malla** (Ajustes > Malla): el principal y los que se quieran comparar, cada uno con su motor
+  (TRELLIS.2 512/1024, Pixal3D 1024/1536), seed y resolución, o como repintado con UltraTex de otro candidato
+  (`malla.candidatos` con `desde`), con "repintar con UltraTex después" y su seed. Muestra cuáles ya están generados y
+  avisa los que faltan; como `malla` no rehace uno que ya tiene `trabajo/malla_<c>/`, **Rehacer** lo borra (con los
+  que lo repintan) y pone Malla 3D en la cola. La elegida no se toca desde acá: se elige en **Te toca elegir**.
 - **Cola**: los pasos corren de a uno (también los que lance la terminal u otro programa esperan a la GPU), con el
   tiempo transcurrido y el estimado (de las duraciones medidas en esta PC), el log en vivo (con la hora de cada
   línea) y cancelar. Si se cierra `crisol ui`, el paso que corre sigue hasta terminar y los que esperan arrancan al
@@ -477,7 +481,7 @@ crisol <texturas|tema> <n> [--solo piso,pared]   # escenarios
 crisol godot <n> [--instalar <proyecto>]
 crisol doctor [--json]                    # revisa la instalación
 crisol mcp                                # servidor MCP para agentes (Para agentes de IA > Servidor MCP)
-crisol ui [--puerto 8190] [--no-abrir]    # la UI en el navegador (Empezá acá > En el navegador)
+crisol ui [--puerto 8190] [--host 0.0.0.0] [--no-abrir]   # la UI en el navegador (Empezá acá > En el navegador)
 crisol estado [<n>] [--json]              # pasos hechos, viejos y qué falta elegir (sin <n>: todos)
 crisol todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
 ```
