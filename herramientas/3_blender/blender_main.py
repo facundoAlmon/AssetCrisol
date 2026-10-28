@@ -1055,7 +1055,7 @@ elif modo == 'vehiculo':
     vehiculo.exportar(os.path.join(TRABAJO, 'vehiculo.glb'), partes)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(TRABAJO, f'{nombre}.blend'))
     vehiculo.material_juego(partes)
-    vehiculo.revision(TRABAJO)
+    vehiculo.revision(TRABAJO, V.get('largo_m', 2.3))
     vehiculo.tarjeta(TRABAJO)
     print(f'[blender] carrocería: {len(mesh.data.polygons)} caras')
     print('VEHICULO OK')

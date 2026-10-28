@@ -369,7 +369,9 @@ def material_juego(objetos):
                         b.inputs['Roughness'].default_value = 0.35
 
 
-def revision(dir_salida):
+def revision(dir_salida, largo_m=2.3):
+    """VISTAS están pensadas para un auto de 2,3 m: posiciones y zoom se escalan con el largo."""
+    e = largo_m / 2.3
     sc = bpy.context.scene
     sc.render.engine = 'BLENDER_EEVEE'
     sc.render.film_transparent = False
@@ -381,7 +383,7 @@ def revision(dir_salida):
         w.node_tree.links.remove(l)
     bg.inputs['Color'].default_value = (0.55, 0.75, 0.95, 1)   # cielo de la carrera, aprox.
     bg.inputs['Strength'].default_value = 0.45
-    bpy.ops.mesh.primitive_plane_add(size=40)
+    bpy.ops.mesh.primitive_plane_add(size=40 * e)
     piso = bpy.context.active_object
     piso.data.materials.append(material_color('piso_revision', (0.45, 0.36, 0.26), 0.8))
     rutas = []
@@ -390,10 +392,11 @@ def revision(dir_salida):
         if persp:
             cd.type = 'PERSP'; cd.sensor_fit = 'VERTICAL'; cd.angle = math.radians(k)
         else:
-            cd.type = 'ORTHO'; cd.ortho_scale = k
+            cd.type = 'ORTHO'; cd.ortho_scale = k * e
         cam = bpy.data.objects.new(nombre, cd); sc.collection.objects.link(cam)
+        pos, mira = Vector(pos) * e, Vector(mira) * e
         cam.location = pos
-        cam.rotation_euler = (Vector(mira) - Vector(pos)).to_track_quat('-Z', 'Y').to_euler()
+        cam.rotation_euler = (mira - pos).to_track_quat('-Z', 'Y').to_euler()
         sc.camera = cam
         sc.render.filepath = os.path.join(dir_salida, f'revision_{nombre}.png')
         bpy.ops.render.render(write_still=True)
