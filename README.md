@@ -75,9 +75,9 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 | | |
 |---|---|
 | Sistema | **Linux** (probado en Linux Mint 22.3, base Ubuntu 24.04). Windows y macOS no están probados. |
-| GPU | **NVIDIA con 16 GB de VRAM** (probado en una RTX 4080 Super) + toolkit de CUDA |
+| GPU | **NVIDIA con 16 GB de VRAM** (probado en una RTX 4080 Super, driver 580) + toolkit de CUDA 12.x |
 | RAM | probado con 64 GB; 32 GB debería alcanzar |
-| Disco | ~100-150 GB libres para modelos, entornos y cachés |
+| Disco | ~90 GB (nivel mínimo) o ~135 GB (completo) para herramientas y modelos, + ~0,5-1 GB por personaje |
 | Software | `python3` con Pillow, **Blender 5.1**, ComfyUI con `comfy-cli`, TRELLIS.2; opcionales: Kimodo y **Godot 4** |
 
 <details>
@@ -85,9 +85,9 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 
 | | |
 |---|---|
-| GPU | Con menos de 16 GB la malla no entra; TRELLIS.2 pide 24 GB oficialmente y entra en 16 con `low_vram`. El toolkit de CUDA hace falta para compilar las extensiones de TRELLIS.2. |
+| GPU | Con menos de 16 GB la malla no entra; TRELLIS.2 pide 24 GB oficialmente y entra en 16 con `low_vram`. El toolkit de CUDA **12.x** (no 13) hace falta para compilar las extensiones de TRELLIS.2. Las RTX 50 (Blackwell) no están probadas: el torch 2.6 de TRELLIS.2 no las soporta. Con un driver anterior al 580, `instalar.sh` usa el torch de CUDA 12.6 para ComfyUI. |
 | RAM | Kimodo usa ~16 GB en CPU. |
-| Disco | Estimado: TRELLIS.2 ~24 GB, Pixal3D ~15 GB, UltraTex ~11 GB, Z-Image Turbo ~21 GB, Qwen Image Edit y FLUX.2 Dev (opcional), más el codificador de texto de Kimodo si lo usás. Conviene que las cachés de modelos vayan a un disco con lugar (`env_modelos` en la config). |
+| Disco | Ver *Disco por nivel* abajo. Conviene que las herramientas y las cachés de modelos vayan a un disco con lugar (`instalar.sh --destino`, `env_modelos` en la config). |
 | Python | `python3` del sistema con **Pillow** (para `pipeline.py`). Cada herramienta trae su propio entorno. |
 | Blender | **5.1** (headless; el pipeline nunca toca un Blender abierto). |
 | ComfyUI | reciente (con los nodos nativos de Pixal3D, TRELLIS.2 y BiRefNet) y el CLI `comfy` (`comfy-cli`) en su venv. |
@@ -95,9 +95,66 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 | Kimodo | **opcional**: solo para generar clips de movimiento nuevos (los incluidos se leen sin Kimodo). |
 | Godot | **opcional**: 4.x, solo para `godot --instalar` (importación headless). |
 
+**Disco por nivel** (lo que baja e instala `instalar.sh`):
+
+| | GB | qué |
+|---|---|---|
+| Entornos | ~16 | venvs de ComfyUI (~8,5) y TRELLIS.2 (~6,6), Blender (1,3) |
+| Mínimo | ~69 | Qwen Image Edit + LoRA (31), Z-Image Turbo (21), pesos de TRELLIS.2 con DINOv3 (17) |
+| Completo | +~46 | Pixal3D con MoGe y BiRefNet (15), FLUX.2 Klein para UltraTex (19), DreamShaper XL + IP-Adapter (10), DWPose y rembg (~2) |
+| `--flux2` | +42 | FLUX.2 Dev Q5 + su codificador de texto |
+| Kimodo | +~25 | a mano: su venv, el codificador de texto (Llama 3 8B) y el modelo |
+
+Total: **~90 GB** el mínimo, **~135 GB** el completo. La instalación deja ~15 GB de paquetes en `<destino>/.uv-cache`
+(no en el disco del sistema): se pueden borrar con `UV_CACHE_DIR=<destino>/.uv-cache uv cache clean`.
+Cada personaje con malla ocupa ~0,5-1 GB en `datos_dir`.
+
+**Tiempos** en la placa de referencia (RTX 4080 Super 16 GB, 64 GB de RAM):
+
+| paso | tiempo |
+|---|---|
+| `instalar.sh` | lo que tarde en bajar ~135 GB (a 50 MB/s, ≈45 min) + ~10 min de compilar TRELLIS.2 |
+| `imagen` | ≈20 s por seed (Qwen Image Edit o Z-Image Turbo); FLUX.2 Dev ≈3,5 min |
+| `vistas` | ≈1 min (espalda y costados con Qwen) |
+| `malla` | Pixal3D ≈2 min (1 vista) o ≈3 min (4 vistas); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min |
+| `blender` | ≈1 min (rig, pesos, todas las animaciones) |
+| `iso` / `anclas` | ≈25 s / ≈3 s |
+| `texturas` | ≈5 s por imagen (DreamShaper), ≈15 s (Z-Image) |
+| `movimiento` (Kimodo) | ≈2,5 min en CPU |
+
 </details>
 
-### Instalación en 5 pasos
+### Instalación automática (recomendada)
+
+```bash
+git clone https://github.com/facundoAlmon/AssetCrisol.git && cd AssetCrisol
+./instalar.sh --plan                    # qué va a hacer, sin hacer nada
+./instalar.sh                           # nivel completo en ~/assetcrisol-herramientas (o --destino /disco/grande)
+mkdir -p ~/.local/bin && ln -s "$PWD/crisol" ~/.local/bin/crisol   # el comando `crisol` (o ./crisol desde acá)
+```
+
+`instalar.sh` instala ComfyUI (con sus nodos), TRELLIS.2 (compila sus extensiones para tu GPU) y Blender 5.1 en
+commits fijos, baja los modelos y completa `config.json`. Al final corre `crisol doctor`. No usa `sudo`: si falta
+algo del sistema (driver de NVIDIA, **toolkit de CUDA 12.x** para compilar TRELLIS.2, `git`, Pillow), lo dice y cómo
+instalarlo. Se puede volver a correr: lo que ya está se saltea, y si un paso falla se retoma desde ahí.
+
+| opción | |
+|---|---|
+| `--nivel minimo` | Qwen Image Edit + Z-Image Turbo + TRELLIS.2 + Blender (~90 GB): imagen, malla, animación, sprites, Godot |
+| `--nivel completo` | por defecto: + Pixal3D, UltraTex, DWPose y escenarios (~135 GB) |
+| `--flux2` | + FLUX.2 Dev y ComfyUI-GGUF (~42 GB, licencia no comercial) |
+| `--destino DIR` | dónde van las herramientas y la caché de modelos (conviene un disco con lugar) |
+| `--solo comfyui,modelos,trellis,blender,config` | solo esos componentes |
+
+Modelos **gated** (hay que aceptar las condiciones en su página de Hugging Face con tu cuenta): DINOv3
+(`facebook/dinov3-vitl16-pretrain-lvd1689m`, para TRELLIS.2) y, en el nivel completo, FLUX.2 Klein
+(`black-forest-labs/FLUX.2-klein-base-9b-fp8`, para UltraTex). El script pide un token de lectura y avisa si falta
+aceptar alguno.
+
+Si `config.json` ya apunta a un ComfyUI o un TRELLIS.2 instalado, los usa sin tocar su código ni su venv: solo suma
+los nodos y modelos que falten. Kimodo y Godot (opcionales) se instalan a mano.
+
+### Instalación a mano
 
 ```bash
 # 1. Clonar y configurar

@@ -113,7 +113,7 @@ def sistema(R):
 def config(R, ruta):
     G = 'Config'
     if not os.path.exists(ruta):
-        R.anotar(G, 'config.json', FALTA, ruta, 'cp config.ejemplo.json config.json y completar las rutas')
+        R.anotar(G, 'config.json', FALTA, ruta, './instalar.sh (o cp config.ejemplo.json config.json y completar las rutas)')
         return None
     try:
         with open(ruta) as f:
@@ -164,7 +164,7 @@ def ejecutable(R, G, nombre, ruta, obligatorio, arreglo, version_args=None, vers
 def herramientas(R, cfg):
     G = 'Herramientas'
     R.tiene['blender'] = ejecutable(R, G, 'Blender', cfg.get('blender'), True,
-                                    'bajar Blender 5.1 de blender.org y poner el ejecutable en `blender`',
+                                    './instalar.sh --solo blender,config (o bajar Blender 5.1 de blender.org y poner el ejecutable en `blender`)',
                                     ['-b', '--factory-startup', '--version'], r'Blender (\d+\.\d+(?:\.\d+)?)', (5, 1))
     R.tiene['godot'] = ejecutable(R, G, 'Godot (opcional)', cfg.get('godot'), False,
                                   'solo para `godot --instalar`: Godot 4.x en `godot`',
@@ -181,7 +181,7 @@ def comfyui(R, cfg):
     cd = cfg.get('comfyui_dir')
     R.tiene['comfyui'] = False
     if not cd or placeholder(cd) or not os.path.isdir(cd):
-        R.anotar(G, 'carpeta', FALTA, cd or 'sin configurar', 'instalar ComfyUI y poner la carpeta en `comfyui_dir`')
+        R.anotar(G, 'carpeta', FALTA, cd or 'sin configurar', './instalar.sh (o instalar ComfyUI a mano y poner la carpeta en `comfyui_dir`)')
         return
     py, comfy = os.path.join(cd, 'venv', 'bin', 'python'), os.path.join(cd, 'venv', 'bin', 'comfy')
     if not os.path.exists(py):
@@ -211,7 +211,7 @@ def comfyui(R, cfg):
         R.tiene[f'nodo_{clave}'] = any(n in hay for n in nombres)
         R.anotar(G, f'nodo {repo.rsplit("/", 1)[1]}', OK if R.tiene[f'nodo_{clave}'] else AVISO,
                  'instalado' if R.tiene[f'nodo_{clave}'] else 'no está',
-                 f'git clone {repo} en custom_nodes/ (+ sus requirements en el venv de ComfyUI)')
+                 f'./instalar.sh --solo comfyui (o git clone {repo} en custom_nodes/ + sus requirements en el venv de ComfyUI)')
     if R.tiene['nodo_ultratex']:
         sin = [p for p in ('moderngl', 'xatlas') if not version_paquete(py, p)]
         if sin:
@@ -246,7 +246,7 @@ def modelos(R, cfg, cd):
                 faltan.append(f'{carpetas[0]}/{nombre}')
         R.tiene[f'modelos_{grupo}'] = not faltan
         R.anotar(G, grupo, OK if not faltan else AVISO, f'{len(lista)} archivo(s)' if not faltan else
-                 'faltan: ' + ', '.join(faltan), 'README > Lista de modelos de ComfyUI' if faltan else '')
+                 'faltan: ' + ', '.join(faltan), './instalar.sh --solo modelos (README > Lista de modelos de ComfyUI)' if faltan else '')
 
 
 def trellis(R, cfg):
@@ -254,7 +254,7 @@ def trellis(R, cfg):
     td = cfg.get('trellis2_dir')
     R.tiene['trellis2'] = R.tiene['rembg'] = False
     if not td or placeholder(td) or not os.path.isdir(td):
-        R.anotar(G, 'carpeta', FALTA, td or 'sin configurar', 'README > TRELLIS.2; poner la carpeta en `trellis2_dir`')
+        R.anotar(G, 'carpeta', FALTA, td or 'sin configurar', './instalar.sh --solo trellis,config (o README > TRELLIS.2 y poner la carpeta en `trellis2_dir`)')
         return
     py = os.path.join(td, 'venv', 'bin', 'python')
     if not os.path.exists(py):
@@ -273,7 +273,7 @@ def trellis(R, cfg):
     faltan = [r for r in HF_TRELLIS if not os.path.isdir(os.path.join(hf, 'hub', 'models--' + r.replace('/', '--')))]
     ok_hf = R.anotar(G, 'pesos (Hugging Face)', OK if not faltan else FALTA,
                      hf if not faltan else 'faltan ' + ', '.join(faltan),
-                     f'HF_HOME={hf} hf download <repo> (DINOv3 es gated: pedir acceso y `hf auth login`)')
+                     f'./instalar.sh --solo trellis (DINOv3 es gated: aceptar sus condiciones en Hugging Face)')
     R.tiene['trellis2'] = ok_tf and ok_hf and R.tiene['rembg']
 
 

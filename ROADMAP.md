@@ -48,16 +48,17 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] Escenario: el taller (piso de piedra, camino y pared de ladrillo; Z-Image Turbo). En `ejemplos/escenarios/taller`.
 
 ## 2. Requisitos e instalación (humanos y agentes)
-- [ ] Requisitos explícitos: GPU y VRAM, driver/CUDA, RAM, disco por nivel, distribuciones probadas, tiempo de cada
-      paso en la placa de referencia (RTX de 16 GB).
-- [ ] **Imagen Docker** publicada en GHCR (nvidia-container-toolkit), sin modelos: van en un volumen que llena un
-      script. Camino recomendado.
-- [ ] `instalar.sh` nativo como alternativa. Repos externos en commits fijos, modelos con `hf download` a una caché
-      configurable.
-- [ ] Niveles:
-  - **mínimo:** ComfyUI (Qwen Image Edit, Z-Image Turbo) + TRELLIS.2 + Blender → animación procedural, sprites y Godot;
-  - **completo:** + Pixal3D, UltraTex (FLUX.2 Klein), DWPose, Kimodo, FLUX.2 Dev.
-- [ ] Modelos gated (DINOv3, FLUX.2 Klein, el codificador de texto de Kimodo): cómo aceptarlos en Hugging Face.
+- [x] Requisitos explícitos (README > Requisitos en detalle): GPU, driver/CUDA, RAM, disco por nivel, tiempo de cada
+      paso en la placa de referencia. Falta probar otras distribuciones.
+- [ ] **Imagen Docker** publicada en GHCR (nvidia-container-toolkit), sin modelos: van en un volumen que llena
+      `instalar.sh --solo modelos`. Camino recomendado.
+- [x] `instalar.sh` nativo: repos externos en commits fijos, venvs con `uv`, extensiones de TRELLIS.2 compiladas para
+      la GPU, modelos con `hf download`; reconoce lo ya instalado y se puede volver a correr. Probado en limpio
+      (ComfyUI, TRELLIS.2 generando una malla, Blender); falta una prueba completa con todos los modelos.
+- [x] Niveles (`--nivel`): **mínimo** ComfyUI (Qwen Image Edit, Z-Image Turbo) + TRELLIS.2 + Blender; **completo**
+      + Pixal3D, UltraTex (FLUX.2 Klein), DWPose y escenarios; `--flux2` suma FLUX.2 Dev.
+- [ ] Kimodo en `instalar.sh` (hoy a mano; su codificador de texto es Llama 3, gated).
+- [x] Modelos gated (DINOv3, FLUX.2 Klein): `instalar.sh` pide el token y dice cuál falta aceptar.
 - [x] `crisol doctor`: rutas, versiones, VRAM, nodos de ComfyUI y modelos; qué falta, cómo arreglarlo y qué pasos
       quedan deshabilitados. Legible y `--json`.
 - [x] `docs/licencias.md` (y `docs/licenses.md`): componente → licencia → qué paso lo usa → si permite uso comercial.
