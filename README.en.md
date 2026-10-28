@@ -367,9 +367,10 @@ apply a small change (e.g. one animation), `blender` → `sprites` → `iso` is 
 > [!WARNING]
 > **One generation at a time on the GPU.** `imagen`, `vistas`, `malla`, `ultratex`, `articulaciones` and `texturas`
 > use the GPU (ComfyUI or TRELLIS.2). With two at once each one takes far longer and the mesh can run out of VRAM.
-> Before launching one, check that ComfyUI is not generating (`curl -s 127.0.0.1:8188/queue`: `queue_running` and
-> `queue_pending` empty) and that no other mesh is running (`nvidia-smi`). ComfyUI loaded with an empty queue is fine:
-> `malla` asks it to free the VRAM.
+> That's why each one **waits** before starting if the GPU is busy: another `crisol` running a GPU step, jobs in
+> ComfyUI's queue, or a CUDA process other than ComfyUI, Blender or Godot (another mesh, a game). With
+> `--sin-esperar` it exits with code 3 instead of waiting. ComfyUI loaded with an empty queue is fine: `malla` asks it
+> to free the VRAM.
 
 > [!TIP]
 > **Look at the face up close** in `ultratex_vistas.png`: the eyes depend a lot on `malla.ultratex.seed` (they can
@@ -1185,7 +1186,7 @@ map, contracts that must not be broken and problems already solved) are in [CLAU
   required is missing);
 - `crisol estado <n> --json`: which steps are done, which are stale (their output is older than the previous
   step's), what is left to choose (`decidir`, with the sheet to show) and the next command (`siguiente`);
-- one generation at a time on the GPU (check ComfyUI's queue and `nvidia-smi` before every GPU step);
+- one generation at a time on the GPU: GPU steps wait by themselves if it is busy (with `--sin-esperar` they exit with 3);
 - **don't choose for the person** `imagen.elegida`, `malla.elegida` or the chosen textures: show them the candidates
   sheet and ask;
 - look at the visual results (`candidatos.png`, `preview.gif`, `revision.png`) before accepting them.

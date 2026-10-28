@@ -175,6 +175,16 @@ def paso_nuevo(nombre, referencia=None, objeto=False, escenario=False, vehiculo=
           f'(imagen.descripcion) y correr: crisol imagen {nombre}')
 
 
+ESPERAR_GPU = True   # --sin-esperar: salir con gpu.GPU_OCUPADA en vez de esperar
+
+
+def reservar_gpu(paso):
+    """Una generación por vez: espera a que la GPU esté libre (otro crisol, la cola de ComfyUI, TRELLIS.2 u otro
+    proceso CUDA) y la reserva hasta que termine este proceso."""
+    import gpu
+    gpu.reservar(CFG, paso, ESPERAR_GPU)
+
+
 def con_numpy():
     """Los pasos de escenarios usan numpy, que el python3 del sistema puede no tener: se relanza el mismo comando con
     el python del venv de ComfyUI (trae numpy y Pillow)."""
@@ -189,6 +199,7 @@ def paso_texturas(nombre, solo=None):
     con_numpy()
     import texturas
     pdir, pj = cargar(nombre)
+    reservar_gpu('texturas')
     texturas.main(CFG, nombre, pj, solo.split(',') if solo else None)
 
 
@@ -202,6 +213,7 @@ def paso_tema(nombre):
 def paso_imagen(nombre):
     import generar_imagen
     pdir, pj = cargar(nombre)
+    reservar_gpu('imagen')
     generar_imagen.main(CFG, nombre, pj)
 
 
@@ -235,6 +247,7 @@ def paso_vistas(nombre):
     if not pj.get('vehiculo') and (m.get('motor') != 'pixal3d' or not m.get('vistas')):
         sys.exit('vistas: solo con malla.motor = "pixal3d" y malla.vistas = true, o en un vehículo')
     img = imagen_elegida(pdir, pj)
+    reservar_gpu('vistas')
     import generar_malla_pixal3d
     from PIL import Image, ImageDraw
     dir_img = os.path.join(pdir, 'trabajo', 'imagen')
@@ -311,6 +324,7 @@ def candidatos_malla(pj):
 
 def paso_malla(nombre):
     pdir, pj = cargar(nombre)
+    reservar_gpu('malla')
     lista = candidatos_malla(pj)
     if not lista:
         return generar_malla(pdir, pj, nombre)
@@ -472,6 +486,7 @@ def paso_ultratex(nombre):
     pdir, pj = cargar(nombre)
     if not os.path.exists(os.path.join(pdir, 'trabajo', 'malla', 'modelo.glb')):
         sys.exit('[ultratex] falta trabajo/malla/modelo.glb: correr antes `malla`')
+    reservar_gpu('ultratex')
     liberar_vram_comfyui()
     retexturizar_ultratex(pdir, pj, nombre)
 
@@ -510,6 +525,7 @@ def paso_articulaciones(nombre):
     pdir, pj = cargar(nombre)
     if pj['_objeto']:
         sys.exit('[articulaciones] los objetos no tienen esqueleto')
+    reservar_gpu('articulaciones')
     blender('guia', pdir, pj)
     generar_imagen.asegurar_servidor(CFG, os.path.join(pdir, 'trabajo'))
     J, motivo = articulaciones_pose.estimar(CFG, nombre, os.path.join(pdir, 'trabajo', 'guia'), pj['modelo']['altura'])
@@ -738,7 +754,11 @@ def main():
     ap.add_argument('--solo', metavar='CLAVES', help='paso texturas: solo estas (p. ej. piso,pared); las demás quedan')
     ap.add_argument('--instalar', metavar='PROYECTO_GODOT', help='copiar el resultado a este proyecto Godot')
     ap.add_argument('--json', action='store_true', help='paso estado: salida en JSON')
+    ap.add_argument('--sin-esperar', action='store_true',
+                    help='pasos de GPU: si está ocupada, salir con código 3 en vez de esperar')
     a = ap.parse_args()
+    global ESPERAR_GPU
+    ESPERAR_GPU = not a.sin_esperar
     if a.paso == 'estado':
         return paso_estado(a.personaje, a.json)
     if not a.personaje:

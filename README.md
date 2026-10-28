@@ -356,10 +356,10 @@ pasar un cambio puntual (p. ej. una animación) alcanza con `blender` → `sprit
 
 > [!WARNING]
 > **Una generación por vez en la GPU.** `imagen`, `vistas`, `malla`, `ultratex`, `articulaciones` y `texturas` usan la
-> GPU (ComfyUI o TRELLIS.2). Con dos a la vez cada una tarda muchísimo más y la malla se puede quedar sin VRAM. Antes
-> de lanzar uno, mirar que ComfyUI no esté generando (`curl -s 127.0.0.1:8188/queue`: `queue_running` y
-> `queue_pending` vacías) y que no haya otra malla en curso (`nvidia-smi`). ComfyUI cargado con la cola vacía no
-> molesta: `malla` le pide que libere la VRAM.
+> GPU (ComfyUI o TRELLIS.2). Con dos a la vez cada una tarda muchísimo más y la malla se puede quedar sin VRAM. Por eso
+> cada uno, antes de empezar, **espera** si la GPU está ocupada: otro `crisol` con un paso de GPU, trabajos en la cola
+> de ComfyUI o un proceso CUDA que no sea ComfyUI, Blender ni Godot (otra malla, un juego). Con `--sin-esperar` sale
+> con código 3 en vez de esperar. ComfyUI cargado con la cola vacía no molesta: `malla` le pide que libere la VRAM.
 
 > [!TIP]
 > **Mirá la cara de cerca** en `ultratex_vistas.png`: los ojos dependen mucho de `malla.ultratex.seed` (pueden salir
@@ -1169,7 +1169,7 @@ cada paso, mapa del código, contratos que no hay que romper y problemas ya resu
   obligatorio);
 - `crisol estado <n> --json`: qué pasos están hechos, cuáles quedaron viejos (su salida es anterior a la del paso
   previo), qué falta elegir (`decidir`, con la hoja a mostrar) y el comando que sigue (`siguiente`);
-- una generación por vez en la GPU (revisar la cola de ComfyUI y `nvidia-smi` antes de cada paso de GPU);
+- una generación por vez en la GPU: los pasos de GPU esperan solos si está ocupada (con `--sin-esperar` salen con 3);
 - **no elegir por la persona** `imagen.elegida`, `malla.elegida` ni las texturas elegidas: mostrarle la hoja de
   candidatos y preguntar;
 - mirar los resultados visuales (`candidatos.png`, `preview.gif`, `revision.png`) antes de darlos por buenos.

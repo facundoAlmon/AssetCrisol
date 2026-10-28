@@ -9,11 +9,12 @@ corre local: no proponer servicios pagos ni APIs en la nube.
 
 ## Reglas
 
-- **Una generación por vez en la GPU** (aunque la otra sea de otra sesión u otro programa). Antes de `imagen`,
-  `vistas`, `malla`, `ultratex`, `articulaciones` o `texturas`:
-  `curl -s 127.0.0.1:8188/queue` (o `comfyui_url`): `queue_running`/`queue_pending` no vacías = ocupada;
-  `nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv`: un python de TRELLIS.2 = malla en curso.
-  Si está ocupada, esperar. No cuentan ComfyUI con la cola vacía ni Godot/Blender abiertos.
+- **Una generación por vez en la GPU** (aunque la otra sea de otra sesión u otro programa). `imagen`, `vistas`,
+  `malla`, `ultratex`, `articulaciones` y `texturas` ya esperan solos (`herramientas/0_entorno/gpu.py`: candado entre
+  `crisol`, cola de ComfyUI, procesos CUDA ajenos); con `--sin-esperar` salen con 3. Lanzarlos en background y esperar
+  la notificación. `tests/humo.py` y Blender no pasan por esa cola: antes, `curl -s 127.0.0.1:8188/queue`
+  (`queue_running`/`queue_pending` vacías) y `nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv`
+  (un python de TRELLIS.2 = malla en curso). No cuentan ComfyUI con la cola vacía ni Godot/Blender abiertos.
 - **No elegir por el usuario** `imagen.elegida`, `malla.elegida` ni `texturas.<clave>.elegida`: mostrarle la hoja
   (`trabajo/imagen/candidatos.png`, `trabajo/candidatos.png`, `revision.png`) y preguntar.
 - **Mirar antes de dar por bueno** un resultado visual (frames del GIF con PIL). En humanoides nuevos, mostrar
@@ -66,6 +67,7 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
 `generar_movimiento.py` (venv Kimodo) y `blender_main`/`rig_lib`/`anim`/`kimodo_clip`/`vehiculo` (Blender).
 - `0_entorno/doctor.py` (`crisol doctor [--json]`): revisa config, rutas, venvs, nodos, modelos y GPU; corre antes
   de leer la config. `PASOS` dice qué necesita cada paso: actualizarlo al sumar un paso, modelo o nodo.
+- `0_entorno/gpu.py`: `reservar(cfg, paso)` al empezar cada paso que genera (un paso nuevo de GPU tiene que llamarlo).
 - `0_entorno/estado.py` (`crisol estado [<n>] [--json]`): pasos hechos/viejos (por fecha de la salida contra la del
   paso previo) y qué falta elegir; al sumar un paso o cambiar dónde escribe, actualizar su cadena.
 - `instalar.sh` (raíz, bash): instalación nativa por niveles. Commits fijados y tabla de modelos (`MODELOS_COMFY`,
