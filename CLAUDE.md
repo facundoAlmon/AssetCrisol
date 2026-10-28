@@ -36,6 +36,7 @@ crisol rehacer <n1,n2,...|todos>                    # blender..revisar en lote
 crisol metodo <n> [anim=kimodo|procedural ...]
 crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimodo (CPU)
 crisol mcp                                          # servidor MCP por stdio (herramientas/mcp)
+crisol ui [--puerto 8190] [--no-abrir]              # UI web local (herramientas/ui)
 ```
 
 - `crisol` (raíz del repo) importa `pipeline` y llama `main()`: es lo mismo que `python3 pipeline.py`; si no está
@@ -101,6 +102,14 @@ crisol mcp                                          # servidor MCP por stdio (he
   `crisol <paso> --json`; `elegir` solo con lo que dijo la persona. Al sumar un paso, también a su `PASOS`. Los pasos
   corren con el python que lanzó `crisol mcp` (`CRISOL_PYTHON`): desde un `uv run` no tiene Pillow (probarlo con
   `/usr/bin/python3 crisol mcp`).
+- `0_entorno/operaciones.py`: lo común del MCP y la UI (correr/lanzar `crisol <paso> --json`, json del asset,
+  `elegir` con las claves de elección, `ajustar` que no elige, `PASOS`).
+- `ui/` (`crisol ui`, python3 del sistema, stdlib + Pillow): `servidor.py` (API JSON sobre la CLI y `estado.py`, SSE,
+  miniaturas; solo Host local y Origin propio), `cola.py` (un paso por vez, `<datos_dir>/.crisol_ui/`, cancelar con
+  `killpg`, duraciones medidas) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; textos en
+  `web/i18n/{es,en}.mjs` con las mismas claves). Un paso nuevo: a `operaciones.PASOS`, su nombre en i18n
+  (`paso.<p>`, `pasodoc.<p>`) y, si no está en la cadena de `estado.py`, a `EXTRA` de `componentes/asset.mjs`.
+  Probar con `python3 tests/ui.py` (sin GPU) y mirar capturas (claro/oscuro, 390 px) antes de dar un cambio por bueno.
 - `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,escenario}.json`, `ejemplos/`.
 - `plantilla/recetas/*.json` (`crisol nuevo --receta`): `_base` (qué plantilla pisan), `_doc`, `_agregar_descripcion`,
   `_borrar`. Lo que se aprenda de un tipo de asset (un gotcha con arreglo por json) va a su receta y a la tabla del README.

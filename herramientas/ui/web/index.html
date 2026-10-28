@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AssetCrisol</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="vendor/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="estilos.css">
+  <script>
+    // tema antes de pintar (sin parpadeo): sistema, claro u oscuro
+    try { const t = localStorage.getItem('crisol.tema'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t } catch {}
+  </script>
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <div id="app"></div>
+  <noscript>crisol ui necesita JavaScript.</noscript>
+</body>
+</html>

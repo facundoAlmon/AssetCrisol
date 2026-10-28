@@ -339,6 +339,35 @@ if something fails.
 [`demo_paseo.gif`](ejemplos/personajes/cris/demo_paseo.gif) (walking on an iso floor) and
 [`demo_direcciones.gif`](ejemplos/personajes/cris/demo_direcciones.gif) (all 8 directions at once).
 
+### In the browser (`crisol ui`)
+
+Everything in this guide can also be done from a page in the browser, without a terminal or json:
+
+```bash
+crisol ui                    # opens http://127.0.0.1:8190/ (--puerto N, --no-abrir)
+```
+
+![crisol ui: a character with its step chain and the iso player](docs/vitrina/img/ui.png)
+
+- **Library**: the characters, objects, vehicles and scenes in `datos_dir`, with a thumbnail, which step they are at
+  and whether something is left to choose. Characters can be selected to redo them in batch (`crisol rehacer`).
+- **Create**: the type (the recipes), a reference image (drag it in) or a description in English, the style and the
+  name.
+- **Each asset**: the chain of steps with their state (done, outdated, to do) and a button to run or redo each one;
+  **Your call** shows the candidates (image, mesh, textures) for the person to choose, and a choice already made can
+  be changed. The viewer shows the result: the character in 8 directions (pick animation and direction), the gif,
+  the portrait, the review sheet, the views.
+- **Settings** without json: style, description, seeds, mesh engine and seed, UltraTex seed, height, head angle, iso
+  animations and the method of each one (procedural or Kimodo). The full json stays as an advanced mode (with the
+  changes shown before saving).
+- **Queue**: steps run one at a time (and wait for the GPU like the ones started from the terminal or another
+  program), with the elapsed and estimated time (from the durations measured on this PC), the live log and cancel.
+- **Setup**: what `crisol doctor` checks; steps that cannot run are disabled with the reason.
+
+It only runs on this PC (it listens on `127.0.0.1`, no accounts or internet), in Spanish or English, with a light or
+dark theme. The queue and its history live in `<datos_dir>/.crisol_ui/`. `python3 tests/ui.py` tests it without a
+GPU (~10 s).
+
 ### First character in 10 commands
 
 ```bash
@@ -456,6 +485,7 @@ crisol <texturas|tema> <n> [--solo piso,pared]   # scenery
 crisol godot <n> [--instalar <project>]
 crisol doctor [--json]                   # checks the installation
 crisol mcp                               # MCP server for agents (For AI agents > MCP server)
+crisol ui [--puerto 8190] [--no-abrir]   # the UI in the browser (Start here > In the browser)
 crisol estado [<n>] [--json]             # steps done, stale, and what is left to choose (without <n>: all)
 crisol todo <n> [--instalar <project>]   # malla -> blender -> sprites -> godot (needs a chosen image)
 ```

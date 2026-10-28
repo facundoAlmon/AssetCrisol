@@ -328,6 +328,34 @@ En `ejemplos/personajes/cris/` también están los gifs de demo, armados con sus
 [`demo_paseo.gif`](ejemplos/personajes/cris/demo_paseo.gif) (camina por un piso iso) y
 [`demo_direcciones.gif`](ejemplos/personajes/cris/demo_direcciones.gif) (las 8 direcciones a la vez).
 
+### En el navegador (`crisol ui`)
+
+Todo lo de esta guía se puede hacer también desde una página en el navegador, sin terminal ni json:
+
+```bash
+crisol ui                    # abre http://127.0.0.1:8190/ (--puerto N, --no-abrir)
+```
+
+![crisol ui: la vista de un personaje con su cadena de pasos y el reproductor iso](docs/vitrina/img/ui.png)
+
+- **Biblioteca**: los personajes, objetos, vehículos y escenarios de `datos_dir`, con su miniatura, en qué paso están y
+  si falta elegir algo. Se pueden seleccionar personajes para rehacerlos en lote (`crisol rehacer`).
+- **Crear**: el tipo (las recetas), una imagen de referencia (arrastrarla) o una descripción en inglés, el estilo y el
+  nombre.
+- **Cada asset**: la cadena de pasos con su estado (hecho, desactualizado, pendiente) y un botón para correr o rehacer
+  cada uno; **Te toca elegir** muestra las candidatas (imagen, malla, texturas) para que la persona elija, y una
+  elección ya hecha se puede cambiar. El visor muestra el resultado: el personaje en 8 direcciones (animación y
+  dirección a elección), el gif, el retrato, la hoja de revisión, las vistas.
+- **Ajustes** sin json: estilo, descripción, seeds, motor y seed de la malla, seed de UltraTex, altura, cabeza,
+  animaciones del iso y método de cada una (procedural o Kimodo). El json completo queda como modo avanzado (con los
+  cambios a la vista antes de guardar).
+- **Cola**: los pasos corren de a uno (también los que lance la terminal u otro programa esperan a la GPU), con el
+  tiempo transcurrido y el estimado (de las duraciones medidas en esta PC), el log en vivo y cancelar.
+- **Instalación**: lo que revisa `crisol doctor`; los pasos que no se pueden correr quedan apagados con el motivo.
+
+Corre solo en esta PC (escucha en `127.0.0.1`, sin cuentas ni internet), en español o inglés y con tema claro u
+oscuro. La cola y el historial quedan en `<datos_dir>/.crisol_ui/`. `python3 tests/ui.py` la prueba sin GPU (~10 s).
+
 ### Primer personaje en 10 comandos
 
 ```bash
@@ -444,6 +472,7 @@ crisol <texturas|tema> <n> [--solo piso,pared]   # escenarios
 crisol godot <n> [--instalar <proyecto>]
 crisol doctor [--json]                    # revisa la instalación
 crisol mcp                                # servidor MCP para agentes (Para agentes de IA > Servidor MCP)
+crisol ui [--puerto 8190] [--no-abrir]    # la UI en el navegador (Empezá acá > En el navegador)
 crisol estado [<n>] [--json]              # pasos hechos, viejos y qué falta elegir (sin <n>: todos)
 crisol todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
 ```

@@ -54,14 +54,22 @@ def existe(pdir, *partes):
     return os.path.relpath(r, pdir) if os.path.isfile(r) else None
 
 
-def miniatura_de(pdir, pj, nombre):
-    """La imagen que representa al asset: el resultado si hay, si no la elegida, la referencia o una candidata."""
-    elegida = est.imagen_elegida(pdir, pj) if not pj.get('_escenario') else None
+def miniatura_de(pdir, pj, nombre, tipo):
+    """La imagen que representa al asset en la biblioteca: el asset solo y de frente (no una hoja ni una tira de
+    vistas), si no la elegida, la referencia o una candidata."""
+    elegida = rel(pdir, est.imagen_elegida(pdir, pj)) if tipo != 'escenario' else None
     cands = sorted(glob.glob(os.path.join(pdir, 'trabajo', 'imagen', 'cand_*.png')))
-    for r in (existe(pdir, 'trabajo', 'tarjeta.png'), existe(pdir, 'preview.gif'), existe(pdir, 'preview.png'), existe(pdir, 'preview_iso.gif'),
-              rel(pdir, elegida), existe(pdir, 'referencia.png'), rel(pdir, cands[0] if cands else None),
-              existe(pdir, 'trabajo', 'texturas', 'candidatos.png')):
-        if r:
+    t = 'trabajo'
+    if tipo == 'personaje':
+        orden = (f'godot/personajes/{nombre}/{nombre}_frente.png', f'{t}/malla/sin_fondo.png')
+    elif tipo == 'vehiculo':
+        orden = (f'{t}/tarjeta.png', f'{t}/malla/sin_fondo.png', 'preview.png')
+    elif tipo == 'objeto':
+        orden = (f'{t}/render/iso_0.png', f'{t}/malla/sin_fondo.png', 'preview.png')
+    else:
+        orden = ('preview.png', f'{t}/texturas/candidatos.png')
+    for r in (*orden, elegida, 'referencia.png', rel(pdir, cands[0]) if cands else None):
+        if r and os.path.isfile(os.path.join(pdir, r)):
             return r
     return None
 
@@ -129,6 +137,33 @@ def opciones_decidir(pdir, pj, d):
     return ops
 
 
+def elecciones(pdir, pj, tipo):
+    """Todo lo que la persona puede elegir (ya elegido o no), para cambiar una elección: [{clave, actual, opciones,
+    mirar}]."""
+    t = os.path.join(pdir, 'trabajo')
+    out = []
+    if tipo == 'escenario':
+        for k, tx in (pj.get('texturas') or {}).items():
+            seeds = sorted(os.path.basename(c)[5:-4] for c in glob.glob(os.path.join(t, 'texturas', k, 'cand_*.png')))
+            if seeds:
+                out.append({'clave': f'texturas.{k}.elegida', 'actual': tx.get('elegida'), 'opciones': seeds,
+                            'mirar': 'trabajo/texturas/candidatos.png'})
+    else:
+        seeds = sorted(os.path.basename(c)[5:-4] for c in glob.glob(os.path.join(t, 'imagen', 'cand_*.png')))
+        if seeds:
+            out.append({'clave': 'imagen.elegida', 'actual': (pj.get('imagen') or {}).get('elegida'), 'opciones': seeds,
+                        'mirar': 'trabajo/imagen/candidatos.png'})
+        m = pj.get('malla') or {}
+        if m.get('candidatos'):
+            nombres = [m.get('motor', 'trellis2')] + list(m['candidatos'])
+            out.append({'clave': 'malla.elegida', 'actual': m.get('elegida'), 'opciones': nombres,
+                        'mirar': 'trabajo/revision.png' if pj.get('vehiculo') else 'trabajo/candidatos.png'})
+    for e in out:
+        e['mirar'] = e['mirar'] if os.path.isfile(os.path.join(pdir, e['mirar'])) else None
+        e['opciones'] = opciones_decidir(pdir, pj, e)
+    return out
+
+
 def resumen_asset(n):
     try:
         pdir, pj = cargar(n)
@@ -136,7 +171,7 @@ def resumen_asset(n):
     except Exception as ex:  # noqa: BLE001 (un json roto no tiene que tirar la biblioteca)
         return {'nombre': n, 'error': str(ex)}
     return {'nombre': n, 'tipo': e['tipo'], 'estilo': pj.get('estilo') or pipeline.CFG.get('estilo', 'animacion3d'),
-            'receta': pj.get('_receta'), 'miniatura': miniatura_de(pdir, pj, n), 'pasos': e['pasos'],
+            'receta': pj.get('_receta'), 'miniatura': miniatura_de(pdir, pj, n, e['tipo']), 'pasos': e['pasos'],
             'decidir': [x['clave'] for x in e['decidir']], 'siguiente': e['siguiente'],
             'modificado': max((os.path.getmtime(os.path.join(pdir, x)) for x in os.listdir(pdir)), default=0)}
 
@@ -162,7 +197,8 @@ def detalle_asset(n):
                   glob.glob(os.path.join(pdir, 'trabajo', 'imagen', '*.log')))
     return {**resumen_asset(n), 'carpeta': pdir, 'json': op.leer(ruta), 'archivo_json': os.path.basename(ruta),
             'pasos': e['pasos'], 'decidir': e['decidir'], 'visuales': visuales(pdir, pj, n, e['tipo']),
-            'iso': iso_meta(pdir, n) if e['tipo'] == 'personaje' else None, 'licencias': licencias, 'logs': logs}
+            'iso': iso_meta(pdir, n) if e['tipo'] == 'personaje' else None,
+            'elecciones': elecciones(pdir, pj, e['tipo']), 'licencias': licencias, 'logs': logs}
 
 
 # ---------- catálogos ----------
@@ -341,14 +377,16 @@ class Manejador(BaseHTTPRequestHandler):
     # --- rutas ---
     def rutear(self, m, p, q):
         app = self.app
-        if not p or p[0] in ('web',) or p == ['favicon.svg']:
-            return self.estatico(p[1:] if p and p[0] == 'web' else p or ['index.html'])
+        if not p:
+            return self.estatico(['index.html'])
         if p[0] == 'archivos' and len(p) >= 3:
             return self.archivo(p[1], p[2:])
         if p[0] == 'mini' and len(p) >= 3:
             return self.miniatura(p[1], p[2:], q)
-        if p[0] != 'api':
-            return self.error(404, 'no existe')
+        if p[0] == 'movimientos' and len(p) == 2:
+            return self.hoja_movimiento(p[1])
+        if p[0] != 'api':                     # la página: index.html, app.mjs, componentes/, vendor/...
+            return self.estatico(p)
         p = p[1:]
         if p == ['assets'] and m == 'GET':
             return self.json({'version': app.version_assets, 'datos': pipeline.DATOS,
@@ -371,6 +409,8 @@ class Manejador(BaseHTTPRequestHandler):
                 return self.json({'ok': True})
             if p[2:] == ['json'] and m == 'PUT':
                 return self.reemplazar_json(ruta, self.cuerpo_json())
+            if p[2:] == ['metodos']:
+                return self.metodos(n, self.cuerpo_json().get('cambios') if m == 'POST' else None)
             if p[2:] == ['log'] and m == 'GET':
                 return self.archivo(n, q['ruta'].split('/'), texto=True)
         if p == ['cola'] and m == 'GET':
@@ -387,6 +427,11 @@ class Manejador(BaseHTTPRequestHandler):
             return self.eventos()
         if p == ['subidas'] and m == 'POST':
             return self.subir()
+        if p == ['movimientos']:
+            d = os.path.join(pipeline.DATOS, 'movimientos', 'candidatos')
+            hojas = sorted(glob.glob(os.path.join(d, '*.png')), key=os.path.getmtime, reverse=True)
+            return self.json([{'archivo': os.path.basename(h), 'modificado': os.path.getmtime(h),
+                               'clips': len(glob.glob(h[:-4] + '_*.npz'))} for h in hojas])
         if p == ['recetas']:
             return self.json(recetas())
         if p == ['estilos']:
@@ -434,6 +479,14 @@ class Manejador(BaseHTTPRequestHandler):
             datos = f.read()
         tipo = 'text/plain; charset=utf-8' if texto else mimetypes.guess_type(ruta)[0] or 'application/octet-stream'
         self.enviar(200, datos, tipo, {'ETag': etag, 'Cache-Control': 'no-cache'})
+
+    def hoja_movimiento(self, archivo):
+        """Una hoja de esqueletos de `crisol movimiento` (movimientos/candidatos/<anim>_s<seed>.png)."""
+        ruta = os.path.join(pipeline.DATOS, 'movimientos', 'candidatos', archivo)
+        if not re.fullmatch(r'[a-z0-9_]+\.png', archivo) or not os.path.isfile(ruta):
+            return self.error(404, 'no existe')
+        with open(ruta, 'rb') as f:
+            self.enviar(200, f.read(), 'image/png', {'Cache-Control': 'no-cache'})
 
     _minis = {}
 
@@ -551,6 +604,25 @@ class Manejador(BaseHTTPRequestHandler):
         op.guardar(ruta, nuevo)
         self.app.cambio()
         return self.json({'ok': True})
+
+    def metodos(self, n, cambios):
+        """`crisol metodo <n> [anim=metodo ...]`: [{animacion, metodo, notas}] (las notas dicen el recomendado)."""
+        args = ['metodo', n]
+        for anim, metodo in (cambios or {}).items():
+            if not re.fullmatch(r'[a-z_]+', anim) or metodo not in ('procedural', 'kimodo'):
+                raise ValueError(f'{anim}={metodo}: animación y procedural|kimodo')
+            args.append(f'{anim}={metodo}')
+        d, err = op.crisol(*args, env=self.app.env)
+        if not d or not d.get('ok'):
+            return self.error(400, (d or {}).get('error') or err)
+        out = []
+        for linea in d.get('mensajes') or []:
+            partes = linea.split(None, 2)
+            if len(partes) >= 2:
+                out.append({'animacion': partes[0], 'metodo': partes[1], 'nota': partes[2] if len(partes) > 2 else ''})
+        if cambios:
+            self.app.cambio()
+        return self.json(out)
 
     def encolar(self, b):
         paso, n = b.get('paso'), b.get('nombre')

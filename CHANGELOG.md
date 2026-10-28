@@ -8,6 +8,12 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Agregado
+- **UI en el navegador** (`crisol ui`, local en `127.0.0.1:8190`, sin dependencias nuevas): biblioteca de assets,
+  crear con referencia o descripción, la cadena de pasos con correr/rehacer, las candidatas para elegir (y cambiar
+  una elección), visor de resultados con el reproductor iso por dirección, ajustes comunes sin json (y el json
+  completo como modo avanzado), cola de pasos de a uno con tiempo estimado, log en vivo y cancelar, movimientos de
+  Kimodo y la revisión de la instalación. En español e inglés, tema claro y oscuro, también en el celular
+  (README > Empezá acá > En el navegador). `tests/ui.py` la prueba sin GPU.
 - **Recetas por tipo**: `crisol nuevo <n> --receta humanoide|chibi|robot|juguete|objeto|vegetacion|vehiculo|escenario`
   arma el json con lo que anda para cada tipo (`plantilla/recetas/`); `--descripcion` completa `imagen.descripcion`
   sin editar el json. `--objeto`, `--vehiculo` y `--escenario` siguen como atajos.

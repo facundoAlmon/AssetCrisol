@@ -13,3 +13,5 @@ herramientas/3_blender/movimientos/candidatos/
 # notas personales de quien lo usa (no se versionan)
 CLAUDE.local.md
 .claude/settings.local.json
+# cola e historial de crisol ui, si datos_dir es esta carpeta
+/.crisol_ui/

@@ -2,7 +2,7 @@
 # usa con EEVEE). Cada trabajo es `crisol <args> --json` con la salida a <datos_dir>/.crisol_ui/trabajos/<id>.{json,log};
 # la cola y el historial quedan en cola.json (sobreviven a un reinicio) y las duraciones reales en duraciones.json
 # (para estimar el tiempo de los próximos). Cancelar mata el grupo de procesos del paso por su PID.
-import json, os, signal, statistics, threading, time
+import json, os, re, signal, statistics, threading, time
 
 import operaciones as op
 
@@ -153,9 +153,10 @@ class Cola:
                          'siguiente': est.get('siguiente'), 'decidir': [x['clave'] for x in est.get('decidir') or []]})
             if d is None and not cancelado:
                 t['resultado'] = {'ok': False, 'error': f'terminó sin JSON (código {codigo}): ver el log'}
-            if codigo == 0:
+            if codigo == 0:   # lo que el paso esperó a la GPU (gpu.py: "[gpu] libre tras N s") no cuenta
+                espera = sum(float(x) for x in re.findall(r'\[gpu\] libre tras (\d+) s', self.log(t['id'])))
                 clave = f'{t["paso"]}|{t["tipo"]}'
-                self.duraciones[clave] = (self.duraciones.get(clave, []) + [round(fin - t['inicio'], 1)])[-MEDIDAS:]
+                self.duraciones[clave] = (self.duraciones.get(clave, []) + [round(fin - t['inicio'] - espera, 1)])[-MEDIDAS:]
                 with open(os.path.join(self.carpeta, 'duraciones.json'), 'w') as f:
                     json.dump(self.duraciones, f)
             self._guardar()

@@ -81,12 +81,15 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
       elegir, ajustar), que devuelve las imágenes para mostrárselas a la persona.
 
 ## 4. UI
-- [ ] Web local servida por el mismo pipeline (se abre en el navegador; sin cuentas ni nube), sobre la CLI.
-- [ ] Flujo guiado: referencia o descripción → tipo y estilo → galería de candidatos para elegir → visor del
-      resultado (gif, iso por dirección, retrato, hoja de revisión) → exportar.
-- [ ] Cola de trabajos con progreso y tiempo estimado; logs a un clic.
-- [ ] Biblioteca de assets (miniaturas, estado, rehacer un paso).
-- [ ] Ajustes comunes sin json (seed, estilo, altura, animaciones); el json queda como modo avanzado.
+- [x] Web local servida por el mismo pipeline (`crisol ui`: se abre en el navegador; sin cuentas ni nube), sobre la CLI.
+- [x] Flujo guiado: referencia o descripción → tipo y estilo → galería de candidatos para elegir → visor del
+      resultado (gif, iso por dirección, retrato, hoja de revisión). Exportar = el paso `godot` (sin `--instalar`).
+- [x] Cola de trabajos con progreso y tiempo estimado (duraciones medidas en la PC); logs a un clic.
+- [x] Biblioteca de assets (miniaturas, estado, rehacer un paso o en lote).
+- [x] Ajustes comunes sin json (seed, estilo, altura, animaciones y su método); el json queda como modo avanzado.
+- [ ] Candidatos de malla como tarjetas (hoy la hoja `candidatos.png` entera con un botón por candidato, salvo
+      vehículos) y visor 3D del `.glb`.
+- [ ] Pasar un clip de Kimodo a la biblioteca de movimientos desde la UI (hoy a mano: README > Blender > Animaciones: dos métodos).
 
 ## 5. Salida 3D y otros motores
 - [ ] Personaje como GLB con rig y animaciones (las mismas de los sprites).

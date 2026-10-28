@@ -66,6 +66,8 @@ referencia, la imagen de referencia es tuya o de quien la hizo: sus derechos tam
 | ComfyUI | servidor de generación | GPL-3.0 | programa: no alcanza a lo generado |
 | Blender | rig, animación y render | GPL-3.0 | programa: no alcanza a los renders |
 | Godot | motor de destino (opcional) | MIT | sí |
+| Preact + htm (en `herramientas/ui/web/vendor/`) | la UI (`crisol ui`) | MIT | sí |
+| Bricolage Grotesque (en `herramientas/ui/web/vendor/`) | tipografía de la UI | SIL Open Font License 1.1 | sí |
 
 ## Los ejemplos del repo
 
