@@ -12,12 +12,11 @@ from PIL import Image as PILImage
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, RAIZ)
 import pipeline  # noqa: E402 (DATOS, CARPETAS y las recetas; no importa bpy ni torch)
+import operaciones as op  # noqa: E402 (herramientas/0_entorno, en el path por pipeline)
+from operaciones import PASOS, crisol  # noqa: E402
 
-PY = os.environ.get('CRISOL_PYTHON', 'python3')   # el del sistema: `crisol mcp` lo pasa
 LADO_MAX = 1568          # lado máximo de las imágenes que se devuelven
 MAX_IMAGENES = 6
-PASOS = ('imagen', 'vistas', 'malla', 'ultratex', 'guia', 'articulaciones', 'blender', 'sprites', 'retrato', 'iso',
-         'anclas', 'revisar', 'godot', 'comparar', 'texturas', 'tema', 'todo')
 TRABAJOS = {}            # id -> {'proc', 'paso', 'nombre', 'inicio', 'log'}
 _ids = itertools.count(1)
 
@@ -30,16 +29,6 @@ las imágenes que devuelve -> repetir. Reglas:
 - Una generación por vez en la GPU: `correr` espera solo si está ocupada. Los pasos largos (malla 3-6 min) siguen
   en segundo plano: si `correr` devuelve un trabajo sin terminar, `esperar` con ese id.
 - Las descripciones (`crear --descripcion`, imagen.descripcion) van en inglés.""")
-
-
-def crisol(*args, timeout=120):
-    """crisol <args> --json y espera: (dict del JSON o None, stderr)."""
-    r = subprocess.run([PY, os.path.join(RAIZ, 'pipeline.py'), *args, '--json'], capture_output=True, text=True,
-                       timeout=timeout)
-    try:
-        return json.loads(r.stdout), r.stderr
-    except ValueError:
-        return None, (r.stdout + r.stderr)[-3000:]
 
 
 def imagen(ruta):
@@ -75,21 +64,7 @@ def imagenes(rutas):
 
 
 def json_del_asset(nombre):
-    for carpeta, archivo in pipeline.CARPETAS:
-        ruta = os.path.join(pipeline.DATOS, carpeta, nombre, archivo)
-        if os.path.exists(ruta):
-            return ruta
-    raise ValueError(f'no existe {nombre} en personajes/, objetos/ ni escenarios/ de {pipeline.DATOS}')
-
-
-def poner(cfg, clave, valor):
-    *ruta, ultima = clave.split('.')
-    d = cfg
-    for k in ruta:
-        d = d.setdefault(k, {})
-        if not isinstance(d, dict):
-            raise ValueError(f'{clave}: {k} no es un bloque')
-    d[ultima] = valor
+    return op.json_del_asset(pipeline.DATOS, pipeline.CARPETAS, nombre)
 
 
 def resumen(d):
@@ -171,9 +146,7 @@ def correr(nombre: str, paso: str, esperar_s: int = 50) -> list:
             return [f'{nombre} ya tiene un trabajo corriendo ({tid}: {t["paso"]}): `esperar` antes']
     tid = f't{next(_ids)}'
     log = os.path.join(tempfile.gettempdir(), f'crisol_mcp_{os.getpid()}_{tid}_{paso}_{nombre}')
-    with open(log + '.json', 'w') as out, open(log + '.log', 'w') as err:   # a archivos: un pipe lleno trabaría el paso
-        proc = subprocess.Popen([PY, os.path.join(RAIZ, 'pipeline.py'), paso, nombre, '--json'],
-                                stdout=out, stderr=err, stdin=subprocess.DEVNULL)
+    proc = op.lanzar([paso, nombre], log)
     TRABAJOS[tid] = {'proc': proc, 'paso': paso, 'nombre': nombre, 'inicio': time.time(), 'log': log + '.log'}
     return esperar_trabajo(tid, esperar_s)
 
@@ -204,16 +177,11 @@ def elegir(nombre: str, clave: str, valor: str) -> str:
     """Anota lo que ELIGIÓ LA PERSONA: imagen.elegida (seed), malla.elegida (candidato) o texturas.<clave>.elegida
     (seed). Solo con su respuesta explícita después de mostrarle la hoja: nunca elegir por ella. `estado` lista qué
     falta decidir y las opciones."""
-    if not (clave in ('imagen.elegida', 'malla.elegida') or
-            (clave.startswith('texturas.') and clave.endswith('.elegida') and clave.count('.') == 2)):
-        return 'clave: imagen.elegida, malla.elegida o texturas.<clave>.elegida'
     ruta = json_del_asset(nombre)
-    with open(ruta) as f:
-        cfg = json.load(f)
-    v = int(valor) if valor.lstrip('-').isdigit() else valor
-    poner(cfg, clave, v)
-    with open(ruta, 'w') as f:
-        json.dump(cfg, f, indent=2, ensure_ascii=False)
+    try:
+        v = op.elegir(ruta, clave, valor)
+    except ValueError as e:
+        return str(e)
     d, _ = crisol('estado', nombre)
     return f'{clave} = {v!r} en {ruta}; siguiente: {(d or {}).get("siguiente")}'
 
@@ -223,22 +191,18 @@ def ajustar(nombre: str, cambios: dict[str, Any]) -> str:
     """Cambia valores del json del asset con claves de puntos, p. ej. {"imagen.seeds": [5, 6, 7, 8],
     "modelo.altura": 1.6, "estilo": "semirealista", "animacion.cabeza_arriba_grados": -5} (README > personaje.json).
     Las elecciones van con `elegir`. Después del cambio, `estado` dice qué pasos quedan viejos."""
-    if any(k.endswith('.elegida') for k in cambios):
-        return 'las elecciones de la persona van con `elegir`'
     ruta = json_del_asset(nombre)
-    with open(ruta) as f:
-        cfg = json.load(f)
-    for k, v in cambios.items():
-        poner(cfg, k, v)
-    with open(ruta, 'w') as f:
-        json.dump(cfg, f, indent=2, ensure_ascii=False)
+    try:
+        op.ajustar(ruta, cambios)
+    except ValueError as e:
+        return str(e)
     return f'cambiado en {ruta}: ' + ', '.join(f'{k} = {v!r}' for k, v in cambios.items())
 
 
 @app.tool()
 def doctor() -> str:
     """Revisa la instalación: qué falta, cómo arreglarlo y qué pasos quedan deshabilitados."""
-    r = subprocess.run([PY, os.path.join(RAIZ, 'pipeline.py'), 'doctor'], capture_output=True, text=True)
+    r = subprocess.run([op.PY, op.PIPELINE, 'doctor'], capture_output=True, text=True)
     return (r.stdout + r.stderr)[-6000:]
 
 
