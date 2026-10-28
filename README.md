@@ -126,7 +126,7 @@ Cada personaje con malla ocupa ~0,5-1 GB en `datos_dir`.
 
 ### Instalación automática (recomendada)
 
-Con Docker: ver [docs/docker.md](docs/docker.md) (la imagen trae todo menos los modelos). Sin Docker:
+Con Docker: ver [docs/docker.md](docs/docker.md) (imagen pública `ghcr.io/facundoalmon/assetcrisol`, con todo menos los modelos). Sin Docker:
 
 ```bash
 git clone https://github.com/facundoAlmon/AssetCrisol.git && cd AssetCrisol

@@ -18,11 +18,11 @@ of yours.
 ## Usage
 
 ```bash
-docker build -t assetcrisol .            # ~20 min (not published on GHCR yet)
+docker pull ghcr.io/facundoalmon/assetcrisol   # ~23 GB; or build it: docker build -t ghcr.io/facundoalmon/assetcrisol . (~20 min)
 
 # an alias to avoid repeating: GPU, models in a volume, assets in ./assets
 mkdir -p assets
-alias crisol='docker run --rm -it --gpus all -v crisol-modelos:/modelos -v "$PWD/assets":/datos assetcrisol'
+alias crisol='docker run --rm -it --gpus all -v crisol-modelos:/modelos -v "$PWD/assets":/datos ghcr.io/facundoalmon/assetcrisol'
 
 crisol modelos                  # downloads the models into the volume (full level; --nivel minimo, --flux2)
 crisol doctor                   # checks everything
@@ -39,7 +39,7 @@ crisol todo bandido
 ## Publishing (maintainers)
 
 `docker/publicar.sh <version>` builds it here and pushes it (23 GB: too big for GitHub's free runners). GHCR by
-default (`ghcr.io/facundoalmon/assetcrisol`; the first one will be `0.1.0-alpha.1`); for another registry,
+default (`ghcr.io/facundoalmon/assetcrisol`, public; the first one was `0.1.0-alpha.1`); for another registry,
 `REGISTRO=docker.io/<user>` or `registry.gitlab.com/<user>/<project>`. Run `docker login` first. On GHCR the package
 starts private: the first time, make it public on its GitHub page.
 
