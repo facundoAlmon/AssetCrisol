@@ -357,7 +357,8 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
 - **Each asset**: the chain of steps with their state (done, outdated, to do) and a button to run or redo each one;
   **Your call** shows the candidates (image, mesh, textures) for the person to choose, and a choice already made can
   be changed. The viewer shows the result: the character in 8 directions (pick animation and direction), the gif,
-  the portrait, the review sheet, the views.
+  the portrait, the review sheet, the views, and the model **in 3D** (rotate and zoom with the mouse or a finger).
+  Mesh candidates can be compared in 3D side by side before choosing.
 - **Settings** without json: style, description, seeds, mesh engine and seed, UltraTex seed, height, head angle, iso
   animations and the method of each one (procedural or Kimodo). The full json stays as an advanced mode (with the
   changes shown before saving).

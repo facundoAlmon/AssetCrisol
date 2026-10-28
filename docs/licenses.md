@@ -66,6 +66,7 @@ reference, the reference image belongs to you or whoever made it: its rights cou
 | Blender | rig, animation and render | GPL-3.0 | a program: doesn't reach the renders |
 | Godot | target engine (optional) | MIT | yes |
 | Preact + htm (in `herramientas/ui/web/vendor/`) | the UI (`crisol ui`) | MIT | yes |
+| three.js (in `herramientas/ui/web/vendor/three/`) | the UI 3D viewer | MIT | yes |
 | Bricolage Grotesque (in `herramientas/ui/web/vendor/`) | UI typeface | SIL Open Font License 1.1 | yes |
 
 ## The repo's examples

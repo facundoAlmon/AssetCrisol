@@ -5,6 +5,7 @@ import {
   trabajosDe, encolar, nombrePaso, aviso, duracion, Colada, transcurrido,
 } from '../comunes.mjs'
 import { Ajustes } from './ajustes.mjs'
+import { Visor3D } from './visor3d.mjs'
 
 // pasos que no están en la cadena de `crisol estado` pero se pueden correr a mano
 const EXTRA = {
@@ -96,12 +97,22 @@ function Decision({ d, dec, recargar, listo }) {
     setGuardando(null)
   }
   const conImagen = dec.opciones.filter(o => o.imagen)
+  // mallas: los candidatos en 3D, uno al lado del otro (los que la persona abre; ninguno de entrada)
+  const con3d = dec.opciones.filter(o => o.glb)
+  const [en3d, setEn3d] = useState([])
+  const alternar3d = v => setEn3d(en3d.includes(v) ? en3d.filter(x => x !== v) : [...en3d, v].slice(-3))
+  const boton3d = o => o.glb && html`<button class="boton chico" aria-pressed=${en3d.includes(o.valor)}
+    onClick=${() => alternar3d(o.valor)}><${Icono} n="cubo" />${t(en3d.includes(o.valor) ? 'decidir.ocultar_3d' : 'decidir.ver_3d')}</button>`
+  const esActual = o => dec.actual != null && String(dec.actual) === String(o.valor)
   return html`<div style="display:grid;gap:12px">
     <header style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
       <h3>${titulo}</h3>
       ${dec.nota && html`<span class="tenue chico">${dec.nota}</span>`}
       ${textura && conImagen.length > 0 && html`<label class="casilla chico" style="margin-left:auto">
         <input type="checkbox" checked=${mosaico} onChange=${e => setMosaico(e.target.checked)} />${t('decidir.mosaico')}</label>`}
+      ${con3d.length > 1 && html`<button class="boton chico" style="margin-left:auto"
+        onClick=${() => setEn3d(en3d.length ? [] : con3d.slice(0, 3).map(o => o.valor))}><${Icono} n="cubo" />
+        ${t(en3d.length ? 'decidir.cerrar_3d' : 'decidir.comparar_3d')}</button>`}
     </header>
     ${conImagen.length > 0
       ? html`<div class="opciones">${dec.opciones.map(o => html`<article class="opcion" key=${o.valor}>
@@ -111,14 +122,24 @@ function Decision({ d, dec, recargar, listo }) {
             ${!mosaico && o.imagen && html`<img src=${urlMini(d.nombre, o.imagen, 520)} alt="" loading="lazy" />`}
           </button>
           <footer><span class="mono">${o.valor}</span>
-            ${dec.actual != null && String(dec.actual) === String(o.valor)
+            <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">${boton3d(o)}
+            ${esActual(o)
               ? html`<${Chip} clase="hecho">${t('decidir.actual')}<//>`
-              : html`<button class="boton chico primario" disabled=${guardando !== null} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}
+              : html`<button class="boton chico primario" disabled=${guardando !== null} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}</span>
           </footer></article>`)}</div>`
       : html`${dec.mirar && html`<button class="hoja-decidir damero" onClick=${() => verGrande(urlArchivo(d.nombre, dec.mirar), t('decidir.hoja'))}>
             <img src=${urlMini(d.nombre, dec.mirar, 1400)} alt=${t('decidir.hoja')} /></button>`}
-          <div class="botones-opcion">${dec.opciones.map(o => html`<button class="boton primario" disabled=${guardando !== null}
-            onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}: ${o.valor}</button>`)}</div>`}
+          <div class="botones-opcion">${dec.opciones.map(o => html`<span class="botones-opcion" key=${o.valor}>
+            ${esActual(o) ? html`<${Chip} clase="hecho">${t('decidir.actual')}: ${o.valor}<//>`
+              : html`<button class="boton primario" disabled=${guardando !== null}
+                  onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}: ${o.valor}</button>`}${boton3d(o)}</span>`)}</div>`}
+    ${en3d.length > 0 && html`<div class="comparar3d">${en3d.map(v => dec.opciones.find(o => o.valor === v)).filter(Boolean).map(o =>
+      html`<article class="opcion" key=${o.valor}>
+        <${Visor3D} url=${urlArchivo(d.nombre, o.glb, Math.round(d.modificado))} titulo=${o.valor} />
+        <footer><span class="mono">${o.valor}</span>
+          ${esActual(o) ? html`<${Chip} clase="hecho">${t('decidir.actual')}<//>`
+            : html`<button class="boton chico primario" disabled=${guardando !== null} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}
+        </footer></article>`)}</div>`}
   </div>`
 }
 
@@ -216,6 +237,9 @@ function Visor({ d }) {
       onClick=${() => { setGid(x.id); setI(0) }}>${etiqueta(x.id)}</button>`)}</div>
     ${g.id === 'iso_reproductor'
       ? html`<${ReproductorIso} nombre=${d.nombre} meta=${d.iso} version=${v} />`
+      : g.id === '3d'
+      ? html`<${Visor3D} url=${urlArchivo(d.nombre, archivo, v)} key=${archivo} />
+          <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>`
       : html`<div class=${'visor damero' + (nitido ? ' nitido' : '')}>
           <img src=${archivo.endsWith('.gif') ? urlArchivo(d.nombre, archivo, v) : urlMini(d.nombre, archivo, 1400, '', v)} alt=${archivo} />
           <div class="herramientas">

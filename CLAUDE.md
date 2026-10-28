@@ -106,7 +106,8 @@ crisol ui [--puerto 8190] [--no-abrir]              # UI web local (herramientas
   `elegir` con las claves de elección, `ajustar` que no elige, `PASOS`).
 - `ui/` (`crisol ui`, python3 del sistema, stdlib + Pillow): `servidor.py` (API JSON sobre la CLI y `estado.py`, SSE,
   miniaturas; solo Host local y Origin propio), `cola.py` (un paso por vez, `<datos_dir>/.crisol_ui/`, cancelar con
-  `killpg`, duraciones medidas) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; textos en
+  `killpg`, duraciones medidas) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; el visor 3D
+  `componentes/visor3d.mjs` con three.js de `web/vendor/three/`, cargado recién al abrirlo; textos en
   `web/i18n/{es,en}.mjs` con las mismas claves). Un paso nuevo: a `operaciones.PASOS`, su nombre en i18n
   (`paso.<p>`, `pasodoc.<p>`) y, si no está en la cadena de `estado.py`, a `EXTRA` de `componentes/asset.mjs`.
   Probar con `python3 tests/ui.py` (sin GPU) y mirar capturas (claro/oscuro, 390 px) antes de dar un cambio por bueno.

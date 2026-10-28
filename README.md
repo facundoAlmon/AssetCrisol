@@ -346,7 +346,8 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
 - **Cada asset**: la cadena de pasos con su estado (hecho, desactualizado, pendiente) y un botón para correr o rehacer
   cada uno; **Te toca elegir** muestra las candidatas (imagen, malla, texturas) para que la persona elija, y una
   elección ya hecha se puede cambiar. El visor muestra el resultado: el personaje en 8 direcciones (animación y
-  dirección a elección), el gif, el retrato, la hoja de revisión, las vistas.
+  dirección a elección), el modelo **en 3D** (girar y acercar con el mouse o el dedo), el gif, el retrato, la hoja
+  de revisión, las vistas. Los candidatos de malla se pueden comparar en 3D uno al lado del otro antes de elegir.
 - **Ajustes** sin json: estilo, descripción, seeds, motor y seed de la malla, seed de UltraTex, altura, cabeza,
   animaciones del iso y método de cada una (procedural o Kimodo). El json completo queda como modo avanzado (con los
   cambios a la vista antes de guardar).

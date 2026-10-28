@@ -67,6 +67,7 @@ referencia, la imagen de referencia es tuya o de quien la hizo: sus derechos tam
 | Blender | rig, animación y render | GPL-3.0 | programa: no alcanza a los renders |
 | Godot | motor de destino (opcional) | MIT | sí |
 | Preact + htm (en `herramientas/ui/web/vendor/`) | la UI (`crisol ui`) | MIT | sí |
+| three.js (en `herramientas/ui/web/vendor/three/`) | el visor 3D de la UI | MIT | sí |
 | Bricolage Grotesque (en `herramientas/ui/web/vendor/`) | tipografía de la UI | SIL Open Font License 1.1 | sí |
 
 ## Los ejemplos del repo

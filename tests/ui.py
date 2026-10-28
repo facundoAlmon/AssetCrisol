@@ -157,6 +157,15 @@ def main():
         chequear(c == 200 and b[:4] == b'\x89PNG', 'miniatura PNG')
         c, b = pedir(base, f'archivos/caja/{mini}', crudo=True)
         chequear(c == 200 and len(b) > 1000, 'archivo del asset')
+        c, d = pedir(base, 'api/assets/caja')
+        g3d = next((g for g in d.get('visuales', []) if g['id'] == '3d'), None)
+        chequear(g3d is not None, 'grupo 3d en el visor de la caja')
+        if g3d:
+            r = urllib.request.urlopen(base + 'archivos/caja/' + g3d['archivos'][0], timeout=30)
+            chequear(r.headers['Content-Type'] == 'model/gltf-binary' and r.read(4) == b'glTF', '.glb con su mimetype')
+        malos = [r for r in ('three.module.min.js', 'GLTFLoader.js', 'OrbitControls.js', 'BufferGeometryUtils.js')
+                 if pedir(base, 'vendor/three/' + r, crudo=True)[0] != 200]
+        chequear(not malos, 'three.js vendorizado', ', '.join(malos))
 
         print('seguridad')
         c, _ = pedir(base, 'api/assets', host='evil.example:80')
