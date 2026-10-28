@@ -30,6 +30,15 @@ Depende de la receta. Lo que decide es **qué modelos generaron el asset**:
 Blender, Godot y ComfyUI son programas: no le ponen condiciones a lo que hacés con ellos (la GPL de Blender alcanza a
 los scripts que importan `bpy`, no a los renders).
 
+## En cada asset
+
+`sprites` e `iso` suman al meta (`<n>_meta.json`, `<n>_iso_meta.json`) un bloque `licencias`: los modelos que
+hicieron el asset, la licencia de cada uno y `comercial` (`true` solo si todos lo permiten). Los escenarios lo dejan
+en `trabajo/tema/licencias.json` y los vehículos en `trabajo/licencias.json`. Sale de la configuración actual del json
+(`imagen.referencia`/`imagen.motor`, `malla.motor`/`vistas`/`ultratex` del candidato elegido, `animacion.metodos`,
+`motor` de cada textura): si cambiaste un motor después de generar, rehacé ese paso para que el aviso sea cierto. Con
+referencia, la imagen de referencia es tuya o de quien la hizo: sus derechos también cuentan.
+
 ## Componentes
 
 | Componente | Para qué | Licencia | Uso comercial |

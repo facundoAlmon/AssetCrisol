@@ -29,6 +29,15 @@ It depends on the recipe. What matters is **which models generated the asset**:
 Blender, Godot and ComfyUI are programs: they put no conditions on what you make with them (Blender's GPL covers the
 scripts that import `bpy`, not the renders).
 
+## In each asset
+
+`sprites` and `iso` add a `licencias` block to the meta (`<n>_meta.json`, `<n>_iso_meta.json`): the models that made
+the asset, each one's license and `comercial` (`true` only if all of them allow it). Scenery leaves it in
+`trabajo/tema/licencias.json` and vehicles in `trabajo/licencias.json`. It comes from the json's current settings
+(`imagen.referencia`/`imagen.motor`, the chosen candidate's `malla.motor`/`vistas`/`ultratex`, `animacion.metodos`,
+each texture's `motor`): if you changed an engine after generating, redo that step so the notice is accurate. With a
+reference, the reference image belongs to you or whoever made it: its rights count too.
+
 ## Components
 
 | Component | Used for | License | Commercial use |

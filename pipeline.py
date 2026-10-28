@@ -209,6 +209,7 @@ def paso_tema(nombre):
     import tema
     pdir, pj = cargar(nombre)
     tema.main(pj)
+    anotar_licencias(pj, os.path.join(pdir, 'trabajo', 'tema', 'licencias.json'))   # tema.json queda como lo lee el juego
 
 
 def paso_imagen(nombre):
@@ -554,8 +555,9 @@ VISTAS_VEHICULO = ('juego', 'tres_cuartos', 'costado', 'arriba')
 
 def paso_blender(nombre):
     pdir, pj = cargar(nombre)
-    if pj.get('vehiculo'):
-        return blender_vehiculo(pdir, pj)
+    if pj.get('vehiculo'):   # el juego usa vehiculo.glb: las licencias van aparte
+        blender_vehiculo(pdir, pj)
+        return anotar_licencias(pj, os.path.join(pdir, 'trabajo', 'licencias.json'))
     blender('objeto' if pj['_objeto'] else 'construir', pdir, pj)
 
 
@@ -624,7 +626,9 @@ def paso_iso(nombre):
     if pj['_objeto']:
         sys.exit('[iso] los objetos ya salen en isométrico con `blender` + `sprites`')
     blender('iso', pdir, pj)
-    armar_iso.armar(pdir, nombre, pj, os.path.join(dir_godot(pdir), 'personajes', nombre, 'iso'))
+    d = os.path.join(dir_godot(pdir), 'personajes', nombre, 'iso')
+    armar_iso.armar(pdir, nombre, pj, d)
+    anotar_licencias(pj, os.path.join(d, f'{nombre}_iso_meta.json'))
 
 
 def paso_anclas(nombre):
@@ -691,6 +695,21 @@ def paso_movimiento(anim_, prompt, duracion, seed, muestras):
                    env=env, check=True)
 
 
+def anotar_licencias(pj, ruta):
+    """Suma `licencias` (qué modelos hicieron el asset y si permiten uso comercial) al json `ruta` (el meta) o lo
+    crea."""
+    import licencias
+    lic = licencias.del_asset(pj, CFG)
+    d = {}
+    if os.path.exists(ruta):
+        with open(ruta) as f:
+            d = json.load(f)
+    d['licencias'] = lic
+    with open(ruta, 'w') as f:
+        json.dump(d, f, indent=1, ensure_ascii=False)
+    print(f'[licencias] {licencias.texto(lic)}')
+
+
 def dir_godot(pdir):
     return os.path.join(pdir, 'godot')
 
@@ -700,8 +719,11 @@ def paso_sprites(nombre):
     pdir, pj = cargar(nombre)
     if pj['_objeto']:
         import armar_objeto
-        return armar_objeto.armar(pdir, nombre, pj, os.path.join(dir_godot(pdir), 'objetos', nombre))
+        meta = armar_objeto.armar(pdir, nombre, pj, os.path.join(dir_godot(pdir), 'objetos', nombre))
+        anotar_licencias(pj, os.path.join(dir_godot(pdir), 'objetos', nombre, f'{nombre}_meta.json'))
+        return meta
     meta = armar_tira.armar(pdir, nombre, pj, os.path.join(dir_godot(pdir), 'personajes', nombre))
+    anotar_licencias(pj, os.path.join(dir_godot(pdir), 'personajes', nombre, f'{nombre}_meta.json'))
     print('[sprites] preview:', os.path.join(pdir, 'preview.gif'))
     return meta
 

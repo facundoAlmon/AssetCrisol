@@ -67,12 +67,13 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] `docs/licencias.md` (y `docs/licenses.md`): componente → licencia → qué paso lo usa → si permite uso comercial.
 
 ## 3. CLI para agentes
-- [ ] `--json` en todos los pasos (estado, archivos generados, avisos), códigos de salida claros, sin preguntas
-      interactivas.
-- [ ] `crisol estado <n>`: qué pasos están hechos y qué falta decidir.
-- [ ] Cola de GPU dentro del pipeline: antes de generar chequea ComfyUI y la GPU, y espera o avisa.
+- [x] `--json` en todos los pasos (archivos generados, qué mirar, estado después), códigos de salida (3 GPU ocupada,
+      4 falta elegir, 5 falta un paso), sin preguntas interactivas.
+- [x] `crisol estado [<n>]`: qué pasos están hechos, cuáles quedaron viejos y qué falta decidir.
+- [x] Cola de GPU dentro del pipeline: antes de generar chequea otros `crisol`, ComfyUI y la GPU, y espera (o sale
+      con `--sin-esperar`).
 - [ ] Recetas por tipo de asset (humanoide, chibi, objeto, vehículo, escenario) que arman el json solas.
-- [ ] Avisos de licencia en el meta de cada asset (qué modelos lo hicieron, si es apto para venta).
+- [x] Avisos de licencia en el meta de cada asset (qué modelos lo hicieron, si es apto para venta).
 - [ ] Servidor MCP con las operaciones de alto nivel (crear, listar candidatos, elegir, generar, exportar), que
       devuelva las imágenes para mostrárselas a la persona.
 
