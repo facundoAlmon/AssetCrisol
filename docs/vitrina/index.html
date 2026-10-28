@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AssetCrisol · Vitrina</title>
+<meta name="description" content="Assets de juego generados de punta a punta con AssetCrisol, en local y con IA open source.">
+<!-- Imágenes: python3 herramientas/4_sprites/vitrina.py (las arma de los ejemplos en datos_dir) -->
+<style>
+  :root {
+    --fondo: #2e343c; --panel: #383f49; --borde: #4a525e; --texto: #e6e8eb; --suave: #a9b0ba;
+    --acento: #f08a3c; --si: #6fbf73; --no: #e0705f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  html[lang="es"] [lang="en"], html[lang="en"] [lang="es"] { display: none; }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  header a { color: var(--texto); text-decoration: none; font-weight: 700; font-size: 1.1rem; }
+  button { background: var(--panel); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px;
+           padding: 6px 12px; font: inherit; cursor: pointer; }
+  h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); line-height: 1.2; margin: 32px 0 8px; }
+  h2 { font-size: 1.4rem; margin: 48px 0 6px; }
+  p.bajada { color: var(--suave); margin: 0 0 20px; max-width: 70ch; }
+  img { display: block; max-width: 100%; height: auto; image-rendering: auto; }
+  .heroe { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 12px; }
+  .heroe img { margin: 0 auto; }
+  .grilla { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+  .grilla.anchas { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  figure { margin: 0; background: var(--panel); border: 1px solid var(--borde); border-radius: 10px;
+           padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  figure img { margin: 0 auto; border-radius: 6px; }
+  figcaption { font-size: .9rem; color: var(--suave); }
+  figcaption b { color: var(--texto); display: block; font-size: 1rem; }
+  .licencia { display: inline-block; margin-top: 4px; font-size: .8rem; border-radius: 4px; padding: 1px 6px;
+              border: 1px solid currentColor; }
+  .licencia.si { color: var(--si); } .licencia.no { color: var(--no); }
+  footer { margin-top: 56px; color: var(--suave); font-size: .9rem; border-top: 1px solid var(--borde); padding-top: 16px; }
+  footer a { color: var(--acento); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a href="https://github.com/facundoAlmon/AssetCrisol">AssetCrisol</a>
+    <button id="idioma" type="button" aria-label="Cambiar idioma / Change language">English</button>
+  </header>
+
+  <h1>
+    <span lang="es">De una imagen a assets de juego, en tu PC</span>
+    <span lang="en">From one image to game assets, on your PC</span>
+  </h1>
+  <p class="bajada">
+    <span lang="es">Todo lo de esta página salió del pipeline, sin retoques: imagen con IA, malla 3D, rig, animación y
+      render a sprites isométricos. Cris, la protagonista del proyecto, en su taller.</span>
+    <span lang="en">Everything on this page came out of the pipeline, untouched: AI image, 3D mesh, rig, animation and
+      render to isometric sprites. Cris, the project's main character, in her workshop.</span>
+  </p>
+  <div class="heroe">
+    <img src="img/taller.gif" width="744" height="308"
+         alt="Cris en vista isométrica entre un horno, un yunque, un crisol, una caja de herramientas y un martillo">
+  </div>
+
+  <h2>Cris</h2>
+  <p class="bajada">
+    <span lang="es">Personaje animado: 15 animaciones en 8 direcciones, listas para Godot.</span>
+    <span lang="en">Animated character: 15 animations in 8 directions, ready for Godot.</span>
+  </p>
+  <div class="grilla anchas">
+    <figure>
+      <img src="img/cris_acciones.gif" width="300" height="300" alt="Cris: reposo, caminar, correr, golpe, patada, salto, rodar y brazos arriba">
+      <figcaption><b><span lang="es">Acciones</span><span lang="en">Actions</span></b>
+        <span lang="es">reposo, caminar, correr, golpe, patada, salto, rodar, brazos arriba</span>
+        <span lang="en">idle, walk, run, punch, kick, jump, roll, arms up</span></figcaption>
+    </figure>
+    <figure>
+      <img src="img/cris_direcciones.gif" width="600" height="380" alt="Cris caminando en las 8 direcciones">
+      <figcaption><b><span lang="es">8 direcciones</span><span lang="en">8 directions</span></b>
+        <span lang="es">cámara isométrica a 30°</span><span lang="en">isometric camera at 30°</span></figcaption>
+    </figure>
+    <figure>
+      <img src="img/cris_paseo.gif" width="600" height="400" alt="Cris caminando por un piso isométrico">
+      <figcaption><b><span lang="es">En el piso</span><span lang="en">On the floor</span></b>
+        <span lang="es">la caminata avanza al paso de los pies</span>
+        <span lang="en">the walk moves at the pace of the feet</span></figcaption>
+    </figure>
+  </div>
+  <p class="bajada">
+    <span lang="es">Z-Image Turbo → Qwen Image Edit → Pixal3D (4 vistas) + UltraTex → rig y animación en Blender.</span>
+    <span lang="en">Z-Image Turbo → Qwen Image Edit → Pixal3D (4 views) + UltraTex → rig and animation in Blender.</span>
+    <span class="licencia no"><span lang="es">no comercial (UltraTex)</span><span lang="en">non-commercial (UltraTex)</span></span>
+  </p>
+
+  <h2><span lang="es">Objetos</span><span lang="en">Props</span></h2>
+  <p class="bajada">
+    <span lang="es">Props isométricos en 4 direcciones, con su huella de colisión para Godot.</span>
+    <span lang="en">Isometric props in 4 directions, with their collision footprint for Godot.</span>
+  </p>
+  <div class="grilla">
+    <figure>
+      <img src="img/horno.gif" alt="Horno de fundición de piedra y ladrillo girando">
+      <figcaption><b><span lang="es">Horno</span><span lang="en">Furnace</span></b>Z-Image Turbo → Pixal3D<br>
+        <span class="licencia si"><span lang="es">comercial</span><span lang="en">commercial</span></span></figcaption>
+    </figure>
+    <figure>
+      <img src="img/yunque.gif" alt="Yunque sobre un tronco girando">
+      <figcaption><b><span lang="es">Yunque</span><span lang="en">Anvil</span></b>Z-Image Turbo → TRELLIS.2 + UltraTex<br>
+        <span class="licencia no"><span lang="es">no comercial</span><span lang="en">non-commercial</span></span></figcaption>
+    </figure>
+    <figure>
+      <img src="img/crisol.gif" alt="Crisol con metal fundido girando">
+      <figcaption><b><span lang="es">Crisol</span><span lang="en">Crucible</span></b>Z-Image Turbo → TRELLIS.2 + UltraTex<br>
+        <span class="licencia no"><span lang="es">no comercial</span><span lang="en">non-commercial</span></span></figcaption>
+    </figure>
+    <figure>
+      <img src="img/caja_herramientas.gif" alt="Caja de herramientas roja girando">
+      <figcaption><b><span lang="es">Caja de herramientas</span><span lang="en">Toolbox</span></b>Z-Image Turbo → TRELLIS.2 + UltraTex<br>
+        <span class="licencia no"><span lang="es">no comercial</span><span lang="en">non-commercial</span></span></figcaption>
+    </figure>
+    <figure>
+      <img src="img/martillo.gif" alt="Martillo de herrero girando">
+      <figcaption><b><span lang="es">Martillo</span><span lang="en">Hammer</span></b>Z-Image Turbo → Pixal3D<br>
+        <span class="licencia si"><span lang="es">comercial</span><span lang="en">commercial</span></span></figcaption>
+    </figure>
+  </div>
+
+  <h2><span lang="es">Escenarios</span><span lang="en">Scenery</span></h2>
+  <p class="bajada">
+    <span lang="es">Texturas repetibles de piso, camino y pared (y un telón de fondo), con los colores del tema.</span>
+    <span lang="en">Tileable floor, path and wall textures (and a backdrop), with the theme colors.</span>
+  </p>
+  <div class="grilla anchas">
+    <figure>
+      <img src="img/taller.png" width="1152" height="384" alt="Texturas del taller: piso de piedra, camino y pared de ladrillo">
+      <figcaption><b><span lang="es">Taller</span><span lang="en">Workshop</span></b>Z-Image Turbo<br>
+        <span class="licencia si"><span lang="es">comercial</span><span lang="en">commercial</span></span></figcaption>
+    </figure>
+    <figure>
+      <img src="img/bosque.png" width="1152" height="713" alt="Texturas del bosque: pasto, camino de piedras, follaje y telón de fondo">
+      <figcaption><b><span lang="es">Bosque</span><span lang="en">Forest</span></b>Z-Image Turbo + DreamShaper XL Turbo<br>
+        <span class="licencia si"><span lang="es">comercial</span><span lang="en">commercial</span></span></figcaption>
+    </figure>
+  </div>
+
+  <footer>
+    <span lang="es">Generado en una sola PC con una GPU NVIDIA de 16 GB, con modelos open source y sin servicios en la
+      nube. Las licencias de cada modelo están en <a href="../licencias.md">docs/licencias.md</a>.</span>
+    <span lang="en">Generated on a single PC with a 16 GB NVIDIA GPU, with open-source models and no cloud services.
+      Each model's license is in <a href="../licenses.md">docs/licenses.md</a>.</span>
+  </footer>
+</main>
+<script>
+  const boton = document.getElementById('idioma');
+  function poner(l) {
+    document.documentElement.lang = l;
+    boton.textContent = l === 'es' ? 'English' : 'Español';
+    try { localStorage.setItem('crisol_idioma', l); } catch (e) {}
+  }
+  let inicial = 'es';
+  try { inicial = localStorage.getItem('crisol_idioma') || (navigator.language.startsWith('es') ? 'es' : 'en'); } catch (e) {}
+  poner(inicial);
+  boton.addEventListener('click', () => poner(document.documentElement.lang === 'es' ? 'en' : 'es'));
+</script>
+</body>
+</html>

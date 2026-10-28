@@ -76,7 +76,8 @@ crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimo
   animación; `movimientos/biblioteca.json`), `generar_movimiento.py` (venv Kimodo), `articulaciones_pose.py`
   (DWPose), `dibujar_guia.py`, `vehiculo.py`.
 - `4_sprites/`: `armar_tira.py` (`ANIMACIONES`, hoja, retrato), `armar_iso.py`, `armar_objeto.py`, `revisar.py`
-  (`revision.png`), `posproceso.py` (color, nitidez, contorno del estilo).
+  (`revision.png`), `posproceso.py` (color, nitidez, contorno del estilo), `vitrina.py` (gifs de `docs/vitrina/` desde los
+  ejemplos ya renderizados en datos_dir).
 - `5_godot/`: `exportar_godot.py`, `exportar_objeto.py`, `sprite_personaje.gd`, `sprite_personaje_iso.gd`, `objeto_iso.gd`.
 - `6_escenario/`: `texturas.py`, `repetible.py`, `tema.py`.
 - `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,vehiculo,escenario}.json`, `ejemplos/`.
