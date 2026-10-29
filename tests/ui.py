@@ -169,6 +169,11 @@ def probar_cancelar(tmp):
             break
         time.sleep(0.1)
     chequear(d3['estado'] in ('cancelado', 'fallo'), 'cola: cancelar un paso que quedó de antes', d3['estado'])
+    # estimado por unidad: 3 seeds de qwen a 40 s cada una no dicen nada de zimage ni de 1 seed
+    c3.duraciones = {'imagen|objeto': [120], 'imagen|objeto|qwen': [40, 44, 36]}
+    chequear(c3.estimado('imagen', 'objeto', 'qwen', 1) == 40 and c3.estimado('imagen', 'objeto', 'qwen', 3) == 120
+             and c3.estimado('imagen', 'objeto', 'zimage', 2) == 120 and c3.estimado('malla', 'objeto', 'trellis2', 0) == 5,
+             'cola: estimado por unidad y variante')
 
 
 def probar_movimientos(base, datos):

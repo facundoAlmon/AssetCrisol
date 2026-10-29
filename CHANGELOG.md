@@ -59,6 +59,10 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - Cancelar un paso en `crisol ui` (o Ctrl+C en la terminal) dejaba su trabajo en la cola de ComfyUI, generando con
   el paso ya muerto y trabando al siguiente. Ahora, al cortar, el paso que reservó la GPU saca sus pendientes de la
   cola de ComfyUI e interrumpe el que corre (`gpu.vaciar_comfyui`).
+- `crisol ui`: el tiempo estimado de `imagen`, `malla`, `iso` y `texturas` era la mediana de las corridas anteriores,
+  sin mirar cuánto trabajo traían (Z-Image con 1 seed contra Qwen con 3; una malla de 3 candidatos contra una que
+  solo copia). Ahora se mide por unidad (seed, candidato que falta generar, animación, textura) y por motor, y se
+  multiplica por las del trabajo nuevo (`servidor.carga`). Hasta tener medidas así, sigue la mediana de antes.
 - `crisol ui`, Ajustes: al escribir las seeds, Guardar seguía en gris hasta salir del campo.
 - `crisol ui`: al reabrirla con un paso que siguió corriendo, quedaba "interrumpido" y el siguiente de la cola
   arrancaba encima; ahora lo espera. En el celular, deslizar en vertical sobre el visor 3D baja la página (girar es

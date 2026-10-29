@@ -2,7 +2,8 @@
 # usa con EEVEE). Cada trabajo es `crisol <args> --json` con la salida a <datos_dir>/.crisol_ui/trabajos/<id>.{json,log};
 # la cola y el historial quedan en cola.json (sobreviven a un reinicio: un paso que siguió corriendo con la UI cerrada
 # se vuelve a esperar por su PID y los pendientes arrancan cuando termina) y las duraciones reales en duraciones.json
-# (para estimar el tiempo de los próximos). Cancelar mata el grupo de procesos del paso por su PID.
+# (para estimar el tiempo de los próximos: enteras por paso y tipo y, en los que traen más o menos trabajo, por unidad
+# y variante; ver servidor.carga). Cancelar mata el grupo de procesos del paso por su PID.
 import json, os, re, signal, statistics, subprocess, threading, time
 
 import operaciones as op
@@ -94,19 +95,28 @@ class Cola:
             json.dump(self.trabajos, f, ensure_ascii=False)
         os.replace(tmp, os.path.join(self.carpeta, 'cola.json'))
 
-    def estimado(self, paso, tipo):
+    def estimado(self, paso, tipo, variante=None, unidades=None):
+        """Segundos: lo medido por unidad en esa variante × las unidades; si no, la mediana de los enteros."""
+        if unidades == 0:   # nada que generar (p. ej. malla con todos los candidatos hechos: solo copia)
+            return 5
+        if unidades is not None:
+            medidas = self.duraciones.get(f'{paso}|{tipo}|{variante}')
+            if medidas:
+                return round(statistics.median(medidas) * unidades)
         medidas = self.duraciones.get(f'{paso}|{tipo}') or self.duraciones.get(paso)
         if medidas:
             return round(statistics.median(medidas))
         return BASE_TIPO.get((paso, tipo), BASE.get(paso, 60))
 
-    def agregar(self, args, nombre, tipo=None, titulo=None):
-        """args: los de crisol sin --json (p. ej. ['malla', 'cris']). Devuelve el trabajo."""
+    def agregar(self, args, nombre, tipo=None, titulo=None, variante=None, unidades=None):
+        """args: los de crisol sin --json (p. ej. ['malla', 'cris']); variante y unidades: servidor.carga. Devuelve
+        el trabajo."""
         with self._cv:
             self._ids += 1
             t = {'id': f't{self._ids}', 'args': list(args), 'paso': args[0], 'nombre': nombre, 'tipo': tipo,
                  'titulo': titulo, 'estado': 'pendiente', 'creado': time.time(), 'inicio': None, 'fin': None,
-                 'codigo': None, 'pid': None, 'estimado': self.estimado(args[0], tipo), 'resultado': None}
+                 'codigo': None, 'pid': None, 'variante': variante, 'unidades': unidades,
+                 'estimado': self.estimado(args[0], tipo, variante, unidades), 'resultado': None}
             self.trabajos.append(t)
             self._guardar()
             self._cv.notify_all()
@@ -204,8 +214,12 @@ class Cola:
                 t['resultado'] = {'ok': False, 'error': f'terminó sin JSON (código {codigo}): ver el log'}
             if codigo == 0:   # lo que el paso esperó a la GPU (gpu.py: "[gpu] libre tras N s") no cuenta
                 espera = sum(float(x) for x in re.findall(r'\[gpu\] libre tras (\d+) s', self.log(t['id'])))
-                clave = f'{t["paso"]}|{t["tipo"]}'
-                self.duraciones[clave] = (self.duraciones.get(clave, []) + [round(fin - t['inicio'] - espera, 1)])[-MEDIDAS:]
+                dur = fin - t['inicio'] - espera
+                medir = [(f'{t["paso"]}|{t["tipo"]}', dur)]
+                if t.get('unidades'):
+                    medir.append((f'{t["paso"]}|{t["tipo"]}|{t.get("variante")}', dur / t['unidades']))
+                for clave, v in medir:
+                    self.duraciones[clave] = (self.duraciones.get(clave, []) + [round(v, 1)])[-MEDIDAS:]
                 with open(os.path.join(self.carpeta, 'duraciones.json'), 'w') as f:
                     json.dump(self.duraciones, f)
             if avisar:
