@@ -334,7 +334,7 @@ Todo lo de esta guía se puede hacer también desde una página en el navegador,
 
 ```bash
 crisol ui                    # abre http://127.0.0.1:8190/ (--puerto N, --no-abrir)
-crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma red
+crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma red, con token
 ```
 
 ![crisol ui: la vista de un personaje con su cadena de pasos y el reproductor iso](docs/vitrina/img/ui.png)
@@ -361,9 +361,12 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   volver a abrirla.
 - **Instalación**: lo que revisa `crisol doctor`; los pasos que no se pueden correr quedan apagados con el motivo.
 
-Corre en esta PC (escucha en `127.0.0.1`, sin cuentas ni internet; con `--host 0.0.0.0`, en toda la red local y
-**sin contraseña**: solo en una red de confianza), en español o inglés y con tema claro u
-oscuro. La cola y el historial quedan en `<datos_dir>/.crisol_ui/`. `python3 tests/ui.py` la prueba sin GPU (~10 s).
+Corre en esta PC (escucha en `127.0.0.1`, sin cuentas ni internet), en español o inglés y con tema claro u
+oscuro. Con `--host 0.0.0.0` escucha en toda la red local y pide un **token** a lo que no venga de esta misma PC:
+al arrancar imprime `http://<ip>:8190/?token=...`; abrir esa URL en el celular (o escribir el token en la página
+que lo pide) deja una cookie y la URL queda sin el token. El token sale al azar en cada arranque (las cookies
+viejas dejan de valer); para uno fijo, `--token <t>` o la variable `CRISOL_UI_TOKEN` (letras, números y `._~-`;
+que sea largo). Desde `127.0.0.1` no lo pide. Es HTTP sin cifrar: igual, solo en una red de confianza. La cola y el historial quedan en `<datos_dir>/.crisol_ui/`. `python3 tests/ui.py` la prueba sin GPU (~10 s).
 
 ### Primer personaje en 10 comandos
 
@@ -481,7 +484,7 @@ crisol <texturas|tema> <n> [--solo piso,pared]   # escenarios
 crisol godot <n> [--instalar <proyecto>]
 crisol doctor [--json]                    # revisa la instalación
 crisol mcp                                # servidor MCP para agentes (Para agentes de IA > Servidor MCP)
-crisol ui [--puerto 8190] [--host 0.0.0.0] [--no-abrir]   # la UI en el navegador (Empezá acá > En el navegador)
+crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # la UI en el navegador (Empezá acá > En el navegador)
 crisol estado [<n>] [--json]              # pasos hechos, viejos y qué falta elegir (sin <n>: todos)
 crisol todo <n> [--instalar <proyecto>]   # malla -> blender -> sprites -> godot (requiere imagen elegida)
 ```

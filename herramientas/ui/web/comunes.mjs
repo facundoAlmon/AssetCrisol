@@ -41,6 +41,7 @@ export async function api(ruta, { metodo = 'GET', cuerpo, crudo } = {}) {
     headers: crudo ? { 'Content-Type': crudo.type || 'application/octet-stream' } : cuerpo ? { 'Content-Type': 'application/json' } : {},
     body: crudo || (cuerpo ? JSON.stringify(cuerpo) : undefined),
   })
+  if (r.status === 401) location.reload()   // crisol ui en la red sin la cookie del token: la página lo pide
   const texto = await r.text()
   let d
   try { d = texto ? JSON.parse(texto) : {} } catch { d = { error: texto } }
@@ -95,7 +96,11 @@ export function conectar() {
   })
   es.addEventListener('log', e => poner({ log: JSON.parse(e.data) }))
   es.addEventListener('assets', e => poner({ versionAssets: Number(e.data) }))
-  es.onerror = () => poner({ conectado: false })
+  es.onerror = () => {
+    poner({ conectado: false })
+    // un 401 cierra el EventSource para siempre (p. ej. la UI se reabrió con otro token): recargar pide el token
+    if (es.readyState === EventSource.CLOSED) fetch('/api/cola').then(r => { if (r.status === 401) location.reload() }, () => {})
+  }
   // el tiempo transcurrido y la barra avanzan aunque la cola no cambie
   setInterval(() => { if (estado.cola.trabajos.some(x => x.estado === 'corriendo')) avisar() }, 1000)
 }

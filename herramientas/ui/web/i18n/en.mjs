@@ -322,4 +322,11 @@ export default {
   'comun.segundos': '{n} s',
   'comun.minutos': '{n} min',
   'comun.minutos_seg': '{m} min {s} s',
+
+  'acceso.titulo': 'Sign in to crisol ui',
+  'acceso.explicacion': 'crisol ui is open on the local network and asks for the token shown in the terminal when it started (or the whole URL with ?token=...).',
+  'acceso.token': 'Token',
+  'acceso.entrar': 'Sign in',
+  'acceso.incorrecto': 'Wrong token.',
+  'acceso.listo': 'Done. Opening crisol ui…',
 }
