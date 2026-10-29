@@ -97,7 +97,7 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
       `<datos_dir>/movimientos/`).
 
 Errores vistos probando la UI (2026-10-28):
-- [ ] Al cancelar un trabajo que usaba ComfyUI no se liberó la cola (de ComfyUI).
+- [x] Al cancelar un trabajo que usaba ComfyUI no se liberó la cola (de ComfyUI).
 - [x] Objeto: cambiar la malla elegida y rehacer `sprites` no usa la malla nueva.
 - [x] El log del paso en curso no muestra nada hasta que termina (visto en `imagen`).
 - [x] La hoja de candidatos de malla dice siempre "trellis (elegida)", aunque la elegida sea otra.

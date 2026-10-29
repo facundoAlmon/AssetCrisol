@@ -4,7 +4,9 @@
 #  - la cola de ComfyUI con trabajos (corriendo o pendientes), o
 #  - un proceso CUDA que no sea el servidor de ComfyUI, Blender ni Godot (TRELLIS.2, otro programa...).
 # ComfyUI con la cola vacía no cuenta aunque tenga modelos cargados: `malla` los descarga con POST /free.
-import fcntl, json, os, subprocess, sys, tempfile, time, urllib.request
+# Al cortar el paso (SIGTERM de `crisol ui` al cancelar, o Ctrl+C) se vacía la cola de ComfyUI: lo que tiene es de
+# este paso (estaba vacía al reservar y los demás esperan), y sin eso seguía generando con el paso ya muerto.
+import fcntl, json, os, signal, subprocess, sys, tempfile, time, urllib.request
 from salida import GPU_OCUPADA, salir
 CANDADO = os.path.join(tempfile.gettempdir(), 'assetcrisol_gpu.lock')
 NO_CUENTAN = ('blender', 'godot')
@@ -84,6 +86,41 @@ def _tomar_candado():
     return True
 
 
+def _post(cfg, ruta, cuerpo):
+    req = urllib.request.Request(cfg['comfyui_url'] + ruta, method='POST', headers={'Content-Type': 'application/json'},
+                                 data=json.dumps(cuerpo).encode())
+    urllib.request.urlopen(req, timeout=3).close()
+
+
+def vaciar_comfyui(cfg):
+    """Saca los pendientes de la cola de ComfyUI e interrumpe el que corre. Devuelve cuántos había."""
+    try:
+        with urllib.request.urlopen(cfg['comfyui_url'] + '/queue', timeout=3) as r:
+            q = json.load(r)
+        pendientes = [x[1] for x in q.get('queue_pending', [])]
+        if pendientes:
+            _post(cfg, '/queue', {'delete': pendientes})
+        if q.get('queue_running'):
+            _post(cfg, '/interrupt', {})
+        return len(pendientes) + len(q.get('queue_running', []))
+    except Exception:   # ComfyUI apagado: no hay nada que vaciar
+        return 0
+
+
+def _al_cortar(cfg):
+    """SIGTERM y SIGINT: vaciar la cola de ComfyUI y salir como antes (SystemExit / KeyboardInterrupt)."""
+    def cortar(sig, _frame):
+        signal.signal(sig, signal.SIG_DFL)   # una segunda señal corta sin esperar
+        n = vaciar_comfyui(cfg)
+        if n:
+            print(f'[gpu] cortado: saqué {n} trabajo(s) de la cola de ComfyUI', file=sys.stderr, flush=True)
+        if sig == signal.SIGINT:
+            raise KeyboardInterrupt
+        sys.exit(128 + sig)
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(sig, cortar)
+
+
 def _quien_tiene_candado():
     try:
         with open(CANDADO) as f:
@@ -103,6 +140,7 @@ def reservar(cfg, paso, esperar=True, cada=15):
         if not motivo:
             if anterior:
                 print(f'[gpu] libre tras {time.time() - desde:.0f} s', flush=True)
+            _al_cortar(cfg)
             return
         if not esperar:
             salir(GPU_OCUPADA, f'[{paso}] GPU ocupada: {motivo}')

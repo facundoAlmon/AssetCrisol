@@ -56,6 +56,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   copiado hasta volver a correr `malla` (que copia, no regenera), y `crisol estado` lo daba por hecho. Ahora marca
   `malla` como vieja si `trabajo/malla` no es la elegida (lo anota `trabajo/malla/candidato.txt`), y la copia lleva
   la fecha de ahora, así `blender` y lo que sigue quedan viejos.
+- Cancelar un paso en `crisol ui` (o Ctrl+C en la terminal) dejaba su trabajo en la cola de ComfyUI, generando con
+  el paso ya muerto y trabando al siguiente. Ahora, al cortar, el paso que reservó la GPU saca sus pendientes de la
+  cola de ComfyUI e interrumpe el que corre (`gpu.vaciar_comfyui`).
 - `crisol ui`, Ajustes: al escribir las seeds, Guardar seguía en gris hasta salir del campo.
 - `crisol ui`: al reabrirla con un paso que siguió corriendo, quedaba "interrumpido" y el siguiente de la cola
   arrancaba encima; ahora lo espera. En el celular, deslizar en vertical sobre el visor 3D baja la página (girar es
