@@ -375,6 +375,16 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .visor3d .estado3d .colada { width: 180px; }
 .visor3d .estado3d.error { color: var(--error); display: flex; align-items: center; justify-content: center; }
 .visor3d .estado3d.error svg { width: 18px; height: 18px; flex: none; }
+.visor3d-marco { display: grid; gap: 10px; min-width: 0; }
+.visor3d-marco.completa { position: fixed; inset: 0; z-index: 70; background: var(--fondo); padding: 12px; }
+.visor3d-marco:fullscreen { background: var(--fondo); padding: 12px; }
+.visor3d-marco.completa, .visor3d-marco:fullscreen { display: flex; flex-direction: column; }
+.visor3d-marco.completa .visor3d, .visor3d-marco:fullscreen .visor3d { flex: 1; height: auto !important; min-height: 0; }
+.visor3d-marco.completa .lienzo3d, .visor3d-marco:fullscreen .lienzo3d { touch-action: none; }
+.controles-3d { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.controles-3d select { width: auto; min-width: 140px; }
+.barra-cuadro { flex: 1 1 220px; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.barra-cuadro input { flex: 1; min-width: 0; accent-color: var(--brasa); height: 28px; }
 .visor3d .titulo3d { position: absolute; top: 12px; left: 12px; padding: 2px 8px; border-radius: 6px; background: var(--superficie-2); }
 .visor3d .ayuda3d { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--texto-3); pointer-events: none; }
 @media (max-width: 860px) {

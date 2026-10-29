@@ -376,8 +376,10 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   one (procedural or Kimodo), and the sprite size (on-screen height, iso tile and the quality of each sheet, with the
   resulting size in view). The full json stays as an advanced mode (with the changes shown before saving).
 - **Animated 3D** (Result, characters): the character with its rig, orbiting with the mouse or a finger, in the
-  chosen animation and at the sheets' pace (the sprite frames at their fps, interpolated). It comes from the Rig and
-  animations step (`trabajo/animado.glb`).
+  chosen animation and at the sheets' pace (the sprite frames at their fps, interpolated), with a bar to go to a
+  frame. It comes from the Rig and animations step (`trabajo/animado.glb`). In every 3D viewer: two fingers (or
+  right-click) move the camera, double-tap or double-click focuses the touched point (the face, a foot) and there is
+  full screen.
 - **Joint editor** (Result > Guide > Edit joints): the skeleton points over the front and side renders, to drag
   them (or move them with the arrow keys). In the front view one side is copied to the other and the knee pole follows
   the knee. Saving writes `modelo.articulaciones` (the previous ones stay in `_articulaciones_previas`: **Undo** on
