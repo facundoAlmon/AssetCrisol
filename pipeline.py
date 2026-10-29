@@ -412,7 +412,7 @@ def paso_malla(nombre):
         print(f'[malla] candidatos listos; trabajo/malla = {elegida}. Correr `blender` para compararlos')
     else:
         print(f'[malla] candidatos listos; trabajo/malla = {elegida}')
-        comparar_candidatos(pdir, lista)
+        comparar_candidatos(pdir, lista, pj['malla'].get('elegida'))
 
 
 VISTAS_COMPARAR = ('s', 'se', 'e', 'n', 'w')   # frente, tres cuartos, los dos costados y espalda, cámara iso (30°)
@@ -423,13 +423,15 @@ def paso_comparar(nombre):
     lista = candidatos_malla(pj)
     if not lista or pj.get('vehiculo'):
         sys.exit('comparar: es para personajes y objetos con malla.candidatos (los vehículos comparan en `blender`)')
-    comparar_candidatos(pdir, lista)
+    comparar_candidatos(pdir, lista, pj['malla'].get('elegida'))
 
 
-def comparar_candidatos(pdir, lista):
-    """trabajo/candidatos.png: una fila por candidato de malla (el elegido, último, marcado) con la malla tal como la
-    importa `blender` (soldada, sin interior, ojos) vista con la cámara iso desde VISTAS_COMPARAR. Elegir con
-    malla.elegida y correr `malla` de nuevo (no regenera: copia el elegido a trabajo/malla)."""
+def comparar_candidatos(pdir, lista, elegida=None):
+    """trabajo/candidatos.png: una fila por candidato de malla (el elegido último, marcado solo si `elegida`, la
+    malla.elegida del json, lo nombra: sin elegir no se marca ninguno) con la malla tal como la importa `blender`
+    (soldada, sin interior, ojos) vista con la cámara iso desde VISTAS_COMPARAR. Cada vista también
+    queda sola en trabajo/comparar/<candidato>/<vista>.png (con alfa, misma escala en todos: las tarjetas de `crisol
+    ui`). Elegir con malla.elegida y correr `malla` de nuevo (no regenera: copia el elegido a trabajo/malla)."""
     from PIL import Image, ImageDraw
     t = os.path.join(pdir, 'trabajo')
     lista = [(n, pjc) for n, pjc in lista if os.path.exists(os.path.join(t, f'malla_{n}', 'modelo.glb'))]
@@ -446,10 +448,13 @@ def comparar_candidatos(pdir, lista):
     ancho = round((caja[2] - caja[0]) * alto / (caja[3] - caja[1]))
     hoja = Image.new('RGB', (ancho * len(VISTAS_COMPARAR), alto * len(filas)), (120, 120, 120))
     for j, (n, ims) in enumerate(filas):
-        for i, im in enumerate(ims):
+        dc = os.path.join(t, 'comparar', n)
+        os.makedirs(dc, exist_ok=True)
+        for i, (v, im) in enumerate(zip(VISTAS_COMPARAR, ims)):
             im = im.crop(caja).resize((ancho, alto), Image.LANCZOS)
             hoja.paste(im, (i * ancho, j * alto), im)
-        ImageDraw.Draw(hoja).text((8, j * alto + 6), n + ('  (elegida)' if j == len(filas) - 1 else ''), fill='white')
+            im.save(os.path.join(dc, f'{v}.png'))
+        ImageDraw.Draw(hoja).text((8, j * alto + 6), n + ('  (elegida)' if n == elegida else ''), fill='white')
     hoja.save(os.path.join(t, 'candidatos.png'))
     print(f'[comparar] mirar {os.path.join(t, "candidatos.png")} y elegir con malla.elegida')
 
@@ -601,6 +606,13 @@ def paso_articulaciones(nombre):
 
 
 VISTAS_VEHICULO = ('juego', 'tres_cuartos', 'costado', 'arriba')
+VISTAS_VEHICULO_CENTRO = ('juego', 'tres_cuartos')   # el auto ocupa el centro: recortar para verlo grande
+
+
+def recorte_centro(im):
+    """La mitad central de una vista de vehículo (VISTAS_VEHICULO_CENTRO), para verlo grande en hojas y tarjetas."""
+    W, H = im.size
+    return im.crop((W // 4, H // 5, W * 3 // 4, H * 4 // 5))
 
 
 def paso_blender(nombre):
@@ -632,7 +644,7 @@ def blender_vehiculo(pdir, pj):
         shutil.copy(os.path.join(t, 'tarjeta.png'), os.path.join(t, f'tarjeta_{n}.png'))
         for v in VISTAS_VEHICULO:
             shutil.copy(os.path.join(t, f'revision_{v}.png'), os.path.join(t, f'revision_{n}_{v}.png'))
-    hoja_vehiculo(t, [n for n, _ in lista], elegida=lista[-1][0])
+    hoja_vehiculo(t, [n for n, _ in lista], elegida=pj['malla'].get('elegida'))
 
 
 def recortar_tarjeta(t, ancho=512):
@@ -661,9 +673,8 @@ def hoja_vehiculo(t, candidatos, elegida=None):
         for j, n in enumerate(candidatos):
             for i, v in enumerate(VISTAS_VEHICULO):
                 im = Image.open(os.path.join(t, f'revision_{n}_{v}.png')).convert('RGB')
-                if v in ('juego', 'tres_cuartos'):   # el auto ocupa el centro: recortar para verlo grande
-                    W, H = im.size
-                    im = im.crop((W // 4, H // 5, W * 3 // 4, H * 4 // 5))
+                if v in VISTAS_VEHICULO_CENTRO:
+                    im = recorte_centro(im)
                 hoja.paste(im.resize((w, h)), (i * w, j * h))
             ImageDraw.Draw(hoja).text((8, j * h + 8), n + ('  (elegida)' if n == elegida else ''), fill='black')
     hoja.save(os.path.join(t, 'revision.png'))

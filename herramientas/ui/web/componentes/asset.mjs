@@ -51,7 +51,7 @@ function Cadena({ d, cola, doctor, cambiar }) {
   const { corriendo, pendientes } = trabajosDe(cola, d.nombre)
   const siguiente = d.siguiente?.split(' ')[1]
   const extra = (EXTRA[d.tipo] || []).filter(p => !(p === 'ultratex' && !d.json?.malla?.ultratex))
-  if (d.json?.malla?.candidatos) extra.push('comparar')
+  if (d.json?.malla?.candidatos && !d.json.vehiculo) extra.push('comparar')   // los vehículos comparan en `blender`
   return html`<section class="panel">
     <header><h2>${t('asset.cadena')}</h2></header>
     <ol class="cadena">
@@ -81,11 +81,9 @@ function Cadena({ d, cola, doctor, cambiar }) {
 }
 
 // ---------- decidir ----------
-function Decision({ d, dec, recargar, listo }) {
+// guarda la elección (solo con el clic de la persona) y avisa
+function useElegir(d, dec, recargar, listo) {
   const [guardando, setGuardando] = useState(null)
-  const textura = dec.clave.startsWith('texturas.') ? dec.clave.split('.')[1] : null
-  const [mosaico, setMosaico] = useState(false)
-  const titulo = textura ? t('decidir.textura', { k: textura }) : t('decidir.' + dec.clave)
   const elegir = async valor => {
     setGuardando(valor)
     try {
@@ -96,13 +94,15 @@ function Decision({ d, dec, recargar, listo }) {
     } catch (e) { aviso(e.message, 'error') }
     setGuardando(null)
   }
+  return { guardando, elegir }
+}
+
+function Decision({ d, dec, recargar, listo }) {
+  const { guardando, elegir } = useElegir(d, dec, recargar, listo)
+  const textura = dec.clave.startsWith('texturas.') ? dec.clave.split('.')[1] : null
+  const [mosaico, setMosaico] = useState(false)
+  const titulo = textura ? t('decidir.textura', { k: textura }) : t('decidir.' + dec.clave)
   const conImagen = dec.opciones.filter(o => o.imagen)
-  // mallas: los candidatos en 3D, uno al lado del otro (los que la persona abre; ninguno de entrada)
-  const con3d = dec.opciones.filter(o => o.glb)
-  const [en3d, setEn3d] = useState([])
-  const alternar3d = v => setEn3d(en3d.includes(v) ? en3d.filter(x => x !== v) : [...en3d, v].slice(-3))
-  const boton3d = o => o.glb && html`<button class="boton chico" aria-pressed=${en3d.includes(o.valor)}
-    onClick=${() => alternar3d(o.valor)}><${Icono} n="cubo" />${t(en3d.includes(o.valor) ? 'decidir.ocultar_3d' : 'decidir.ver_3d')}</button>`
   const esActual = o => dec.actual != null && String(dec.actual) === String(o.valor)
   return html`<div style="display:grid;gap:12px">
     <header style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
@@ -110,9 +110,6 @@ function Decision({ d, dec, recargar, listo }) {
       ${dec.nota && html`<span class="tenue chico">${dec.nota}</span>`}
       ${textura && conImagen.length > 0 && html`<label class="casilla chico" style="margin-left:auto">
         <input type="checkbox" checked=${mosaico} onChange=${e => setMosaico(e.target.checked)} />${t('decidir.mosaico')}</label>`}
-      ${con3d.length > 1 && html`<button class="boton chico" style="margin-left:auto"
-        onClick=${() => setEn3d(en3d.length ? [] : con3d.slice(0, 3).map(o => o.valor))}><${Icono} n="cubo" />
-        ${t(en3d.length ? 'decidir.cerrar_3d' : 'decidir.comparar_3d')}</button>`}
     </header>
     ${conImagen.length > 0
       ? html`<div class="opciones">${dec.opciones.map(o => html`<article class="opcion" key=${o.valor}>
@@ -122,25 +119,85 @@ function Decision({ d, dec, recargar, listo }) {
             ${!mosaico && o.imagen && html`<img src=${urlMini(d.nombre, o.imagen, 520)} alt="" loading="lazy" />`}
           </button>
           <footer><span class="mono">${o.valor}</span>
-            <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">${boton3d(o)}
-            ${en3d.includes(o.valor) ? '' : esActual(o)
+            ${esActual(o)
               ? html`<${Chip} clase="hecho">${t('decidir.actual')}<//>`
-              : html`<button class="boton chico primario" disabled=${guardando !== null} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}</span>
+              : html`<button class="boton chico primario" disabled=${guardando !== null} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}
           </footer></article>`)}</div>`
       : html`${dec.mirar && html`<button class="hoja-decidir damero" onClick=${() => verGrande(urlArchivo(d.nombre, dec.mirar), t('decidir.hoja'))}>
             <img src=${urlMini(d.nombre, dec.mirar, 1400)} alt=${t('decidir.hoja')} /></button>`}
-          <div class="botones-opcion">${dec.opciones.map(o => html`<span class="botones-opcion" key=${o.valor}>
-            ${en3d.includes(o.valor) ? ''   // abierto en 3D: se elige desde su visor, abajo
-              : esActual(o) ? html`<${Chip} clase="hecho">${t('decidir.actual')}: ${o.valor}<//>`
-              : html`<button class="boton primario" disabled=${guardando !== null}
-                  onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}: ${o.valor}</button>`}${boton3d(o)}</span>`)}</div>`}
-    ${en3d.length > 0 && html`<div class="comparar3d">${en3d.map(v => dec.opciones.find(o => o.valor === v)).filter(Boolean).map(o =>
-      html`<article class="opcion" key=${o.valor}>
-        <${Visor3D} url=${urlArchivo(d.nombre, o.glb, Math.round(d.modificado))} titulo=${o.valor} />
-        <footer><span class="mono">${o.valor}</span>
-          ${esActual(o) ? html`<${Chip} clase="hecho">${t('decidir.actual')}<//>`
-            : html`<button class="boton chico primario" disabled=${guardando !== null} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}
-        </footer></article>`)}</div>`}
+          <div class="botones-opcion">${dec.opciones.map(o => esActual(o)
+            ? html`<${Chip} clase="hecho" key=${o.valor}>${t('decidir.actual')}: ${o.valor}<//>`
+            : html`<button class="boton primario" key=${o.valor} disabled=${guardando !== null}
+                onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}: ${o.valor}</button>`)}</div>`}
+  </div>`
+}
+
+// los candidatos de malla: una tarjeta por candidato (el principal y los de malla.candidatos) con sus vistas (todas
+// las tarjetas en la misma vista, a elegir arriba), cómo se hace, si ya está generado y su visor 3D en la tarjeta
+const MOTOR = { trellis2: 'TRELLIS.2', pixal3d: 'Pixal3D' }
+
+function comoSeHace(o) {
+  const ut = o.ultratex != null ? t('decidir.cand_ultratex', { s: o.ultratex }) : null
+  if (o.desde) return [t('decidir.cand_desde', { d: o.desde }), ut].filter(Boolean).join(' · ')
+  return [MOTOR[o.motor] || o.motor, o.seed != null && t('decidir.cand_seed', { s: o.seed }), o.resolucion, ut].filter(Boolean).join(' · ')
+}
+
+function TarjetaMalla({ d, o, vista, actual, abierto, alternar3d, elegir, guardando }) {
+  const v = o.vistas.find(x => x.id === vista) || o.vistas[0]
+  const ver = Math.round(d.modificado)
+  return html`<article class=${'opcion tarjeta-malla' + (actual ? ' actual' : '')}>
+    ${abierto
+      ? html`<${Visor3D} url=${urlArchivo(d.nombre, o.glb, ver)} titulo=${o.valor} />`
+      : v
+        ? html`<button class="arte damero" onClick=${() => verGrande(urlArchivo(d.nombre, v.imagen, ver), `${o.valor}: ${t('vista.' + v.id)}`)}
+              aria-label=${`${t('visor.ampliar')}: ${o.valor}, ${t('vista.' + v.id)}`}>
+            <img src=${urlMini(d.nombre, v.imagen, 520, v.centro ? '&centro=1' : '', ver)} alt="" loading="lazy" />
+            ${v.vieja && html`<span class="marca-vieja"><${Chip} clase="viejo">${t('decidir.vista_vieja')}<//></span>`}
+          </button>`
+        : html`<div class="arte sin-arte"><${Icono} n="cubo" />
+            <span>${t(o.hecho ? 'decidir.sin_vistas' : 'cand.falta')}</span></div>`}
+    <footer>
+      <div class="titulo-cand"><span class="mono">${o.valor}</span>
+        ${actual && html`<${Chip} clase="hecho">${t('decidir.actual')}<//>`}</div>
+      <p class="tenue chico">${comoSeHace(o)}</p>
+      <div class="botones-opcion">
+        ${o.glb && html`<button class="boton chico" aria-pressed=${abierto} onClick=${alternar3d}>
+          <${Icono} n="cubo" />${t(abierto ? 'decidir.ocultar_3d' : 'decidir.ver_3d')}</button>`}
+        ${!actual && html`<button class="boton chico primario" style="margin-left:auto" disabled=${guardando !== null}
+          title=${o.hecho ? '' : t('decidir.elegir_sin_generar')} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}
+      </div>
+    </footer>
+  </article>`
+}
+
+function DecisionMalla({ d, dec, recargar, listo }) {
+  const { guardando, elegir } = useElegir(d, dec, recargar, listo)
+  const ops = dec.opciones
+  const vistas = [...new Set(ops.flatMap(o => o.vistas.map(v => v.id)))]
+  const [vista, setVista] = useState(null)
+  const [en3d, setEn3d] = useState([])   // los que la persona abre en 3D (hasta 3: un contexto WebGL cada uno)
+  const con3d = ops.filter(o => o.glb)
+  const alternar3d = v => setEn3d(en3d.includes(v) ? en3d.filter(x => x !== v) : [...en3d, v].slice(-3))
+  // generados sin vistas propias (de antes de que `comparar` las guardara): queda la hoja de siempre
+  const sinVistas = ops.some(o => o.hecho && !o.vistas.length)
+  const pasoVistas = d.json?.vehiculo ? 'blender' : 'comparar'
+  return html`<div style="display:grid;gap:12px">
+    <header style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+      <h3>${t('decidir.malla.elegida')}</h3>
+      ${dec.nota && html`<span class="tenue chico">${dec.nota}</span>`}
+      ${con3d.length > 1 && html`<button class="boton chico" style="margin-left:auto"
+        onClick=${() => setEn3d(en3d.length ? [] : con3d.slice(0, 3).map(o => o.valor))}><${Icono} n="cubo" />
+        ${t(en3d.length ? 'decidir.cerrar_3d' : 'decidir.comparar_3d')}</button>`}
+    </header>
+    ${vistas.length > 1 && html`<div class="segmentos desplazable" role="group" aria-label=${t('decidir.vista')}>
+      ${vistas.map(v => html`<button aria-pressed=${(vista || vistas[0]) === v} onClick=${() => setVista(v)}>${t('vista.' + v)}</button>`)}</div>`}
+    ${sinVistas && html`<div class="aviso"><${Icono} n="info" /><p style="flex:1">${t('decidir.sin_vistas_ayuda', { paso: nombrePaso(pasoVistas, d.tipo) })}</p>
+      <button class="boton chico" onClick=${() => encolar({ paso: pasoVistas, nombre: d.nombre })}><${Icono} n="correr" />${nombrePaso(pasoVistas, d.tipo)}</button></div>`}
+    ${sinVistas && dec.mirar && html`<button class="hoja-decidir damero" onClick=${() => verGrande(urlArchivo(d.nombre, dec.mirar), t('decidir.hoja'))}>
+      <img src=${urlMini(d.nombre, dec.mirar, 1400, '', Math.round(d.modificado))} alt=${t('decidir.hoja')} /></button>`}
+    <div class="opciones tarjetas-malla">${ops.map(o => html`<${TarjetaMalla} key=${o.valor} d=${d} o=${o} vista=${vista || vistas[0]}
+      actual=${dec.actual != null && String(dec.actual) === String(o.valor)} abierto=${en3d.includes(o.valor)}
+      alternar3d=${() => alternar3d(o.valor)} elegir=${elegir} guardando=${guardando} />`)}</div>
   </div>`
 }
 
@@ -152,7 +209,7 @@ function Decidir({ d, recargar, cambiando, setCambiando }) {
     <header><h2>${t('decidir.titulo')}</h2>
       ${cambiando && html`<button class="boton chico fantasma" style="margin-left:auto" onClick=${() => setCambiando(null)}>${t('decidir.no_cambiar')}</button>`}
       <p class="tenue chico" style="flex-basis:100%">${t('decidir.ayuda')}</p></header>
-    <div style="display:grid;gap:26px">${lista.map(dec => html`<${Decision} key=${dec.clave} d=${d} dec=${dec} recargar=${recargar}
+    <div style="display:grid;gap:26px">${lista.map(dec => html`<${dec.clave === 'malla.elegida' ? DecisionMalla : Decision} key=${dec.clave} d=${d} dec=${dec} recargar=${recargar}
       listo=${() => setCambiando(null)} />`)}</div>
   </section>`
 }

@@ -177,23 +177,56 @@ def iso_meta(pdir, nombre):
     return m
 
 
+# vistas de cada candidato de malla para su tarjeta: (id, archivo relativo a trabajo/ con {c} = el candidato). Las de
+# personajes y objetos las deja `comparar` (pipeline.VISTAS_COMPARAR, misma escala en todos); las de vehículos, `blender`
+VISTAS_MALLA = [(v, f'comparar/{{c}}/{v}.png') for v in pipeline.VISTAS_COMPARAR]
+VISTAS_VEHICULO = [('tarjeta', 'tarjeta_{c}.png')] + [(v, f'revision_{{c}}_{v}.png') for v in pipeline.VISTAS_VEHICULO]
+
+
+def datos_candidato(pj, nombre):
+    """Cómo se hace un candidato de malla (lo que no pisa lo hereda del principal, como pipeline.candidatos_malla):
+    {motor, seed, resolucion, desde, ultratex (su seed, o None)}."""
+    m = pj.get('malla') or {}
+    base = {k: v for k, v in m.items() if k not in ('candidatos', 'elegida')}
+    c = dict(base, **((m.get('candidatos') or {}).get(nombre) or {})) if nombre != m.get('motor', 'trellis2') else base
+    ut = c.get('ultratex')
+    return {'motor': c.get('motor', 'trellis2'), 'seed': c.get('seed'), 'resolucion': c.get('resolucion'),
+            'desde': c.get('desde'), 'ultratex': ((ut.get('seed', 1) if isinstance(ut, dict) else 1) if ut else None)}
+
+
+def opcion_malla(pdir, pj, o):
+    """Un candidato de malla para su tarjeta: si ya está generado, sus vistas (las que existen; `vieja` si son de antes
+    que la malla), su .glb para el visor 3D (el vehículo armado si ya está, si no la malla) y cómo se hace."""
+    t = os.path.join(pdir, 'trabajo')
+    glb = existe(t, f'malla_{o}', 'modelo.glb')
+    fecha = os.path.getmtime(os.path.join(t, glb)) if glb else None
+    vistas = []
+    for v, ruta in VISTAS_VEHICULO if pj.get('vehiculo') else VISTAS_MALLA:
+        r = existe(t, ruta.format(c=o))
+        if r and glb:
+            vistas.append({'id': v, 'imagen': f'trabajo/{r}', 'vieja': os.path.getmtime(os.path.join(t, r)) < fecha,
+                           'centro': bool(pj.get('vehiculo')) and v in pipeline.VISTAS_VEHICULO_CENTRO})
+    armado = pj.get('vehiculo') and existe(t, f'vehiculo_{o}.glb')
+    return {'valor': o, 'imagen': vistas[0]['imagen'] if vistas else None, 'vistas': vistas, 'hecho': bool(glb),
+            'glb': f'trabajo/{armado or glb}' if glb else None, **datos_candidato(pj, o)}
+
+
 def opciones_decidir(pdir, pj, d):
-    """Cada opción de una decisión con su imagen propia (o None si solo está la hoja) y, en las mallas, su .glb para
-    el visor 3D (el vehículo armado de ese candidato si ya está, si no la malla)."""
+    """Cada opción de una decisión con su imagen propia (o None si solo está la hoja); los candidatos de malla con lo
+    de opcion_malla."""
     t = os.path.join(pdir, 'trabajo')
     clave, ops = d['clave'], []
     for o in d['opciones']:
-        img = glb = None
+        img = None
+        if clave == 'malla.elegida':
+            ops.append(opcion_malla(pdir, pj, o))
+            continue
         if clave == 'imagen.elegida':
             img = existe(t, 'imagen', f'cand_{o}.png') and f'trabajo/imagen/cand_{o}.png'
-        elif clave == 'malla.elegida':
-            img = existe(t, f'tarjeta_{o}.png') and f'trabajo/tarjeta_{o}.png'
-            glb = (existe(t, f'vehiculo_{o}.glb') and f'trabajo/vehiculo_{o}.glb') or \
-                (existe(t, f'malla_{o}', 'modelo.glb') and f'trabajo/malla_{o}/modelo.glb')
         elif clave.startswith('texturas.'):
             k = clave.split('.')[1]
             img = existe(t, 'texturas', k, f'cand_{o}.png') and f'trabajo/texturas/{k}/cand_{o}.png'
-        ops.append({'valor': o, 'imagen': img, 'glb': glb})
+        ops.append({'valor': o, 'imagen': img})
     return ops
 
 
@@ -637,8 +670,8 @@ class Manejador(BaseHTTPRequestHandler):
         if not os.path.isfile(ruta) or not ruta.lower().endswith(IMAGENES):
             return self.error(404, 'no existe')
         lado = max(32, min(int(q.get('lado', 320)), 1600))
-        fila, filas = q.get('fila'), q.get('filas')
-        clave = (ruta, os.path.getmtime(ruta), lado, fila, filas)
+        fila, filas, centro = q.get('fila'), q.get('filas'), q.get('centro')
+        clave = (ruta, os.path.getmtime(ruta), lado, fila, filas, centro)
         datos = self._minis.get(clave)
         if datos is None:
             from PIL import Image
@@ -648,6 +681,8 @@ class Manejador(BaseHTTPRequestHandler):
             if fila is not None and filas:    # una fila de una hoja (los candidatos de malla, uno por fila)
                 h = im.height / int(filas)
                 im = im.crop((0, round(int(fila) * h), im.width, round((int(fila) + 1) * h)))
+            if centro:    # vistas de vehículo con el auto chico en el medio (la imagen ampliada queda entera)
+                im = pipeline.recorte_centro(im)
             im.thumbnail((lado, lado))
             b = io.BytesIO()
             im.save(b, 'PNG')
@@ -765,6 +800,7 @@ class Manejador(BaseHTTPRequestHandler):
             if os.path.isdir(d):
                 shutil.rmtree(d)
                 borrados.append(c)
+            shutil.rmtree(os.path.join(base, 'comparar', c), ignore_errors=True)   # sus vistas para la tarjeta
         self.app.cambio()
         return self.json({'borrados': borrados})
 

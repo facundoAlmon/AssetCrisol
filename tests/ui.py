@@ -273,6 +273,25 @@ def main():
             open(os.path.join(trabajo_caja, f'malla_{n}', 'modelo.glb'), 'wb').close()
         c, d = pedir(base, 'api/assets/caja')
         chequear(c == 200 and set(d.get('mallas_hechas', {})) == {'pixal3d', 'ultratex'}, 'candidatos ya generados en el detalle')
+        # las vistas que deja `comparar` por candidato (trabajo/comparar/<c>/<vista>.png) van a su tarjeta
+        ref_png = os.path.join(RAIZ, 'ejemplos', 'objetos', 'caja', 'trabajo', 'malla', 'sin_fondo.png')
+        os.makedirs(os.path.join(trabajo_caja, 'comparar', 'pixal3d'), exist_ok=True)
+        for v in ('s', 'se'):
+            shutil.copy(ref_png, os.path.join(trabajo_caja, 'comparar', 'pixal3d', f'{v}.png'))
+        os.makedirs(os.path.join(trabajo_caja, 'comparar', 'trellis2'), exist_ok=True)   # sin malla: no cuenta
+        shutil.copy(ref_png, os.path.join(trabajo_caja, 'comparar', 'trellis2', 's.png'))
+        c, d = pedir(base, 'api/assets/caja')
+        ops = {o['valor']: o for e in d.get('elecciones', []) if e['clave'] == 'malla.elegida' for o in e['opciones']}
+        p3 = ops.get('pixal3d', {})
+        chequear([v['id'] for v in p3.get('vistas', [])] == ['s', 'se'] and p3.get('imagen') == 'trabajo/comparar/pixal3d/s.png'
+                 and p3.get('hecho') and p3.get('glb') == 'trabajo/malla_pixal3d/modelo.glb' and p3.get('motor') == 'pixal3d'
+                 and p3.get('seed') == 1, 'tarjeta de un candidato con sus vistas', json.dumps(p3))
+        chequear(ops.get('trellis2', {}).get('vistas') == [] and not ops['trellis2']['hecho'] and ops['trellis2']['glb'] is None,
+                 'candidato sin generar: tarjeta sin imagen', json.dumps(ops.get('trellis2')))
+        chequear(ops.get('ultratex', {}).get('desde') == 'trellis2' and ops['ultratex'].get('ultratex') == 2,
+                 'cómo se hace un repintado', json.dumps(ops.get('ultratex')))
+        c, b = pedir(base, 'mini/caja/' + p3.get('imagen', 'x') + '?lado=100', crudo=True)
+        chequear(c == 200 and b[:4] == b'\x89PNG', 'miniatura de la vista de un candidato')
         for malo in ('..', '..%2F..%2Fimagen', 'no_existe', 'Pixal3D'):
             c, _ = pedir(base, f'api/assets/caja/malla/{malo}/rehacer', 'POST', {})
             chequear(c in (400, 404), f'rehacer candidato {malo}: rechazado', str(c))
@@ -284,8 +303,8 @@ def main():
         c, d = pedir(base, 'api/assets/caja/malla/pixal3d/rehacer', 'POST', {}, origen=False)
         chequear(c == 403, 'rehacer sin Origin: 403')
         c, d = pedir(base, 'api/assets/caja/malla/pixal3d/rehacer', 'POST', {})
-        chequear(c == 200 and d['borrados'] == ['pixal3d'] and not os.path.exists(os.path.join(trabajo_caja, 'malla_pixal3d')),
-                 'rehacer un candidato generado')
+        chequear(c == 200 and d['borrados'] == ['pixal3d'] and not os.path.exists(os.path.join(trabajo_caja, 'malla_pixal3d'))
+                 and not os.path.exists(os.path.join(trabajo_caja, 'comparar', 'pixal3d')), 'rehacer un candidato generado (y sus vistas)')
 
         print('crear')
         c, _ = pedir(base, 'api/subidas', 'POST', b'no es una imagen', tipo='image/png')
