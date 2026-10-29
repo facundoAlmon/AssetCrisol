@@ -484,6 +484,7 @@ crisol comparar <n>                    # rehace trabajo/candidatos.png de malla.
 crisol rehacer <n1,n2,...|todos>       # blender..revisar en lote
 crisol metodo <n> [anim=kimodo|procedural ...]
 crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
+crisol clip [<anim> --candidato <anim>_s<seed>_<i> [--desde s] [--hasta s] [--recomendado si|no] [--quitar]]
 crisol <texturas|tema> <n> [--solo piso,pared]   # escenarios
 crisol godot <n> [--instalar <proyecto>]
 crisol doctor [--json]                    # revisa la instalación
@@ -834,8 +835,9 @@ caminata.
   natural en movimientos de cuerpo entero; no tiene puños (mano abierta) ni exageración de dibujo animado. Se toman
   los mismos cuadros que la procedural (no corre índices de la hoja).
 
-El método por defecto de cada animación es el **recomendado** en `herramientas/3_blender/movimientos/biblioteca.json`.
-Hoy `caminar` y `morir` son de Kimodo (paso largo, pies que apoyan bien; caída creíble) y el resto procedural (el
+El método por defecto de cada animación es el **recomendado** en la biblioteca de movimientos: la del repo
+(`herramientas/3_blender/movimientos/biblioteca.json`) con la propia encima (`<datos_dir>/movimientos/biblioteca.json`,
+la que escribe `crisol clip`). En el repo, `caminar` y `morir` son de Kimodo (paso largo, pies que apoyan bien; caída creíble) y el resto procedural (el
 directo de boxeo de Kimodo dura ~2 cuadros y casi no se ve).
 
 ```bash
@@ -851,11 +853,26 @@ crisol blender bandido && crisol sprites bandido   # + iso y anclas
 crisol movimiento correr --prompt "A person runs forward at a steady jogging pace." --duracion 3
 #   -> <datos_dir>/movimientos/candidatos/correr_s1_{0,1,2}.npz + correr_s1.png (esqueletos de costado, una fila
 #      por muestra; rojo = izquierda). Otra --seed da otras 3.
-#   elegir: copiar el .npz a herramientas/3_blender/movimientos/correr.npz y agregarlo a biblioteca.json
-#           (con desde/hasta si sobra el principio o el final)
+crisol clip                                              # la biblioteca (de dónde sale cada clip) y los candidatos
+crisol clip correr --candidato correr_s1_2 --desde 0.4   # la muestra 2 pasa a ser el clip de correr
+crisol clip correr --recomendado si                      # método por defecto de correr (si no, solo con `metodo`)
+crisol clip golpe --hasta 1.1                            # cambia la ventana de uno del repo (desde/hasta "" la borra)
+crisol clip correr --quitar                              # vuelve el del repo (si hay)
 ```
-Prompts en inglés y concretos. Animaciones con clip posible: las de `kimodo_clip.CUADROS` (todas menos `idle`,
-`saltar`, `agacharse` y `defender`).
+`clip` copia el `.npz` a `<datos_dir>/movimientos/<anim>.npz` y lo anota en `<datos_dir>/movimientos/biblioteca.json`
+(clip, recomendado, desde/hasta, prompt, seed, muestra): no toca la del repo. Una entrada propia con clip reemplaza a la
+del repo; una sin clip (solo `--recomendado`, `--desde`, `--hasta`) cambia esos campos de la del repo. `desde`/`hasta`
+son segundos del clip (sin `desde`, en un ciclo, de un apoyo del pie izquierdo al siguiente). Al pasar un clip sin
+`--recomendado` queda lo que tenía esa animación. Después, rehacer `blender`, `sprites`, `iso` y `anclas` de los
+personajes que lo usen. Para que un clip propio venga con AssetCrisol, copiar el `.npz` y la entrada a
+`herramientas/3_blender/movimientos/`.
+
+En `crisol ui`, **Movimientos** hace todo esto sin terminal: generar (por la cola), mirar la fila de esqueletos de cada
+muestra, pasarla a la biblioteca con su ventana, elegir si es el método por defecto, quitarla y usarla en un personaje
+(lo mismo que Ajustes > Animaciones del personaje).
+
+Prompts en inglés y concretos. Animaciones con clip posible: las de `metodos.CUADROS` (todas menos `idle`, `saltar`,
+`agacharse` y `defender`).
 
 </details>
 

@@ -29,6 +29,10 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
                                     personaje.json > animacion.metodos); después rehacer blender/iso/anclas
   movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]  clips candidatos con Kimodo
                                     (CPU, ~2,5 min) -> <datos_dir>/movimientos/candidatos/
+  clip     [<anim> --candidato <anim>_s<seed>_<i> [--desde s] [--hasta s] [--recomendado si|no] [--quitar]]
+                                    biblioteca de movimientos (sin <anim>: la lista y los candidatos): pasa un
+                                    candidato a <datos_dir>/movimientos/ (biblioteca.json + <anim>.npz), cambia su
+                                    ventana o si es el método por defecto; --quitar vuelve al del repo
   rehacer  <n1,n2,...|todos>        blender -> sprites -> iso -> anclas -> revisar de cada uno (para pasarles un
                                     cambio del rig o las animaciones); todos = personajes con malla (sin tmp_*);
                                     sigue si uno falla y al final lista los que fallaron
@@ -79,6 +83,7 @@ if __name__ in ('__main__', 'pipeline') and sys.argv[1:2] == ['ui']:   # UI web 
     os.execv(sys.executable, [sys.executable, os.path.join(H, 'ui', 'servidor.py'), *sys.argv[2:]])
 # dónde viven personajes/, objetos/, escenarios/ y movimientos/candidatos/ (relativo a la config)
 DATOS = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(CONFIG)), CFG.get('datos_dir') or RAIZ))
+os.environ['CRISOL_MOVIMIENTOS'] = os.path.join(DATOS, 'movimientos')   # biblioteca propia (metodos.py; Blender la hereda)
 
 
 def _fusionar(base, encima):
@@ -732,7 +737,8 @@ def paso_metodo(nombre, cambios):
         pj['animacion'] = crudo['animacion']
     for anim_ in armar_iso.NOMBRES:
         m, rec = metodos.metodo(anim_, pj['animacion'], bib), metodos.recomendado(anim_, bib)
-        nota = bib.get(anim_, {}).get('_nota', '')
+        c = bib.get(anim_) or {}
+        nota = c and (c.get('_nota') or c.get('prompt') or c['clip'])   # la UI mira el "kimodo:" para ofrecerlo
         print(f'  {anim_:14s} {m:10s}' + ('' if m == rec else f' (recomendado: {rec})') +
               (f'  kimodo: {nota}' if nota else ''))
     if cambios:
@@ -741,7 +747,7 @@ def paso_metodo(nombre, cambios):
 
 def paso_movimiento(anim_, prompt, duracion, seed, muestras):
     """Clips candidatos con Kimodo (en la CPU: no compite con la GPU). Elegir una muestra mirando la hoja de
-    esqueletos, copiarla a movimientos/<anim>.npz y cargarla en movimientos/biblioteca.json."""
+    esqueletos y pasarla a la biblioteca con `crisol clip <anim> --candidato <anim>_s<seed>_<i>`."""
     import armar_iso
     if anim_ not in armar_iso.NOMBRES:
         sys.exit(f'[movimiento] {anim_}: no es una animación ({", ".join(armar_iso.NOMBRES)})')
@@ -754,6 +760,118 @@ def paso_movimiento(anim_, prompt, duracion, seed, muestras):
     subprocess.run([os.path.join(kd, 'venv', 'bin', 'python'), os.path.join(H, '3_blender', 'generar_movimiento.py'),
                     anim_, prompt, '--duracion', str(duracion), '--seed', str(seed), '--muestras', str(muestras)],
                    env=env, check=True)
+    print(f'[movimiento] para usar una muestra: crisol clip {anim_} --candidato {anim_}_s{seed}_<i> '
+          '[--desde s --hasta s] [--recomendado si]')
+
+
+def _segundos(v, opcion):
+    """--desde/--hasta: None (no cambiar), '' (borrar) o segundos."""
+    if v is None or v == '':
+        return v
+    try:
+        x = float(v.replace(',', '.'))
+    except ValueError:
+        x = -1
+    if x < 0:
+        sys.exit(f'[clip] --{opcion} {v!r}: segundos desde el inicio del clip (o "" para borrarlo)')
+    return x
+
+
+def paso_clip(anim_, candidato, desde, hasta, recomendado, quitar):
+    """La biblioteca de movimientos propia (<datos_dir>/movimientos, metodos.py): pasar un candidato de `crisol
+    movimiento` (copia el .npz como <anim>.npz y lo anota en biblioteca.json), cambiar la ventana (desde/hasta) o si
+    es el método por defecto (recomendado) de un clip, o quitarlo (vuelve el del repo, si hay). Sin <anim>, lista."""
+    import metodos
+    propia = os.path.join(DATOS, 'movimientos')
+    cand_dir = os.path.join(propia, 'candidatos')
+    if not anim_:
+        bib = metodos.biblioteca()
+        for a_ in metodos.CUADROS:
+            c = bib.get(a_)
+            if not c:
+                print(f'  {a_:14s} (sin clip)')
+                continue
+            v = f"  {c.get('desde', 'inicio')}-{c.get('hasta', 'fin')} s" if 'desde' in c or 'hasta' in c else ''
+            print(f"  {a_:14s} {c['_origen']:12s} {c['clip']:16s} {'recomendado' if c.get('recomendado') else '-':12s}{v}")
+        cands = metodos.candidatos(cand_dir)
+        print(f'[clip] {len(cands)} candidatos en {cand_dir}' + ''.join(
+            f"\n  {c['id']:24s} {c.get('duracion', '?')} s  {c.get('prompt', '')}" for c in cands))
+        return
+    if anim_ not in metodos.CUADROS:
+        sys.exit(f'[clip] {anim_}: no puede salir de un clip ({", ".join(metodos.CUADROS)})')
+    desde, hasta = _segundos(desde, 'desde'), _segundos(hasta, 'hasta')
+    if recomendado not in (None, 'si', 'no'):
+        sys.exit('[clip] --recomendado: si o no')
+    ruta = os.path.join(propia, 'biblioteca.json')
+    antes = open(ruta).read() if os.path.exists(ruta) else None
+    crudo = metodos.leer(propia) or {
+        '_doc': 'Biblioteca propia de clips de Kimodo (la escribe `crisol clip`; README > Animaciones: dos métodos). '
+                'Una entrada con clip reemplaza a la del repo; sin clip, cambia sus campos (null borra uno).'}
+    e = crudo.get(anim_)
+    npz = os.path.join(propia, f'{anim_}.npz')
+    if quitar:
+        if not e:
+            sys.exit(f'[clip] {anim_}: no está en la biblioteca propia ({ruta})')
+        del crudo[anim_]
+    elif candidato:
+        candidato = candidato.removesuffix('.npz')
+        m, origen = metodos.CANDIDATO.match(candidato), os.path.join(cand_dir, candidato + '.npz')
+        if not m or not os.path.isfile(origen):
+            sys.exit(f'[clip] no existe el candidato {candidato} en {cand_dir} (`crisol clip` los lista)')
+        info = metodos.info_clip(origen)
+        if not info:
+            sys.exit(f'[clip] {origen}: no se puede leer (¿un .npz de `crisol movimiento`?)')
+        previa = metodos.biblioteca().get(anim_) or {}
+        e = {'clip': f'{anim_}.npz',
+             'recomendado': recomendado == 'si' if recomendado else bool(previa.get('recomendado')),
+             'desde': desde or None, 'hasta': hasta or None,
+             'candidato': candidato, 'prompt': info.get('prompt'), 'duracion': info.get('duracion'),
+             'seed': int(m[2]), 'muestra': int(m[3])}
+        if desde == 0:
+            e['desde'] = 0.0
+        crudo[anim_] = {k: v for k, v in e.items() if v is not None}
+    else:
+        if desde is None and hasta is None and recomendado is None:
+            sys.exit('[clip] nada que cambiar: --candidato, --desde, --hasta, --recomendado o --quitar')
+        if anim_ not in metodos.biblioteca():
+            sys.exit(f'[clip] {anim_}: no hay clip; pasar uno con --candidato')
+        e = dict(e or {})
+        for k, v in (('desde', desde), ('hasta', hasta),
+                     ('recomendado', None if recomendado is None else recomendado == 'si')):
+            if v == '' and e.get('clip'):
+                e.pop(k, None)          # entrada propia: borrar es sacar la clave
+            elif v == '':
+                e[k] = None             # sobre la del repo: null la tapa
+            elif v is not None:
+                e[k] = v
+        crudo[anim_] = e
+    os.makedirs(propia, exist_ok=True)
+    with open(ruta, 'w') as f:
+        json.dump(crudo, f, indent=2, ensure_ascii=False)
+        f.write('\n')
+    c = metodos.biblioteca().get(anim_)
+    if c:   # la ventana, con la entrada como quedó: si no sirve, se vuelve atrás
+        d_, h_, dur = c.get('desde'), c.get('hasta'), c.get('duracion')
+        if (d_ is not None and h_ is not None and h_ <= d_) or (dur and any(x is not None and x > dur for x in (d_, h_))):
+            if antes is None:
+                os.remove(ruta)
+            else:
+                with open(ruta, 'w') as f:
+                    f.write(antes)
+            sys.exit(f'[clip] ventana {d_ if d_ is not None else "inicio"}-{h_ if h_ is not None else "fin"} s: '
+                     f'tiene que ir de menos a más y caber en el clip ({dur} s)')
+    if candidato:
+        shutil.copy2(origen, npz)
+    elif quitar and e.get('clip') == f'{anim_}.npz' and os.path.exists(npz):
+        os.remove(npz)
+    if c:
+        print(f"[clip] {anim_}: {metodos.ruta_clip(c)} ({c['_origen']})" +
+              (', recomendado: método por defecto' if c.get('recomendado') else ', para quien lo elija') +
+              (f", ventana {c.get('desde', 'inicio')}-{c.get('hasta', 'fin')} s" if 'desde' in c or 'hasta' in c else ''))
+    else:
+        print(f'[clip] {anim_}: sin clip (sale procedural)')
+    print(f'[clip] guardado en {ruta}; rehacer blender, sprites, iso y anclas de los personajes que usan el clip '
+          '(`crisol metodo <n>` dice con qué sale cada animación)')
 
 
 def anotar_licencias(pj, ruta):
@@ -827,13 +945,18 @@ def paso_godot(nombre, instalar=None):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('paso', choices=['nuevo', 'imagen', 'vistas', 'revisar', 'rehacer', 'malla', 'ultratex', 'guia', 'articulaciones', 'blender', 'sprites', 'retrato',
-                                     'iso', 'anclas', 'godot', 'todo', 'comparar', 'texturas', 'tema', 'metodo', 'movimiento', 'estado'])
+                                     'iso', 'anclas', 'godot', 'todo', 'comparar', 'texturas', 'tema', 'metodo', 'movimiento', 'clip', 'estado'])
     ap.add_argument('personaje', nargs='?', help='personaje, objeto o escenario (en `movimiento`, la animación)')
     ap.add_argument('cambios', nargs='*', help='paso metodo: anim=kimodo|procedural')
     ap.add_argument('--prompt', help='paso movimiento: descripción del movimiento (en inglés)')
     ap.add_argument('--duracion', type=float, default=4.0, help='paso movimiento: segundos (máx. 10)')
     ap.add_argument('--seed', type=int, default=1, help='paso movimiento')
     ap.add_argument('--muestras', type=int, default=3, help='paso movimiento: variantes de la semilla')
+    ap.add_argument('--candidato', help='paso clip: <anim>_s<seed>_<i> de movimientos/candidatos (lo pasa a la biblioteca)')
+    ap.add_argument('--desde', help='paso clip: segundo del clip donde empieza la animación ("" lo borra)')
+    ap.add_argument('--hasta', help='paso clip: segundo donde termina ("" lo borra)')
+    ap.add_argument('--recomendado', choices=['si', 'no'], help='paso clip: si = método por defecto de esa animación')
+    ap.add_argument('--quitar', action='store_true', help='paso clip: sacarlo de la biblioteca propia')
     ap.add_argument('--referencia', help='imagen de referencia (paso nuevo)')
     ap.add_argument('--receta', choices=RECETAS,
                     help='paso nuevo: tipo de asset (plantilla/recetas/<receta>.json, con su _doc); por defecto humanoide')
@@ -857,13 +980,13 @@ def main():
     ESPERAR_GPU = not a.sin_esperar
     if a.paso == 'estado':
         return paso_estado(a.personaje, a.json)
-    if not a.personaje:
+    if not a.personaje and a.paso != 'clip':
         ap.error(f'{a.paso}: falta el nombre')
     if a.paso in ('texturas', 'tema'):
         con_numpy()   # se relanza con otro python: antes de redirigir la salida
     if a.json:
         estado_de = None
-        if a.paso not in ('movimiento', 'rehacer'):
+        if a.paso not in ('movimiento', 'clip', 'rehacer'):
             import estado
 
             def estado_de():
@@ -889,6 +1012,8 @@ def carpetas_del_paso(a):
     """Dónde escribe el paso (para listar los archivos que dejó con --json)."""
     if a.paso == 'movimiento':
         return [os.path.join(DATOS, 'movimientos', 'candidatos')]
+    if a.paso == 'clip':
+        return [os.path.join(DATOS, 'movimientos')]
     if a.paso == 'nuevo':
         return [os.path.join(DATOS, CARPETAS[carpeta_de_receta(a.receta)][0], a.personaje)]
     if a.paso == 'rehacer':
@@ -901,7 +1026,7 @@ def revisar_instalacion(a):
     """Antes del paso: ¿la instalación tiene lo que este paso necesita con la config de este asset? Si no, sale con
     salida.FALTA_INSTALAR diciendo qué falta y cómo arreglarlo (en vez de fallar a mitad de camino)."""
     import doctor
-    pj = {} if a.paso in ('nuevo', 'movimiento', 'rehacer', 'estado') else cargar(a.personaje)[1]
+    pj = {} if a.paso in ('nuevo', 'movimiento', 'clip', 'rehacer', 'estado') else cargar(a.personaje)[1]
     faltan = doctor.revisar_paso(CFG, a.paso, pj, instalar=bool(a.instalar))
     if faltan:
         salida.salir(salida.FALTA_INSTALAR, f'[{a.paso}] a la instalación le falta:\n' + '\n'.join(
@@ -911,7 +1036,7 @@ def revisar_instalacion(a):
 
 def revisar_previos(paso, nombre):
     """La salida del paso anterior que `paso` lee: si no está, sale con salida.FALTA_PASO nombrando qué correr."""
-    if paso in ('nuevo', 'movimiento', 'rehacer', 'estado', 'imagen', 'texturas', 'tema', 'metodo', 'todo', 'malla',
+    if paso in ('nuevo', 'movimiento', 'clip', 'rehacer', 'estado', 'imagen', 'texturas', 'tema', 'metodo', 'todo', 'malla',
                 'vistas', 'comparar', 'ultratex'):
         return   # sin entrada de un paso anterior, o ya lo revisan ellos (imagen elegida, modelo.glb, vistas)
     pdir, pj = cargar(nombre)
@@ -929,10 +1054,10 @@ def revisar_previos(paso, nombre):
 
 
 def ejecutar(a):
-    es_escenario = os.path.exists(os.path.join(DATOS, 'escenarios', a.personaje, 'escenario.json'))
+    es_escenario = bool(a.personaje) and os.path.exists(os.path.join(DATOS, 'escenarios', a.personaje, 'escenario.json'))
     if a.cambios and a.paso != 'metodo':
         salida.salir(salida.USO, f'{a.paso}: argumentos de más: {" ".join(a.cambios)}')
-    if a.paso not in ('nuevo', 'movimiento') and es_escenario != (a.paso in PASOS_ESCENARIO):
+    if a.paso not in ('nuevo', 'movimiento', 'clip') and es_escenario != (a.paso in PASOS_ESCENARIO):
         salida.salir(salida.USO, f'{a.paso}: es un paso de {"personajes y objetos" if es_escenario else "escenarios"}')
     revisar_instalacion(a)
     revisar_previos(a.paso, a.personaje)
@@ -974,6 +1099,8 @@ def ejecutar(a):
         paso_metodo(a.personaje, a.cambios)
     elif a.paso == 'movimiento':
         paso_movimiento(a.personaje, a.prompt, a.duracion, a.seed, a.muestras)
+    elif a.paso == 'clip':
+        paso_clip(a.personaje, a.candidato, a.desde, a.hasta, a.recomendado, a.quitar)
     elif a.paso == 'godot':
         paso_godot(a.personaje, a.instalar)
     elif a.paso == 'todo':

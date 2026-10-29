@@ -35,6 +35,7 @@ crisol <nuevo --escenario|texturas|tema> <n>
 crisol rehacer <n1,n2,...|todos>                    # blender..revisar en lote
 crisol metodo <n> [anim=kimodo|procedural ...]
 crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimodo (CPU)
+crisol clip [<anim> --candidato <anim>_s<seed>_<i> [--desde s] [--hasta s] [--recomendado si|no] [--quitar]]
 crisol mcp                                          # servidor MCP por stdio (herramientas/mcp)
 crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web local (herramientas/ui)
 ```
@@ -93,7 +94,9 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
 - `3_blender/`: `blender_main.py` (modos `limpia`, `guia`, `construir`, `retrato`, `reves`, `comparar`, `iso`,
   `anclas`, `objeto`, `alinear`), `rig_lib.py` (`PLANTILLA`, estimación, rig, pesos, `cortar_puentes`), `anim.py`
   (`TODAS`, poses-dict `_pose`/`_poses`), `kimodo_clip.py` (NPZ → Action), `metodos.py` (procedural/kimodo por
-  animación; `movimientos/biblioteca.json`), `generar_movimiento.py` (venv Kimodo), `articulaciones_pose.py`
+  animación, `CUADROS`; sin bpy ni numpy: biblioteca del repo `movimientos/biblioteca.json` + la propia de
+  `<datos_dir>/movimientos/` que escribe `crisol clip`, por `CRISOL_MOVIMIENTOS`, que Blender hereda; lee los `.npz`
+  candidatos con zipfile), `generar_movimiento.py` (venv Kimodo), `articulaciones_pose.py`
   (DWPose), `dibujar_guia.py`, `vehiculo.py`.
 - `4_sprites/`: `armar_tira.py` (`ANIMACIONES`, hoja, retrato), `armar_iso.py`, `armar_objeto.py`, `revisar.py`
   (`revision.png`), `aseprite.py` (`.json` estilo Aseprite junto a cada hoja), `posproceso.py` (color, nitidez, contorno del estilo), `vitrina.py` (gifs de `docs/vitrina/` desde los

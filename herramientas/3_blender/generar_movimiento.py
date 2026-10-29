@@ -20,7 +20,8 @@ for _l in ('Left', 'Right'):
 
 
 def hoja_palitos(rutas, salida, paso=5, celda=120, escala=60):
-    """Vista lateral (adelante = derecha), en el lugar; izquierda en rojo, derecha en azul."""
+    """Vista lateral (adelante = derecha), en el lugar; izquierda en rojo, derecha en azul. Filas de 2 × celda
+    = 240 px de alto: crisol ui recorta con ese alto la de cada muestra."""
     filas = []
     for r in rutas:
         d = np.load(r)

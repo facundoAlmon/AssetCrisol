@@ -499,6 +499,7 @@ crisol comparar <n>                    # rebuilds trabajo/candidatos.png from ma
 crisol rehacer <n1,n2,...|todos>       # blender..revisar in batch
 crisol metodo <n> [anim=kimodo|procedural ...]
 crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]
+crisol clip [<anim> --candidato <anim>_s<seed>_<i> [--desde s] [--hasta s] [--recomendado si|no] [--quitar]]
 crisol <texturas|tema> <n> [--solo piso,pared]   # scenery
 crisol godot <n> [--instalar <project>]
 crisol doctor [--json]                   # checks the installation
@@ -851,8 +852,9 @@ Diagnosis: a render colored by dominant bone, at rest and in poses (`throw`, `ar
   natural for full-body movements; no fists (open hand) and no cartoon exaggeration. It takes the same frames as the
   procedural one (sheet indices don't shift).
 
-Each animation's default method is the **recommended** one in `herramientas/3_blender/movimientos/biblioteca.json`.
-Today `caminar` (walk) and `morir` (die) use Kimodo (long stride, feet that land well; a believable fall) and the rest
+Each animation's default method is the **recommended** one in the motion library: the repo one
+(`herramientas/3_blender/movimientos/biblioteca.json`) with your own on top (`<datos_dir>/movimientos/biblioteca.json`,
+written by `crisol clip`). In the repo, `caminar` (walk) and `morir` (die) use Kimodo (long stride, feet that land well; a believable fall) and the rest
 are procedural (Kimodo's boxing jab lasts ~2 frames and is barely visible).
 
 ```bash
@@ -868,10 +870,25 @@ crisol blender bandit && crisol sprites bandit   # + iso and anclas
 crisol movimiento correr --prompt "A person runs forward at a steady jogging pace." --duracion 3
 #   -> <datos_dir>/movimientos/candidatos/correr_s1_{0,1,2}.npz + correr_s1.png (side-view skeletons, one row
 #      per sample; red = left). Another --seed gives 3 more.
-#   pick: copy the .npz to herramientas/3_blender/movimientos/correr.npz and add it to biblioteca.json
-#         (with desde/hasta if the start or the end is too long)
+crisol clip                                              # the library (where each clip comes from) and the candidates
+crisol clip correr --candidato correr_s1_2 --desde 0.4   # sample 2 becomes the correr clip
+crisol clip correr --recomendado si                      # default method for correr (otherwise only with `metodo`)
+crisol clip golpe --hasta 1.1                            # changes the window of a repo clip ("" clears desde/hasta)
+crisol clip correr --quitar                              # back to the repo one (if any)
 ```
-Prompts in English and concrete. Animations that can use a clip: those in `kimodo_clip.CUADROS` (all except `idle`,
+`clip` copies the `.npz` to `<datos_dir>/movimientos/<anim>.npz` and records it in `<datos_dir>/movimientos/biblioteca.json`
+(clip, recomendado, desde/hasta, prompt, seed, sample): the repo library is not touched. Your own entry with a clip
+replaces the repo one; one without a clip (only `--recomendado`, `--desde`, `--hasta`) changes those fields of the repo
+one. `desde`/`hasta` are seconds of the clip (without `desde`, a cycle goes from one left foot plant to the next).
+Adding a clip without `--recomendado` keeps what that animation had. Then redo `blender`, `sprites`, `iso` and `anclas`
+of the characters that use it. To ship your own clip with AssetCrisol, copy the `.npz` and the entry to
+`herramientas/3_blender/movimientos/`.
+
+In `crisol ui`, **Motions** does all of this without a terminal: generate (through the queue), look at the skeleton row
+of each sample, add it to the library with its window, choose whether it is the default method, remove it and use it in
+a character (the same as Settings > Animations of the character).
+
+Prompts in English and concrete. Animations that can use a clip: those in `metodos.CUADROS` (all except `idle`,
 `saltar`, `agacharse` and `defender`).
 
 </details>
