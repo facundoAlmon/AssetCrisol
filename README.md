@@ -353,6 +353,11 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   hace (motor, seed, resolución, UltraTex), si ya está generado, **Ver en 3D** dentro de la tarjeta (hasta tres a la
   vez) y **Elegir esta**. Las mallas de antes de este cambio, sin vistas propias, muestran la hoja
   `trabajo/candidatos.png` hasta correr **Comparar mallas**.
+- **Deshacer** un paso (en la cadena, junto a su estado): muestra qué va a borrar y cuánto pesa antes de confirmar;
+  no toca el json ni las elecciones (Repintar textura vuelve a la malla del motor y Detectar articulaciones a las de
+  antes). **Cambiar el nombre** (el lápiz junto al nombre): carpeta, `godot/` y el `.blend`; lo que ya esté
+  instalado en un juego sigue con el nombre viejo. En la terminal: `crisol deshacer <n> --paso <p> [--ver]` y
+  `crisol renombrar <n> --nuevo <m>`.
 - **Exportar** (pestaña Archivos y logs): marcar qué bajar (la carpeta de Godot, las hojas de costado e iso, el
   retrato, las anclas, el modelo 3D, las vistas previas o los archivos de origen) y bajarlo en un zip, también desde
   otra PC o el celular.

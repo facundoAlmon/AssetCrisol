@@ -8,6 +8,11 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Agregado
+- `crisol deshacer <n> --paso <p> [--ver]`: borra lo que generó un paso (con `--ver`, solo lo lista), sin tocar el json
+  ni las elecciones; `ultratex` vuelve a la malla del motor y `articulaciones` a las de antes. `crisol renombrar <n>
+  --nuevo <m>`: la carpeta, `godot/<tipo>/<n>/` (archivos, rutas `res://` y nombres en escenas y metas; los `.import`
+  se borran) y el `.blend`. Los dos se niegan si hay un paso de ese asset corriendo. En `crisol ui`: **Deshacer** junto
+  al estado de cada paso (con la lista de lo que borra antes de confirmar) y el lápiz junto al nombre.
 - **UI en el navegador** (`crisol ui`, local en `127.0.0.1:8190`, sin dependencias nuevas): biblioteca de assets,
   crear con referencia o descripción, la cadena de pasos con correr/rehacer, las candidatas para elegir (y cambiar
   una elección), visor de resultados con el reproductor iso por dirección, ajustes comunes sin json (y el json

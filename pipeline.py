@@ -41,6 +41,10 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
   godot    <n> [--instalar proyecto] exporta a <carpeta>/<n>/godot/ (y copia a un proyecto Godot)
   todo     <n> [--instalar proyecto] malla -> blender -> sprites -> godot (requiere imagen elegida)
 
+  deshacer <n> --paso p [--ver]     borra lo que generó ese paso (con --ver solo lo lista); no toca el json ni
+                                    las elecciones; ultratex vuelve a la malla del motor, articulaciones a las de antes
+  renombrar <n> --nuevo m           cambia el nombre del asset (carpeta, godot/ y el .blend); lo instalado en un
+                                    juego no se toca
   estado   [<n>] [--json]           qué pasos están hechos, cuáles quedaron viejos y qué falta elegir (sin <n>: todos)
   doctor   [--json]                 revisa la instalación: qué falta, cómo arreglarlo y qué pasos quedan deshabilitados
   mcp                               servidor MCP por stdio para agentes (crear, estado, correr, ver, elegir...; con uv)
@@ -139,6 +143,52 @@ def cargar(nombre):
 
 CARPETAS = (('personajes', 'personaje.json'), ('objetos', 'objeto.json'), ('escenarios', 'escenario.json'))
 PASOS_ESCENARIO = ('nuevo', 'texturas', 'tema')
+
+
+def _tipo(pj):
+    return 'escenario' if pj['_escenario'] else ('vehiculo' if pj.get('vehiculo') else 'objeto') if pj['_objeto'] \
+        else 'personaje'
+
+
+def paso_deshacer(nombre, paso, ver=False):
+    import deshacer
+    pdir, pj = cargar(nombre)
+    if not paso:
+        salida.salir(salida.USO, f'deshacer: falta --paso ({", ".join(deshacer.PASOS)})')
+    try:
+        lista = deshacer.que_borra(pdir, _tipo(pj), nombre, paso)
+    except ValueError as e:
+        salida.salir(salida.USO, f'[deshacer] {e}')
+    extra = deshacer.extra(pdir, paso)
+    if ver or not (lista or extra):
+        print(f'[deshacer] {paso} de {nombre}: ' + ('nada que deshacer' if not (lista or extra) else 'borraría'))
+        for r, b in lista:
+            print(f'  {r} ({b / 1e6:.1f} MB)')
+        if extra:
+            print(f'  y {extra}')
+        return
+    pid = deshacer.ocupado(nombre)
+    if pid:
+        salida.salir(salida.ERROR, f'[deshacer] hay un crisol con {nombre} corriendo (pid {pid}): esperar a que termine')
+    borrados, hecho = deshacer.deshacer(pdir, _tipo(pj), nombre, paso)
+    print(f'[deshacer] {paso} de {nombre}: borré {len(borrados)} ' + ('ruta' if len(borrados) == 1 else 'rutas') +
+          (f'; {hecho}' if hecho else ''))
+
+
+def paso_renombrar(nombre, nuevo):
+    import deshacer
+    pdir, pj = cargar(nombre)
+    if not nuevo:
+        salida.salir(salida.USO, 'renombrar: falta --nuevo <nombre>')
+    pid = deshacer.ocupado(nombre)
+    if pid:
+        salida.salir(salida.ERROR, f'[renombrar] hay un crisol con {nombre} corriendo (pid {pid}): esperar a que termine')
+    try:
+        destino = deshacer.renombrar(pdir, nombre, nuevo)
+    except ValueError as e:
+        salida.salir(salida.USO, f'[renombrar] {e}')
+    print(f'[renombrar] {nombre} -> {nuevo} ({destino}). Lo que ya esté instalado en un juego sigue con el nombre '
+          'viejo: reinstalarlo')
 
 
 def paso_estado(nombre, como_json=False):
@@ -963,7 +1013,8 @@ def paso_godot(nombre, instalar=None):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('paso', choices=['nuevo', 'imagen', 'vistas', 'revisar', 'rehacer', 'malla', 'ultratex', 'guia', 'articulaciones', 'blender', 'sprites', 'retrato',
-                                     'iso', 'anclas', 'godot', 'todo', 'comparar', 'texturas', 'tema', 'metodo', 'movimiento', 'clip', 'estado'])
+                                     'iso', 'anclas', 'godot', 'todo', 'comparar', 'texturas', 'tema', 'metodo', 'movimiento', 'clip', 'estado',
+                                     'deshacer', 'renombrar'])
     ap.add_argument('personaje', nargs='?', help='personaje, objeto o escenario (en `movimiento`, la animación)')
     ap.add_argument('cambios', nargs='*', help='paso metodo: anim=kimodo|procedural')
     ap.add_argument('--prompt', help='paso movimiento: descripción del movimiento (en inglés)')
@@ -983,6 +1034,9 @@ def main():
     ap.add_argument('--vehiculo', action='store_true', help='paso nuevo: = --receta vehiculo (README > Vehículos)')
     ap.add_argument('--escenario', action='store_true', help='paso nuevo: = --receta escenario')
     ap.add_argument('--solo', metavar='CLAVES', help='paso texturas: solo estas (p. ej. piso,pared); las demás quedan')
+    ap.add_argument('--paso', dest='deshacer_paso', metavar='PASO', help='paso deshacer: cuál')
+    ap.add_argument('--ver', action='store_true', help='paso deshacer: solo listar lo que borraría')
+    ap.add_argument('--nuevo', help='paso renombrar: el nombre nuevo')
     ap.add_argument('--instalar', metavar='PROYECTO_GODOT', help='copiar el resultado a este proyecto Godot')
     ap.add_argument('--json', action='store_true',
                     help='salida en JSON por stdout (lo demás va a stderr): ok, código, archivos escritos, qué mirar y '
@@ -1006,9 +1060,10 @@ def main():
         estado_de = None
         if a.paso not in ('movimiento', 'clip', 'rehacer'):
             import estado
+            n_despues = a.nuevo if a.paso == 'renombrar' else a.personaje
 
             def estado_de():
-                return estado.estado(*cargar(a.personaje), a.personaje)
+                return estado.estado(*cargar(n_despues), n_despues)
         salida.correr_json(a.paso, a.personaje, carpetas_del_paso(a), lambda: ejecutar(a), estado_de)
     if os.environ.get('CRISOL_TRAZA'):
         return ejecutar(a)
@@ -1075,6 +1130,9 @@ def ejecutar(a):
     es_escenario = bool(a.personaje) and os.path.exists(os.path.join(DATOS, 'escenarios', a.personaje, 'escenario.json'))
     if a.cambios and a.paso != 'metodo':
         salida.salir(salida.USO, f'{a.paso}: argumentos de más: {" ".join(a.cambios)}')
+    if a.paso in ('deshacer', 'renombrar'):
+        return paso_deshacer(a.personaje, a.deshacer_paso, a.ver) if a.paso == 'deshacer' else \
+            paso_renombrar(a.personaje, a.nuevo)
     if a.paso not in ('nuevo', 'movimiento', 'clip') and es_escenario != (a.paso in PASOS_ESCENARIO):
         salida.salir(salida.USO, f'{a.paso}: es un paso de {"personajes y objetos" if es_escenario else "escenarios"}')
     revisar_instalacion(a)

@@ -55,6 +55,36 @@ function AyudaPaso({ a }) {
   </dl>`
 }
 
+// deshacer un paso: primero muestra qué borraría (y lo que vuelve atrás) y pide confirmar, en la misma fila
+function Deshacer({ d, paso, cerrar }) {
+  const [plan, setPlan] = useState(null)
+  const [haciendo, setHaciendo] = useState(false)
+  const url = `assets/${encodeURIComponent(d.nombre)}/deshacer`
+  useEffect(() => { api(`${url}?paso=${paso}`).then(setPlan, e => { aviso(e.message, 'error'); cerrar() }) }, [paso])
+  if (!plan) return html`<div class="ayuda-paso"><${Cargando} /></div>`
+  const nada = !plan.borraria.length && !plan.extra
+  const total = plan.borraria.reduce((s, [, b]) => s + b, 0)
+  const confirmar = async () => {
+    setHaciendo(true)
+    try {
+      const r = await api(url, { metodo: 'POST', cuerpo: { paso } })
+      aviso(t('desh.hecho', { p: nombrePaso(paso, d.tipo), n: r.borrados.length }))
+      cerrar()
+    } catch (e) { aviso(e.message, 'error'); setHaciendo(false) }
+  }
+  return html`<div class="ayuda-paso deshacer">
+    ${nada ? html`<p>${t('desh.nada')}</p>` : html`
+      <b>${t('desh.titulo', { p: nombrePaso(paso, d.tipo), t: tamano(total) })}</b>
+      <ul class="mono chico">${plan.borraria.map(([r, b]) => html`<li key=${r}>${r} <span class="tenue">${tamano(b)}</span></li>`)}</ul>
+      ${plan.extra && html`<p>${t('desh.extra', { e: plan.extra })}</p>`}
+      <p class="tenue chico">${t('desh.nota')}</p>`}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${!nada && html`<button class="boton chico peligro" disabled=${haciendo} onClick=${confirmar}>${t('desh.si')}</button>`}
+      <button class="boton chico fantasma" onClick=${cerrar}>${t(nada ? 'desh.cerrar' : 'desh.no')}</button>
+    </div>
+  </div>`
+}
+
 // el número de cada paso en la cadena (1, 2...): el mismo lleva su resultado en el visor
 const numeros = d => Object.fromEntries(d.pasos.filter(p => p.estado !== 'no_aplica').map((p, i) => [p.paso, i + 1]))
 
@@ -64,6 +94,7 @@ const ELIGE = { imagen: c => c === 'imagen.elegida', malla: c => c === 'malla.el
 function Cadena({ d, cola, doctor, cambiar }) {
   const { corriendo, pendientes } = trabajosDe(cola, d.nombre)
   const [ayuda, setAyuda] = useState(null)   // el paso con la ayuda abierta
+  const [deshaciendo, setDeshaciendo] = useState(null)   // el paso con "Deshacer" abierto
   const siguiente = d.siguiente?.split(' ')[1]
   const extra = (EXTRA[d.tipo] || []).filter(p => !(p === 'ultratex' && !d.json?.malla?.ultratex))
   if (d.json?.malla?.candidatos && !d.json.vehiculo) extra.push('comparar')   // los vehículos comparan en `blender`
@@ -82,7 +113,9 @@ function Cadena({ d, cola, doctor, cambiar }) {
             <div class="doc-paso">${docPaso(p.paso, d.tipo)}
               ${ayudaPaso(p.paso, d.tipo) && html` <button class="mas-ayuda" aria-expanded=${ayuda === p.paso}
                 onClick=${() => setAyuda(ayuda === p.paso ? null : p.paso)}>${t(ayuda === p.paso ? 'ayuda.menos' : 'ayuda.mas')}</button>`}</div>
-            <div class="nota">${t('estado.' + p.estado)}${p.nota ? ': ' + p.nota : ''}</div>
+            <div class="nota">${t('estado.' + p.estado)}${p.nota ? ': ' + p.nota : ''}
+              ${(p.estado === 'hecho' || p.estado === 'viejo') && !enMarcha && html` <button class="mas-ayuda deshacer-paso"
+                aria-expanded=${deshaciendo === p.paso} onClick=${() => setDeshaciendo(deshaciendo === p.paso ? null : p.paso)}>${t('desh.boton')}</button>`}</div>
             ${corriendo?.paso === p.paso && html`<div style="margin-top:8px"><${Colada} tr=${corriendo} cola=${cola} /></div>`}
             ${ELIGE[p.paso] && d.elecciones.some(e => ELIGE[p.paso](e.clave) && e.actual != null && !d.decidir.some(x => x.clave === e.clave)) &&
               html`<button class="boton chico fantasma" style="padding:0;min-height:28px;color:var(--brasa)"
@@ -90,6 +123,7 @@ function Cadena({ d, cola, doctor, cambiar }) {
           </div>
           <${BotonPaso} d=${d} paso=${p.paso} estado=${p.estado} cola=${cola} doctor=${doctor} principal=${p.paso === siguiente} />
           ${ayuda === p.paso && html`<${AyudaPaso} a=${ayudaPaso(p.paso, d.tipo)} />`}
+          ${deshaciendo === p.paso && html`<${Deshacer} d=${d} paso=${p.paso} cerrar=${() => setDeshaciendo(null)} />`}
         </li>`
       })}
     </ol>
@@ -420,11 +454,37 @@ function Archivos({ d, cola }) {
   </div>`
 }
 
+// cambiar el nombre del asset: carpeta, godot/ y .blend (deshacer.renombrar); lo instalado en un juego no cambia
+function Renombrar({ d, cerrar }) {
+  const [nuevo, setNuevo] = useState(d.nombre)
+  const [guardando, setGuardando] = useState(false)
+  const valido = /^[a-z0-9][a-z0-9_]{0,47}$/.test(nuevo) && nuevo !== d.nombre
+  const guardar = async () => {
+    setGuardando(true)
+    try {
+      const r = await api(`assets/${encodeURIComponent(d.nombre)}/renombrar`, { metodo: 'POST', cuerpo: { nuevo } })
+      aviso(t('ren.hecho', { n: r.nombre }))
+      location.hash = '#/a/' + encodeURIComponent(r.nombre)
+    } catch (e) { aviso(e.message, 'error'); setGuardando(false) }
+  }
+  return html`<form class="renombrar" onSubmit=${e => { e.preventDefault(); valido && guardar() }}>
+    <label class="campo"><span>${t('ren.nombre')}</span>
+      <input class="entrada mono" value=${nuevo} autofocus spellcheck="false" aria-invalid=${!valido && nuevo !== d.nombre}
+        onInput=${e => setNuevo(e.target.value.toLowerCase())} />
+      <small>${t('ren.ayuda')}</small></label>
+    <div style="display:flex;gap:8px;align-items:end">
+      <button class="boton primario" type="submit" disabled=${!valido || guardando}>${t('ren.guardar')}</button>
+      <button class="boton fantasma" type="button" onClick=${cerrar}>${t('ren.cancelar')}</button>
+    </div>
+  </form>`
+}
+
 // ---------- pantalla ----------
 export function Asset({ nombre, pestana }) {
   const g = useGlobal()
   const { d, error, cargar } = useDetalle(nombre)
   const [cambiando, setCambiando] = useState(null)
+  const [renombrando, setRenombrando] = useState(false)
   if (error) return html`<a class="migas" href="#/"><${Icono} n="atras" />${t('nav.biblioteca')}</a><${Error} error=${error} reintentar=${cargar} />`
   if (!d) return html`<${Cargando} />`
   const { corriendo } = trabajosDe(g.cola, d.nombre)
@@ -433,7 +493,10 @@ export function Asset({ nombre, pestana }) {
   return html`
     <a class="migas" href="#/"><${Icono} n="atras" />${t('nav.biblioteca')}</a>
     <header class="encabezado">
-      <div class="asset-titulo"><h1>${d.nombre}</h1>
+      <div class="asset-titulo">${renombrando
+          ? html`<${Renombrar} d=${d} cerrar=${() => setRenombrando(false)} />`
+          : html`<h1>${d.nombre}</h1><button class="icono-boton" title=${t('ren.boton')} aria-label=${t('ren.boton')}
+              disabled=${!!corriendo || trabajosDe(g.cola, d.nombre).pendientes.length > 0} onClick=${() => setRenombrando(true)}><${Icono} n="editar" /></button>`}
         <${Chip}>${t('tipo.' + d.tipo)}<//><${Chip}>${d.estilo}<//>
         ${d.licencias && !d.licencias.comercial && html`<${Chip} clase="fallo">${t('asset.no_comercial')}<//>`}
       </div>

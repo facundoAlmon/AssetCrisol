@@ -365,6 +365,11 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   whether it is generated yet, **View in 3D** inside the card (up to three at once) and **Choose this one**. Meshes
   from before this change, without views of their own, show the `trabajo/candidatos.png` sheet until you run
   **Compare meshes**.
+- **Undo** a step (in the chain, next to its state): shows what it will delete and how much it weighs before
+  confirming; it does not touch the json or the choices (Repaint texture goes back to the engine mesh and Detect
+  joints to the previous ones). **Rename** (the pencil next to the name): folder, `godot/` and the `.blend`; whatever
+  is already installed in a game keeps the old name. From the terminal: `crisol deshacer <n> --paso <p> [--ver]` and
+  `crisol renombrar <n> --nuevo <m>`.
 - **Export** (Files and logs tab): check what to download (the Godot folder, the side and iso sheets, the portrait,
   the anchors, the 3D model, the previews or the source files) and get it as a zip, also from another PC or a phone.
 - **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
