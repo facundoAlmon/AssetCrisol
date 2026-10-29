@@ -2,7 +2,7 @@
 // reproductor iso por dirección), los ajustes y los archivos/logs.
 import {
   html, useState, useEffect, useRef, useGlobal, api, t, urlArchivo, urlMini, Icono, Chip, Cargando, Error, verGrande,
-  trabajosDe, encolar, nombrePaso, aviso, duracion, Colada, transcurrido,
+  trabajosDe, encolar, nombrePaso, docPaso, aviso, duracion, Colada, transcurrido, Plegable,
 } from '../comunes.mjs'
 import { Ajustes } from './ajustes.mjs'
 import { Visor3D } from './visor3d.mjs'
@@ -38,11 +38,14 @@ function BotonPaso({ d, paso, estado, cola, doctor, principal }) {
   if (pendientes.some(x => x.paso === paso)) return html`<${Chip} clase="pendiente-cola">${t('asset.en_cola')}<//>`
   const rehacer = estado === 'hecho' || estado === 'viejo'
   const off = !!falta || bloqueado(paso, d)
-  const titulo = falta ? t('asset.no_disponible', { falta: falta.join('; ') }) : bloqueado(paso, d) ? t('asset.elegir_primero') : t('pasodoc.' + paso)
+  const titulo = falta ? t('asset.no_disponible', { falta: falta.join('; ') }) : bloqueado(paso, d) ? t('asset.elegir_primero') : docPaso(paso, d.tipo)
   return html`<button class=${'boton chico' + (principal ? ' primario' : '')} disabled=${off} title=${titulo}
       onClick=${() => encolar({ paso, nombre: d.nombre })}>
     <${Icono} n=${rehacer ? 'rehacer' : 'correr'} />${t(rehacer ? 'asset.rehacer' : 'asset.correr')}</button>`
 }
+
+// el número de cada paso en la cadena (1, 2...): el mismo lleva su resultado en el visor
+const numeros = d => Object.fromEntries(d.pasos.filter(p => p.estado !== 'no_aplica').map((p, i) => [p.paso, i + 1]))
 
 // qué elección cambia cada paso de la cadena (un paso puede tener varias: texturas)
 const ELIGE = { imagen: c => c === 'imagen.elegida', malla: c => c === 'malla.elegida', texturas: c => c.startsWith('texturas.') }
@@ -52,16 +55,19 @@ function Cadena({ d, cola, doctor, cambiar }) {
   const siguiente = d.siguiente?.split(' ')[1]
   const extra = (EXTRA[d.tipo] || []).filter(p => !(p === 'ultratex' && !d.json?.malla?.ultratex))
   if (d.json?.malla?.candidatos && !d.json.vehiculo) extra.push('comparar')   // los vehículos comparan en `blender`
-  return html`<section class="panel">
-    <header><h2>${t('asset.cadena')}</h2></header>
+  const pasos = d.pasos.filter(p => p.estado !== 'no_aplica')
+  const resumen = t('asset.hechos', { h: pasos.filter(p => p.estado === 'hecho').length, n: pasos.length }) +
+    (siguiente ? ' · ' + t('asset.siguiente', { paso: nombrePaso(siguiente, d.tipo) }) : '')
+  return html`<section class="panel"><${Plegable} titulo=${t('asset.cadena')} resumen=${resumen}>
     <ol class="cadena">
-      ${d.pasos.filter(p => p.estado !== 'no_aplica').map(p => {
+      ${pasos.map((p, i) => {
         const enMarcha = corriendo?.paso === p.paso ? 'corriendo' : pendientes.some(x => x.paso === p.paso) ? 'en-cola' : ''
         const falta = doctor?.deshabilitados?.[p.paso]
         return html`<li class=${[p.estado, enMarcha, falta ? 'apagado' : ''].join(' ')} key=${p.paso}>
           <span class="marca-paso">${p.estado === 'hecho' ? html`<${Icono} n="check" />` : p.estado === 'viejo' ? html`<${Icono} n="rehacer" />` : ''}</span>
           <div style="min-width:0">
-            <div class="nombre-paso">${nombrePaso(p.paso, d.tipo)}</div>
+            <div class="nombre-paso"><span class="num-paso">${i + 1}.</span>${nombrePaso(p.paso, d.tipo)}</div>
+            <div class="doc-paso">${docPaso(p.paso, d.tipo)}</div>
             <div class="nota">${t('estado.' + p.estado)}${p.nota ? ': ' + p.nota : ''}</div>
             ${corriendo?.paso === p.paso && html`<div style="margin-top:8px"><${Colada} tr=${corriendo} cola=${cola} /></div>`}
             ${ELIGE[p.paso] && d.elecciones.some(e => ELIGE[p.paso](e.clave) && e.actual != null && !d.decidir.some(x => x.clave === e.clave)) &&
@@ -73,11 +79,11 @@ function Cadena({ d, cola, doctor, cambiar }) {
       })}
     </ol>
     ${extra.length > 0 && html`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
-      ${extra.map(p => html`<button class="boton chico" title=${t('pasodoc.' + p)} disabled=${!!doctor?.deshabilitados?.[p] || bloqueado(p, d) ||
+      ${extra.map(p => html`<button class="boton chico" title=${docPaso(p)} disabled=${!!doctor?.deshabilitados?.[p] || bloqueado(p, d) ||
           corriendo?.paso === p || pendientes.some(x => x.paso === p)}
         onClick=${() => encolar({ paso: p, nombre: d.nombre })}><${Icono} n="correr" />${nombrePaso(p)}</button>`)}
     </div>`}
-  </section>`
+  <//></section>`
 }
 
 // ---------- decidir ----------
@@ -280,11 +286,14 @@ export function ReproductorIso({ nombre, meta, version }) {
 }
 
 function Visor({ d }) {
-  const grupos = [...(d.iso ? [{ id: 'iso_reproductor' }] : []), ...d.visuales]
-  const [gid, setGid] = useState(grupos[0]?.id)
+  // en el orden de la cadena (con su número); se abre en el primero de antes: el resultado más terminado
+  const porDefecto = [...(d.iso ? [{ id: 'iso_reproductor', paso: 'iso' }] : []), ...d.visuales]
+  const num = numeros(d)
+  const grupos = porDefecto.map(x => ({ ...x, n: num[x.paso] })).sort((a, b) => (a.n ?? 99) - (b.n ?? 99))
+  const [gid, setGid] = useState(porDefecto[0]?.id)
   const [i, setI] = useState(0)
   const [nitido, setNitido] = useState(false)
-  useEffect(() => { if (!grupos.some(g => g.id === gid)) setGid(grupos[0]?.id) }, [d])
+  useEffect(() => { if (!grupos.some(g => g.id === gid)) setGid(porDefecto[0]?.id) }, [d])
   if (!grupos.length) return html`<div class="vacio"><p>${t('asset.sin_resultado')}</p></div>`
   const g = grupos.find(x => x.id === gid) || grupos[0]
   const v = Math.round(d.modificado)
@@ -292,7 +301,7 @@ function Visor({ d }) {
   const etiqueta = id => id === 'iso_reproductor' ? t('visor.iso') : id === 'iso' ? t('visor.iso_gif') : t('visor.' + id)
   return html`<div>
     <div class="segmentos desplazable" role="group" style="margin-bottom:14px">${grupos.map(x => html`<button aria-pressed=${x.id === g.id}
-      onClick=${() => { setGid(x.id); setI(0) }}>${etiqueta(x.id)}</button>`)}</div>
+      onClick=${() => { setGid(x.id); setI(0) }}>${x.n ? html`<span class="num-paso">${x.n}</span>` : ''}${etiqueta(x.id)}</button>`)}</div>
     ${g.id === 'iso_reproductor'
       ? html`<${ReproductorIso} nombre=${d.nombre} meta=${d.iso} version=${v} />`
       : g.id === '3d'

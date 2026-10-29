@@ -128,15 +128,24 @@ def miniatura_de(pdir, pj, nombre, tipo):
     return None
 
 
+# qué paso deja cada grupo del visor (la UI les pone su número de la cadena); en vehículos, `blender` arma el 3D y la
+# revisión
+PASO_VISUAL = {'animacion': 'sprites', '3d': 'malla', 'iso': 'iso', 'retrato': 'sprites', 'revision': 'revisar',
+               'hoja': 'sprites', 'guia': 'guia', 'tarjeta': 'blender', 'objeto': 'sprites', 'comparar': 'malla',
+               'tema': 'tema', 'repetibles': 'tema', 'malla': 'malla', 'vistas': 'vistas', 'imagen': 'imagen'}
+
+
 def visuales(pdir, pj, nombre, tipo):
-    """Grupos de archivos para el visor, solo los que existen: [{'id', 'archivos': [rutas relativas]}]."""
+    """Grupos de archivos para el visor, solo los que existen: [{'id', 'paso', 'archivos': [rutas relativas]}]."""
     t = 'trabajo'
     g = []
+    armado = tipo == 'vehiculo' and os.path.isfile(os.path.join(pdir, t, 'vehiculo.glb'))   # ruedas en su nodo
 
     def grupo(gid, *rutas):
         hay = [r for r in rutas if r and os.path.isfile(os.path.join(pdir, r))]
         if hay:
-            g.append({'id': gid, 'archivos': hay})
+            paso = 'blender' if armado and gid in ('3d', 'revision') else PASO_VISUAL[gid]
+            g.append({'id': gid, 'paso': paso, 'archivos': hay})
 
     if tipo == 'personaje':
         gd = f'godot/personajes/{nombre}'
@@ -148,7 +157,6 @@ def visuales(pdir, pj, nombre, tipo):
         grupo('hoja', f'{gd}/{nombre}_sheet.png')
         grupo('guia', f'{t}/guia/guia.png')
     elif tipo == 'vehiculo':
-        armado = os.path.isfile(os.path.join(pdir, t, 'vehiculo.glb'))   # con las ruedas en su nodo, si ya está
         grupo('3d', f'{t}/vehiculo.glb' if armado else f'{t}/malla/modelo.glb')
         grupo('tarjeta', f'{t}/tarjeta.png')
         grupo('revision', f'{t}/revision.png')
@@ -626,6 +634,8 @@ class Manejador(BaseHTTPRequestHandler):
             return self.json(app.cola.foto())
         if p == ['cola'] and m == 'POST':
             return self.encolar(self.cuerpo_json())
+        if p == ['cola', 'historial'] and m == 'DELETE':   # {ids: [...]} o sin ids: todo lo terminado
+            return self.json({'borrados': app.cola.borrar_historial((self.cuerpo_json() or {}).get('ids'))})
         if len(p) == 2 and p[0] == 'cola' and m == 'DELETE':
             return self.json(app.cola.quitar(p[1]))
         if len(p) == 3 and p[0] == 'trabajos' and p[2] == 'log':

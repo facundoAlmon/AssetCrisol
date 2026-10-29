@@ -174,6 +174,10 @@ def probar_cancelar(tmp):
     chequear(c3.estimado('imagen', 'objeto', 'qwen', 1) == 40 and c3.estimado('imagen', 'objeto', 'qwen', 3) == 120
              and c3.estimado('imagen', 'objeto', 'zimage', 2) == 120 and c3.estimado('malla', 'objeto', 'trellis2', 0) == 5,
              'cola: estimado por unidad y variante')
+    terminados = [x['id'] for x in c3.trabajos if x['estado'] not in ('pendiente', 'corriendo')]
+    borrados = c3.borrar_historial(terminados[:1])
+    chequear(borrados == terminados[:1] and not c3.buscar(borrados[0]) and not os.path.exists(c3.ruta(borrados[0], 'log'))
+             and len(c3.borrar_historial()) == len(terminados) - 1, 'cola: borrar historial (uno y el resto, con sus logs)')
 
 
 def probar_movimientos(base, datos):
@@ -293,7 +297,7 @@ def main():
         chequear(c == 200 and len(b) > 1000, 'archivo del asset')
         c, d = pedir(base, 'api/assets/caja')
         g3d = next((g for g in d.get('visuales', []) if g['id'] == '3d'), None)
-        chequear(g3d is not None, 'grupo 3d en el visor de la caja')
+        chequear(g3d is not None and g3d['paso'] == 'malla', 'grupo 3d en el visor de la caja, con su paso')
         if g3d:
             r = urllib.request.urlopen(base + 'archivos/caja/' + g3d['archivos'][0], timeout=30)
             chequear(r.headers['Content-Type'] == 'model/gltf-binary' and r.read(4) == b'glTF', '.glb con su mimetype')

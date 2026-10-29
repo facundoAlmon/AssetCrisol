@@ -156,6 +156,23 @@ class Cola:
         threading.Thread(target=rematar, daemon=True).start()
         return t
 
+    def borrar_historial(self, ids=None):
+        """Saca del historial los trabajos terminados (los de `ids`, o todos) y borra su log y su JSON. Los que corren
+        o esperan no se tocan. Devuelve los ids borrados."""
+        with self._cv:
+            fuera = [t for t in self.trabajos if t['estado'] not in ('pendiente', 'corriendo')
+                     and (ids is None or t['id'] in ids)]
+            self.trabajos = [t for t in self.trabajos if t not in fuera]
+            for t in fuera:
+                for ext in ('log', 'json'):
+                    try:
+                        os.remove(self.ruta(t['id'], ext))
+                    except OSError:
+                        pass
+            self._guardar()
+            self._cv.notify_all()
+            return [t['id'] for t in fuera]
+
     def ruta(self, tid, ext):
         return os.path.join(self.dir_trabajos, f'{tid}.{ext}')
 

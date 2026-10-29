@@ -354,7 +354,8 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   and whether something is left to choose. Characters can be selected to redo them in batch (`crisol rehacer`).
 - **Create**: the type (the recipes), a reference image (drag it in) or a description in English, the style and the
   name.
-- **Each asset**: the chain of steps with their state (done, outdated, to do) and a button to run or redo each one;
+- **Each asset**: the numbered chain of steps, with what each one does, its state (done, outdated, to do) and a
+  button to run or redo it (the viewer tabs carry the number of the step that made each result);
   **Your call** shows the candidates (image, mesh, textures) for the person to choose, and a choice already made can
   be changed. The viewer shows the result: the character in 8 directions (pick animation and direction), the gif,
   the portrait, the review sheet, the views, and the model **in 3D** (rotate and zoom with the mouse or a finger).
@@ -373,8 +374,9 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   changed here: it is picked in **Your call**.
 - **Queue**: steps run one at a time (and wait for the GPU like the ones started from the terminal or another
   program), with the elapsed and estimated time (from the durations measured on this PC), the live log (each line
-  with its time) and cancel. If `crisol ui` is closed, the running step goes on until it ends and the waiting ones
+  with its time) and cancel. The history can be cleared (all or the checked ones, with their logs). If `crisol ui` is closed, the running step goes on until it ends and the waiting ones
   start when it is opened again.
+- On a phone, the steps, the settings groups and the queue history fold (with a summary in view).
 - **Setup**: what `crisol doctor` checks; steps that cannot run are disabled with the reason.
 
 It runs on this PC (it listens on `127.0.0.1`, no accounts or internet), in Spanish or English, with a light or
