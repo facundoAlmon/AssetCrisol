@@ -126,7 +126,12 @@ def main():
         if paso(env, 'blender', 'cris') and paso(env, 'sprites', 'cris'):
             c = os.path.join(D, 'personajes', 'cris')
             g = os.path.join('godot', 'personajes', 'cris')
-            hay(c, 'preview.gif', os.path.join(g, 'cris_meta.json'), os.path.join(g, 'cris_sheet.png'))
+            hay(c, 'preview.gif', os.path.join(g, 'cris_meta.json'), os.path.join(g, 'cris_sheet.png'),
+                os.path.join('trabajo', 'animado.glb'), os.path.join('trabajo', 'animado.json'))
+            with open(os.path.join(c, 'trabajo', 'animado.json')) as f:
+                animado = json.load(f)
+            if not animado.get('caminar', {}).get('ciclo') or len(animado) < 15:
+                fallas.append(f'animado.json: sin caminar en loop o faltan animaciones ({list(animado)})')
             revisar_aseprite(os.path.join(c, g, 'cris_sheet.json'), 'walk')
             revisar_imagen(os.path.join(c, g, 'cris_sheet.png'), 512, 512)
             if not RAPIDO and paso(env, 'iso', 'cris'):

@@ -1,6 +1,7 @@
 // Visor 3D de un .glb (la malla, un candidato, el vehículo armado): three.js vendorizado (vendor/three/), que se carga
 // recién cuando se abre un visor. Sin fondo (el damero de la página queda detrás), luces suaves, girar y zoom con el
 // mouse o el dedo, encuadre por la caja del modelo. Al desmontar libera geometrías, texturas y el contexto WebGL.
+// Con `animaciones` (el personaje con rig, trabajo/animado.glb) reproduce la elegida al ritmo de los sprites.
 import { html, useState, useEffect, useRef, t, Icono } from '../comunes.mjs'
 
 let three = null   // los módulos, una sola vez
@@ -15,6 +16,24 @@ function cargarThree() {
 
 const quieto = () => matchMedia('(prefers-reduced-motion: reduce)').matches
 
+// El tiempo del glTF para `s` segundos de reproducción: los cuadros de los sprites a su fps, interpolando entre uno y
+// el siguiente (en loop, el último va hacia `fin`, la pose que cierra el ciclo); sin loop, 700 ms quieto en el último
+// y vuelve a empezar, como el reproductor iso. a: {tiempos, fin, fps, loop} (servidor.animado)
+export function tiempoAnimado(a, s) {
+  const n = a.tiempos.length
+  if (n < 2) return a.tiempos[0] || 0
+  let x
+  if (a.loop) x = (s * a.fps) % n
+  else {
+    const dur = (n - 1) / a.fps, u = s % (dur + 0.7)
+    if (u >= dur) return a.tiempos[n - 1]
+    x = u * a.fps
+  }
+  const i = Math.floor(x), f = x - i
+  const sig = i + 1 < n ? a.tiempos[i + 1] : a.fin
+  return a.tiempos[i] + (sig - a.tiempos[i]) * f
+}
+
 function liberar(obj) {
   obj.traverse(o => {
     o.geometry?.dispose()
@@ -25,13 +44,17 @@ function liberar(obj) {
   })
 }
 
-export function Visor3D({ url, titulo, alto }) {
+export function Visor3D({ url, titulo, alto, animaciones }) {
   const caja = useRef(null)
   const api = useRef(null)   // {reiniciar, girar(bool)}
   const [estado, setEstado] = useState('cargando')   // cargando | listo | error
   const [progreso, setProgreso] = useState(0)
   const [error, setError] = useState(null)
   const [girar, setGirar] = useState(false)
+  const nombres = Object.keys(animaciones || {})
+  const [anim, setAnim] = useState(nombres.includes('walk') ? 'walk' : nombres[0])
+  const [pausa, setPausa] = useState(quieto())
+  const reproduccion = useRef({ s: 0, antes: null })   // segundos reproducidos de la animación elegida
 
   useEffect(() => {
     let vivo = true, cuadro = 0, limpiar = () => {}
@@ -67,8 +90,15 @@ export function Visor3D({ url, titulo, alto }) {
       const obs = new ResizeObserver(medir)
       obs.observe(el)
       medir()
+      let mixer = null, clip = null
       const dibujar = () => {
         cuadro = requestAnimationFrame(dibujar)
+        const r = reproduccion.current, ahora = performance.now()
+        if (mixer && clip && r.a) {
+          if (!r.pausa && r.antes !== null) r.s += (ahora - r.antes) / 1000
+          mixer.setTime(Math.max(0, Math.min(tiempoAnimado(r.a, r.s), clip.duration - 1e-4)))
+        }
+        r.antes = ahora
         controles.update()
         renderer.render(escena, camara)
       }
@@ -77,8 +107,22 @@ export function Visor3D({ url, titulo, alto }) {
         if (!vivo) { liberar(gltf.scene); return }
         modelo = gltf.scene
         escena.add(modelo)
+        // en poses que salen de la caja de reposo (rodar, saltar) three la tomaba como fuera de cámara
+        modelo.traverse(o => { if (o.isSkinnedMesh) o.frustumCulled = false })
+        if (gltf.animations.length) {
+          mixer = new THREE.AnimationMixer(modelo)
+          api.current.clips = Object.fromEntries(gltf.animations.map(c => [c.name, c]))
+        }
         // encuadre: el modelo centrado, la cámara a una distancia que lo muestra entero, un poco desde arriba
-        const bb = new THREE.Box3().setFromObject(modelo)
+        // (con la geometría en reposo: en una malla con rig, setFromObject usa los huesos, que al cargar no están
+        // puestos, y la caja quedaba en los pies)
+        modelo.updateMatrixWorld(true)
+        const bb = new THREE.Box3()
+        modelo.traverse(o => {
+          if (!o.isMesh) return
+          o.geometry.computeBoundingBox()
+          bb.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld))
+        })
         const centro = bb.getCenter(new THREE.Vector3()), tam = bb.getSize(new THREE.Vector3())
         const radio = Math.max(tam.length() / 2, 1e-3)
         const dist = radio / Math.sin((camara.fov * Math.PI) / 360) * 1.05
@@ -99,6 +143,12 @@ export function Visor3D({ url, titulo, alto }) {
           controles.update()
         },
         girar: si => { controles.autoRotate = si },
+        animar: nombreClip => {
+          if (!mixer) return
+          mixer.stopAllAction()
+          clip = api.current.clips[nombreClip] || null
+          if (clip) mixer.clipAction(clip).play()
+        },
       }
       dibujar()
       limpiar = () => {
@@ -115,8 +165,14 @@ export function Visor3D({ url, titulo, alto }) {
   }, [url])
 
   useEffect(() => { api.current?.girar(girar && !quieto()) }, [girar, estado])
+  useEffect(() => {   // la animación elegida desde el principio; la pausa la deja donde está
+    const a = animaciones?.[anim]
+    Object.assign(reproduccion.current, { a, s: 0 })
+    if (estado === 'listo' && a) api.current?.animar(a.clip)
+  }, [anim, estado, animaciones])
+  useEffect(() => { reproduccion.current.pausa = pausa }, [pausa])
 
-  return html`<div class="visor3d damero" style=${alto ? { height: alto } : null}>
+  const visor = html`<div class="visor3d damero" style=${alto ? { height: alto } : null}>
     <div class="lienzo3d" ref=${caja} aria-label=${titulo || t('visor.3d')} role="img" />
     ${estado === 'cargando' && html`<div class="estado3d" role="status">
       <span>${t('visor.3d_cargando')}${progreso ? ` ${Math.round(progreso * 100)} %` : ''}</span>
@@ -130,5 +186,14 @@ export function Visor3D({ url, titulo, alto }) {
         onClick=${() => api.current?.reiniciar()}><${Icono} n="centrar" titulo=${t('visor.3d_reiniciar')} /></button>
     </div>`}
     ${estado === 'listo' && html`<span class="ayuda3d">${t(matchMedia('(pointer: coarse)').matches ? 'visor.3d_ayuda_tactil' : 'visor.3d_ayuda')}</span>`}
+  </div>`
+  if (!nombres.length) return visor
+  return html`<div>${visor}
+    <div class="controles-iso" style="margin-top:10px">
+      <select class="entrada" value=${anim} onChange=${e => setAnim(e.target.value)} aria-label=${t('visor.animacion')}>
+        ${nombres.map(x => html`<option value=${x}>${x}</option>`)}
+      </select>
+      <button class="boton chico" onClick=${() => setPausa(!pausa)}><${Icono} n=${pausa ? 'correr' : 'pausa'} />${t(pausa ? 'visor.reproducir' : 'visor.pausa')}</button>
+    </div>
   </div>`
 }

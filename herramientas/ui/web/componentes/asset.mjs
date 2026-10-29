@@ -369,8 +369,8 @@ function Visor({ d }) {
       ? html`<${ReproductorIso} nombre=${d.nombre} meta=${d.iso} version=${v} />`
       : g.id === 'guia' && editando
       ? html`<${EditorArticulaciones} d=${d} cerrar=${() => setEditando(false)} />`
-      : g.id === '3d'
-      ? html`<${Visor3D} url=${urlArchivo(d.nombre, archivo, v)} key=${archivo} />
+      : g.id === '3d' || g.id === 'animado'
+      ? html`<${Visor3D} url=${urlArchivo(d.nombre, archivo, v)} key=${archivo} animaciones=${g.id === 'animado' ? d.animado : null} />
           <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>`
       : html`<div class=${'visor damero' + (nitido ? ' nitido' : '')}>
           <img src=${archivo.endsWith('.gif') ? urlArchivo(d.nombre, archivo, v) : urlMini(d.nombre, archivo, 1400, '', v)} alt=${archivo} />

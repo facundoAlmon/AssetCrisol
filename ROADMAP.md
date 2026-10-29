@@ -121,7 +121,8 @@ Mejoras pedidas (2026-10-28):
 - [ ] Receta para cuadrúpedos (perro, gato, caballo, vaca...): toca el rig y las animaciones, no solo la UI.
 
 ## 5. Salida 3D y otros motores
-- [ ] Personaje como GLB con rig y animaciones (las mismas de los sprites).
+- [x] Personaje como GLB con rig y animaciones (las mismas de los sprites): `trabajo/animado.glb`, también en el visor
+      3D de `crisol ui`.
 - [ ] Polígonos para tiempo real (p. ej. 10-30 k caras) + LODs, conservando UV y pesos (hoy salen de 100-200 k).
 - [ ] Revisión de cerca: lo que en un sprite no se nota (codos, ropa que atraviesa, costuras de textura).
 - [ ] Esqueleto compatible: mapeo a Mixamo, Humanoid de Unity y `SkeletonProfileHumanoid` de Godot (sin dedos ni cara).
