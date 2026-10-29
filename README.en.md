@@ -354,7 +354,8 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   and whether something is left to choose. Characters can be selected to redo them in batch (`crisol rehacer`).
 - **Create**: the type (the recipes), a reference image (drag it in) or a description in English, the style and the
   name.
-- **Each asset**: the numbered chain of steps, with what each one does, its state (done, outdated, to do) and a
+- **Each asset**: the numbered chain of steps, with what each one does (and, with **More**, what to check, what to
+  try if it goes wrong and its section of this README), its state (done, outdated, to do) and a
   button to run or redo it (the viewer tabs carry the number of the step that made each result);
   **Your call** shows the candidates (image, mesh, textures) for the person to choose, and a choice already made can
   be changed. The viewer shows the result: the character in 8 directions (pick animation and direction), the gif,

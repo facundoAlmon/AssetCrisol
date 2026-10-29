@@ -343,7 +343,8 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   si falta elegir algo. Se pueden seleccionar personajes para rehacerlos en lote (`crisol rehacer`).
 - **Crear**: el tipo (las recetas), una imagen de referencia (arrastrarla) o una descripción en inglés, el estilo y el
   nombre.
-- **Cada asset**: la cadena de pasos numerada, con qué hace cada uno, su estado (hecho, desactualizado, pendiente) y
+- **Cada asset**: la cadena de pasos numerada, con qué hace cada uno (y, con **Más**, qué mirar, qué probar si sale
+  mal y su sección de este README), su estado (hecho, desactualizado, pendiente) y
   un botón para correr o rehacerlo (las pestañas del visor llevan el número del paso que dejó cada resultado); **Te toca elegir** muestra las candidatas (imagen, malla, texturas) para que la persona elija, y una
   elección ya hecha se puede cambiar. El visor muestra el resultado: el personaje en 8 direcciones (animación y
   dirección a elección), el modelo **en 3D** (girar y acercar con el mouse o el dedo), el gif, el retrato, la hoja

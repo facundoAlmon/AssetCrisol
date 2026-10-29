@@ -118,7 +118,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   proceso para que el paso no muera si se cierra la UI) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; el visor 3D
   `componentes/visor3d.mjs` con three.js de `web/vendor/three/`, cargado recién al abrirlo; textos en
   `web/i18n/{es,en}.mjs` con las mismas claves). Un paso nuevo: a `operaciones.PASOS`, su nombre en i18n
-  (`paso.<p>`, `pasodoc.<p>`) y, si no está en la cadena de `estado.py`, a `EXTRA` de `componentes/asset.mjs`.
+  (`paso.<p>`, `pasodoc.<p>`), su ayuda larga (`web/i18n/ayuda_{es,en}.mjs`), su grupo del visor en
+  `servidor.PASO_VISUAL` y, si no está en la cadena de `estado.py`, a `EXTRA` de `componentes/asset.mjs`.
   Los candidatos de malla en *Te toca elegir* son tarjetas (`DecisionMalla` de `asset.mjs`, datos de
   `servidor.opcion_malla`): vistas de `trabajo/comparar/<c>/<vista>.png` (las deja `pipeline.comparar_candidatos`) o,
   en vehículos, `tarjeta_<c>.png`/`revision_<c>_<vista>.png`.

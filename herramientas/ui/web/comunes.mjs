@@ -3,6 +3,8 @@
 import { html, render, useState, useEffect, useRef, useMemo, useCallback } from './vendor/preact-htm.mjs'
 import es from './i18n/es.mjs'
 import en from './i18n/en.mjs'
+import ayudaEs from './i18n/ayuda_es.mjs'
+import ayudaEn from './i18n/ayuda_en.mjs'
 
 export { html, render, useState, useEffect, useRef, useMemo, useCallback }
 
@@ -33,6 +35,12 @@ export function t(clave, vars) {
 }
 // en objetos y vehículos, `blender` no arma un rig: renderiza las vistas (o arma el vehículo)
 export const nombrePaso = (p, tipo) => t(p === 'blender' && tipo && tipo !== 'personaje' ? 'paso.blender_' + tipo : 'paso.' + p)
+// la ayuda extendida (i18n/ayuda_<idioma>.mjs): {hace, mirar, mal, readme (ancla)} o undefined, y su sección del README
+export function ayudaPaso(p, tipo) {
+  const A = idioma === 'en' ? ayudaEn : ayudaEs
+  return (p === 'blender' && tipo && tipo !== 'personaje' && A['blender_' + tipo]) || A[p]
+}
+export const urlReadme = ancla => 'https://github.com/facundoAlmon/AssetCrisol' + (idioma === 'en' ? '/blob/main/README.en.md' : '') + '#' + ancla
 export const docPaso = (p, tipo) => t(p === 'blender' && tipo && tipo !== 'personaje' ? 'pasodoc.blender_' + tipo : 'pasodoc.' + p)
 
 // ---------- API ----------
@@ -97,6 +105,7 @@ export function conectar() {
   })
   es.addEventListener('log', e => poner({ log: JSON.parse(e.data) }))
   es.addEventListener('assets', e => poner({ versionAssets: Number(e.data) }))
+  es.addEventListener('reiniciar', () => { if (!estado.reiniciar) poner({ reiniciar: true }) })
   es.onerror = () => {
     poner({ conectado: false })
     // un 401 cierra el EventSource para siempre (p. ej. la UI se reabrió con otro token): recargar pide el token

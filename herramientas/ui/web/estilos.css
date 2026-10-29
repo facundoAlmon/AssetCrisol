@@ -448,3 +448,10 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .num-paso { opacity: .65; font-variant-numeric: tabular-nums; margin-right: 5px; }
 .acciones-historial { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-left: auto; }
 .lista-cola .marca-fila { width: 20px; height: 20px; flex: none; accent-color: var(--brasa); }
+.mas-ayuda { background: none; border: 0; padding: 0 2px; font: inherit; font-weight: 600; color: var(--brasa); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.ayuda-paso { margin: 8px 0 4px; padding: 10px 12px; border-radius: var(--r); background: var(--superficie-2); color: var(--texto-2); display: grid; gap: 4px; }
+.ayuda-paso dt { font-weight: 600; color: var(--texto); margin-top: 4px; }
+.ayuda-paso dt:first-child { margin-top: 0; }
+.ayuda-paso dd { margin: 0; }
+.ayuda-paso a { color: var(--brasa); }
+.cadena .ayuda-paso { grid-column: 2 / -1; margin: 0; }
