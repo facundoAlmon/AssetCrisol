@@ -15,6 +15,7 @@ sys.path.insert(0, RAIZ)
 import pipeline  # noqa: E402 (DATOS, CARPETAS, recetas, estilos; no importa bpy ni torch)
 import estado as est  # noqa: E402 (herramientas/0_entorno, en el path por pipeline)
 import operaciones as op  # noqa: E402
+import deshacer  # noqa: E402 (herramientas/0_entorno: deshacer un paso y renombrar)
 import metodos  # noqa: E402 (herramientas/3_blender: la biblioteca de movimientos y sus candidatos, sin bpy)
 from cola import Cola  # noqa: E402
 
@@ -697,6 +698,24 @@ class Manejador(BaseHTTPRequestHandler):
                 return self.metodos(n, self.cuerpo_json().get('cambios') if m == 'POST' else None)
             if p[2:] == ['log'] and m == 'GET':
                 return self.archivo(n, q['ruta'].split('/'), texto=True)
+            if p[2:] == ['deshacer'] and m == 'GET':   # ?paso=p: qué borraría
+                pdir, pj = cargar(n)
+                tipo = est.estado(pdir, pj, n)['tipo']
+                return self.json({'borraria': deshacer.que_borra(pdir, tipo, n, q.get('paso', '')),
+                                  'extra': deshacer.extra(pdir, q.get('paso', ''))})
+            if p[2:] == ['deshacer'] and m == 'POST':
+                self.libre(n)
+                pdir, pj = cargar(n)
+                borrados, extra = deshacer.deshacer(pdir, est.estado(pdir, pj, n)['tipo'], n, self.cuerpo_json().get('paso', ''))
+                app.cambio()
+                return self.json({'borrados': borrados, 'extra': extra})
+            if p[2:] == ['renombrar'] and m == 'POST':
+                self.libre(n)
+                nuevo = self.cuerpo_json().get('nuevo', '')
+                deshacer.renombrar(cargar(n)[0], n, nuevo)
+                app.cola.renombrar(n, nuevo)
+                app.cambio()
+                return self.json({'nombre': nuevo})
             if p[2:] == ['exportar'] and m == 'GET':
                 pdir, pj = cargar(n)
                 return self.json(grupos_exportar(pdir, pj, n, est.estado(pdir, pj, n)['tipo']))
@@ -769,6 +788,14 @@ class Manejador(BaseHTTPRequestHandler):
             datos = f.read()
         tipo = 'text/plain; charset=utf-8' if texto else mimetypes.guess_type(ruta)[0] or 'application/octet-stream'
         self.enviar(200, datos, tipo, {'ETag': etag, 'Cache-Control': 'no-cache'})
+
+    def libre(self, n):
+        """Que no haya un paso de este asset corriendo o esperando (ni en la cola ni de la terminal)."""
+        if any(t['estado'] in ('pendiente', 'corriendo') and n in t['nombre'].split(',') for t in self.app.cola.trabajos):
+            raise ValueError(f'{n} tiene pasos en la cola: esperar a que terminen o quitarlos')
+        pid = deshacer.ocupado(n)
+        if pid:
+            raise ValueError(f'hay un crisol con {n} corriendo (pid {pid}): esperar a que termine')
 
     def zip(self, n, ids):
         """<n>.zip con los archivos de esos grupos, adentro de una carpeta <n>/ (armado en un temporal y mandado de a

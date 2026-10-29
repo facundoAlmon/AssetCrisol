@@ -461,3 +461,9 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .lista-exportar input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
 .boton.apagado { opacity: .5; pointer-events: none; }
 .lista-cola .que { overflow-wrap: anywhere; }
+.cadena .deshacer ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; overflow-wrap: anywhere; }
+.cadena .deshacer p { margin: 0; }
+.deshacer-paso { color: var(--texto-2); font-weight: 500; margin-left: 4px; }
+.renombrar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; min-width: 0; }
+.renombrar .campo { min-width: min(100%, 260px); }
+.cadena .deshacer li { display: list-item; padding: 0; border: 0; }

@@ -173,6 +173,15 @@ class Cola:
             self._cv.notify_all()
             return [t['id'] for t in fuera]
 
+    def renombrar(self, viejo, nuevo):
+        """El historial sigue al asset renombrado (sus logs aparecen en el nuevo); nunca con pasos en marcha."""
+        with self._cv:
+            for t in self.trabajos:
+                if t['nombre'] == viejo:
+                    t['nombre'] = nuevo
+                    t['args'] = [nuevo if a == viejo else a for a in t['args']]
+            self._guardar()
+
     def ruta(self, tid, ext):
         return os.path.join(self.dir_trabajos, f'{tid}.{ext}')
 

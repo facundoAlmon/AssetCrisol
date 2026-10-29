@@ -305,6 +305,24 @@ def main():
                  if pedir(base, 'vendor/three/' + r, crudo=True)[0] != 200]
         chequear(not malos, 'three.js vendorizado', ', '.join(malos))
 
+        print('deshacer y renombrar')
+        c, v = pedir(base, 'api/assets/caja/deshacer?paso=sprites')
+        rutas = [r for r, _ in v.get('borraria', [])] if c == 200 else []
+        chequear('preview.png' in rutas, 'deshacer: lista lo que borraría', rutas)
+        c, r = pedir(base, 'api/assets/caja/deshacer', 'POST', {'paso': 'sprites'})
+        c2, d = pedir(base, 'api/assets/caja')
+        sprites = next((p['estado'] for p in d.get('pasos', []) if p['paso'] == 'sprites'), None)
+        chequear(c == 200 and sorted(r['borrados']) == sorted(rutas) and sprites == 'falta', 'deshacer sprites: borrado y falta',
+                 f'{c} {r} {sprites}')
+        c, r = pedir(base, 'api/assets/caja/renombrar', 'POST', {'nuevo': 'caja_dos'})
+        c2, _ = pedir(base, 'api/assets/caja_dos')
+        c3, _ = pedir(base, 'api/assets/caja')
+        chequear(c == 200 and c2 == 200 and c3 == 400, 'renombrar caja -> caja_dos', f'{c} {r} {c2} {c3}')
+        c, r = pedir(base, 'api/assets/caja_dos/renombrar', 'POST', {'nuevo': 'Caja Mal'})
+        chequear(c == 400, 'renombrar con un nombre inválido: 400', r)
+        c, _ = pedir(base, 'api/assets/caja_dos/renombrar', 'POST', {'nuevo': 'caja'})
+        chequear(c == 200, 'renombrar de vuelta a caja')
+
         print('exportar')
         c, g = pedir(base, 'api/assets/caja/exportar')
         ids = [x['id'] for x in g] if c == 200 else []
