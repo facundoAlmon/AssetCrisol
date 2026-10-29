@@ -235,12 +235,15 @@ function Decidir({ d, recargar, cambiando, setCambiando }) {
   </section>`
 }
 
-// ---------- lo que pidió mirar el último paso ----------
+// ---------- lo que pidió mirar el último paso (una hora, hasta cerrarlo o elegir) ----------
 function Mirar({ d, cola }) {
   const ultimo = [...cola.trabajos].reverse().find(x => x.nombre === d.nombre && x.estado === 'hecho')
   const [cerrado, setCerrado] = useState(null)
   const rutas = (ultimo?.resultado?.mirar || []).filter(r => r.startsWith(d.carpeta + '/')).map(r => r.slice(d.carpeta.length + 1))
   if (!ultimo || !rutas.length || cerrado === ultimo.id || Date.now() / 1000 - ultimo.fin > 3600) return null
+  // lo que pedía mirar era para elegir (imagen, malla, texturas) y ya se eligió: no queda nada que mirar
+  const pedia = ultimo.resultado?.decidir || []
+  if (pedia.length && !pedia.some(c => (d.decidir || []).some(x => x.clave === c))) return null
   return html`<section class="aviso brasa" style="margin-bottom:20px;flex-wrap:wrap">
     <${Icono} n="info" />
     <div style="flex:1;display:grid;gap:10px;min-width:0">
