@@ -28,6 +28,19 @@ def _paso(nombre, salida, entradas=(), aplica=True, opcional=False, nota=None):
     return d
 
 
+def _en_trabajo(t, nombres):
+    """Qué candidato de malla está en trabajo/malla (lo anota pipeline.copiar_candidato; en copias de antes, el único
+    candidato con un modelo.glb del mismo tamaño), o None si no se sabe."""
+    try:
+        with open(os.path.join(t, 'malla', 'candidato.txt')) as f:
+            return f.read().strip() or None
+    except OSError:
+        pass
+    tam = lambda d: os.path.getsize(os.path.join(t, d, 'modelo.glb')) if os.path.exists(os.path.join(t, d, 'modelo.glb')) else None
+    iguales = [n for n in nombres if tam(f'malla_{n}') is not None and tam(f'malla_{n}') == tam('malla')]
+    return iguales[0] if len(iguales) == 1 else None
+
+
 def glb_hecho(glb, img):
     return _fecha(glb) is not None and (_fecha(img) or 0) <= _fecha(glb) + 1
 
@@ -72,6 +85,11 @@ def _cadena_malla(pdir, pj, decidir):
         p = _paso('malla', glb, ent, nota=f'candidatos hechos: {", ".join(hechos) or "ninguno"} de {", ".join(nombres)}'
                                             f'; elegida: {m.get("elegida", nombres[0])}')
         pasos.append(p)
+        elegida = m.get('elegida', nombres[0])
+        actual = _en_trabajo(t, nombres) if p['estado'] == 'hecho' else None
+        if actual not in (None, elegida):
+            p.update(estado='viejo', nota=f'trabajo/malla es {actual}, no la elegida ({elegida}): `malla` la '
+                                          'copia (los generados no se rehacen)')
         if 'elegida' not in m and hechos:
             hoja = os.path.join(t, 'revision.png' if pj.get('vehiculo') else 'candidatos.png')
             decidir.append({'clave': 'malla.elegida', 'mirar': hoja, 'opciones': nombres,

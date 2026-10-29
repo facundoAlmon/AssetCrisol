@@ -98,10 +98,10 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 
 Errores vistos probando la UI (2026-10-28):
 - [ ] Al cancelar un trabajo que usaba ComfyUI no se liberó la cola (de ComfyUI).
-- [ ] Objeto: cambiar la malla elegida y rehacer `sprites` no usa la malla nueva.
-- [ ] El log del paso en curso no muestra nada hasta que termina (visto en `imagen`).
+- [x] Objeto: cambiar la malla elegida y rehacer `sprites` no usa la malla nueva.
+- [x] El log del paso en curso no muestra nada hasta que termina (visto en `imagen`).
 - [x] La hoja de candidatos de malla dice siempre "trellis (elegida)", aunque la elegida sea otra.
-- [ ] Ajustes: al cambiar la seed de la imagen, el botón de guardar sigue en gris.
+- [x] Ajustes: al cambiar la seed de la imagen, el botón de guardar sigue en gris.
 - [ ] Los tiempos estimados de la cola no se acercan a lo que tardan los pasos.
 
 Mejoras pedidas (2026-10-28):

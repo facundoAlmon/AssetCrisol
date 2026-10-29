@@ -383,6 +383,18 @@ def candidatos_malla(pj):
     return salida
 
 
+def copiar_candidato(t, n):
+    """trabajo/malla_<n> → trabajo/malla, anotado en trabajo/malla/candidato.txt (estado.py lo compara con
+    malla.elegida). Con la fecha de ahora: copytree deja la del candidato y los pasos siguientes no quedaban viejos."""
+    actual = os.path.join(t, 'malla')
+    shutil.rmtree(actual, ignore_errors=True)
+    shutil.copytree(os.path.join(t, f'malla_{n}'), actual)
+    for f in os.listdir(actual):
+        os.utime(os.path.join(actual, f))
+    with open(os.path.join(actual, 'candidato.txt'), 'w') as f:
+        f.write(n + '\n')
+
+
 def paso_malla(nombre):
     pdir, pj = cargar(nombre)
     imagen_elegida(pdir, pj)   # que no espere la GPU para después salir por falta de elegir
@@ -411,8 +423,7 @@ def paso_malla(nombre):
             generar_malla(pdir, pjc, nombre)
         shutil.copytree(actual, dst)
     elegida = lista[-1][0]
-    shutil.rmtree(actual, ignore_errors=True)
-    shutil.copytree(os.path.join(t, f'malla_{elegida}'), actual)
+    copiar_candidato(t, elegida)
     if pj.get('vehiculo'):
         print(f'[malla] candidatos listos; trabajo/malla = {elegida}. Correr `blender` para compararlos')
     else:
@@ -641,8 +652,7 @@ def blender_vehiculo(pdir, pj):
     lista = [(n, pjc) for n, pjc in lista if os.path.exists(os.path.join(t, f'malla_{n}', 'modelo.glb'))]
     for n, pjc in lista:
         print(f'[vehiculo] candidato {n}', flush=True)
-        shutil.rmtree(os.path.join(t, 'malla'), ignore_errors=True)
-        shutil.copytree(os.path.join(t, f'malla_{n}'), os.path.join(t, 'malla'))
+        copiar_candidato(t, n)
         blender('vehiculo', pdir, pjc)
         recortar_tarjeta(t)
         shutil.copy(os.path.join(t, 'vehiculo.glb'), os.path.join(t, f'vehiculo_{n}.glb'))
