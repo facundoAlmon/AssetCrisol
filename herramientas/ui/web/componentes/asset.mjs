@@ -300,7 +300,7 @@ export function ReproductorIso({ nombre, meta, version }) {
   const a = meta.animaciones[anim]
   useEffect(() => {
     const img = new Image()
-    let cuadro = 0, timer = null, vivo = true
+    let cuadro = 0, timer = null, espera = null, vivo = true
     const fila = meta.direcciones.indexOf(dir)
     const dibujar = () => {
       const c = lienzo.current
@@ -309,17 +309,26 @@ export function ReproductorIso({ nombre, meta, version }) {
       ctx.clearRect(0, 0, c.width, c.height)
       ctx.drawImage(img, cuadro * meta.frame_width, fila * meta.frame_height, meta.frame_width, meta.frame_height, 0, 0, c.width, c.height)
     }
-    img.onload = () => {
-      dibujar()
-      if (pausa || a.frames < 2) return
+    // sin loop: se queda 700 ms en el último cuadro y vuelve a empezar (un solo temporizador a la vez: reiniciar en
+    // cada tick del último cuadro dejaba varios pendientes y la animación saltaba entre los cuadros 0 y 1)
+    const arrancar = () => {
       timer = setInterval(() => {
-        cuadro = cuadro + 1 >= a.frames ? (a.loop ? 0 : a.frames - 1) : cuadro + 1
-        if (!a.loop && cuadro === a.frames - 1) setTimeout(() => { cuadro = 0 }, 700)
+        if (cuadro + 1 < a.frames) cuadro++
+        else if (a.loop) cuadro = 0
+        else {
+          clearInterval(timer)
+          espera = setTimeout(() => { cuadro = 0; dibujar(); arrancar() }, 700)
+          return
+        }
         dibujar()
       }, 1000 / Math.max(1, a.fps))
     }
+    img.onload = () => {
+      dibujar()
+      if (!pausa && a.frames >= 2) arrancar()
+    }
     img.src = urlArchivo(nombre, `${meta.carpeta}/${a.imagen}`, version)
-    return () => { vivo = false; clearInterval(timer) }
+    return () => { vivo = false; clearInterval(timer); clearTimeout(espera) }
   }, [anim, dir, pausa, version])
   // la rosa: la pantalla vista desde arriba (n arriba)
   const ROSA = [['nw', 'n', 'ne'], ['w', null, 'e'], ['sw', 's', 'se']]
