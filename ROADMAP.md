@@ -90,12 +90,33 @@ antiparras levantadas), pelo corto, brazos separados, simétrico. Con cada versi
 - [x] Visor 3D del `.glb` (three.js): el resultado y los candidatos de malla uno al lado del otro.
 - [x] Candidatos de malla desde la UI (motor, seed, resolución, repintados con UltraTex; rehacer uno).
 - [x] `crisol ui --host 0.0.0.0` (la red local); la cola retoma el paso que siguió corriendo con la UI cerrada.
-- [ ] Contraseña o token para `--host 0.0.0.0` (hoy, cualquiera en la red puede correr pasos).
-- [ ] Hora en los logs que escriben los pasos en `trabajo/*.log` (los de la cola ya la tienen).
-- [ ] Candidatos de malla como tarjetas con imagen (hoy la hoja `candidatos.png` entera con un botón por candidato,
-      salvo vehículos; en 3D ya se ven de a uno).
-- [ ] Pasar un clip de Kimodo a la biblioteca de movimientos desde la UI (hoy a mano: README > Blender >
-      Animaciones: dos métodos).
+- [x] Token para `--host 0.0.0.0` (cookie tras abrir la URL con `?token=`; desde 127.0.0.1, sin token).
+- [x] Hora en los logs de los pasos (`trellis2.log`, `blender_<modo>.log`; `comfyui.log` no: ComfyUI sigue vivo).
+- [x] Candidatos de malla como tarjetas con imagen (una vista por candidato que guarda `comparar`).
+- [x] Pasar un clip de Kimodo a la biblioteca de movimientos desde la UI (`crisol clip`, biblioteca propia en
+      `<datos_dir>/movimientos/`).
+
+Errores vistos probando la UI (2026-10-28):
+- [ ] Al cancelar un trabajo que usaba ComfyUI no se liberó la cola (de ComfyUI).
+- [ ] Objeto: cambiar la malla elegida y rehacer `sprites` no usa la malla nueva.
+- [ ] El log del paso en curso no muestra nada hasta que termina (visto en `imagen`).
+- [x] La hoja de candidatos de malla dice siempre "trellis (elegida)", aunque la elegida sea otra.
+- [ ] Ajustes: al cambiar la seed de la imagen, el botón de guardar sigue en gris.
+- [ ] Los tiempos estimados de la cola no se acercan a lo que tardan los pasos.
+
+Mejoras pedidas (2026-10-28):
+- [ ] En el celular, secciones colapsables (hoy hay que bajar mucho).
+- [ ] Pasos y resultados numerados (mismo número el paso y su resultado) y las pestañas de resultados en ese orden.
+- [ ] Qué hace cada paso, a la vista (ayuda corta junto al paso).
+- [ ] Deshacer un paso: borra lo que generó.
+- [ ] Editor de articulaciones (moverlas sobre `guia.png`).
+- [ ] Articulaciones: casi siempre salen mal y al recalcular andan; recalcular sola en el paso (ver por qué la
+      primera falla).
+- [ ] Cambiar el nombre de un asset.
+- [ ] Exportar: elegir qué archivos y bajarlos en un zip.
+- [ ] Elegir la resolución de los sprites.
+- [ ] Borrar el historial de la cola (todo o lo seleccionado).
+- [ ] Receta para cuadrúpedos (perro, gato, caballo, vaca...): toca el rig y las animaciones, no solo la UI.
 
 ## 5. Salida 3D y otros motores
 - [ ] Personaje como GLB con rig y animaciones (las mismas de los sprites).
