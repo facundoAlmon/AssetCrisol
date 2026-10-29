@@ -365,6 +365,8 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   whether it is generated yet, **View in 3D** inside the card (up to three at once) and **Choose this one**. Meshes
   from before this change, without views of their own, show the `trabajo/candidatos.png` sheet until you run
   **Compare meshes**.
+- **Export** (Files and logs tab): check what to download (the Godot folder, the side and iso sheets, the portrait,
+  the anchors, the 3D model, the previews or the source files) and get it as a zip, also from another PC or a phone.
 - **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
   one (procedural or Kimodo), and the sprite size (on-screen height, iso tile and the quality of each sheet, with the
   resulting size in view). The full json stays as an advanced mode (with the changes shown before saving).

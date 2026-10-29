@@ -45,6 +45,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - `CONTRIBUTING.md`, plantillas de issues (error con `crisol doctor --json`, propuesta) y este CHANGELOG.
 
 ### Cambiado
+- `crisol ui`: **Exportar** en la pestaña Archivos y logs: grupos de archivos para marcar (con cuántos son y cuánto
+  pesan) y un zip con lo marcado (`GET /api/assets/<n>/zip?grupos=...`). Las rutas de los assets solo aceptan nombres
+  válidos (sin `..`). En el celular, la pestaña ya no se sale de la pantalla con nombres de logs largos.
 - `crisol ui`, Ajustes > Sprites: el tamaño de los sprites sin json (además del alto en pantalla, la calidad de la hoja,
   la baldosa y la calidad del iso; en objetos, también la escala y la calidad de la vista de costado), con lo que sale
   en el juego y lo que se renderiza a la vista mientras se cambia.

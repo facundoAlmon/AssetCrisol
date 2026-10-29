@@ -340,6 +340,42 @@ function Visor({ d }) {
   </div>`
 }
 
+// ---------- exportar: elegir grupos de archivos y bajarlos en un zip ----------
+const NO_MARCADOS = ['fuente', 'previas', 'modelo']   // de entrada, lo que va al juego
+const tamano = b => b < 1e6 ? `${Math.max(1, Math.round(b / 1e3))} kB` : `${(b / 1e6).toFixed(b < 1e7 ? 1 : 0)} MB`
+
+function Exportar({ d }) {
+  const [grupos, setGrupos] = useState(null)
+  const [marcados, setMarcados] = useState(new Set())
+  useEffect(() => {
+    api(`assets/${encodeURIComponent(d.nombre)}/exportar`).then(g => {
+      setGrupos(g)
+      // con la carpeta de Godot, las hojas sueltas ya están adentro: de entrada solo esa
+      const godot = g.some(x => x.id === 'godot')
+      const ids = g.map(x => x.id).filter(i => !NO_MARCADOS.includes(i) && (!godot || i === 'godot' || i === 'anclas'))
+      setMarcados(new Set(ids.length ? ids : g.map(x => x.id)))   // sin nada para el juego todavía: todo
+    }, e => aviso(e.message, 'error'))
+  }, [d.nombre, d.modificado])
+  if (!grupos) return html`<${Cargando} />`
+  if (!grupos.length) return html`<p class="tenue">${t('exp.nada')}</p>`
+  const sel = grupos.filter(g => marcados.has(g.id))
+  const archivos = new Set(sel.flatMap(g => g.archivos))
+  const tam = Object.fromEntries(grupos.flatMap(g => g.archivos.map((a, i) => [a, g.tamanos[i]])))
+  const bytes = [...archivos].reduce((s, a) => s + tam[a], 0)
+  const marcar = (id, si) => { const m = new Set(marcados); si ? m.add(id) : m.delete(id); setMarcados(m) }
+  return html`<div style="display:grid;gap:12px;grid-template-columns:minmax(0,1fr)">
+    <ul class="lista-exportar">${grupos.map(g => html`<li key=${g.id}><label class="casilla">
+      <input type="checkbox" checked=${marcados.has(g.id)} onChange=${e => marcar(g.id, e.target.checked)} />
+      <span><b>${t('exp.' + g.id)}</b> <span class="tenue chico">${t(g.archivos.length === 1 ? 'exp.archivo' : 'exp.archivos', { n: g.archivos.length })} · ${tamano(g.bytes)}</span>
+        <small class="tenue">${t('exp.' + g.id + '_ayuda')}</small></span></label></li>`)}</ul>
+    <div class="barra-guardar">
+      <a class=${'boton primario' + (sel.length ? '' : ' apagado')} aria-disabled=${!sel.length}
+        href=${sel.length ? `/api/assets/${encodeURIComponent(d.nombre)}/zip?grupos=${sel.map(g => g.id).join(',')}` : null}
+        download=${d.nombre + '.zip'}><${Icono} n="bajar" />${archivos.size ? t(archivos.size === 1 ? 'exp.bajar_uno' : 'exp.bajar', { n: archivos.size, t: tamano(bytes) }) : t('exp.elegir')}</a>
+    </div>
+  </div>`
+}
+
 // ---------- archivos y logs ----------
 function Archivos({ d, cola }) {
   const [log, setLog] = useState(null)
@@ -351,7 +387,8 @@ function Archivos({ d, cola }) {
   }
   const trabajos = cola.trabajos.filter(x => x.nombre === d.nombre || (x.paso === 'rehacer' && x.nombre.split(',').includes(d.nombre))).reverse()
   const lic = d.licencias
-  return html`<div style="display:grid;gap:20px">
+  return html`<div style="display:grid;gap:20px;grid-template-columns:minmax(0,1fr)">
+    <section class="panel"><${Plegable} titulo=${t('exp.titulo')} abierta=${true}><${Exportar} d=${d} /><//></section>
     ${lic && html`<section class="panel"><header><h2>${t('asset.licencias')}</h2>
         <${Chip} clase=${lic.comercial ? 'hecho' : 'fallo'}>${t(lic.comercial ? 'asset.comercial' : 'asset.no_comercial')}<//></header>
       <ul style="margin:0;padding-left:18px;display:grid;gap:4px">${(lic.modelos || []).map(m => html`<li>

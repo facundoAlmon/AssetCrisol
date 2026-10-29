@@ -5,7 +5,7 @@
 # para las miniaturas). Solo acepta pedidos con Host local y, si cambian algo, con Origin de la misma página: corre
 # comandos en esta PC. Con --host 0.0.0.0 (la red local), además pide un token a todo lo que no venga de esta misma PC.
 import argparse, ast, glob, hmac, html, io, ipaddress, json, mimetypes, os, re, secrets, shutil, socket, subprocess, sys, \
-    tempfile, threading, time, uuid
+    tempfile, threading, time, uuid, zipfile
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -126,6 +126,52 @@ def miniatura_de(pdir, pj, nombre, tipo):
         if r and os.path.isfile(os.path.join(pdir, r)):
             return r
     return None
+
+
+# ---------- exportar ----------
+
+def grupos_exportar(pdir, pj, nombre, tipo):
+    """Lo que se puede bajar en un zip, por grupos (en la UI se marcan): [{'id', 'archivos': [rutas relativas a pdir],
+    'tamanos': [bytes de cada uno], 'bytes'}], solo los que tienen algo. Un archivo puede estar en dos grupos (godot y hoja): el zip lo lleva una vez."""
+    t = 'trabajo'
+
+    def hay(*patrones):
+        out = []
+        for pat in patrones:
+            for r in sorted(glob.glob(os.path.join(pdir, pat), recursive=True)):
+                if os.path.isfile(r) and not r.endswith('.import') and rel(pdir, r) not in out:
+                    out.append(rel(pdir, r))
+        return out
+
+    elegida = est.imagen_elegida(pdir, pj) if tipo != 'escenario' else None
+    if tipo == 'personaje':
+        gd = f'godot/personajes/{nombre}'
+        g = [('godot', hay('godot/**/*')),
+             ('hoja', hay(f'{gd}/{nombre}_sheet.*', f'{gd}/{nombre}_meta.json')),
+             ('iso', hay(f'{gd}/iso/*.png', f'{gd}/iso/*.json')),
+             ('retrato', hay(f'{gd}/{nombre}_retrato.png', f'{gd}/{nombre}_frente.png')),
+             ('anclas', hay(f'{t}/iso/anclas.json')),
+             ('modelo', hay(f'{t}/malla/modelo.glb')),
+             ('previas', hay('preview.gif', 'preview_iso.gif', f'{t}/revision.png')),
+             ('fuente', hay('personaje.json', 'referencia.png', rel(pdir, elegida) if elegida else ''))]
+    elif tipo in ('objeto', 'vehiculo'):
+        g = [('godot', hay('godot/**/*')),
+             ('modelo', hay(f'{t}/vehiculo.glb') or hay(f'{t}/malla/modelo.glb')),
+             ('tarjeta', hay(f'{t}/tarjeta.png')),
+             ('previas', hay('preview.png', f'{t}/revision.png')),
+             ('fuente', hay('objeto.json', 'referencia.png', rel(pdir, elegida) if elegida else ''))]
+    else:
+        g = [('tema', hay(f'{t}/tema/*')), ('previas', hay('preview.png')), ('fuente', hay('escenario.json'))]
+    out = []
+    for i, a in g:
+        if a:
+            tam = [os.path.getsize(os.path.join(pdir, r)) for r in a]
+            out.append({'id': i, 'archivos': a, 'tamanos': tam, 'bytes': sum(tam)})
+    return out
+
+
+# los que ya vienen comprimidos van tal cual (comprimirlos de nuevo solo gasta tiempo)
+YA_COMPRIMIDOS = ('.png', '.gif', '.glb', '.jpg', '.webp')
 
 
 # qué paso deja cada grupo del visor (la UI les pone su número de la cadena); en vehículos, `blender` arma el 3D y la
@@ -629,6 +675,8 @@ class Manejador(BaseHTTPRequestHandler):
             return self.crear(self.cuerpo_json())
         if len(p) >= 2 and p[0] == 'assets':
             n = p[1]
+            if not NOMBRE.match(n):   # arma rutas con él (el zip lee archivos): nada de '..' ni '/'
+                return self.error(404, 'no existe')
             if len(p) == 2 and m == 'GET':
                 return self.json(detalle_asset(n))
             ruta = op.json_del_asset(pipeline.DATOS, pipeline.CARPETAS, n)
@@ -649,6 +697,11 @@ class Manejador(BaseHTTPRequestHandler):
                 return self.metodos(n, self.cuerpo_json().get('cambios') if m == 'POST' else None)
             if p[2:] == ['log'] and m == 'GET':
                 return self.archivo(n, q['ruta'].split('/'), texto=True)
+            if p[2:] == ['exportar'] and m == 'GET':
+                pdir, pj = cargar(n)
+                return self.json(grupos_exportar(pdir, pj, n, est.estado(pdir, pj, n)['tipo']))
+            if p[2:] == ['zip'] and m == 'GET':   # ?grupos=a,b (los de exportar)
+                return self.zip(n, [x for x in q.get('grupos', '').split(',') if x])
         if p == ['cola'] and m == 'GET':
             return self.json(app.cola.foto())
         if p == ['cola'] and m == 'POST':
@@ -716,6 +769,29 @@ class Manejador(BaseHTTPRequestHandler):
             datos = f.read()
         tipo = 'text/plain; charset=utf-8' if texto else mimetypes.guess_type(ruta)[0] or 'application/octet-stream'
         self.enviar(200, datos, tipo, {'ETag': etag, 'Cache-Control': 'no-cache'})
+
+    def zip(self, n, ids):
+        """<n>.zip con los archivos de esos grupos, adentro de una carpeta <n>/ (armado en un temporal y mandado de a
+        pedazos: las hojas iso pueden pesar decenas de MB)."""
+        pdir, pj = cargar(n)
+        grupos = {g['id']: g['archivos'] for g in grupos_exportar(pdir, pj, n, est.estado(pdir, pj, n)['tipo'])}
+        if not ids or any(i not in grupos for i in ids):
+            raise ValueError(f'grupos: {", ".join(grupos)}')
+        archivos = list(dict.fromkeys(r for i in ids for r in grupos[i]))
+        with tempfile.TemporaryFile() as tmp:
+            with zipfile.ZipFile(tmp, 'w') as z:
+                for r in archivos:
+                    z.write(os.path.join(pdir, r), f'{n}/{r}', zipfile.ZIP_STORED if r.lower().endswith(YA_COMPRIMIDOS)
+                            else zipfile.ZIP_DEFLATED)
+            largo = tmp.tell()
+            tmp.seek(0)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/zip')
+            self.send_header('Content-Length', str(largo))
+            self.send_header('Content-Disposition', f'attachment; filename="{n}.zip"')
+            self.send_header('X-Content-Type-Options', 'nosniff')
+            self.end_headers()
+            shutil.copyfileobj(tmp, self.wfile, 1 << 20)
 
     def hoja_movimiento(self, archivo, q):
         """Una hoja de esqueletos de `crisol movimiento` (movimientos/candidatos/<anim>_s<seed>.png); con
