@@ -103,6 +103,8 @@ Errores vistos probando la UI (2026-10-28):
 - [x] La hoja de candidatos de malla dice siempre "trellis (elegida)", aunque la elegida sea otra.
 - [x] Ajustes: al cambiar la seed de la imagen, el botón de guardar sigue en gris.
 - [x] Los tiempos estimados de la cola no se acercan a lo que tardan los pasos.
+- [ ] "Mirá esto antes de seguir" sale aunque ya se haya elegido (`Mirar` de `asset.mjs` muestra lo último que
+      pidió mirar un paso durante una hora, sin mirar si ya no queda nada por decidir).
 
 Mejoras pedidas (2026-10-28):
 - [x] En el celular, secciones colapsables (hoy hay que bajar mucho).
