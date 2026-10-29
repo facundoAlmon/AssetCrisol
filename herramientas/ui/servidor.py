@@ -3,9 +3,9 @@
 # pipeline: los pasos corren como `crisol <paso> <n> --json` en la cola (cola.py, de a uno), el estado sale de
 # estado.py y las elecciones y ajustes de operaciones.py, como en el MCP. Corre con el python3 del sistema (Pillow
 # para las miniaturas). Solo acepta pedidos con Host local y, si cambian algo, con Origin de la misma página: corre
-# comandos en esta PC.
-import argparse, ast, glob, io, ipaddress, json, mimetypes, os, re, shutil, socket, subprocess, sys, tempfile, threading, \
-    time, uuid
+# comandos en esta PC. Con --host 0.0.0.0 (la red local), además pide un token a todo lo que no venga de esta misma PC.
+import argparse, ast, glob, hmac, html, io, ipaddress, json, mimetypes, os, re, secrets, shutil, socket, subprocess, sys, \
+    tempfile, threading, time, uuid
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -27,6 +27,57 @@ mimetypes.add_type('model/gltf-binary', '.glb')
 
 # pasos que la UI puede encolar para un asset (más rehacer y movimiento, que van aparte)
 PASOS_ASSET = set(op.PASOS)
+
+
+def textos_acceso(idioma):
+    """Las claves `acceso.*` de web/i18n/<idioma>.mjs (lo que falte, de es.mjs), para la página del token, que se arma
+    acá: sin token no se sirve ningún archivo de la página."""
+    def leer(i):
+        d = {}
+        with open(os.path.join(WEB, 'i18n', i + '.mjs'), encoding='utf-8') as fh:
+            for linea in fh:
+                m = re.match(r"\s*'(acceso\.[\w.]+)':\s*('(?:[^'\\]|\\.)*'),?\s*$", linea)
+                if m:
+                    d[m.group(1)] = ast.literal_eval(m.group(2))
+        return d
+    return {**leer('es'), **(leer(idioma) if idioma != 'es' else {})}
+
+
+def pagina_acceso(idioma, incorrecto=False, listo_a=None):
+    """La página mínima del token (401) o, con listo_a, la que entra a la UI después de dejar la cookie."""
+    t = {k: html.escape(v) for k, v in textos_acceso(idioma).items()}
+    if listo_a is not None:
+        cabeza = f'<meta http-equiv="refresh" content="0;url={html.escape(listo_a)}">'
+        cuerpo = f'<p><a href="{html.escape(listo_a)}">{t["acceso.listo"]}</a></p>'
+    else:
+        cabeza = ''
+        aviso = f'<p class="mal" role="alert">{t["acceso.incorrecto"]}</p>' if incorrecto else ''
+        cuerpo = (f'<p>{t["acceso.explicacion"]}</p>{aviso}<form method="get" action="/">'
+                  f'<label for="token">{t["acceso.token"]}</label>'
+                  '<input id="token" name="token" type="password" autocomplete="current-password" required autofocus>'
+                  f'<button>{t["acceso.entrar"]}</button></form>')
+    return f'''<!doctype html>
+<html lang="{idioma}"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AssetCrisol</title>{cabeza}
+<style>
+:root {{ color-scheme: dark; --fondo: #1a2028; --superficie: #222a34; --linea: #3a4553; --texto: #e7ebf0;
+  --texto-2: #a2acb9; --brasa: #ff9e45; --sobre-brasa: #23140a; --error: #ff7a6b; }}
+@media (prefers-color-scheme: light) {{ :root {{ color-scheme: light; --fondo: #eef1f5; --superficie: #fff;
+  --linea: #c9d0d9; --texto: #18202a; --texto-2: #4b5664; --brasa: #b35200; --sobre-brasa: #fff; --error: #b3261e; }} }}
+body {{ margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--fondo); color: var(--texto);
+  font: 16px/1.5 system-ui, sans-serif; padding: 16px; box-sizing: border-box; }}
+main {{ max-width: 26rem; width: 100%; background: var(--superficie); border: 1px solid var(--linea);
+  border-radius: 12px; padding: 24px; box-sizing: border-box; }}
+h1 {{ font-size: 1.3rem; margin: 0 0 8px; }} p {{ color: var(--texto-2); margin: 0 0 16px; }} a {{ color: var(--brasa); }}
+.mal {{ color: var(--error); }} form {{ display: grid; gap: 8px; }}
+input {{ font: inherit; padding: 10px; border-radius: 8px; border: 1px solid var(--linea); background: var(--fondo);
+  color: var(--texto); }}
+button {{ font: inherit; font-weight: 600; padding: 10px; border: 0; border-radius: 8px; background: var(--brasa);
+  color: var(--sobre-brasa); cursor: pointer; }}
+</style></head>
+<body><main><h1>{t["acceso.titulo"]}</h1>{cuerpo}</main></body></html>
+'''.encode()
 
 
 # ---------- lectura de assets ----------
@@ -303,8 +354,10 @@ class Doctor:
 # ---------- servidor ----------
 
 class App:
-    def __init__(self, puerto, red=False):
+    def __init__(self, puerto, red=False, token=None):
         self.puerto, self.red = puerto, red
+        self.token = token   # solo en la red (red=True); None = sin token
+        self.cookie = f'crisol_ui_{puerto}'   # las cookies no distinguen puertos: una por instancia
         self.env = dict(os.environ, CRISOL_PYTHON=op.PY)
         self.cola = Cola(os.path.join(pipeline.DATOS, '.crisol_ui'), env=self.env)
         self.cola.al_terminar = lambda t: self.cambio()
@@ -375,14 +428,60 @@ class Manejador(BaseHTTPRequestHandler):
         """Los pedidos que cambian algo, solo desde la misma página (Origin = el Host al que se habló)."""
         return self.headers.get('Origin') == 'http://' + (self.headers.get('Host') or '').lower()
 
+    def desde_esta_pc(self):
+        """El pedido llega por loopback (la dirección de la conexión, no el Host, que lo escribe el cliente)."""
+        try:
+            ip = ipaddress.ip_address(self.client_address[0])
+        except ValueError:
+            return False
+        return ip.is_loopback or bool(getattr(ip, 'ipv4_mapped', None) and ip.ipv4_mapped.is_loopback)
+
+    def token_valido(self, valor):
+        return bool(valor) and hmac.compare_digest(valor.encode(), self.app.token.encode())
+
+    def cookie_token(self):
+        for parte in (self.headers.get('Cookie') or '').split(';'):
+            k, _, v = parte.strip().partition('=')
+            if k == self.app.cookie:
+                return v
+        return ''
+
+    def idioma(self):
+        return 'es' if (self.headers.get('Accept-Language') or 'es').lower().startswith('es') else 'en'
+
+    def acceso(self, metodo, url, partes, q):
+        """Con token (--host 0.0.0.0, pedido de otra PC): True si pasa; si no, ya respondió. `?token=` bueno deja la
+        cookie y vuelve a la misma ruta sin el token (con una página que recarga y no con un 302: así SameSite=Strict
+        manda la cookie aunque el enlace se haya abierto desde otro sitio); sin cookie ni token bueno, 401."""
+        if not self.app.token or self.desde_esta_pc():
+            return True
+        sin_cache = {'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer'}
+        if 'token' in q:
+            if metodo in ('GET', 'HEAD') and self.token_valido(q['token']):
+                resto = '&'.join(p for p in url.query.split('&') if p and not p.startswith('token='))
+                destino = url.path + ('?' + resto if resto else '')
+                cookie = f'{self.app.cookie}={self.app.token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=2592000'
+                self.enviar(200, pagina_acceso(self.idioma(), listo_a=destino), 'text/html; charset=utf-8',
+                            {**sin_cache, 'Set-Cookie': cookie})
+                return False
+        elif self.token_valido(self.cookie_token()):
+            return True
+        if partes[:1] in (['api'], ['archivos'], ['mini'], ['movimientos']) or metodo not in ('GET', 'HEAD'):
+            self.json({'error': 'falta el token de crisol ui (está en la terminal donde se abrió)'}, 401)
+        else:
+            self.enviar(401, pagina_acceso(self.idioma(), 'token' in q), 'text/html; charset=utf-8', sin_cache)
+        return False
+
     def despachar(self, metodo):
         if not self.host_local():
             return self.error(403, 'solo desde esta PC (Host)')
-        if metodo not in ('GET', 'HEAD') and not self.origen_propio():
-            return self.error(403, 'solo desde la página de crisol ui (Origin)')
         url = urlsplit(self.path)
         partes = [unquote(p) for p in url.path.split('/') if p]
         q = {k: v[-1] for k, v in parse_qs(url.query).items()}
+        if not self.acceso(metodo, url, partes, q):
+            return
+        if metodo not in ('GET', 'HEAD') and not self.origen_propio():
+            return self.error(403, 'solo desde la página de crisol ui (Origin)')
         try:
             return self.rutear(metodo, partes, q)
         except (ValueError, KeyError) as e:
@@ -722,11 +821,16 @@ def main():
     ap = argparse.ArgumentParser(prog='crisol ui', description='UI web local de AssetCrisol')
     ap.add_argument('--puerto', type=int, default=8190)
     ap.add_argument('--host', default='127.0.0.1',
-                    help='interfaz donde escuchar (0.0.0.0: toda la red local; sin contraseña: solo en una red de confianza)')
+                    help='interfaz donde escuchar (0.0.0.0: toda la red local, con token)')
+    ap.add_argument('--token', default=os.environ.get('CRISOL_UI_TOKEN') or None,
+                    help='token fijo para entrar desde la red (por defecto CRISOL_UI_TOKEN o uno al azar en cada arranque)')
     ap.add_argument('--no-abrir', action='store_true', help='no abrir el navegador')
     a = ap.parse_args()
     red = a.host not in ('127.0.0.1', 'localhost', '::1')
-    Manejador.app = App(a.puerto, red)
+    token = (a.token or secrets.token_urlsafe(16)) if red else None
+    if token and not re.fullmatch(r'[A-Za-z0-9._~-]+', token):
+        ap.error('--token/CRISOL_UI_TOKEN: solo letras, números y . _ ~ - (va en la URL y en una cookie)')
+    Manejador.app = App(a.puerto, red, token)
     clase = ThreadingHTTPServer
     if ':' in a.host:   # IPv6 ('::' = todas)
         clase = type('ServidorV6', (ThreadingHTTPServer,), {'address_family': socket.AF_INET6})
@@ -741,8 +845,9 @@ def main():
                 ip = sk.getsockname()[0]
         except OSError:
             ip = socket.gethostname()
-        print(f'  en la red: http://{ip}:{a.puerto}/ (escucha en {a.host})\n'
-              '  AVISO: sin contraseña; cualquiera en esta red puede correr pasos y cambiar los assets.', flush=True)
+        print(f'  en la red: http://{ip}:{a.puerto}/?token={token} (escucha en {a.host})\n'
+              '  desde otra PC o el celular se entra con esa URL (o con el token); desde esta PC, sin token.',
+              flush=True)
     if not a.no_abrir:
         import webbrowser
         threading.Timer(0.5, webbrowser.open, (url,)).start()

@@ -345,7 +345,7 @@ Everything in this guide can also be done from a page in the browser, without a 
 
 ```bash
 crisol ui                    # opens http://127.0.0.1:8190/ (--puerto N, --no-abrir)
-crisol ui --host 0.0.0.0     # also from another PC or a phone on the same network
+crisol ui --host 0.0.0.0     # also from another PC or a phone on the same network, with a token
 ```
 
 ![crisol ui: a character with its step chain and the iso player](docs/vitrina/img/ui.png)
@@ -373,9 +373,13 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   start when it is opened again.
 - **Setup**: what `crisol doctor` checks; steps that cannot run are disabled with the reason.
 
-It runs on this PC (it listens on `127.0.0.1`, no accounts or internet; with `--host 0.0.0.0`, on the whole local
-network and **without a password**: only on a trusted network), in Spanish or English, with a light or
-dark theme. The queue and its history live in `<datos_dir>/.crisol_ui/`. `python3 tests/ui.py` tests it without a
+It runs on this PC (it listens on `127.0.0.1`, no accounts or internet), in Spanish or English, with a light or
+dark theme. With `--host 0.0.0.0` it listens on the whole local network and asks for a **token** from anything that
+does not come from this same PC: on start it prints `http://<ip>:8190/?token=...`; opening that URL on the phone
+(or typing the token on the page that asks for it) leaves a cookie and drops the token from the URL. The token is
+random on every start (old cookies stop working); for a fixed one, `--token <t>` or the `CRISOL_UI_TOKEN` variable
+(letters, digits and `._~-`; make it long). From `127.0.0.1` it does not ask. It is plain HTTP: still, only on a
+trusted network. The queue and its history live in `<datos_dir>/.crisol_ui/`. `python3 tests/ui.py` tests it without a
 GPU (~10 s).
 
 ### First character in 10 commands
@@ -495,7 +499,7 @@ crisol <texturas|tema> <n> [--solo piso,pared]   # scenery
 crisol godot <n> [--instalar <project>]
 crisol doctor [--json]                   # checks the installation
 crisol mcp                               # MCP server for agents (For AI agents > MCP server)
-crisol ui [--puerto 8190] [--host 0.0.0.0] [--no-abrir]  # the UI in the browser (Start here > In the browser)
+crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]  # the UI in the browser (Start here > In the browser)
 crisol estado [<n>] [--json]             # steps done, stale, and what is left to choose (without <n>: all)
 crisol todo <n> [--instalar <project>]   # malla -> blender -> sprites -> godot (needs a chosen image)
 ```

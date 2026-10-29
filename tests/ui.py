@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test de la UI web (`crisol ui`) sin GPU: levanta el servidor sobre una copia de los ejemplos en una carpeta temporal
 y prueba la página, la API, la seguridad (Host, Origin, rutas fuera del asset), elegir/ajustar, crear un asset con
-una imagen subida y la cola (un paso que sale enseguida, el SSE y cancelar uno que corre). No corre Blender ni nada
-que use la GPU (~10 s).
+una imagen subida, la cola (un paso que sale enseguida, el SSE y cancelar uno que corre) y el token de --host 0.0.0.0.
+No corre Blender ni nada que use la GPU (~10 s).
 
 uso: python3 tests/ui.py [--dejar]
   --dejar   no borrar la carpeta temporal
@@ -21,10 +21,13 @@ def chequear(ok, que, detalle=''):
     return ok
 
 
-def pedir(base, ruta, metodo='GET', cuerpo=None, tipo='application/json', host=None, origen=True, crudo=False):
-    """(código, cuerpo: dict/str/bytes)."""
+def pedir(base, ruta, metodo='GET', cuerpo=None, tipo='application/json', host=None, origen=True, crudo=False,
+          cookie=None, cabeceras=None):
+    """(código, cuerpo: dict/str/bytes); con cabeceras (un dict), ahí quedan las de la respuesta."""
     datos = cuerpo if isinstance(cuerpo, bytes) else json.dumps(cuerpo).encode() if cuerpo is not None else None
     r = urllib.request.Request(base + ruta, data=datos, method=metodo)
+    if cookie:
+        r.add_header('Cookie', cookie)
     if datos is not None:
         r.add_header('Content-Type', tipo)
     if origen and metodo != 'GET':
@@ -33,9 +36,11 @@ def pedir(base, ruta, metodo='GET', cuerpo=None, tipo='application/json', host=N
         r.add_header('Host', host)
     try:
         with urllib.request.urlopen(r, timeout=30) as resp:
-            codigo, b = resp.status, resp.read()
+            codigo, b, h = resp.status, resp.read(), resp.headers
     except urllib.error.HTTPError as e:
-        codigo, b = e.code, e.read()
+        codigo, b, h = e.code, e.read(), e.headers
+    if cabeceras is not None:
+        cabeceras.update(h.items())
     if crudo:
         return codigo, b
     try:
@@ -48,6 +53,72 @@ def puerto_libre():
     with socket.socket() as s:
         s.bind(('127.0.0.1', 0))
         return s.getsockname()[1]
+
+
+def ip_de_la_red():
+    """Una IP de esta PC que no sea loopback (para hablarle a la UI como si fuera otra PC), o None."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sk:
+            sk.connect(('10.255.255.255', 1))
+            ip = sk.getsockname()[0]
+        return None if ip.startswith('127.') else ip
+    except OSError:
+        return None
+
+
+def probar_token(env):
+    """`crisol ui --host 0.0.0.0`: desde otra PC (la IP de la red de esta) pide el token; desde 127.0.0.1, no."""
+    print('token (--host 0.0.0.0)')
+    ip = ip_de_la_red()
+    if not ip:
+        print('  - sin IP de red en esta PC: no se prueba el token')
+        return
+    puerto = puerto_libre()
+    srv = subprocess.Popen([sys.executable, os.path.join(RAIZ, 'crisol'), 'ui', '--puerto', str(puerto), '--no-abrir',
+                            '--host', '0.0.0.0'], env=dict(env, CRISOL_UI_TOKEN='prueba-123'),
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    try:
+        local, red = f'http://127.0.0.1:{puerto}/', f'http://{ip}:{puerto}/'
+        for _ in range(100):
+            try:
+                urllib.request.urlopen(local, timeout=1)
+                break
+            except OSError:
+                time.sleep(0.1)
+        lineas = [srv.stdout.readline() for _ in range(2)]
+        chequear(any(f'{red}?token=prueba-123' in x for x in lineas), 'imprime la URL con el token', ''.join(lineas))
+        chequear(pedir(local, 'api/assets')[0] == 200, 'desde esta PC, sin token')
+        c, b = pedir(red, '', crudo=True)
+        chequear(c == 401 and b'name="token"' in b, 'sin token: 401 con la página que lo pide', str(c))
+        c, _ = pedir(red, 'api/assets')
+        chequear(c == 401, 'API sin token: 401')
+        for r in ('app.mjs', 'i18n/es.mjs', 'mini/caja/x.png', 'archivos/caja/objeto.json', 'api/eventos'):
+            c, _ = pedir(red, r, crudo=True)
+            chequear(c == 401, f'{r} sin token: 401', str(c))
+        c, _ = pedir(red, 'api/cola', 'POST', {'paso': 'godot', 'nombre': 'caja'})
+        chequear(c == 401, 'POST sin token: 401')
+        c, b = pedir(red, '?token=malo', crudo=True)
+        chequear(c == 401 and b'incorrecto' in b, 'token malo: 401', str(c))
+        c, _ = pedir(red, 'api/assets', cookie=f'crisol_ui_{puerto}=malo')
+        chequear(c == 401, 'cookie mala: 401')
+        h = {}
+        c, b = pedir(red, '?token=prueba-123&x=1', crudo=True, cabeceras=h)
+        galleta = h.get('Set-Cookie', '')
+        chequear(c == 200 and galleta.startswith(f'crisol_ui_{puerto}=prueba-123;') and 'HttpOnly' in galleta
+                 and 'SameSite=Strict' in galleta, 'token bueno: cookie HttpOnly y SameSite=Strict', galleta)
+        chequear(b'url=/?x=1"' in b and b'prueba-123' not in b, 'vuelve a la página sin el token en la URL', b[:300])
+        cookie = galleta.split(';')[0]
+        chequear(pedir(red, 'api/assets', cookie=cookie)[0] == 200, 'con la cookie: la API')
+        chequear(pedir(red, '', crudo=True, cookie=cookie)[0] == 200, 'con la cookie: la página')
+        chequear(pedir(red, 'api/cola', 'POST', {'paso': 'rm', 'nombre': 'caja'}, cookie=cookie)[0] == 400,
+                 'con la cookie: POST con Origin llega a la API')
+        chequear(pedir(red, 'api/cola', 'POST', {'paso': 'rm'}, cookie=cookie, origen=False)[0] == 403,
+                 'con la cookie: POST sin Origin sigue en 403')
+        chequear(pedir(red, 'api/assets', host='evil.example:80', cookie=cookie)[0] == 403,
+                 'con la cookie: Host ajeno sigue en 403')
+    finally:
+        srv.terminate()
+        srv.wait(10)
 
 
 def probar_cancelar(tmp):
@@ -248,6 +319,7 @@ def main():
         with urllib.request.urlopen(base + 'api/eventos', timeout=10) as r:
             primera = r.readline().decode()
         chequear(primera.startswith('event: cola'), 'SSE: evento de la cola')
+        probar_token(env)
         probar_cancelar(tmp)
     finally:
         if srv:

@@ -36,7 +36,7 @@ crisol rehacer <n1,n2,...|todos>                    # blender..revisar en lote
 crisol metodo <n> [anim=kimodo|procedural ...]
 crisol movimiento <anim> --prompt "..." [--duracion s] [--seed n]   # clips Kimodo (CPU)
 crisol mcp                                          # servidor MCP por stdio (herramientas/mcp)
-crisol ui [--puerto 8190] [--no-abrir]              # UI web local (herramientas/ui)
+crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web local (herramientas/ui)
 ```
 
 - `crisol` (raíz del repo) importa `pipeline` y llama `main()`: es lo mismo que `python3 pipeline.py`; si no está
@@ -105,7 +105,9 @@ crisol ui [--puerto 8190] [--no-abrir]              # UI web local (herramientas
 - `0_entorno/operaciones.py`: lo común del MCP y la UI (correr/lanzar `crisol <paso> --json`, json del asset,
   `elegir` con las claves de elección, `ajustar` que no elige, `PASOS`).
 - `ui/` (`crisol ui`, python3 del sistema, stdlib + Pillow): `servidor.py` (API JSON sobre la CLI y `estado.py`, SSE,
-  miniaturas; Host local, o IP/nombre de la PC con `--host 0.0.0.0`, y Origin = Host), `cola.py` (un paso por vez,
+  miniaturas; Host local, o IP/nombre de la PC con `--host 0.0.0.0`, y Origin = Host; en la red, token para
+  todo lo que no llega por loopback: `?token=` → cookie HttpOnly/SameSite=Strict `crisol_ui_<puerto>`, si no 401 con
+  la página de `pagina_acceso`, que lee las claves `acceso.*` de i18n), `cola.py` (un paso por vez,
   `<datos_dir>/.crisol_ui/`, cancelar con `killpg`, duraciones medidas; al reabrir, un paso que siguió corriendo se
   espera por su PID; el log de cada paso pasa por `0_entorno/sello.py`, que le pone la hora a cada línea en otro
   proceso para que el paso no muera si se cierra la UI) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; el visor 3D
