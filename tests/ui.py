@@ -100,6 +100,64 @@ def probar_cancelar(tmp):
     chequear(d3['estado'] in ('cancelado', 'fallo'), 'cola: cancelar un paso que quedó de antes', d3['estado'])
 
 
+def probar_movimientos(base, datos):
+    """La biblioteca de movimientos (`crisol clip`) sin correr Kimodo: candidatos copiados de los clips del repo."""
+    print('movimientos')
+    from PIL import Image
+    repo = os.path.join(RAIZ, 'herramientas', '3_blender', 'movimientos')
+    bib_repo = open(os.path.join(repo, 'biblioteca.json')).read()
+    cand = os.path.join(datos, 'movimientos', 'candidatos')
+    os.makedirs(cand, exist_ok=True)
+    for i in range(2):
+        shutil.copy(os.path.join(repo, 'correr.npz'), os.path.join(cand, f'correr_s3_{i}.npz'))
+    Image.new('RGB', (600, 480), 'white').save(os.path.join(cand, 'correr_s3.png'))   # 2 filas de 240 px
+    c, d = pedir(base, 'api/movimientos')
+    cs = {x['id']: x for x in d.get('candidatos', [])} if c == 200 else {}
+    chequear(set(cs) == {'correr_s3_0', 'correr_s3_1'} and cs['correr_s3_1'].get('duracion') == 3.0 and
+             'jogging' in cs['correr_s3_1'].get('prompt', '') and cs['correr_s3_1']['hoja'] == 'correr_s3.png',
+             'candidatos con duración y prompt (leídos sin numpy)', json.dumps(d)[:300])
+    chequear({x['animacion']: x['origen'] for x in d.get('biblioteca', [])}.get('caminar') == 'repo', 'biblioteca del repo')
+    c, b = pedir(base, 'movimientos/correr_s3.png?fila=1', crudo=True)
+    chequear(c == 200 and Image.open(__import__('io').BytesIO(b)).size == (600, 240), 'fila de la hoja de una muestra')
+    c, _ = pedir(base, 'movimientos/correr_s3.png?fila=2', crudo=True)
+    chequear(c == 404, 'fila que no está: 404')
+    c, _ = pedir(base, 'api/movimientos/clip', 'POST', {'animacion': 'correr', 'candidato': 'correr_s3_1'}, origen=False)
+    chequear(c == 403, 'pasar un clip sin Origin: 403')
+    for malo in ({'animacion': 'idle', 'candidato': 'correr_s3_1'}, {'animacion': 'correr', 'candidato': '../x_s1_0'},
+                 {'animacion': 'correr', 'candidato': 'correr_s9_0'}, {'animacion': 'correr'},
+                 {'animacion': 'correr', 'candidato': 'correr_s3_1', 'hasta': 99}):
+        c, _ = pedir(base, 'api/movimientos/clip', 'POST', malo)
+        chequear(c == 400, f'clip rechazado: {json.dumps(malo)}', str(c))
+    propia = os.path.join(datos, 'movimientos')
+    chequear(not os.path.exists(os.path.join(propia, 'correr.npz')), 'un clip rechazado no copia nada')
+    c, d = pedir(base, 'api/movimientos/clip', 'POST', {'animacion': 'correr', 'candidato': 'correr_s3_1', 'desde': 0.5,
+                                                         'hasta': '', 'recomendado': True})
+    e = {x['animacion']: x for x in d.get('biblioteca', [])}.get('correr', {}) if c == 200 else {}
+    chequear(e.get('origen') == 'propia' and e.get('recomendado') and e.get('desde') == 0.5 and e.get('hasta') is None and
+             e.get('candidato') == 'correr_s3_1' and os.path.isfile(os.path.join(propia, 'correr.npz')),
+             'pasar un candidato a la biblioteca propia', json.dumps(d)[:300])
+    chequear(open(os.path.join(repo, 'biblioteca.json')).read() == bib_repo, 'la biblioteca del repo no cambia')
+    c, d = pedir(base, 'api/movimientos/clip', 'POST', {'animacion': 'golpe', 'recomendado': True, 'desde': ''})
+    e = {x['animacion']: x for x in d.get('biblioteca', [])}.get('golpe', {}) if c == 200 else {}
+    chequear(e.get('origen') == 'repo+propia' and e.get('recomendado') and e.get('desde') is None and e.get('hasta') == 1.3,
+             'cambiar una entrada del repo desde la propia', json.dumps(e))
+    c, d = pedir(base, 'api/movimientos/clip', 'POST', {'animacion': 'patada', 'candidato': 'correr_s3_0'})
+    chequear(c == 200, 'clip para una animación sin clip en el repo')
+    c, d = pedir(base, 'api/assets/cris/metodos')
+    pat = next((a for a in d if a['animacion'] == 'patada'), {}) if c == 200 else {}
+    chequear(pat.get('metodo') == 'procedural' and pat.get('nota', '').startswith('kimodo'), 'Ajustes ofrece el clip propio',
+             json.dumps(pat))
+    c, d = pedir(base, 'api/assets/cris/metodos', 'POST', {'cambios': {'patada': 'kimodo'}})
+    json_cris = os.path.join(datos, 'personajes', 'cris', 'personaje.json')
+    chequear(c == 200 and json.load(open(json_cris))['animacion']['metodos'].get('patada') == 'kimodo',
+             'usar el clip propio en un personaje')
+    for anim in ('correr', 'golpe'):
+        c, d = pedir(base, 'api/movimientos/clip', 'POST', {'animacion': anim, 'quitar': True})
+        e = {x['animacion']: x for x in d.get('biblioteca', [])}.get(anim, {}) if c == 200 else {}
+        chequear(e.get('origen') == 'repo', f'quitar {anim}: vuelve el del repo', json.dumps(e))
+    chequear(not os.path.exists(os.path.join(propia, 'correr.npz')), 'quitar borra el .npz propio')
+
+
 def main():
     tmp = tempfile.mkdtemp(prefix='crisol_ui_')
     srv = None
@@ -231,6 +289,8 @@ def main():
         chequear(c == 400, 'nombre repetido: 400')
         c, _ = pedir(base, 'api/assets', 'POST', {'nombre': 'Con Espacios', 'receta': 'objeto', 'descripcion': 'x'})
         chequear(c == 400, 'nombre inválido: 400')
+
+        probar_movimientos(base, cfg['datos_dir'])
 
         print('cola')
         c, tr = pedir(base, 'api/cola', 'POST', {'paso': 'godot', 'nombre': 'caja'})   # sale enseguida: falta sprites

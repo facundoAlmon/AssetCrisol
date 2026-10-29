@@ -403,3 +403,17 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .grupo-ajustes { grid-template-columns: minmax(0, 1fr); }
 .grupo-ajustes .fila > div, .candidatos-malla, .candidato { min-width: 0; }
 .barra-guardar { flex-wrap: wrap; }
+
+/* ---------- movimientos (Kimodo): candidatos y biblioteca ---------- */
+.clips { display: grid; gap: 12px; }
+.clip { min-width: 0; display: grid; gap: 10px; padding: 12px; border: 1px solid var(--linea); border-radius: var(--r); background: var(--superficie-2); }
+.clip > header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.clip > p { margin: 0; }
+.clip .esqueletos { overflow-x: auto; border-radius: var(--r-chico); background: #fff; }
+.clip .esqueletos button { display: block; border: 0; padding: 0; background: transparent; cursor: zoom-in; }
+.clip .esqueletos img { display: block; height: 120px; width: auto; max-width: none; }
+.clip .controles { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+.clip .controles .campo { min-width: 0; }
+.clip .controles select.entrada { width: auto; min-width: 150px; max-width: 100%; }
+.clip .ventana { width: 104px; }
+.clip .controles .casilla { min-height: 40px; }

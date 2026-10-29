@@ -283,7 +283,7 @@ def trellis(R, cfg):
 
 # pasos -> lo que necesitan: listas de alternativas (basta una) de capacidades que tienen que estar todas
 PASOS = [
-    ('nuevo, metodo', [['pillow']], ''),
+    ('nuevo, metodo, clip', [['pillow']], ''),
     ('imagen (con referencia)', [['comfyui', 'modelos_qwen']], 'Qwen Image Edit'),
     ('imagen (sin referencia)', [['comfyui', 'modelos_zimage'], ['comfyui', 'modelos_flux2', 'nodo_gguf']],
      'Z-Image Turbo, o FLUX.2 Dev + ComfyUI-GGUF'),
@@ -304,7 +304,7 @@ PASOS = [
     ('mcp', [['uv']], 'uv (pone el SDK de MCP)'),
 ]
 # sin estos, la receta recomendada no anda: el resto son opcionales (avisan pero no hacen fallar a doctor)
-OBLIGATORIOS = {'nuevo, metodo', 'imagen (con referencia)', 'vistas', 'malla (TRELLIS.2)',
+OBLIGATORIOS = {'nuevo, metodo, clip', 'imagen (con referencia)', 'vistas', 'malla (TRELLIS.2)',
                 'guia, blender, retrato, iso, anclas, revisar, comparar, rehacer', 'sprites, godot'}
 
 

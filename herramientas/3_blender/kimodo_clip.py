@@ -24,10 +24,7 @@ for _sd, _lado in (('L', 'Left'), ('R', 'Right')):
     })
 BRAZO = ('shoulder', 'upper_arm', 'forearm', 'hand')
 PIERNA = ('thigh', 'shin')
-# cuadros y loop de cada animación (los de anim.py: cambiarlos corre los índices de la hoja)
-CUADROS = {'caminar': (8, True), 'respirar': (8, True), 'correr': (12, True), 'rodar': (8, False),
-           'golpe': (7, False), 'patada': (8, False), 'herido': (3, False), 'morir': (6, False),
-           'lanzar': (6, False), 'brazos_arriba': (6, False), 'cargar': (6, True)}
+CUADROS = metodos.CUADROS   # cuadros y loop de cada animación que puede salir de un clip
 ACCIONES = {'caminar': 'Walk'}   # blender_main guarda el .blend con la Action 'Walk'
 # Kimodo: y arriba, +z adelante, +x a la izquierda del personaje. Rig: z arriba, frente -Y, .L en +X.
 M = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]], float)
@@ -155,7 +152,7 @@ def todas(a):
         if metodos.metodo(nombre, a, bib) == 'kimodo':
             c = bib[nombre]
             n, ciclo = CUADROS[nombre]
-            ruta = os.path.join(metodos.MOVIMIENTOS, c['clip'])
+            ruta = metodos.ruta_clip(c)
             fn = (lambda arm, a, ruta=ruta, n=n, ciclo=ciclo, c=c, nombre=nombre:
                   clip(arm, a, ACCIONES.get(nombre, f'Kimodo_{nombre}'), ruta, n, ciclo, c.get('desde'), c.get('hasta')))
         lista.append((nombre, fn))

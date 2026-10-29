@@ -15,6 +15,7 @@ sys.path.insert(0, RAIZ)
 import pipeline  # noqa: E402 (DATOS, CARPETAS, recetas, estilos; no importa bpy ni torch)
 import estado as est  # noqa: E402 (herramientas/0_entorno, en el path por pipeline)
 import operaciones as op  # noqa: E402
+import metodos  # noqa: E402 (herramientas/3_blender: la biblioteca de movimientos y sus candidatos, sin bpy)
 from cola import Cola  # noqa: E402
 
 WEB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'web')
@@ -260,6 +261,19 @@ def animaciones():
     return [{'id': a, 'godot': nombres_iso.get(a, a)} for a in todas]
 
 
+def movimientos():
+    """La biblioteca de movimientos (la del repo con la propia de datos_dir encima, metodos.biblioteca) y los
+    candidatos de `crisol movimiento`, con su hoja de esqueletos."""
+    d = os.path.join(pipeline.DATOS, 'movimientos', 'candidatos')
+    bib = metodos.biblioteca()
+    return {'animaciones': list(metodos.CUADROS),
+            'biblioteca': [{'animacion': a, 'origen': c['_origen'], 'clip': c['clip'],
+                            'recomendado': bool(c.get('recomendado')), 'desde': c.get('desde'), 'hasta': c.get('hasta'),
+                            'duracion': c.get('duracion'), 'prompt': c.get('prompt'), 'candidato': c.get('candidato'),
+                            'nota': c.get('_nota')} for a, c in bib.items()],
+            'candidatos': metodos.candidatos(d)}
+
+
 class Doctor:
     """`crisol doctor --json` en segundo plano (tarda unos segundos): lo último que dijo y qué pasos deshabilita."""
     def __init__(self, env):
@@ -422,7 +436,7 @@ class Manejador(BaseHTTPRequestHandler):
         if p[0] == 'mini' and len(p) >= 3:
             return self.miniatura(p[1], p[2:], q)
         if p[0] == 'movimientos' and len(p) == 2:
-            return self.hoja_movimiento(p[1])
+            return self.hoja_movimiento(p[1], q)
         if p[0] != 'api':                     # la página: index.html, app.mjs, componentes/, vendor/...
             return self.estatico(p)
         p = p[1:]
@@ -467,11 +481,10 @@ class Manejador(BaseHTTPRequestHandler):
             return self.eventos()
         if p == ['subidas'] and m == 'POST':
             return self.subir()
-        if p == ['movimientos']:
-            d = os.path.join(pipeline.DATOS, 'movimientos', 'candidatos')
-            hojas = sorted(glob.glob(os.path.join(d, '*.png')), key=os.path.getmtime, reverse=True)
-            return self.json([{'archivo': os.path.basename(h), 'modificado': os.path.getmtime(h),
-                               'clips': len(glob.glob(h[:-4] + '_*.npz'))} for h in hojas])
+        if p == ['movimientos'] and m == 'GET':
+            return self.json(movimientos())
+        if p == ['movimientos', 'clip'] and m == 'POST':
+            return self.clip(self.cuerpo_json())
         if p == ['recetas']:
             return self.json(recetas())
         if p == ['estilos']:
@@ -520,13 +533,22 @@ class Manejador(BaseHTTPRequestHandler):
         tipo = 'text/plain; charset=utf-8' if texto else mimetypes.guess_type(ruta)[0] or 'application/octet-stream'
         self.enviar(200, datos, tipo, {'ETag': etag, 'Cache-Control': 'no-cache'})
 
-    def hoja_movimiento(self, archivo):
-        """Una hoja de esqueletos de `crisol movimiento` (movimientos/candidatos/<anim>_s<seed>.png)."""
+    def hoja_movimiento(self, archivo, q):
+        """Una hoja de esqueletos de `crisol movimiento` (movimientos/candidatos/<anim>_s<seed>.png); con
+        ?fila=i, solo la fila de la muestra i (generar_movimiento.py las dibuja de 240 px de alto)."""
         ruta = os.path.join(pipeline.DATOS, 'movimientos', 'candidatos', archivo)
-        if not re.fullmatch(r'[a-z0-9_]+\.png', archivo) or not os.path.isfile(ruta):
+        if not re.fullmatch(r'[a-z0-9_-]+\.png', archivo) or not os.path.isfile(ruta):
             return self.error(404, 'no existe')
-        with open(ruta, 'rb') as f:
-            self.enviar(200, f.read(), 'image/png', {'Cache-Control': 'no-cache'})
+        if q.get('fila') is None:
+            with open(ruta, 'rb') as f:
+                return self.enviar(200, f.read(), 'image/png', {'Cache-Control': 'no-cache'})
+        from PIL import Image
+        im, fila = Image.open(ruta), int(q['fila'])
+        if not 0 <= fila < round(im.height / 240):
+            return self.error(404, 'no hay esa fila')
+        b = io.BytesIO()
+        im.crop((0, fila * 240, im.width, (fila + 1) * 240)).save(b, 'PNG')
+        self.enviar(200, b.getvalue(), 'image/png', {'Cache-Control': 'no-cache'})
 
     _minis = {}
 
@@ -687,6 +709,33 @@ class Manejador(BaseHTTPRequestHandler):
         if cambios:
             self.app.cambio()
         return self.json(out)
+
+    def clip(self, b):
+        """`crisol clip <anim> [--candidato c] [--desde s] [--hasta s] [--recomendado si|no] [--quitar]`: pasar un
+        candidato a la biblioteca propia o cambiar/quitar una entrada. Devuelve la biblioteca y los candidatos."""
+        anim = b.get('animacion', '')
+        if anim not in metodos.CUADROS:
+            raise ValueError(f'animacion: una de {", ".join(metodos.CUADROS)}')
+        args = ['clip', anim]
+        if b.get('candidato'):
+            if not metodos.CANDIDATO.match(str(b['candidato'])):
+                raise ValueError('candidato: <anim>_s<seed>_<muestra>')
+            args += ['--candidato', b['candidato']]
+        for k in ('desde', 'hasta'):
+            if k in b and b[k] is not None:
+                v = '' if b[k] == '' else float(b[k])
+                args += [f'--{k}', str(v)]
+        if b.get('recomendado') is not None:
+            args += ['--recomendado', 'si' if b['recomendado'] else 'no']
+        if b.get('quitar'):
+            args.append('--quitar')
+        if len(args) == 2:
+            raise ValueError('nada que cambiar')
+        d, err = op.crisol(*args, env=self.app.env)
+        if not d or not d.get('ok'):
+            return self.error(400, (d or {}).get('error') or err)
+        self.app.cambio()
+        return self.json(movimientos())
 
     def encolar(self, b):
         paso, n = b.get('paso'), b.get('nombre')
