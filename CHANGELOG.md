@@ -8,6 +8,10 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Agregado
+- **Editor de articulaciones** en `crisol ui` (Resultado > Guía > Editar articulaciones): arrastrar los puntos del
+  esqueleto sobre los renders de frente y de costado (o moverlos con las flechas), con deshacer. Guarda
+  `modelo.articulaciones` (las de antes en `_articulaciones_previas`), redibuja `guia.png` sin Blender y marca el paso
+  como hecho a mano, así Rig y animaciones queda para rehacer.
 - `crisol deshacer <n> --paso <p> [--ver]`: borra lo que generó un paso (con `--ver`, solo lo lista), sin tocar el json
   ni las elecciones; `ultratex` vuelve a la malla del motor y `articulaciones` a las de antes. `crisol renombrar <n>
   --nuevo <m>`: la carpeta, `godot/<tipo>/<n>/` (archivos, rutas `res://` y nombres en escenas y metas; los `.import`

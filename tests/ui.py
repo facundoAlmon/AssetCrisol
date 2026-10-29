@@ -238,6 +238,50 @@ def probar_movimientos(base, datos):
     chequear(not os.path.exists(os.path.join(propia, 'correr.npz')), 'quitar borra el .npz propio')
 
 
+def probar_articulaciones(base, datos):
+    """El editor sobre una guía armada a mano (sin Blender): leer, guardar (previas, guia.png, marca) y rechazos."""
+    from PIL import Image
+    pdir = os.path.join(datos, 'personajes', 'cris')
+    gdir = os.path.join(pdir, 'trabajo', 'guia')
+    c, _ = pedir(base, 'api/assets/cris/articulaciones')
+    chequear(c == 400, 'sin renders de la guía: 400')
+    os.makedirs(gdir, exist_ok=True)
+    with open(os.path.join(pdir, 'personaje.json')) as f:
+        J = json.load(f)['modelo']['articulaciones']
+    with open(os.path.join(gdir, 'guia.json'), 'w') as f:
+        json.dump({'ortho': 2.0, 'centro_z': 0.9, 'px': 200, 'articulaciones': J, 'origen': 'personaje.json'}, f)
+    for v in ('frente', 'costado'):
+        Image.new('RGB', (200, 200), 'white').save(os.path.join(gdir, f'{v}.png'))
+    c, g = pedir(base, 'api/assets/cris/articulaciones')
+    chequear(c == 200 and g['px'] == 200 and g['articulaciones'] == J and g['origen'] == 'personaje.json',
+             'leer las articulaciones de la guía', f'{c} {g}')
+    nuevas = json.loads(json.dumps(J))
+    rodilla = [nuevas['thigh.S'][1][0] + 0.01, nuevas['thigh.S'][1][1], nuevas['thigh.S'][1][2] - 0.02]
+    nuevas['thigh.S'][1] = nuevas['shin.S'][0] = rodilla
+    c, g = pedir(base, 'api/assets/cris/articulaciones', 'PUT', {'articulaciones': nuevas})
+    with open(os.path.join(pdir, 'personaje.json')) as f:
+        m = json.load(f)['modelo']
+    with open(os.path.join(gdir, 'articulaciones.json')) as f:
+        marca = json.load(f)
+    chequear(c == 200 and m['articulaciones']['shin.S'][0] == rodilla and m['_articulaciones_previas'] == J
+             and g['fuente'] == 'a mano', 'guardar: modelo.articulaciones y las de antes en _articulaciones_previas', f'{c} {g}')
+    chequear(os.path.isfile(os.path.join(gdir, 'guia.png')) and marca['fuente'] == 'a mano', 'guia.png redibujada y la marca')
+    c, d = pedir(base, 'api/assets/cris')
+    art = next((p for p in d.get('pasos', []) if p['paso'] == 'articulaciones'), {})
+    chequear(art.get('estado') == 'hecho' and 'a mano' in (art.get('nota') or ''), 'estado: articulaciones a mano', art)
+    c, _ = pedir(base, 'api/assets/cris/articulaciones', 'PUT', {'articulaciones': {'cola': [[0, 0, 0], [0, 0, 1]]}})
+    chequear(c == 400, 'un hueso que no está: 400')
+    c, _ = pedir(base, 'api/assets/cris/articulaciones', 'PUT', {'articulaciones': {'hips': [[0, 0, 'x'], [0, 0, 1]]}})
+    chequear(c == 400, 'una coordenada que no es número: 400')
+    c, _ = pedir(base, 'api/assets/caja/articulaciones')
+    chequear(c == 400, 'un objeto no tiene editor: 400')
+    c, r = pedir(base, 'api/assets/cris/deshacer', 'POST', {'paso': 'articulaciones'})
+    with open(os.path.join(pdir, 'personaje.json')) as f:
+        m = json.load(f)['modelo']
+    chequear(c == 200 and m['articulaciones'] == J, 'deshacer articulaciones vuelve a las de antes', f'{c} {r}')
+    shutil.rmtree(gdir)
+
+
 def main():
     tmp = tempfile.mkdtemp(prefix='crisol_ui_')
     srv = None
@@ -322,6 +366,9 @@ def main():
         chequear(c == 400, 'renombrar con un nombre inválido: 400', r)
         c, _ = pedir(base, 'api/assets/caja_dos/renombrar', 'POST', {'nuevo': 'caja'})
         chequear(c == 200, 'renombrar de vuelta a caja')
+
+        print('editor de articulaciones')
+        probar_articulaciones(base, cfg['datos_dir'])
 
         print('exportar')
         c, g = pedir(base, 'api/assets/caja/exportar')

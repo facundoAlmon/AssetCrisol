@@ -129,6 +129,9 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   Los candidatos de malla en *Te toca elegir* son tarjetas (`DecisionMalla` de `asset.mjs`, datos de
   `servidor.opcion_malla`): vistas de `trabajo/comparar/<c>/<vista>.png` (las deja `pipeline.comparar_candidatos`) o,
   en vehículos, `tarjeta_<c>.png`/`revision_<c>_<vista>.png`.
+  `componentes/articulaciones.mjs` es el editor de articulaciones (sobre `trabajo/guia/{frente,costado}.png` con la
+  cámara de `guia.json`; `servidor.guardar_articulaciones` escribe `modelo.articulaciones` + `_articulaciones_previas`,
+  redibuja `guia.png` con `dibujar_guia` y marca `articulaciones.json` con `fuente: "a mano"`).
   `componentes/candidatos.mjs` edita `malla.candidatos` con el formato de `pipeline.candidatos_malla` (lo que un
   candidato no pisa lo hereda del principal: solo escribe las claves que cambian) y nunca `malla.elegida`.
   Probar con `python3 tests/ui.py` (sin GPU) y mirar capturas (claro/oscuro, 390 px) antes de dar un cambio por bueno.

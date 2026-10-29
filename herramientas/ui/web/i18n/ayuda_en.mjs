@@ -28,13 +28,13 @@ export default {
   guia: {
     hace: 'Renders the mesh from the front and the side with a grid and draws where the joints are (shoulders, elbows, hips, knees...). Only for checking: it changes nothing.',
     mirar: 'Each joint in its place on the body, from the front and the side. Green: deforming bones; orange: controls; yellow: bone heads.',
-    mal: 'Run "Detect joints" and check the guide again. On dolls or toys where it fails, enter them by hand in the json.',
+    mal: 'Run "Detect joints" and check the guide again. On dolls or toys where it fails, place them by hand: Result > Guide > Edit joints.',
     readme: '3a-joint-guide-crisol-guia',
   },
   articulaciones: {
     hace: 'Detects the joints with DWPose on the guide renders and saves them in the character. It goes before the guide and the rig: without it, Blender estimates them by slicing the mesh, and that goes wrong on almost every character. If DWPose finds nobody or the pose is not plausible, it keeps the previous ones.',
     mirar: 'Then the guide: shoulders, elbows, wrists, hips, knees and ankles in their place.',
-    mal: 'On dolls, toys and chibis DWPose often finds nobody (the step note says so): the estimated ones stay; if they look wrong in the guide, enter them by hand.',
+    mal: 'On dolls, toys and chibis DWPose often finds nobody (the step note says so): the estimated ones stay; if they look wrong in the guide, fix them with Result > Guide > Edit joints.',
     readme: '3a-joint-guide-crisol-guia',
   },
   blender: {

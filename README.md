@@ -364,6 +364,11 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
 - **Ajustes** sin json: estilo, descripción, seeds, altura, cabeza, animaciones del iso y método de cada una
   (procedural o Kimodo), y el tamaño de los sprites (alto en pantalla, baldosa iso y calidad de cada hoja, con el
   tamaño que sale a la vista). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
+- **Editor de articulaciones** (Resultado > Guía > Editar articulaciones): los puntos del esqueleto sobre los
+  renders de frente y de costado, para arrastrarlos (o moverlos con las flechas). De frente, lo de un lado se copia al
+  otro y el polo de la rodilla la sigue. Guardar escribe `modelo.articulaciones` (las de antes quedan en
+  `_articulaciones_previas`: **Deshacer** en Detectar articulaciones vuelve a ellas), redibuja `guia.png` sin Blender y
+  deja Rig y animaciones para rehacer.
 - **Candidatos de malla** (Ajustes > Malla): el principal y los que se quieran comparar, cada uno con su motor
   (TRELLIS.2 512/1024, Pixal3D 1024/1536), seed y resolución, o como repintado con UltraTex de otro candidato
   (`malla.candidatos` con `desde`), con "repintar con UltraTex después" y su seed. Muestra cuáles ya están generados y
@@ -470,8 +475,8 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
    espalda y suele copiar lo del pecho (un logo, un emblema); con `espalda` la de atrás sale de la vista de Qwen.
    Mirar la **cara de cerca** (ver el consejo de arriba).
 5. **Articulaciones** (`crisol articulaciones`): revisar `guia.png` (y `pose_frente.png`, lo que vio DWPose).
-   Con muñecos y juguetes DWPose suele no detectar a nadie: ahí cargarlas a mano (ver
-   [3a](#3a-guía-de-articulaciones-pipelinepy-guia)).
+   Con muñecos y juguetes DWPose suele no detectar a nadie: ahí acomodarlas a mano (con el editor de `crisol ui` o en
+   el json, ver [3a](#3a-guía-de-articulaciones-pipelinepy-guia)).
 6. **Animación**: los valores por defecto andan; ver [3b](#3b-blender-pipelinepy-blender) si la cara no mira al
    frente o los codos doblan raro.
 7. **Revisar** (`crisol revisar`, después de `sprites` + `iso`): `trabajo/revision.png` junta la cabeza de
@@ -719,7 +724,8 @@ fallan en casi todos. Lo que pasó queda en `trabajo/guia/articulaciones.json` y
 <summary><b>Articulaciones estimadas o a mano</b></summary>
 
 Si `modelo.articulaciones` es `null`, se **estiman** por rebanadas de la malla (anda en cuerpos de proporciones
-normales; falla en chibis, cabezones o torsos anchos). **A mano**: copiar el bloque `articulaciones` de
+normales; falla en chibis, cabezones o torsos anchos). **A mano**: lo más cómodo es el editor de `crisol ui`
+(Resultado > Guía > Editar articulaciones: arrastrar los puntos de frente y de costado). Sin la UI: copiar el bloque `articulaciones` de
 `trabajo/guia/guia.json` a `modelo.articulaciones`, editar mirando la grilla (`"hueso": [[x,y,z cabeza], [x,y,z
 cola]]`; lado izquierdo del personaje = +X con sufijo `.S`, se espeja solo; frente = -Y; pies en z=0) y volver a
 correr `guia`. Codo ≈ a la altura de la cintura, rodilla en la rótula, tobillo arriba del empeine.

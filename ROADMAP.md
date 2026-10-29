@@ -111,7 +111,7 @@ Mejoras pedidas (2026-10-28):
 - [x] Pasos y resultados numerados (mismo número el paso y su resultado) y las pestañas de resultados en ese orden.
 - [x] Qué hace cada paso, a la vista (ayuda corta junto al paso).
 - [x] Deshacer un paso: borra lo que generó.
-- [ ] Editor de articulaciones (moverlas sobre `guia.png`).
+- [x] Editor de articulaciones (moverlas sobre `guia.png`).
 - [x] Articulaciones: casi siempre salen mal y al recalcular andan; recalcular sola en el paso (ver por qué la
       primera falla).
 - [x] Cambiar el nombre de un asset.

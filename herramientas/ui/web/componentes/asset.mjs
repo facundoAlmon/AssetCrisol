@@ -6,6 +6,7 @@ import {
 } from '../comunes.mjs'
 import { Ajustes } from './ajustes.mjs'
 import { Visor3D } from './visor3d.mjs'
+import { EditorArticulaciones } from './articulaciones.mjs'
 
 // pasos que no están en la cadena de `crisol estado` pero se pueden correr a mano
 const EXTRA = {
@@ -345,6 +346,7 @@ function Visor({ d }) {
   const [gid, setGid] = useState(porDefecto[0]?.id)
   const [i, setI] = useState(0)
   const [nitido, setNitido] = useState(false)
+  const [editando, setEditando] = useState(false)
   useEffect(() => { if (!grupos.some(g => g.id === gid)) setGid(porDefecto[0]?.id) }, [d])
   if (!grupos.length) return html`<div class="vacio"><p>${t('asset.sin_resultado')}</p></div>`
   const g = grupos.find(x => x.id === gid) || grupos[0]
@@ -353,9 +355,11 @@ function Visor({ d }) {
   const etiqueta = id => id === 'iso_reproductor' ? t('visor.iso') : id === 'iso' ? t('visor.iso_gif') : t('visor.' + id)
   return html`<div>
     <div class="segmentos desplazable" role="group" style="margin-bottom:14px">${grupos.map(x => html`<button aria-pressed=${x.id === g.id}
-      onClick=${() => { setGid(x.id); setI(0) }}>${x.n ? html`<span class="num-paso">${x.n}</span>` : ''}${etiqueta(x.id)}</button>`)}</div>
+      onClick=${() => { setGid(x.id); setI(0); setEditando(false) }}>${x.n ? html`<span class="num-paso">${x.n}</span>` : ''}${etiqueta(x.id)}</button>`)}</div>
     ${g.id === 'iso_reproductor'
       ? html`<${ReproductorIso} nombre=${d.nombre} meta=${d.iso} version=${v} />`
+      : g.id === 'guia' && editando
+      ? html`<${EditorArticulaciones} d=${d} cerrar=${() => setEditando(false)} />`
       : g.id === '3d'
       ? html`<${Visor3D} url=${urlArchivo(d.nombre, archivo, v)} key=${archivo} />
           <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>`
@@ -370,7 +374,9 @@ function Visor({ d }) {
         </div>
         ${g.archivos.length > 1 && html`<div class="tira">${g.archivos.map((x, k) => html`<button class="damero" aria-pressed=${k === i}
           onClick=${() => setI(k)} title=${x}><img src=${urlMini(d.nombre, x, 160, '', v)} alt=${x} /></button>`)}</div>`}
-        <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>`}
+        <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>
+        ${g.id === 'guia' && html`<button class="boton" style="margin-top:4px" onClick=${() => setEditando(true)}>
+          <${Icono} n="editar" />${t('art.editar')}</button>`}`}
   </div>`
 }
 

@@ -375,6 +375,10 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
 - **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
   one (procedural or Kimodo), and the sprite size (on-screen height, iso tile and the quality of each sheet, with the
   resulting size in view). The full json stays as an advanced mode (with the changes shown before saving).
+- **Joint editor** (Result > Guide > Edit joints): the skeleton points over the front and side renders, to drag
+  them (or move them with the arrow keys). In the front view one side is copied to the other and the knee pole follows
+  the knee. Saving writes `modelo.articulaciones` (the previous ones stay in `_articulaciones_previas`: **Undo** on
+  Detect joints goes back to them), redraws `guia.png` without Blender and leaves Rig and animations to redo.
 - **Mesh candidates** (Settings > Mesh): the main one and the ones to compare, each with its engine (TRELLIS.2
   512/1024, Pixal3D 1024/1536), seed and resolution, or as an UltraTex repaint of another candidate
   (`malla.candidatos` with `desde`), with "repaint with UltraTex afterwards" and its seed. It shows which ones are
@@ -485,7 +489,8 @@ The template already has these values; this is what to look at and what to chang
    the back and often copies the chest (a logo, an emblem); with `espalda` the back comes from Qwen's view. Look at
    the **face up close** (see the tip above).
 5. **Joints** (`crisol articulaciones`): check `guia.png` (and `pose_frente.png`, what DWPose saw). With dolls
-   and toys DWPose often detects nobody: enter them by hand (see [3a](#3a-joint-guide-pipelinepy-guia)).
+   and toys DWPose often detects nobody: place them by hand (with the `crisol ui` editor or in the json, see
+   [3a](#3a-joint-guide-pipelinepy-guia)).
 6. **Animation**: the defaults work; see [3b](#3b-blender-pipelinepy-blender) if the face does not look forward or
    the elbows bend oddly.
 7. **Review** (`crisol revisar`, after `sprites` + `iso`): `trabajo/revision.png` gathers the head in profile
@@ -738,7 +743,8 @@ joints): without it the slice estimate stays, and that fails on almost every cha
 <summary><b>Estimated or hand-placed joints</b></summary>
 
 If `modelo.articulaciones` is `null`, they are **estimated** from slices of the mesh (works for bodies with normal
-proportions; fails on chibis, big heads or wide torsos). **By hand**: copy the `articulaciones` block from
+proportions; fails on chibis, big heads or wide torsos). **By hand**: the easiest is the `crisol ui` editor (Result > Guide >
+Edit joints: drag the points in the front and side views). Without the UI: copy the `articulaciones` block from
 `trabajo/guia/guia.json` to `modelo.articulaciones`, edit it while looking at the grid (`"bone": [[x,y,z head],
 [x,y,z tail]]`; the character's left side = +X with the `.S` suffix, mirrored automatically; front = -Y; feet at z=0)
 and run `guia` again. Elbow ≈ at waist height, knee at the kneecap, ankle above the instep.

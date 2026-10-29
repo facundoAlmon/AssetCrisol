@@ -28,13 +28,13 @@ export default {
   guia: {
     hace: 'Renderiza la malla de frente y de costado con una grilla y dibuja dónde quedaron las articulaciones (hombros, codos, caderas, rodillas...). Es solo para revisar: no cambia nada.',
     mirar: 'Que cada articulación caiga en su lugar del cuerpo, de frente y de costado. Verde: huesos que deforman; naranja: controles; amarillo: cabezas de hueso.',
-    mal: 'Corré "Detectar articulaciones" y volvé a mirar la guía. En muñecos o juguetes donde no anda, hay que cargarlas a mano en el json.',
+    mal: 'Corré "Detectar articulaciones" y volvé a mirar la guía. En muñecos o juguetes donde no anda, acomodalas a mano: Resultado > Guía > Editar articulaciones.',
     readme: '3a-guía-de-articulaciones-crisol-guia',
   },
   articulaciones: {
     hace: 'Detecta las articulaciones con DWPose sobre los renders de la guía y las guarda en el personaje. Va antes de la guía y del rig: sin esto, Blender las estima cortando la malla en rebanadas, y en casi todos los personajes salen mal. Si DWPose no encuentra a nadie o la pose no es creíble, deja las de antes.',
     mirar: 'Después, la guía: que hombros, codos, muñecas, caderas, rodillas y tobillos caigan en su lugar.',
-    mal: 'Con muñecos, juguetes y chibis DWPose no suele detectar a nadie (la nota del paso lo dice): quedan las estimadas; si en la guía están mal, cargarlas a mano.',
+    mal: 'Con muñecos, juguetes y chibis DWPose no suele detectar a nadie (la nota del paso lo dice): quedan las estimadas; si en la guía están mal, acomodalas con Resultado > Guía > Editar articulaciones.',
     readme: '3a-guía-de-articulaciones-crisol-guia',
   },
   blender: {
