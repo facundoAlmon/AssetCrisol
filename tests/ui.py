@@ -370,6 +370,25 @@ def main():
         print('editor de articulaciones')
         probar_articulaciones(base, cfg['datos_dir'])
 
+        print('3D animado')
+        t = os.path.join(cfg['datos_dir'], 'personajes', 'cris', 'trabajo')
+        shutil.copy(os.path.join(t, 'malla', 'modelo.glb'), os.path.join(t, 'animado.glb'))   # el visor solo lo sirve
+        with open(os.path.join(t, 'animado.json'), 'w') as f:
+            json.dump({'caminar': {'clip': 'Walk', 'tiempos': [0, 0.1667], 'fin': 0.3333, 'ciclo': True},
+                       'golpe': {'clip': 'Punch', 'tiempos': [0, 0.1667], 'fin': 0.1667, 'ciclo': False}}, f)
+        c, d = pedir(base, 'api/assets/cris')
+        an = d.get('animado') or {}
+        chequear(any(g['id'] == 'animado' and g['paso'] == 'blender' for g in d.get('visuales', [])),
+                 'grupo 3D animado en el visor, del paso blender')
+        chequear(list(an) == ['walk', 'punch'] and an['walk']['fps'] == 12 and an['walk']['loop']
+                 and an['punch']['fps'] == 14 and not an['punch']['loop'], 'animaciones con su nombre, fps y loop de las hojas', an)
+        c, g = pedir(base, 'api/assets/cris/exportar')
+        modelo = next((x['archivos'] for x in g if x['id'] == 'modelo'), []) if c == 200 else []
+        chequear('trabajo/animado.glb' in modelo, 'animado.glb en exportar > modelo', modelo)
+        c, v = pedir(base, 'api/assets/cris/deshacer?paso=blender')
+        rutas = [r for r, _ in v.get('borraria', [])] if c == 200 else []
+        chequear({'trabajo/animado.glb', 'trabajo/animado.json'} <= set(rutas), 'deshacer blender borra el 3D animado', rutas)
+
         print('exportar')
         c, g = pedir(base, 'api/assets/caja/exportar')
         ids = [x['id'] for x in g] if c == 200 else []

@@ -17,6 +17,7 @@ import estado as est  # noqa: E402 (herramientas/0_entorno, en el path por pipel
 import operaciones as op  # noqa: E402
 import deshacer  # noqa: E402 (herramientas/0_entorno: deshacer un paso y renombrar)
 import metodos  # noqa: E402 (herramientas/3_blender: la biblioteca de movimientos y sus candidatos, sin bpy)
+import armar_iso  # noqa: E402 (herramientas/4_sprites: nombre en Godot, fps y loop de cada animación)
 from cola import Cola  # noqa: E402
 
 WEB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'web')
@@ -152,7 +153,7 @@ def grupos_exportar(pdir, pj, nombre, tipo):
              ('iso', hay(f'{gd}/iso/*.png', f'{gd}/iso/*.json')),
              ('retrato', hay(f'{gd}/{nombre}_retrato.png', f'{gd}/{nombre}_frente.png')),
              ('anclas', hay(f'{t}/iso/anclas.json')),
-             ('modelo', hay(f'{t}/malla/modelo.glb')),
+             ('modelo', hay(f'{t}/malla/modelo.glb', f'{t}/animado.glb')),
              ('previas', hay('preview.gif', 'preview_iso.gif', f'{t}/revision.png')),
              ('fuente', hay('personaje.json', 'referencia.png', rel(pdir, elegida) if elegida else ''))]
     elif tipo in ('objeto', 'vehiculo'):
@@ -177,7 +178,7 @@ YA_COMPRIMIDOS = ('.png', '.gif', '.glb', '.jpg', '.webp')
 
 # qué paso deja cada grupo del visor (la UI les pone su número de la cadena); en vehículos, `blender` arma el 3D y la
 # revisión
-PASO_VISUAL = {'animacion': 'sprites', '3d': 'malla', 'iso': 'iso', 'retrato': 'sprites', 'revision': 'revisar',
+PASO_VISUAL = {'animacion': 'sprites', '3d': 'malla', 'animado': 'blender', 'iso': 'iso', 'retrato': 'sprites', 'revision': 'revisar',
                'hoja': 'sprites', 'guia': 'guia', 'tarjeta': 'blender', 'objeto': 'sprites', 'comparar': 'malla',
                'tema': 'tema', 'repetibles': 'tema', 'malla': 'malla', 'vistas': 'vistas', 'imagen': 'imagen'}
 
@@ -197,6 +198,8 @@ def visuales(pdir, pj, nombre, tipo):
     if tipo == 'personaje':
         gd = f'godot/personajes/{nombre}'
         grupo('animacion', 'preview.gif')
+        if os.path.isfile(os.path.join(pdir, t, 'animado.json')):
+            grupo('animado', f'{t}/animado.glb')
         grupo('3d', f'{t}/malla/modelo.glb')
         grupo('iso', 'preview_iso.gif')
         grupo('retrato', f'{gd}/{nombre}_retrato.png', f'{gd}/{nombre}_frente.png')
@@ -221,6 +224,19 @@ def visuales(pdir, pj, nombre, tipo):
         grupo('vistas', f'{t}/imagen/vistas.png')
         grupo('imagen', rel(pdir, est.imagen_elegida(pdir, pj)), 'referencia.png')
     return g
+
+
+def animado(pdir):
+    """Las animaciones de trabajo/animado.glb para el visor 3D, con el nombre en Godot y el fps/loop de las hojas
+    (los mismos que el iso): {godot: {clip, tiempos, fin, fps, loop}}, en el orden de anim.TODAS."""
+    r = os.path.join(pdir, 'trabajo', 'animado.json')
+    if not os.path.exists(r):
+        return None
+    out = {}
+    for carpeta, v in op.leer(r).items():
+        fps, loop = armar_iso._ritmo(carpeta)
+        out[armar_iso.NOMBRES.get(carpeta, carpeta)] = {**v, 'fps': fps, 'loop': loop}
+    return out
 
 
 def iso_meta(pdir, nombre):
@@ -409,6 +425,7 @@ def detalle_asset(n):
     return {**resumen_asset(n), 'carpeta': pdir, 'json': op.leer(ruta), 'archivo_json': os.path.basename(ruta),
             'pasos': e['pasos'], 'decidir': e['decidir'], 'visuales': visuales(pdir, pj, n, e['tipo']),
             'iso': iso_meta(pdir, n) if e['tipo'] == 'personaje' else None,
+            'animado': animado(pdir) if e['tipo'] == 'personaje' else None,
             'elecciones': elecciones(pdir, pj, e['tipo']), 'licencias': licencias, 'logs': logs,
             'mallas_hechas': mallas_hechas(pdir) if e['tipo'] != 'escenario' else {},
             # para el tamaño de los sprites en Ajustes: lo que pone el estilo cuando el json deja null

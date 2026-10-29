@@ -364,6 +364,9 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
 - **Ajustes** sin json: estilo, descripción, seeds, altura, cabeza, animaciones del iso y método de cada una
   (procedural o Kimodo), y el tamaño de los sprites (alto en pantalla, baldosa iso y calidad de cada hoja, con el
   tamaño que sale a la vista). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
+- **3D animado** (Resultado, personajes): el personaje con su rig, girando con el mouse o el dedo, en la animación
+  que se elija y al ritmo de las hojas (los cuadros de los sprites a su fps, interpolados). Sale del paso Rig y
+  animaciones (`trabajo/animado.glb`).
 - **Editor de articulaciones** (Resultado > Guía > Editar articulaciones): los puntos del esqueleto sobre los
   renders de frente y de costado, para arrastrarlos (o moverlos con las flechas). De frente, lo de un lado se copia al
   otro y el polo de la rodilla la sigue. Guardar escribe `modelo.articulaciones` (las de antes quedan en
@@ -558,6 +561,7 @@ AssetCrisol/
 │   │   ├── malla/            sin_fondo.png, modelo.glb, modelo_motor.glb, ultratex_*.png, logs
 │   │   ├── guia/             frente.png, costado.png, guia.png, guia.json
 │   │   ├── frames/           <animación>/NN.png (vista lateral)
+│   │   ├── animado.glb       la malla con el rig y una animación por acción (+ animado.json: tiempos de los cuadros)
 │   │   ├── retrato/          retrato.png, frente.png, retrato.json
 │   │   ├── iso/              <animación>/<dirección>/NN.png, anclas.json
 │   │   ├── revision.png
@@ -791,6 +795,10 @@ los frames laterales y el retrato. Todas las animaciones son **en el lugar** (el
    en unidades del modelo (la usa `sprites` para recortar la imagen original);
 6. guarda `trabajo/<n>.blend` y los PNG en `trabajo/frames/` y `trabajo/retrato/`. Lo que se toque a mano en el
    `.blend` se pierde: todos los modos rearman desde `modelo.glb`.
+7. exporta `trabajo/animado.glb`: la malla con el rig y una animación glTF por acción (muestreada cuadro a cuadro,
+   con el IK de las piernas horneado; las de loop llegan hasta la pose que cierra el ciclo). `animado.json` dice qué
+   tiempo del glTF es cada cuadro de los sprites. Lo usa el visor 3D animado de `crisol ui`; también sirve para
+   llevar el personaje animado a otro motor (con los polígonos de la malla, 100-200 k caras).
 
 </details>
 

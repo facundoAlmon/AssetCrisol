@@ -93,7 +93,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
 - `2_malla/`: `generar_malla_pixal3d.py` (workflow API armado en Python; modo `alinear`), `generar_malla_trellis.py`
   (venv TRELLIS.2; se relanza con `os.execv` tras un OOM), `retexturizar_ultratex.py` (`limpia.glb` + `sin_fondo.png`
   → `modelo.glb`; el del motor queda en `modelo_motor.glb`; `espalda`/`costados` con las vistas de Qwen).
-- `3_blender/`: `blender_main.py` (modos `limpia`, `guia`, `construir`, `retrato`, `reves`, `comparar`, `iso`,
+- `3_blender/`: `blender_main.py` (`construir` también exporta `trabajo/animado.glb` + `animado.json` para el visor 3D
+  animado de la UI, `servidor.animado`; modos `limpia`, `guia`, `construir`, `retrato`, `reves`, `comparar`, `iso`,
   `anclas`, `objeto`, `alinear`), `rig_lib.py` (`PLANTILLA`, estimación, rig, pesos, `cortar_puentes`), `anim.py`
   (`TODAS`, poses-dict `_pose`/`_poses`), `kimodo_clip.py` (NPZ → Action), `metodos.py` (procedural/kimodo por
   animación, `CUADROS`; sin bpy ni numpy: biblioteca del repo `movimientos/biblioteca.json` + la propia de

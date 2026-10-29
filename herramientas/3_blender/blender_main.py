@@ -1145,6 +1145,33 @@ else:
 HUESOS_ANCLA = ['hips', 'chest', 'neck', 'head', 'hand.R', 'hand.L', 'foot.R', 'foot.L']
 
 
+def exportar_animado(arm, acciones):
+    """trabajo/animado.glb: la malla con el rig y una animación por Action, para el visor 3D de crisol ui. El glTF se
+    muestrea cuadro a cuadro (el IK de las piernas queda horneado) y cada animación empieza en 0 desde su primer
+    cuadro; en las de loop (con CYCLES) llega hasta la pose que cierra el ciclo. animado.json: por animación, la
+    Action y el tiempo de cada cuadro de los sprites (en segundos del glTF), para que el visor vaya a su ritmo."""
+    arm.rotation_euler.z = 0   # de frente (-Y), como modelo.glb
+    fps = sc.render.fps
+    out = {}
+    for nombre_anim, (accion, frames) in acciones.items():
+        act = bpy.data.actions[accion]
+        ciclo = any(m.type == 'CYCLES' for fc in anim._fcurves(act) for m in fc.modifiers)
+        paso = frames[-1] - frames[-2] if len(frames) > 1 else 0
+        fin = frames[-1] + paso if ciclo else frames[-1]
+        act.use_frame_range = True
+        act.frame_start, act.frame_end = frames[0], max(fin, frames[0] + 1)
+        out[nombre_anim] = {'clip': accion, 'tiempos': [round((f - frames[0]) / fps, 4) for f in frames],
+                            'fin': round((fin - frames[0]) / fps, 4), 'ciclo': ciclo}
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in [arm] + list(arm.children_recursive):
+        o.select_set(True)
+    bpy.ops.export_scene.gltf(filepath=os.path.join(TRABAJO, 'animado.glb'), export_format='GLB', use_selection=True,
+                              export_animation_mode='ACTIONS', export_force_sampling=True,
+                              export_anim_slide_to_zero=True, export_optimize_animation_size=True)
+    with open(os.path.join(TRABAJO, 'animado.json'), 'w') as f:
+        json.dump(out, f, indent=1)
+
+
 def anclas_cuadro(arm, size, f):
     """Cabeza de cada hueso (posición y giro en el mundo) en el cuadro f, más su píxel en el render iso."""
     bpy.context.scene.frame_set(f)
@@ -1246,8 +1273,10 @@ if modo == 'construir':
     apuntar(cam, (0, -10, CAM_Z), (math.pi / 2, 0, 0))   # cámara a nivel: mira al frente
     arm.rotation_euler.z = math.radians(90)              # el personaje mira a la derecha (+X)
     info = {}
+    acciones = {}
     for nombre_anim, fn in kimodo_clip.todas(a):
         frames = fn(arm, a)
+        acciones[nombre_anim] = (arm.animation_data.action.name, frames)
         d = os.path.join(TRABAJO, 'frames', nombre_anim); os.makedirs(d, exist_ok=True)
         for i, f in enumerate(frames):
             sc.frame_set(f)
@@ -1259,6 +1288,7 @@ if modo == 'construir':
     arm.animation_data.action = bpy.data.actions['Walk']
     sc.frame_start, sc.frame_end = 1, 16
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(TRABAJO, f'{nombre}.blend'))
+    exportar_animado(arm, acciones)
     with open(os.path.join(TRABAJO, 'frames', 'frames.json'), 'w') as f:
         json.dump({'size': size, 'ppu': ppu, 'frames': info}, f)
     print('CONSTRUIR OK', info)

@@ -375,6 +375,9 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
 - **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
   one (procedural or Kimodo), and the sprite size (on-screen height, iso tile and the quality of each sheet, with the
   resulting size in view). The full json stays as an advanced mode (with the changes shown before saving).
+- **Animated 3D** (Result, characters): the character with its rig, orbiting with the mouse or a finger, in the
+  chosen animation and at the sheets' pace (the sprite frames at their fps, interpolated). It comes from the Rig and
+  animations step (`trabajo/animado.glb`).
 - **Joint editor** (Result > Guide > Edit joints): the skeleton points over the front and side renders, to drag
   them (or move them with the arrow keys). In the front view one side is copied to the other and the knee pole follows
   the knee. Saving writes `modelo.articulaciones` (the previous ones stay in `_articulaciones_previas`: **Undo** on
@@ -577,6 +580,7 @@ AssetCrisol/
 │   │   ├── malla/            sin_fondo.png, modelo.glb, modelo_motor.glb, ultratex_*.png, logs
 │   │   ├── guia/             frente.png, costado.png, guia.png, guia.json
 │   │   ├── frames/           <animation>/NN.png (side view)
+│   │   ├── animado.glb       the mesh with the rig and one animation per action (+ animado.json: frame times)
 │   │   ├── retrato/          retrato.png, frente.png, retrato.json
 │   │   ├── iso/              <animation>/<direction>/NN.png, anclas.json
 │   │   ├── revision.png
@@ -809,6 +813,10 @@ renders the side-view frames and the portrait. All animations are **in place** (
    model units (`sprites` uses it to crop the original image);
 6. saves `trabajo/<n>.blend` and the PNGs in `trabajo/frames/` and `trabajo/retrato/`. Anything edited by hand in the
    `.blend` is lost: every mode rebuilds from `modelo.glb`.
+7. exports `trabajo/animado.glb`: the mesh with the rig and one glTF animation per action (sampled frame by frame,
+   with the leg IK baked; looping ones run up to the pose that closes the cycle). `animado.json` says which glTF time
+   each sprite frame is. The animated 3D viewer of `crisol ui` uses it; it also works to take the animated character
+   to another engine (with the mesh's polygon count, 100-200 k faces).
 
 </details>
 

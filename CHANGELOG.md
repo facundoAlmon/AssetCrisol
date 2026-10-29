@@ -8,6 +8,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Agregado
+- **3D animado** en `crisol ui`: el personaje con su rig en el visor 3D, con la animación elegida al ritmo de las hojas.
+  `blender` exporta `trabajo/animado.glb` (malla + rig + una animación por acción, IK horneado) y `animado.json` (el
+  tiempo de cada cuadro de los sprites); el `.glb` también sale en Exportar > Modelo 3D.
 - **Editor de articulaciones** en `crisol ui` (Resultado > Guía > Editar articulaciones): arrastrar los puntos del
   esqueleto sobre los renders de frente y de costado (o moverlos con las flechas), con deshacer. Guarda
   `modelo.articulaciones` (las de antes en `_articulaciones_previas`), redibuja `guia.png` sin Blender y marca el paso
