@@ -365,8 +365,10 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   (procedural o Kimodo), y el tamaño de los sprites (alto en pantalla, baldosa iso y calidad de cada hoja, con el
   tamaño que sale a la vista). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
 - **3D animado** (Resultado, personajes): el personaje con su rig, girando con el mouse o el dedo, en la animación
-  que se elija y al ritmo de las hojas (los cuadros de los sprites a su fps, interpolados). Sale del paso Rig y
-  animaciones (`trabajo/animado.glb`).
+  que se elija y al ritmo de las hojas (los cuadros de los sprites a su fps, interpolados), con una barra para ir a
+  un cuadro. Sale del paso Rig y animaciones (`trabajo/animado.glb`). En todos los visores 3D: dos dedos (o el clic
+  derecho) mueven la cámara, doble toque o doble clic enfoca el punto tocado (la cara, un pie) y hay pantalla
+  completa.
 - **Editor de articulaciones** (Resultado > Guía > Editar articulaciones): los puntos del esqueleto sobre los
   renders de frente y de costado, para arrastrarlos (o moverlos con las flechas). De frente, lo de un lado se copia al
   otro y el polo de la rodilla la sigue. Guardar escribe `modelo.articulaciones` (las de antes quedan en
