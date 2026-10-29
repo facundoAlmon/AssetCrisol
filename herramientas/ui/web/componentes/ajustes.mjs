@@ -47,6 +47,18 @@ function campos(d, estilos, animaciones) {
   return lista
 }
 
+const aSeeds = texto => texto.split(/[ ,;]+/).filter(Boolean).map(Number).filter(Number.isFinite)
+
+// el texto propio (con onInput y no onChange: si no, el botón de guardar seguía en gris hasta salir del campo) y no
+// el de la lista, para no reformatear "1, " mientras se escribe; se rehace si la lista cambia desde afuera
+function Seeds({ id, valor, cambiar }) {
+  const lista = (valor || []).join(', ')
+  const [texto, setTexto] = useState(lista)
+  useEffect(() => { if (aSeeds(texto).join(', ') !== lista) setTexto(lista) }, [lista])
+  return html`<input class="entrada mono" id=${id} inputmode="numeric" value=${texto}
+    onInput=${e => { setTexto(e.target.value); cambiar(aSeeds(e.target.value)) }} />`
+}
+
 function Campo({ c, valor, cambiar }) {
   const etiqueta = c.crudo ? c.etiqueta : t(c.etiqueta)
   const ayuda = c.ayuda && html`<small>${t(c.ayuda)}</small>`
@@ -70,8 +82,7 @@ function Campo({ c, valor, cambiar }) {
     control = html`<select class="entrada" id=${id} value=${valor ?? ''} onChange=${e => cambiar(e.target.value || null)}>
       ${c.opciones.map(([v, n]) => html`<option value=${v}>${n}</option>`)}</select>`
   } else if (c.tipo === 'seeds') {
-    control = html`<input class="entrada mono" id=${id} inputmode="numeric" value=${(valor || []).join(', ')}
-      onChange=${e => cambiar(e.target.value.split(/[ ,;]+/).filter(Boolean).map(Number).filter(Number.isFinite))} />`
+    control = html`<${Seeds} id=${id} valor=${valor} cambiar=${cambiar} />`
   } else {
     control = html`<input class="entrada" id=${id} type="number" step=${c.tipo === 'entero' ? 1 : c.paso} value=${valor ?? ''}
       onInput=${e => cambiar(e.target.value === '' ? (c.nulo ? null : undefined) : Number(e.target.value))} />`

@@ -70,6 +70,7 @@ class _Copia(io.TextIOBase):
 
     def write(self, s):
         self.destino.write(s)
+        self.destino.flush()             # el log del paso se lee mientras corre (crisol ui)
         self._resto += s
         *hechas, self._resto = self._resto.split('\n')
         self.lineas += [l for l in hechas if l.strip()]
@@ -86,7 +87,8 @@ def correr_json(paso, nombre, carpetas, fn, estado_de=None):
     sys.stdout.flush()
     fd_json = os.dup(1)
     os.dup2(2, 1)                        # subprocesos (Blender, ComfyUI...) heredan el fd 1: van a stderr
-    copia = _Copia(sys.stdout)
+    os.environ.setdefault('PYTHONUNBUFFERED', '1')   # y sus python escriben a un archivo: sin esto, todo al final
+    copia = _Copia(sys.stderr)           # no sys.stdout: a un archivo va con búfer de bloque y el log quedaba vacío
     sys.stdout = copia
     antes = foto(carpetas)
     codigo, error = OK, None

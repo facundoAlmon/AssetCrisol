@@ -50,6 +50,13 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - Los tiempos de Pixal3D en objetos (README): el candidato `pixal3d` a 1536 tarda 1-8 min según el volumen.
 
 ### Arreglado
+- Con `--json` (los pasos que lanza la UI) los mensajes del paso y la salida de sus subprocesos de python quedaban en
+  un búfer y el log aparecía recién al terminar (visto en `imagen`): ahora se escriben al momento.
+- Cambiar `malla.elegida` y rehacer lo que sigue usaba la malla anterior: `trabajo/malla` sigue siendo el candidato
+  copiado hasta volver a correr `malla` (que copia, no regenera), y `crisol estado` lo daba por hecho. Ahora marca
+  `malla` como vieja si `trabajo/malla` no es la elegida (lo anota `trabajo/malla/candidato.txt`), y la copia lleva
+  la fecha de ahora, así `blender` y lo que sigue quedan viejos.
+- `crisol ui`, Ajustes: al escribir las seeds, Guardar seguía en gris hasta salir del campo.
 - `crisol ui`: al reabrirla con un paso que siguió corriendo, quedaba "interrumpido" y el siguiente de la cola
   arrancaba encima; ahora lo espera. En el celular, deslizar en vertical sobre el visor 3D baja la página (girar es
   de costado). Al comparar mallas en 3D, "Elegir esta" aparecía dos veces.
