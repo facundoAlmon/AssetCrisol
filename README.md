@@ -347,7 +347,11 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   cada uno; **Te toca elegir** muestra las candidatas (imagen, malla, texturas) para que la persona elija, y una
   elección ya hecha se puede cambiar. El visor muestra el resultado: el personaje en 8 direcciones (animación y
   dirección a elección), el modelo **en 3D** (girar y acercar con el mouse o el dedo), el gif, el retrato, la hoja
-  de revisión, las vistas. Los candidatos de malla se pueden comparar en 3D uno al lado del otro antes de elegir.
+  de revisión, las vistas. Los candidatos de malla salen como tarjetas, una por candidato: su render (todas en la
+  misma vista: frente, tres cuartos, costados o espalda; en vehículos la tarjeta y las vistas de `blender`), cómo se
+  hace (motor, seed, resolución, UltraTex), si ya está generado, **Ver en 3D** dentro de la tarjeta (hasta tres a la
+  vez) y **Elegir esta**. Las mallas de antes de este cambio, sin vistas propias, muestran la hoja
+  `trabajo/candidatos.png` hasta correr **Comparar mallas**.
 - **Ajustes** sin json: estilo, descripción, seeds, altura, cabeza, animaciones del iso y método de cada una
   (procedural o Kimodo). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
 - **Candidatos de malla** (Ajustes > Malla): el principal y los que se quieran comparar, cada uno con su motor
@@ -673,7 +677,8 @@ cada candidato pisa claves de `malla`, y `desde: "<otro>"` reusa la malla de ese
 (típico: `{"desde": "trellis2", "ultratex": {"giro": 45}}`). `malla` genera cada uno en `trabajo/malla_<c>/` (el que
 ya tiene `modelo.glb` no se rehace) y deja el elegido en `trabajo/malla`; en personajes y objetos arma
 `trabajo/candidatos.png` (`crisol comparar <n>` la rehace): una fila por candidato, vista con la cámara iso
-desde cinco ángulos. Para cambiar de elegida, editar `malla.elegida` y correr `malla` de nuevo (copia, no genera).
+desde cinco ángulos (cada vista también sola en `trabajo/comparar/<c>/<vista>.png`, para las tarjetas de `crisol
+ui`; "(elegida)" marca solo la de `malla.elegida`). Para cambiar de elegida, editar `malla.elegida` y correr `malla` de nuevo (copia, no genera).
 Los candidatos heredan `caras`: Pixal3D con 5000 sale astillado.
 
 </details>

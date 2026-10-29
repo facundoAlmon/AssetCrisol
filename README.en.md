@@ -358,7 +358,11 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   **Your call** shows the candidates (image, mesh, textures) for the person to choose, and a choice already made can
   be changed. The viewer shows the result: the character in 8 directions (pick animation and direction), the gif,
   the portrait, the review sheet, the views, and the model **in 3D** (rotate and zoom with the mouse or a finger).
-  Mesh candidates can be compared in 3D side by side before choosing.
+  Mesh candidates show up as cards, one per candidate: its render (all in the same view: front, three quarters,
+  sides or back; for vehicles the card and the `blender` views), how it is made (engine, seed, resolution, UltraTex),
+  whether it is generated yet, **View in 3D** inside the card (up to three at once) and **Choose this one**. Meshes
+  from before this change, without views of their own, show the `trabajo/candidatos.png` sheet until you run
+  **Compare meshes**.
 - **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
   one (procedural or Kimodo). The full json stays as an advanced mode (with the changes shown before saving).
 - **Mesh candidates** (Settings > Mesh): the main one and the ones to compare, each with its engine (TRELLIS.2
@@ -691,7 +695,9 @@ overrides `malla` keys, and `desde: "<other>"` (from) reuses that other candidat
 changes (typical: `{"desde": "trellis2", "ultratex": {"giro": 45}}`). `malla` generates each one in
 `trabajo/malla_<c>/` (one that already has `modelo.glb` is not redone) and leaves the chosen one in `trabajo/malla`;
 for characters and props it builds `trabajo/candidatos.png` (`crisol comparar <n>` rebuilds it): one row per
-candidate, seen with the iso camera from five angles. To switch, edit `malla.elegida` and run `malla` again (it
+candidate, seen with the iso camera from five angles (each view is also saved alone in
+`trabajo/comparar/<c>/<view>.png`, for the `crisol ui` cards; "(elegida)" marks only the one in `malla.elegida`). To
+switch, edit `malla.elegida` and run `malla` again (it
 copies, it doesn't generate). Candidates inherit `caras`: Pixal3D with 5000 comes out splintered.
 
 </details>

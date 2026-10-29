@@ -377,11 +377,28 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .visor3d .estado3d.error svg { width: 18px; height: 18px; flex: none; }
 .visor3d .titulo3d { position: absolute; top: 12px; left: 12px; padding: 2px 8px; border-radius: 6px; background: var(--superficie-2); }
 .visor3d .ayuda3d { position: absolute; left: 12px; bottom: 10px; font-size: 12px; color: var(--texto-3); pointer-events: none; }
-.comparar3d { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px; }
-.comparar3d .visor3d { height: 380px; border-radius: 0; }
 @media (max-width: 860px) {
   .visor3d { height: 420px; }
-  .comparar3d .visor3d { height: 340px; }
+}
+
+/* tarjetas de los candidatos de malla (Te toca elegir): la vista o el visor 3D, cómo se hace y Elegir esta */
+.tarjetas-malla { grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
+.tarjeta-malla.actual { border-color: color-mix(in srgb, var(--hecho) 55%, var(--linea)); }
+.tarjeta-malla .arte { position: relative; }
+.tarjeta-malla .visor3d { height: auto; flex: 1; min-height: 300px; border-radius: 0; }
+.tarjeta-malla .sin-arte { aspect-ratio: auto; flex: 1; min-height: 200px; cursor: default; background: var(--superficie-3); color: var(--texto-3); gap: 8px; align-content: center; text-align: center; padding: 16px; }
+.tarjeta-malla .sin-arte svg { width: 34px; height: 34px; }
+.tarjeta-malla .titulo3d { display: none; }   /* el nombre ya está abajo */
+.tarjeta-malla .marca-vieja { position: absolute; top: 8px; left: 8px; }
+.tarjeta-malla footer { flex-direction: column; align-items: stretch; gap: 6px; }
+.tarjeta-malla .titulo-cand { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+.tarjeta-malla .titulo-cand .mono { overflow-wrap: anywhere; font-size: 15px; }
+.tarjeta-malla footer p { margin: 0; }
+@media (max-width: 600px) {   /* en el celular, de a dos: se comparan una al lado de la otra */
+  .tarjetas-malla { grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr)); gap: 10px; }
+  .tarjeta-malla footer { padding: 8px; }
+  .tarjeta-malla .ayuda3d { display: none; }
+  .tarjeta-malla .botones-opcion .boton { flex: 1; justify-content: center; }
 }
 
 /* candidatos de malla */
