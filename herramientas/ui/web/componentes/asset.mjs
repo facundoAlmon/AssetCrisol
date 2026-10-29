@@ -2,7 +2,7 @@
 // reproductor iso por dirección), los ajustes y los archivos/logs.
 import {
   html, useState, useEffect, useRef, useGlobal, api, t, urlArchivo, urlMini, Icono, Chip, Cargando, Error, verGrande,
-  trabajosDe, encolar, nombrePaso, docPaso, aviso, duracion, Colada, transcurrido, Plegable,
+  trabajosDe, encolar, nombrePaso, docPaso, ayudaPaso, urlReadme, aviso, duracion, Colada, transcurrido, Plegable,
 } from '../comunes.mjs'
 import { Ajustes } from './ajustes.mjs'
 import { Visor3D } from './visor3d.mjs'
@@ -44,6 +44,17 @@ function BotonPaso({ d, paso, estado, cola, doctor, principal }) {
     <${Icono} n=${rehacer ? 'rehacer' : 'correr'} />${t(rehacer ? 'asset.rehacer' : 'asset.correr')}</button>`
 }
 
+// la ayuda extendida de un paso ("Más" en la cadena): qué hace, qué mirar, qué probar si sale mal y su sección del
+// README; ocupa todo el ancho de la fila (en la columna del medio no entra)
+function AyudaPaso({ a }) {
+  return html`<dl class="ayuda-paso">
+    <dt>${t('ayuda.hace')}</dt><dd>${a.hace}</dd>
+    <dt>${t('ayuda.mirar')}</dt><dd>${a.mirar}</dd>
+    <dt>${t('ayuda.mal')}</dt><dd>${a.mal}</dd>
+    <dd><a href=${urlReadme(a.readme)} target="_blank" rel="noopener">${t('ayuda.readme')}</a></dd>
+  </dl>`
+}
+
 // el número de cada paso en la cadena (1, 2...): el mismo lleva su resultado en el visor
 const numeros = d => Object.fromEntries(d.pasos.filter(p => p.estado !== 'no_aplica').map((p, i) => [p.paso, i + 1]))
 
@@ -52,6 +63,7 @@ const ELIGE = { imagen: c => c === 'imagen.elegida', malla: c => c === 'malla.el
 
 function Cadena({ d, cola, doctor, cambiar }) {
   const { corriendo, pendientes } = trabajosDe(cola, d.nombre)
+  const [ayuda, setAyuda] = useState(null)   // el paso con la ayuda abierta
   const siguiente = d.siguiente?.split(' ')[1]
   const extra = (EXTRA[d.tipo] || []).filter(p => !(p === 'ultratex' && !d.json?.malla?.ultratex))
   if (d.json?.malla?.candidatos && !d.json.vehiculo) extra.push('comparar')   // los vehículos comparan en `blender`
@@ -67,7 +79,9 @@ function Cadena({ d, cola, doctor, cambiar }) {
           <span class="marca-paso">${p.estado === 'hecho' ? html`<${Icono} n="check" />` : p.estado === 'viejo' ? html`<${Icono} n="rehacer" />` : ''}</span>
           <div style="min-width:0">
             <div class="nombre-paso"><span class="num-paso">${i + 1}.</span>${nombrePaso(p.paso, d.tipo)}</div>
-            <div class="doc-paso">${docPaso(p.paso, d.tipo)}</div>
+            <div class="doc-paso">${docPaso(p.paso, d.tipo)}
+              ${ayudaPaso(p.paso, d.tipo) && html` <button class="mas-ayuda" aria-expanded=${ayuda === p.paso}
+                onClick=${() => setAyuda(ayuda === p.paso ? null : p.paso)}>${t(ayuda === p.paso ? 'ayuda.menos' : 'ayuda.mas')}</button>`}</div>
             <div class="nota">${t('estado.' + p.estado)}${p.nota ? ': ' + p.nota : ''}</div>
             ${corriendo?.paso === p.paso && html`<div style="margin-top:8px"><${Colada} tr=${corriendo} cola=${cola} /></div>`}
             ${ELIGE[p.paso] && d.elecciones.some(e => ELIGE[p.paso](e.clave) && e.actual != null && !d.decidir.some(x => x.clave === e.clave)) &&
@@ -75,6 +89,7 @@ function Cadena({ d, cola, doctor, cambiar }) {
                 onClick=${() => cambiar(d.elecciones.filter(e => ELIGE[p.paso](e.clave)).map(e => e.clave))}>${t('decidir.cambiar')}</button>`}
           </div>
           <${BotonPaso} d=${d} paso=${p.paso} estado=${p.estado} cola=${cola} doctor=${doctor} principal=${p.paso === siguiente} />
+          ${ayuda === p.paso && html`<${AyudaPaso} a=${ayudaPaso(p.paso, d.tipo)} />`}
         </li>`
       })}
     </ol>

@@ -431,6 +431,20 @@ class Doctor:
 
 # ---------- servidor ----------
 
+def t_no_existe(e):
+    return f'no existe: {e.args[0] if e.args else e}'
+
+
+def fecha_codigo():
+    """La fecha del código Python que tiene cargado este proceso (la UI, la cola, operaciones, estado, pipeline): si
+    cambia en el disco, la página avisa que hay que reiniciar `crisol ui` (la web sí se lee de nuevo, y una página
+    nueva contra un servidor viejo pide rutas que no existen)."""
+    entorno = os.path.join(RAIZ, 'herramientas', '0_entorno')
+    rutas = glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), '*.py')) + \
+        [os.path.join(entorno, f) for f in ('operaciones.py', 'estado.py')] + [pipeline.__file__, metodos.__file__]
+    return max((os.path.getmtime(r) for r in rutas if os.path.exists(r)), default=0)
+
+
 class App:
     def __init__(self, puerto, red=False, token=None):
         self.puerto, self.red = puerto, red
@@ -441,6 +455,7 @@ class App:
         self.cola.al_terminar = lambda t: self.cambio()
         self.doctor = Doctor(self.env)
         self.version_assets = 0
+        self.codigo = fecha_codigo()
 
     def cambio(self):
         self.version_assets += 1
@@ -562,8 +577,10 @@ class Manejador(BaseHTTPRequestHandler):
             return self.error(403, 'solo desde la página de crisol ui (Origin)')
         try:
             return self.rutear(metodo, partes, q)
-        except (ValueError, KeyError) as e:
-            return self.error(400, str(e).strip("'"))
+        except ValueError as e:
+            return self.error(400, str(e))
+        except KeyError as e:   # un id o una clave que no está: solo el nombre no se entiende como error
+            return self.error(400, t_no_existe(e))
         except BrokenPipeError:
             pass
         except Exception as e:  # noqa: BLE001
@@ -748,7 +765,8 @@ class Manejador(BaseHTTPRequestHandler):
         self.enviar(200, datos, 'image/png', {'Cache-Control': 'no-cache', 'ETag': f'"{hash(clave)}"'})
 
     def eventos(self):
-        """SSE: la cola (cuando cambia), las últimas líneas del log del trabajo en curso y la versión de los assets."""
+        """SSE: la cola (cuando cambia), las últimas líneas del log del trabajo en curso, la versión de los assets y si
+        el código cambió en el disco (reiniciar)."""
         self.send_response(200)
         self.send_header('Content-Type', 'text/event-stream')
         self.send_header('Cache-Control', 'no-cache')
@@ -771,6 +789,8 @@ class Manejador(BaseHTTPRequestHandler):
                     ultima_av = app.version_assets
                     self.wfile.write(f'event: assets\ndata: {ultima_av}\n\n'.encode())
                 latido += 1
+                if latido % 10 == 1 and fecha_codigo() > app.codigo + 1:
+                    self.wfile.write(b'event: reiniciar\ndata: 1\n\n')
                 if latido % 15 == 0:
                     self.wfile.write(b': latido\n\n')
                 self.wfile.flush()

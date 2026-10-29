@@ -69,7 +69,10 @@ function Marco({ ruta, children }) {
       </nav>
       <div class="pie"><${CrisolMini} /><${Preferencias} /></div>
     </aside>
-    <main class="principal" id="principal">${children}</main>
+    <main class="principal" id="principal">
+      ${g.reiniciar && html`<div class="aviso brasa" role="status" style="margin-bottom:20px"><${Icono} n="rehacer" />
+        <div><b>${t('app.reiniciar')}</b><div class="chico">${t('app.reiniciar_ayuda')}</div></div></div>`}
+      ${children}</main>
     <nav class="barra-abajo">
       ${NAV.filter(([h]) => h !== '/movimientos').map(([href, icono, k]) => html`<a href=${'#' + href} aria-current=${actual(ruta, href) ? 'page' : null}>
         ${href === '/cola' && tr && html`<${Colada} tr=${tr} cola=${g.cola} />`}
