@@ -467,3 +467,24 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .renombrar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; min-width: 0; }
 .renombrar .campo { min-width: min(100%, 260px); }
 .cadena .deshacer li { display: list-item; padding: 0; border: 0; }
+
+/* editor de articulaciones: los renders de la guía con los huesos encima (colores fijos: van sobre el render) */
+.editor-art-vistas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.editor-art-vista { margin: 0; display: grid; gap: 4px; min-width: 0; }
+.editor-art-vista svg { width: 100%; height: auto; max-height: 72vh; display: block; border-radius: var(--r-chico); background: #fff; user-select: none; }
+.art-eje { stroke: rgb(220 0 0 / 0.45); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 4 4; }
+.art-hueso { stroke: #00a040; stroke-width: 3; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.art-hueso.espejo { stroke: rgb(0 160 64 / 0.45); }
+.art-punto { cursor: grab; touch-action: none; outline: none; }
+.art-punto:active { cursor: grabbing; }
+.art-punto .toque { fill: transparent; }
+.art-punto .marca { fill: #ffd400; stroke: #111; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.art-punto.espejo .marca { fill: rgb(255 212 0 / 0.55); }
+.art-punto.elegido .marca { fill: var(--brasa); stroke: #000; stroke-width: 2; }
+.art-punto:focus-visible .toque { fill: rgb(255 158 69 / 0.25); stroke: var(--brasa); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.editor-art-pie { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 10px; }
+.editor-art-pie .acciones { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (max-width: 600px) {   /* en el celular, una abajo de la otra: lado a lado no se pueden arrastrar con el dedo */
+  .editor-art-vistas { grid-template-columns: minmax(0, 1fr); }
+  .editor-art-vista svg { max-height: none; }
+}

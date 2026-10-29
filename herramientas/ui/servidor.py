@@ -233,6 +233,53 @@ def iso_meta(pdir, nombre):
     return m
 
 
+# ---------- editor de articulaciones ----------
+
+def articulaciones_guia(pdir, pj):
+    """Lo que necesita el editor: la cámara de los renders de la guía (trabajo/guia/guia.json, frente.png y
+    costado.png) y las articulaciones (las de modelo.articulaciones; si no hay, las estimadas con que se dibujó)."""
+    gdir = os.path.join(pdir, 'trabajo', 'guia')
+    if not all(os.path.isfile(os.path.join(gdir, a)) for a in ('guia.json', 'frente.png', 'costado.png')):
+        raise ValueError('faltan los renders de la guía: correr antes `articulaciones` o `guia`')
+    g = op.leer(os.path.join(gdir, 'guia.json'))
+    marca = os.path.join(gdir, 'articulaciones.json')
+    propias = pj['modelo'].get('articulaciones') or {}
+    return {'px': g['px'], 'ortho': g['ortho'], 'centro_z': g['centro_z'],
+            'articulaciones': {**g['articulaciones'], **propias},
+            'origen': 'personaje.json' if propias else 'estimadas',
+            'fuente': op.leer(marca).get('fuente') if os.path.exists(marca) else None,
+            'frente': 'trabajo/guia/frente.png', 'costado': 'trabajo/guia/costado.png',
+            'version': round(os.path.getmtime(os.path.join(gdir, 'frente.png')))}
+
+
+def guardar_articulaciones(pdir, pj, ruta, nuevas):
+    """Las del editor a modelo.articulaciones (las de antes quedan en _articulaciones_previas: `deshacer
+    articulaciones` vuelve a ellas), guia.png redibujada sin Blender y la marca del paso como hechas a mano (blender
+    queda viejo)."""
+    import dibujar_guia   # herramientas/3_blender, en el path por pipeline (PIL, sin bpy)
+    base = articulaciones_guia(pdir, pj)['articulaciones']
+    if not isinstance(nuevas, dict) or not nuevas or set(nuevas) - set(base):
+        raise ValueError('articulaciones: {hueso: [cabeza, cola]} con los huesos de la guía')
+    num = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and abs(v) <= 10  # noqa: E731
+    for n, par in nuevas.items():
+        if not (isinstance(par, list) and len(par) == 2 and all(isinstance(c, list) and len(c) == 3 and all(map(num, c))
+                                                               for c in par)):
+            raise ValueError(f'{n}: [[x, y, z], [x, y, z]] en metros')
+    nuevas = {n: [[round(v, 4) for v in c] for c in par] for n, par in nuevas.items()}
+    crudo = op.leer(ruta)
+    m = crudo.setdefault('modelo', {})
+    if m.get('articulaciones') and m['articulaciones'] != nuevas:
+        m['_articulaciones_previas'] = m['articulaciones']
+    m['articulaciones'] = nuevas
+    op.guardar(ruta, crudo)
+    gdir = os.path.join(pdir, 'trabajo', 'guia')
+    g = op.leer(os.path.join(gdir, 'guia.json'))
+    g.update(articulaciones={**g['articulaciones'], **nuevas}, origen='personaje.json')
+    op.guardar(os.path.join(gdir, 'guia.json'), g)
+    dibujar_guia.dibujar(gdir)
+    op.guardar(os.path.join(gdir, 'articulaciones.json'), {'fuente': 'a mano', 'motivo': None})
+
+
 # vistas de cada candidato de malla para su tarjeta: (id, archivo relativo a trabajo/ con {c} = el candidato). Las de
 # personajes y objetos las deja `comparar` (pipeline.VISTAS_COMPARAR, misma escala en todos); las de vehículos, `blender`
 VISTAS_MALLA = [(v, f'comparar/{{c}}/{v}.png') for v in pipeline.VISTAS_COMPARAR]
@@ -716,6 +763,14 @@ class Manejador(BaseHTTPRequestHandler):
                 app.cola.renombrar(n, nuevo)
                 app.cambio()
                 return self.json({'nombre': nuevo})
+            if p[2:] == ['articulaciones'] and m == 'GET':
+                return self.json(articulaciones_guia(*cargar(n)))
+            if p[2:] == ['articulaciones'] and m == 'PUT':
+                self.libre(n)
+                pdir, pj = cargar(n)
+                guardar_articulaciones(pdir, pj, ruta, self.cuerpo_json().get('articulaciones'))
+                app.cambio()
+                return self.json(articulaciones_guia(*cargar(n)))
             if p[2:] == ['exportar'] and m == 'GET':
                 pdir, pj = cargar(n)
                 return self.json(grupos_exportar(pdir, pj, n, est.estado(pdir, pj, n)['tipo']))

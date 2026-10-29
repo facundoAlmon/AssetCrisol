@@ -113,6 +113,8 @@ def _articulaciones(marca, glb, pj):
         if m.get('motivo'):
             quedan = 'las de antes' if pj['modelo'].get('articulaciones') else 'estimadas por rebanadas'
             p['nota'] = f'DWPose no pudo ({m["motivo"]}): quedan {quedan}; revisar la guía'
+        elif m.get('fuente') == 'a mano':
+            p['nota'] = 'a mano (editor de crisol ui)'
         else:
             p['nota'] = 'DWPose'
     return p

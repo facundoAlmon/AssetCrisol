@@ -642,8 +642,9 @@ def paso_guia(nombre):
     blender('guia', pdir, pj)
     print('[guia]', dibujar_guia.dibujar(os.path.join(pdir, 'trabajo', 'guia')))
     if not pj['modelo'].get('articulaciones'):
-        print('[guia] articulaciones ESTIMADAS. Si están bien, no hace falta nada. Para ajustarlas, copiá\n'
-              '       trabajo/guia/guia.json > articulaciones a personaje.json > modelo.articulaciones y editalas.')
+        print('[guia] articulaciones ESTIMADAS. Si están bien, no hace falta nada. Para ajustarlas: `crisol ui` >\n'
+              '       Resultado > Guía > Editar articulaciones, o copiá trabajo/guia/guia.json > articulaciones a\n'
+              '       personaje.json > modelo.articulaciones y editalas.')
 
 
 def paso_articulaciones(nombre):
