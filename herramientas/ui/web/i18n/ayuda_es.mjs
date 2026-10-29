@@ -38,8 +38,8 @@ export default {
     readme: '3a-guía-de-articulaciones-crisol-guia',
   },
   blender: {
-    hace: 'En Blender: le pone un esqueleto a la malla, calcula cuánto mueve cada hueso a cada parte (pesos), arma todas las animaciones y renderiza sus cuadros de costado. Segundos a un minuto.',
-    mirar: 'Las animaciones en el resultado (después de "Hoja de sprites"): codos y rodillas que doblan bien, nada que se estire raro, la cara mirando al frente.',
+    hace: 'En Blender: le pone un esqueleto a la malla, calcula cuánto mueve cada hueso a cada parte (pesos), arma todas las animaciones y renderiza sus cuadros de costado. También deja el personaje animado en 3D (trabajo/animado.glb). Segundos a un minuto.',
+    mirar: 'Las animaciones en "3D animado" (girándolo, en pantalla completa o cuadro por cuadro con la barra) y, después de "Hoja de sprites", de costado: codos y rodillas que doblan bien, nada que se estire raro, la cara mirando al frente.',
     mal: 'Cara que mira arriba o abajo: Ajustes > Modelo > Cabeza arriba (negativo levanta la cara). Codos "de plastilina", piezas que se arrastran o brazos fundidos: ver la sección de pesos del README. Si las articulaciones están mal, todo lo demás sale mal: mirar primero la guía.',
     readme: '3b-blender-crisol-blender',
   },

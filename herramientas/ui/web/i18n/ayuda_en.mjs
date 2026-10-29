@@ -38,8 +38,8 @@ export default {
     readme: '3a-joint-guide-crisol-guia',
   },
   blender: {
-    hace: 'In Blender: gives the mesh a skeleton, works out how much each bone moves each part (weights), builds every animation and renders its side-view frames. Seconds to a minute.',
-    mirar: 'The animations in the result (after "Sprite sheet"): elbows and knees bending right, nothing stretching oddly, the face looking ahead.',
+    hace: 'In Blender: gives the mesh a skeleton, works out how much each bone moves each part (weights), builds every animation and renders its side-view frames. It also leaves the animated 3D character (trabajo/animado.glb). Seconds to a minute.',
+    mirar: 'The animations in "Animated 3D" (orbiting it, in full screen or frame by frame with the bar) and, after "Sprite sheet", from the side: elbows and knees bending right, nothing stretching oddly, the face looking ahead.',
     mal: 'Face looking up or down: Settings > Model > Head up (negative lifts the face). "Clay" elbows, dragged pieces or arms fused to the body: see the weights section of the README. Wrong joints break everything else: check the guide first.',
     readme: '3b-blender-crisol-blender',
   },

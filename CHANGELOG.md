@@ -7,6 +7,11 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ## [Sin publicar]
 
+## [0.2.0-alpha.1] - 2026-10-29
+
+La UI en el navegador (`crisol ui`), con el editor de articulaciones y el personaje animado en 3D, y `crisol
+deshacer`/`crisol renombrar`. La imagen Docker está en `ghcr.io/facundoalmon/assetcrisol:0.2.0-alpha.1`.
+
 ### Agregado
 - **3D animado** en `crisol ui`: el personaje con su rig en el visor 3D, con la animación elegida al ritmo de las hojas.
   `blender` exporta `trabajo/animado.glb` (malla + rig + una animación por acción, IK horneado) y `animado.json` (el
@@ -78,6 +83,8 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - Los tiempos de Pixal3D en objetos (README): el candidato `pixal3d` a 1536 tarda 1-8 min según el volumen.
 
 ### Arreglado
+- `crisol ui`: el reproductor iso, en las animaciones sin loop (golpe, patada, salto...), después de la primera pasada
+  quedaba saltando entre los cuadros 0 y 1.
 - `crisol ui`: "Mirá esto antes de seguir" seguía apareciendo después de elegir (la imagen, la malla o las
   texturas que pedía mirar el paso).
 - Las articulaciones salían mal la primera vez y "al recalcular" andaban: lo primero eran las estimadas por
@@ -126,5 +133,6 @@ está en `ghcr.io/facundoalmon/assetcrisol:0.1.0-alpha.1`.
 - Hojas con `.json` estilo Aseprite para otros motores; `render.emisivo`; vitrina de los ejemplos.
 - `tests/humo.py`: test de humo sin generación (~3 min).
 
-[Sin publicar]: https://github.com/facundoAlmon/AssetCrisol/compare/v0.1.0-alpha.1...main
+[Sin publicar]: https://github.com/facundoAlmon/AssetCrisol/compare/v0.2.0-alpha.1...main
+[0.2.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.2.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.1.0-alpha.1

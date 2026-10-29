@@ -123,7 +123,9 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `<datos_dir>/.crisol_ui/`, cancelar con `killpg`, duraciones medidas; al reabrir, un paso que siguió corriendo se
   espera por su PID; el log de cada paso pasa por `0_entorno/sello.py`, que le pone la hora a cada línea en otro
   proceso para que el paso no muera si se cierra la UI) y `web/` (Preact + htm vendorizados en `web/vendor/`, sin build; el visor 3D
-  `componentes/visor3d.mjs` con three.js de `web/vendor/three/`, cargado recién al abrirlo; textos en
+  `componentes/visor3d.mjs` con three.js de `web/vendor/three/`, cargado recién al abrirlo; con `animaciones`
+  (`servidor.animado`) reproduce `animado.glb` con `mixer.setTime` al ritmo de los sprites (`cuadroEn` →
+  `tiempoDeCuadro`); la caja del encuadre se mide con la geometría en reposo, no con `setFromObject`; textos en
   `web/i18n/{es,en}.mjs` con las mismas claves). Un paso nuevo: a `operaciones.PASOS`, su nombre en i18n
   (`paso.<p>`, `pasodoc.<p>`), su ayuda larga (`web/i18n/ayuda_{es,en}.mjs`), su grupo del visor en
   `servidor.PASO_VISUAL` y, si no está en la cadena de `estado.py`, a `EXTRA` de `componentes/asset.mjs`.
