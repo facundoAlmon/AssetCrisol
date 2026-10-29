@@ -511,7 +511,9 @@ codes are 0 ok, 1 failed, 2 bad arguments, 3 GPU busy (with `--sin-esperar`), 4 
 (`imagen.elegida`, a texture), 5 a previous step is missing and 6 the installation lacks something the step needs
 (before starting, each step checks only what it uses and says how to fix it; `crisol doctor` checks everything). No
 step asks questions. An error the step didn't foresee is reported in one line, with the traceback in
-`trabajo/error_<paso>.log` (`CRISOL_TRAZA=1` shows it in the terminal).
+`trabajo/error_<paso>.log` (`CRISOL_TRAZA=1` shows it in the terminal). The step logs (`trabajo/malla/trellis2.log`,
+`trabajo/blender_<modo>.log`; not ComfyUI's) start each line with the time (`14:03:27 ...`; progress
+bars, on every update).
 
 Step names: `nuevo` new, `imagen` image, `vistas` views, `malla` mesh, `guia` guide, `articulaciones` joints,
 `retrato` portrait, `anclas` anchors, `revisar` review, `todo` all, `comparar` compare, `rehacer` redo, `metodo`

@@ -496,7 +496,9 @@ códigos de salida son 0 bien, 1 falló, 2 argumentos mal, 3 GPU ocupada (con `-
 (`imagen.elegida`, una textura), 5 falta un paso anterior y 6 a la instalación le falta algo que el paso necesita
 (antes de empezar, cada paso revisa solo lo suyo y dice cómo arreglarlo; `crisol doctor` revisa todo). Ningún paso
 hace preguntas. Un error que el paso no previó sale en una línea con el traceback en `trabajo/error_<paso>.log`
-(`CRISOL_TRAZA=1` lo muestra en la terminal). `crisol` es la entrada a `pipeline.py`: sin el enlace en el PATH, `./crisol` desde el repo o `python3 pipeline.py` hacen lo
+(`CRISOL_TRAZA=1` lo muestra en la terminal). Los logs de los pasos (`trabajo/malla/trellis2.log`,
+`trabajo/blender_<modo>.log`; no el de ComfyUI) llevan la hora al principio de cada línea (`14:03:27 ...`;
+las barras de progreso, en cada actualización). `crisol` es la entrada a `pipeline.py`: sin el enlace en el PATH, `./crisol` desde el repo o `python3 pipeline.py` hacen lo
 mismo.
 
 <details>

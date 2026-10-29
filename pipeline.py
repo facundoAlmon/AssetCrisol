@@ -488,9 +488,9 @@ def generar_malla(pdir, pj, nombre):
     else:
         sys.exit(f'[malla] motor desconocido: {m.get("motor")} (pixal3d | trellis2)')
     if cmd:
-        with open(log, 'w') as lf:
-            r = subprocess.run(cmd, cwd=cwd, env=env, stdout=lf, stderr=subprocess.STDOUT)
-        if r.returncode or not os.path.exists(os.path.join(out, 'modelo.glb')):
+        import sello   # cada línea del log con su hora
+        codigo, _ = sello.correr(cmd, log, cwd=cwd, env=env)
+        if codigo or not os.path.exists(os.path.join(out, 'modelo.glb')):
             sys.exit(f'[malla] falló, ver {log}')
     motor = os.path.join(out, 'modelo_motor.glb')
     if os.path.exists(motor):  # era la de la malla anterior
@@ -551,16 +551,14 @@ def blender(modo, pdir, pj):
     # Blender lee la configuración efectiva (json del personaje/objeto + estilo), no el json crudo
     with open(os.path.join(pdir, 'trabajo', '_config.json'), 'w') as f:
         json.dump(pj, f, indent=1, ensure_ascii=False)
-    r = subprocess.run([CFG['blender'], '-b', '--factory-startup', '--python',
-                        os.path.join(H, '3_blender', 'blender_main.py'), '--', modo, pdir],
-                       capture_output=True, text=True)
-    salida = r.stdout + r.stderr
-    with open(os.path.join(pdir, 'trabajo', f'blender_{modo}.log'), 'w') as f:
-        f.write(salida)
+    import sello   # el log con la hora de cada línea; lo que se revisa abajo es la salida sin sellar
+    codigo, salida = sello.correr([CFG['blender'], '-b', '--factory-startup', '--python',
+                                   os.path.join(H, '3_blender', 'blender_main.py'), '--', modo, pdir],
+                                  os.path.join(pdir, 'trabajo', f'blender_{modo}.log'), guardar=True)
     for l in salida.splitlines():
         if l.startswith('[blender]') or 'Error' in l or 'OK' in l:
             print(l)
-    if r.returncode or f'{modo.upper()} OK' not in salida:
+    if codigo or f'{modo.upper()} OK' not in salida:
         sys.exit(f'[blender] falló, ver trabajo/blender_{modo}.log')
 
 
