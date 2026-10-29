@@ -597,6 +597,9 @@ def paso_guia(nombre):
 
 
 def paso_articulaciones(nombre):
+    """DWPose sobre los renders de la guía -> modelo.articulaciones. Va en la cadena de los personajes antes de la
+    guía: sin articulaciones, `blender` las estima por rebanadas, que fallan en casi todos (torso ancho, cabezones).
+    El resultado queda anotado en trabajo/guia/articulaciones.json (estado.py: hecho aunque DWPose no haya podido)."""
     import articulaciones_pose, generar_imagen
     pdir, pj = cargar(nombre)
     if pj['_objeto']:
@@ -604,9 +607,14 @@ def paso_articulaciones(nombre):
     reservar_gpu('articulaciones')
     blender('guia', pdir, pj)
     generar_imagen.asegurar_servidor(CFG, os.path.join(pdir, 'trabajo'))
-    J, motivo = articulaciones_pose.estimar(CFG, nombre, os.path.join(pdir, 'trabajo', 'guia'), pj['modelo']['altura'])
+    gdir = os.path.join(pdir, 'trabajo', 'guia')
+    J, motivo = articulaciones_pose.estimar(CFG, nombre, gdir, pj['modelo']['altura'])
+    with open(os.path.join(gdir, 'articulaciones.json'), 'w') as f:
+        json.dump({'fuente': 'estimadas' if motivo else 'dwpose', 'motivo': motivo}, f, ensure_ascii=False)
     if motivo:
-        print(f'[articulaciones] no se pudieron estimar ({motivo}): quedan las de antes; cargarlas a mano mirando guia.png')
+        quedan = 'las de antes' if pj['modelo'].get('articulaciones') else 'las estimadas por rebanadas'
+        print(f'[articulaciones] no se pudieron estimar ({motivo}): quedan {quedan}; revisar guia.png y, si están '
+              'mal, cargarlas a mano')
         paso_guia(nombre)
         return
     ruta = os.path.join(pdir, 'personaje.json')
@@ -1114,7 +1122,11 @@ def ejecutar(a):
     elif a.paso == 'godot':
         paso_godot(a.personaje, a.instalar)
     elif a.paso == 'todo':
-        paso_malla(a.personaje); paso_blender(a.personaje); paso_sprites(a.personaje)
+        paso_malla(a.personaje)
+        pj = cargar(a.personaje)[1]
+        if not pj['_objeto'] and not pj['modelo'].get('articulaciones'):
+            paso_articulaciones(a.personaje)
+        paso_blender(a.personaje); paso_sprites(a.personaje)
         paso_godot(a.personaje, a.instalar)
 
 

@@ -9,7 +9,7 @@ import { Visor3D } from './visor3d.mjs'
 
 // pasos que no están en la cadena de `crisol estado` pero se pueden correr a mano
 const EXTRA = {
-  personaje: ['ultratex', 'articulaciones', 'retrato'],
+  personaje: ['ultratex', 'retrato'],
   objeto: ['ultratex'],
   vehiculo: [],
   escenario: [],

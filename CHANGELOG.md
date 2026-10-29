@@ -58,6 +58,11 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - Los tiempos de Pixal3D en objetos (README): el candidato `pixal3d` a 1536 tarda 1-8 min según el volumen.
 
 ### Arreglado
+- Las articulaciones salían mal la primera vez y "al recalcular" andaban: lo primero eran las estimadas por
+  rebanadas (sin `modelo.articulaciones`), y lo segundo, DWPose (`crisol articulaciones`), que no estaba en la cadena
+  (en `crisol ui`, un botón aparte). Ahora `articulaciones` es un paso de la cadena de los personajes, antes de `guia` y
+  `blender` (`crisol todo` lo corre si no hay articulaciones); anota el resultado en `trabajo/guia/articulaciones.json`
+  y `crisol estado` dice si DWPose no pudo. `blender` queda viejo si las articulaciones son más nuevas.
 - Con `--json` (los pasos que lanza la UI) los mensajes del paso y la salida de sus subprocesos de python quedaban en
   un búfer y el log aparecía recién al terminar (visto en `imagen`): ahora se escriben al momento.
 - Cambiar `malla.elegida` y rehacer lo que sigue usaba la malla anterior: `trabajo/malla` sigue siendo el candidato

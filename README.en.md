@@ -722,7 +722,9 @@ Renders the mesh from the front and the side (orthographic) with a grid every 0.
 between hips, neck and nose, and depth comes from the side view. On test humanoids it landed within 5 cm of the
 hand-placed ones. If it detects nobody or the pose fails the anatomical check (top-to-bottom order, knee and elbow
 near the middle), it warns and keeps the previous ones (in `modelo._articulaciones_previas`). That happens with dolls
-and toys.
+and toys. It is a step of the character chain (before `guia` and `blender`; `crisol todo` runs it when there are no
+joints): without it the slice estimate stays, and that fails on almost every character. What happened is kept in
+`trabajo/guia/articulaciones.json` and in the `crisol estado` note.
 
 <details>
 <summary><b>Estimated or hand-placed joints</b></summary>
