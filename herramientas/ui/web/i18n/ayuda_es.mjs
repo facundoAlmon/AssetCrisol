@@ -32,9 +32,9 @@ export default {
     readme: '3a-guía-de-articulaciones-crisol-guia',
   },
   articulaciones: {
-    hace: 'Detecta las articulaciones con DWPose sobre los renders de la guía y las guarda en el personaje. Si no encuentra a nadie o la pose no es creíble, deja las de antes.',
+    hace: 'Detecta las articulaciones con DWPose sobre los renders de la guía y las guarda en el personaje. Va antes de la guía y del rig: sin esto, Blender las estima cortando la malla en rebanadas, y en casi todos los personajes salen mal. Si DWPose no encuentra a nadie o la pose no es creíble, deja las de antes.',
     mirar: 'Después, la guía: que hombros, codos, muñecas, caderas, rodillas y tobillos caigan en su lugar.',
-    mal: 'A veces la primera vez sale mal y al volver a correrlo anda. Con muñecos, juguetes y chibis DWPose no suele detectar a nadie: cargarlas a mano mirando la guía.',
+    mal: 'Con muñecos, juguetes y chibis DWPose no suele detectar a nadie (la nota del paso lo dice): quedan las estimadas; si en la guía están mal, cargarlas a mano.',
     readme: '3a-guía-de-articulaciones-crisol-guia',
   },
   blender: {

@@ -190,7 +190,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   híbridos bone heat + distancia.
 - `cortar_puentes` solo tapa agujeros < 12 cm (uno grande arma una lámina). `modelo.normales: true` solo si la fila
   de revés muestra caras de afuera borradas (en otros suma manchas).
-- Articulaciones: las rebanadas fallan en chibis/torso ancho → `crisol articulaciones` (DWPose); en muñecos
+- Articulaciones: las rebanadas fallan en casi todos (chibis, torso ancho) → `articulaciones` (DWPose) es un paso de
+  la cadena de personajes antes de `blender` (`trabajo/guia/articulaciones.json` dice si DWPose pudo); en muñecos
   DWPose tampoco anda → cargarlas a mano mirando `guia.png`.
 - Brazos (`anim._brazo`): girar en ejes del cuerpo, no del hueso (en pose A hace un cono). Pies: `tobillo_*` es
   respecto de la canilla; medir tras cambiar poses (rango ~ -30..+50).

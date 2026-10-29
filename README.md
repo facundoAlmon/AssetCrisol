@@ -702,7 +702,9 @@ amarillo = cabezas de hueso.
 cuello se reparten entre cadera, cuello y nariz, y la profundidad sale de la vista de costado. En humanoides de
 prueba cayó a menos de 5 cm de las cargadas a mano. Si no detecta a nadie o la pose no pasa la validación
 anatómica (orden de arriba a abajo, rodilla y codo cerca de la mitad), avisa y quedan las de antes (en
-`modelo._articulaciones_previas`). Pasa con muñecos y juguetes.
+`modelo._articulaciones_previas`). Pasa con muñecos y juguetes. Es un paso de la cadena de los personajes (antes de
+`guia` y `blender`; `crisol todo` lo corre si no hay articulaciones): sin él quedan las estimadas por rebanadas, que
+fallan en casi todos. Lo que pasó queda en `trabajo/guia/articulaciones.json` y en la nota de `crisol estado`.
 
 <details>
 <summary><b>Articulaciones estimadas o a mano</b></summary>

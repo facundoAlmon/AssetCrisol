@@ -1,6 +1,6 @@
 # `crisol estado <n>`: qué pasos de un personaje, objeto o escenario están hechos, cuáles quedaron viejos (su salida
 # es anterior a la de un paso previo) y qué falta decidir. Solo mira archivos y el json: no corre nada.
-import glob, os
+import glob, json, os
 
 
 def _fecha(ruta):
@@ -99,6 +99,25 @@ def _cadena_malla(pdir, pj, decidir):
     return pasos, glb
 
 
+def _articulaciones(marca, glb, pj):
+    """Hecho si corrió (trabajo/guia/articulaciones.json, aunque DWPose no haya podido) o si están cargadas a mano."""
+    p = _paso('articulaciones', marca, [glb])
+    if p['estado'] == 'falta' and pj['modelo'].get('articulaciones'):
+        return dict(p, estado='hecho', nota="ya están en modelo.articulaciones")
+    if p['estado'] == 'hecho':
+        try:
+            with open(marca) as f:
+                m = json.load(f)
+        except (OSError, ValueError):
+            m = {}
+        if m.get('motivo'):
+            quedan = 'las de antes' if pj['modelo'].get('articulaciones') else 'estimadas por rebanadas'
+            p['nota'] = f'DWPose no pudo ({m["motivo"]}): quedan {quedan}; revisar la guía'
+        else:
+            p['nota'] = 'DWPose'
+    return p
+
+
 def personaje(pdir, pj, nombre):
     t = os.path.join(pdir, 'trabajo')
     g = os.path.join(pdir, 'godot', 'personajes', nombre)
@@ -107,9 +126,11 @@ def personaje(pdir, pj, nombre):
     blend = os.path.join(t, f'{nombre}.blend')
     meta, iso = os.path.join(g, f'{nombre}_meta.json'), os.path.join(g, 'iso', f'{nombre}_iso_meta.json')
     art = 'cargadas en modelo.articulaciones' if pj['modelo'].get('articulaciones') else 'estimadas (sin modelo.articulaciones)'
+    marca = os.path.join(t, 'guia', 'articulaciones.json')
     pasos += [
+        _articulaciones(marca, glb, pj),
         _paso('guia', os.path.join(t, 'guia', 'guia.png'), [glb], opcional=True, nota=art),
-        _paso('blender', blend, [glb]),
+        _paso('blender', blend, [glb, marca]),
         _paso('sprites', meta, [blend]),
         _paso('iso', iso, [glb]),
         _paso('anclas', os.path.join(t, 'iso', 'anclas.json'), [iso]),
@@ -182,7 +203,7 @@ def texto(e):
     for p in e['pasos']:
         if p['estado'] == 'no_aplica':
             continue
-        lineas.append(f'  {MARCAS[p["estado"]]} {p["paso"]:9s} {p["estado"]:9s}' + (f' {p["nota"]}' if p.get('nota') else ''))
+        lineas.append(f'  {MARCAS[p["estado"]]} {p["paso"]:14s} {p["estado"]:9s}' + (f' {p["nota"]}' if p.get('nota') else ''))
     for d in e['decidir']:
         op = ', '.join(str(o) for o in d['opciones'])
         lineas.append(f'  decidir {d["clave"]} ({op}) mirando {d["mirar"]}' + (f'; {d["nota"]}' if d.get('nota') else ''))

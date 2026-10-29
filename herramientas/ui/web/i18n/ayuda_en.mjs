@@ -32,9 +32,9 @@ export default {
     readme: '3a-joint-guide-crisol-guia',
   },
   articulaciones: {
-    hace: 'Detects the joints with DWPose on the guide renders and saves them in the character. If it finds nobody or the pose is not plausible, it keeps the previous ones.',
+    hace: 'Detects the joints with DWPose on the guide renders and saves them in the character. It goes before the guide and the rig: without it, Blender estimates them by slicing the mesh, and that goes wrong on almost every character. If DWPose finds nobody or the pose is not plausible, it keeps the previous ones.',
     mirar: 'Then the guide: shoulders, elbows, wrists, hips, knees and ankles in their place.',
-    mal: 'Sometimes it fails the first time and works when run again. On dolls, toys and chibis DWPose often finds nobody: enter them by hand looking at the guide.',
+    mal: 'On dolls, toys and chibis DWPose often finds nobody (the step note says so): the estimated ones stay; if they look wrong in the guide, enter them by hand.',
     readme: '3a-joint-guide-crisol-guia',
   },
   blender: {
