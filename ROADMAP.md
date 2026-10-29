@@ -102,7 +102,7 @@ Errores vistos probando la UI (2026-10-28):
 - [x] El log del paso en curso no muestra nada hasta que termina (visto en `imagen`).
 - [x] La hoja de candidatos de malla dice siempre "trellis (elegida)", aunque la elegida sea otra.
 - [x] Ajustes: al cambiar la seed de la imagen, el botón de guardar sigue en gris.
-- [ ] Los tiempos estimados de la cola no se acercan a lo que tardan los pasos.
+- [x] Los tiempos estimados de la cola no se acercan a lo que tardan los pasos.
 
 Mejoras pedidas (2026-10-28):
 - [ ] En el celular, secciones colapsables (hoy hay que bajar mucho).

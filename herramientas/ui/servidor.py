@@ -345,6 +345,29 @@ def animaciones():
     return [{'id': a, 'godot': nombres_iso.get(a, a)} for a in todas]
 
 
+def carga(paso, pdir, pj, solo=None):
+    """Cuánto trabajo trae un paso, para estimar su tiempo (cola.estimado): (variante, unidades). La variante separa
+    lo que tarda distinto por unidad (el motor); las unidades son lo que se repite (seeds, candidatos de malla que
+    faltan generar, animaciones iso, texturas); (None, None) en los demás."""
+    if paso == 'imagen':
+        import generar_imagen
+        motor = 'qwen' if pj['imagen'].get('referencia') else generar_imagen.motor_texto(pipeline.CFG, pj)
+        return motor, len(pj['imagen'].get('seeds') or [])
+    if paso == 'malla':
+        lista = pipeline.candidatos_malla(pj) or [(None, pj)]
+        t = os.path.join(pdir, 'trabajo')
+        faltan = [c for n, c in lista if n is None or not os.path.exists(os.path.join(t, f'malla_{n}', 'modelo.glb'))]
+        motores = sorted({c['malla'].get('motor', 'trellis2') + ('+ultratex' if c['malla'].get('ultratex') else '')
+                          for c in faltan})
+        return '/'.join(motores), len(faltan)
+    if paso == 'iso':
+        return '', len(pj.get('isometrico', {}).get('animaciones') or animaciones())
+    if paso == 'texturas':
+        tex = pj.get('texturas') or {}
+        return '', sum(len(t.get('seeds') or []) for k, t in tex.items() if not solo or k in solo.split(','))
+    return None, None   # siempre lo mismo: alcanza con lo que tardó entero
+
+
 def movimientos():
     """La biblioteca de movimientos (la del repo con la propia de datos_dir encima, metodos.biblioteca) y los
     candidatos de `crisol movimiento`, con su hoja de esqueletos."""
@@ -874,7 +897,7 @@ class Manejador(BaseHTTPRequestHandler):
 
     def encolar(self, b):
         paso, n = b.get('paso'), b.get('nombre')
-        tipo = None
+        tipo = variante = unidades = None
         if paso == 'rehacer':
             lista = b.get('nombres') or []
             if not lista or not all(NOMBRE.match(x) for x in lista):
@@ -895,11 +918,15 @@ class Manejador(BaseHTTPRequestHandler):
                 if not re.fullmatch(r'[a-z_,]+', b['solo']):
                     raise ValueError('solo: claves separadas por coma')
                 args += ['--solo', b['solo']]
+            try:
+                variante, unidades = carga(paso, pdir, pj, b.get('solo'))
+            except Exception:  # noqa: BLE001 (un json a medio editar no impide encolar: se estima sin carga)
+                variante, unidades = None, None
         else:
             raise ValueError(f'paso desconocido: {paso}')
         if any(t['estado'] in ('pendiente', 'corriendo') and t['args'] == args for t in self.app.cola.trabajos):
             raise ValueError('ese paso ya está en la cola')
-        return self.json(self.app.cola.agregar(args, n, tipo))
+        return self.json(self.app.cola.agregar(args, n, tipo, variante=variante, unidades=unidades))
 
 
 def main():
