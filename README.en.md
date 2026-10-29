@@ -366,7 +366,8 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   from before this change, without views of their own, show the `trabajo/candidatos.png` sheet until you run
   **Compare meshes**.
 - **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
-  one (procedural or Kimodo). The full json stays as an advanced mode (with the changes shown before saving).
+  one (procedural or Kimodo), and the sprite size (on-screen height, iso tile and the quality of each sheet, with the
+  resulting size in view). The full json stays as an advanced mode (with the changes shown before saving).
 - **Mesh candidates** (Settings > Mesh): the main one and the ones to compare, each with its engine (TRELLIS.2
   512/1024, Pixal3D 1024/1536), seed and resolution, or as an UltraTex repaint of another candidate
   (`malla.candidatos` with `desde`), with "repaint with UltraTex afterwards" and its seed. It shows which ones are

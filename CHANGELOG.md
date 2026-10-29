@@ -45,6 +45,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - `CONTRIBUTING.md`, plantillas de issues (error con `crisol doctor --json`, propuesta) y este CHANGELOG.
 
 ### Cambiado
+- `crisol ui`, Ajustes > Sprites: el tamaño de los sprites sin json (además del alto en pantalla, la calidad de la hoja,
+  la baldosa y la calidad del iso; en objetos, también la escala y la calidad de la vista de costado), con lo que sale
+  en el juego y lo que se renderiza a la vista mientras se cambia.
 - `crisol ui`: los pasos van numerados y con su ayuda corta a la vista (antes, solo al pasar el mouse); las pestañas
   del visor llevan el número del paso que dejó cada resultado, en ese orden. El historial de la cola se puede borrar
   (todo o lo marcado, con sus logs). En el celular, los pasos (con cuántos hay hechos y cuál sigue), los grupos de

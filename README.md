@@ -354,7 +354,8 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   vez) y **Elegir esta**. Las mallas de antes de este cambio, sin vistas propias, muestran la hoja
   `trabajo/candidatos.png` hasta correr **Comparar mallas**.
 - **Ajustes** sin json: estilo, descripción, seeds, altura, cabeza, animaciones del iso y método de cada una
-  (procedural o Kimodo). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
+  (procedural o Kimodo), y el tamaño de los sprites (alto en pantalla, baldosa iso y calidad de cada hoja, con el
+  tamaño que sale a la vista). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
 - **Candidatos de malla** (Ajustes > Malla): el principal y los que se quieran comparar, cada uno con su motor
   (TRELLIS.2 512/1024, Pixal3D 1024/1536), seed y resolución, o como repintado con UltraTex de otro candidato
   (`malla.candidatos` con `desde`), con "repintar con UltraTex después" y su seed. Muestra cuáles ya están generados y

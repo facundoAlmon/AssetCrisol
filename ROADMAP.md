@@ -114,7 +114,7 @@ Mejoras pedidas (2026-10-28):
       primera falla).
 - [ ] Cambiar el nombre de un asset.
 - [ ] Exportar: elegir qué archivos y bajarlos en un zip.
-- [ ] Elegir la resolución de los sprites.
+- [x] Elegir la resolución de los sprites.
 - [x] Borrar el historial de la cola (todo o lo seleccionado).
 - [ ] Receta para cuadrúpedos (perro, gato, caballo, vaca...): toca el rig y las animaciones, no solo la UI.
 
