@@ -316,7 +316,9 @@ def detalle_asset(n):
             'pasos': e['pasos'], 'decidir': e['decidir'], 'visuales': visuales(pdir, pj, n, e['tipo']),
             'iso': iso_meta(pdir, n) if e['tipo'] == 'personaje' else None,
             'elecciones': elecciones(pdir, pj, e['tipo']), 'licencias': licencias, 'logs': logs,
-            'mallas_hechas': mallas_hechas(pdir) if e['tipo'] != 'escenario' else {}}
+            'mallas_hechas': mallas_hechas(pdir) if e['tipo'] != 'escenario' else {},
+            # para el tamaño de los sprites en Ajustes: lo que pone el estilo cuando el json deja null
+            'escala': None if e['tipo'] == 'escenario' else {**pj['_estilo']['escala'], 'altura': pj['modelo'].get('altura')}}
 
 
 # ---------- catálogos ----------

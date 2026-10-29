@@ -1,12 +1,16 @@
 // Ajustes de un asset sin tocar el json: los campos comunes por tipo (README > personaje.json) y los métodos de
 // animación. El json completo queda como modo avanzado, con un diff antes de guardar. Las elecciones (imagen, malla,
 // texturas) no se cambian acá: van por Decidir.
-import { html, useState, useEffect, useMemo, api, t, aviso, Icono, Cargando, Plegable } from '../comunes.mjs'
+import { html, useState, useEffect, useMemo, api, t, aviso, Icono, Cargando, Plegable, nombrePaso } from '../comunes.mjs'
 import { Candidatos, CLAVES_CANDIDATOS } from './candidatos.mjs'
 
 const leer = (obj, clave) => clave.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj)
 
-// tipos de campo: texto, area, numero, entero, seeds, bool, select (opciones), animaciones
+// la superresolución: se renderiza N veces más grande y el juego lo reduce (más nítido, más pesado)
+const SUPER = [1, 2, 3, 4].map(n => [n, `${n}×`])
+
+// tipos de campo: texto, area, numero, entero, seeds, bool, select (opciones; numerico: el valor es un número),
+// animaciones, resolucion (el texto con el tamaño que sale)
 function campos(d, estilos, animaciones) {
   const j = d.json
   const estilo = { g: 'estilo', clave: 'estilo', tipo: 'select', etiqueta: 'aj.estilo', ayuda: 'aj.estilo_ayuda',
@@ -37,12 +41,27 @@ function campos(d, estilos, animaciones) {
       { g: 'malla', clave: 'malla.ultratex.costados', tipo: 'bool', etiqueta: 'aj.costados' })
   }
   lista.push({ g: 'modelo', clave: 'modelo.altura', tipo: 'numero', paso: 0.01, etiqueta: 'aj.altura' })
+  const e = d.escala || {}
   if (d.tipo === 'personaje') {
     lista.push({ g: 'modelo', clave: 'animacion.cabeza_arriba_grados', tipo: 'numero', paso: 1, etiqueta: 'aj.cabeza', ayuda: 'aj.cabeza_ayuda' },
-      { g: 'sprites', clave: 'sprites.alto_en_pantalla_px', tipo: 'entero', nulo: true, etiqueta: 'aj.alto_px', ayuda: 'aj.alto_px_ayuda' },
+      { g: 'sprites', clave: 'sprites.alto_en_pantalla_px', tipo: 'entero', nulo: true, etiqueta: 'aj.alto_px', ayuda: 'aj.alto_px_ayuda',
+        auto: e.altura && e.px_por_unidad ? Math.round(e.altura * e.px_por_unidad) : null },
+      { g: 'sprites', clave: 'sprites.superresolucion', tipo: 'select', numerico: true, etiqueta: 'aj.superres', ayuda: 'aj.superres_ayuda',
+        opciones: [['', t('aj.defecto') + ' (3×)'], ...SUPER] },
+      { g: 'sprites', clave: 'isometrico.baldosa_px', tipo: 'entero', nulo: true, etiqueta: 'aj.baldosa', ayuda: 'aj.baldosa_ayuda', auto: e.baldosa_px },
+      { g: 'sprites', clave: 'isometrico.superresolucion', tipo: 'select', numerico: true, etiqueta: 'aj.superres_iso',
+        opciones: [['', t('aj.defecto') + ' (2×)'], ...SUPER] },
+      { g: 'sprites', clave: 'resolucion', tipo: 'resolucion' },
       { g: 'animaciones', clave: 'isometrico.animaciones', tipo: 'animaciones', etiqueta: 'aj.iso_anims', ayuda: 'aj.iso_anims_ayuda', animaciones })
   } else {
-    lista.push({ g: 'modelo', clave: 'modelo.giro_grados', tipo: 'numero', paso: 1, etiqueta: 'aj.giro' })
+    lista.push({ g: 'modelo', clave: 'modelo.giro_grados', tipo: 'numero', paso: 1, etiqueta: 'aj.giro' },
+      { g: 'sprites', clave: 'isometrico.baldosa_px', tipo: 'entero', nulo: true, etiqueta: 'aj.baldosa', ayuda: 'aj.baldosa_ayuda', auto: e.baldosa_px },
+      { g: 'sprites', clave: 'isometrico.superresolucion', tipo: 'select', numerico: true, etiqueta: 'aj.superres_iso',
+        opciones: [['', t('aj.defecto') + ' (2×)'], ...SUPER] },
+      { g: 'sprites', clave: 'lateral.px_por_unidad', tipo: 'numero', paso: 0.01, nulo: true, etiqueta: 'aj.lateral_px', ayuda: 'aj.lateral_px_ayuda', auto: e.px_por_unidad },
+      { g: 'sprites', clave: 'lateral.superresolucion', tipo: 'select', numerico: true, etiqueta: 'aj.superres_lateral',
+        opciones: [['', t('aj.defecto') + ' (3×)'], ...SUPER] },
+      { g: 'sprites', clave: 'resolucion', tipo: 'resolucion' })
   }
   return lista
 }
@@ -79,15 +98,37 @@ function Campo({ c, valor, cambiar }) {
   if (c.tipo === 'area') {
     control = html`<textarea class="entrada" id=${id} lang=${c.ingles ? 'en' : null} value=${valor ?? ''} onInput=${e => cambiar(e.target.value || null)} />`
   } else if (c.tipo === 'select') {
-    control = html`<select class="entrada" id=${id} value=${valor ?? ''} onChange=${e => cambiar(e.target.value || null)}>
+    control = html`<select class="entrada" id=${id} value=${valor ?? ''} onChange=${e => cambiar(e.target.value === '' ? null : c.numerico ? Number(e.target.value) : e.target.value)}>
       ${c.opciones.map(([v, n]) => html`<option value=${v}>${n}</option>`)}</select>`
   } else if (c.tipo === 'seeds') {
     control = html`<${Seeds} id=${id} valor=${valor} cambiar=${cambiar} />`
   } else {
     control = html`<input class="entrada" id=${id} type="number" step=${c.tipo === 'entero' ? 1 : c.paso} value=${valor ?? ''}
+      placeholder=${c.auto != null ? t('aj.auto', { v: c.auto }) : null}
       onInput=${e => cambiar(e.target.value === '' ? (c.nulo ? null : undefined) : Number(e.target.value))} />`
   }
   return html`<label class="campo" for=${id}><span>${etiqueta}</span>${control}${ayuda}</label>`
+}
+
+// a qué tamaño sale cada cuadro con los valores de ahora (también los sin guardar): en el juego y renderizado
+function Resolucion({ d, valor }) {
+  const e = d.escala || {}
+  if (!e.altura) return null
+  const iso = (valor('isometrico.baldosa_px') ?? e.baldosa_px) / Math.SQRT2   // px de pantalla por unidad en iso
+  const sIso = valor('isometrico.superresolucion') ?? 2
+  const altoIso = Math.round(e.altura * iso * Math.cos(Math.PI / 6))           // de pie, cámara a 30°
+  let texto
+  if (d.tipo === 'personaje') {
+    const alto = valor('sprites.alto_en_pantalla_px') ?? Math.round(e.altura * e.px_por_unidad)
+    const s = valor('sprites.superresolucion') ?? 3
+    texto = t('aj.res_personaje', { a: alto, ar: alto * s, s, i: altoIso, ir: altoIso * sIso, si: sIso })
+  } else {
+    const ppu = valor('lateral.px_por_unidad') ?? e.px_por_unidad
+    const s = valor('lateral.superresolucion') ?? 3
+    const a = Math.round(e.altura * ppu)
+    texto = t('aj.res_objeto', { a, ar: a * s, s, i: altoIso, ir: altoIso * sIso, si: sIso })
+  }
+  return html`<p class="aviso" style="margin:0"><${Icono} n="info" /><span>${texto} ${t('aj.res_rehacer', { p: nombrePaso('blender', d.tipo) })}</span></p>`
 }
 
 function Metodos({ d }) {
@@ -191,8 +232,9 @@ export function Ajustes({ d, recargar }) {
   return html`<div style="display:grid;gap:26px">
     ${grupos.map(g => html`<section class="grupo-ajustes" key=${g}><${Plegable} titulo=${t('aj.g.' + g)} nivel="h3">
       <div class="fila">${lista.filter(c => c.g === g).map(c => html`<div key=${c.clave}
-          style=${['area', 'animaciones', 'candidatos'].includes(c.tipo) ? 'grid-column:1/-1' : ''}>
-        ${c.tipo === 'candidatos'
+          style=${['area', 'animaciones', 'candidatos', 'resolucion'].includes(c.tipo) ? 'grid-column:1/-1' : ''}>
+        ${c.tipo === 'resolucion' ? html`<${Resolucion} d=${d} valor=${k => valor({ clave: k })} />`
+          : c.tipo === 'candidatos'
           ? html`<${Candidatos} key=${d.modificado + JSON.stringify(d.json.malla || {})} d=${d} onCambio=${(patch, error) => {
               setCambios(prev => ({ ...Object.fromEntries(Object.entries(prev).filter(([k]) => !CLAVES_CANDIDATOS.includes(k))), ...patch }))
               setErrorCand(error)
