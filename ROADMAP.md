@@ -105,9 +105,9 @@ Errores vistos probando la UI (2026-10-28):
 - [x] Los tiempos estimados de la cola no se acercan a lo que tardan los pasos.
 
 Mejoras pedidas (2026-10-28):
-- [ ] En el celular, secciones colapsables (hoy hay que bajar mucho).
-- [ ] Pasos y resultados numerados (mismo número el paso y su resultado) y las pestañas de resultados en ese orden.
-- [ ] Qué hace cada paso, a la vista (ayuda corta junto al paso).
+- [x] En el celular, secciones colapsables (hoy hay que bajar mucho).
+- [x] Pasos y resultados numerados (mismo número el paso y su resultado) y las pestañas de resultados en ese orden.
+- [x] Qué hace cada paso, a la vista (ayuda corta junto al paso).
 - [ ] Deshacer un paso: borra lo que generó.
 - [ ] Editor de articulaciones (moverlas sobre `guia.png`).
 - [ ] Articulaciones: casi siempre salen mal y al recalcular andan; recalcular sola en el paso (ver por qué la
@@ -115,7 +115,7 @@ Mejoras pedidas (2026-10-28):
 - [ ] Cambiar el nombre de un asset.
 - [ ] Exportar: elegir qué archivos y bajarlos en un zip.
 - [ ] Elegir la resolución de los sprites.
-- [ ] Borrar el historial de la cola (todo o lo seleccionado).
+- [x] Borrar el historial de la cola (todo o lo seleccionado).
 - [ ] Receta para cuadrúpedos (perro, gato, caballo, vaca...): toca el rig y las animaciones, no solo la UI.
 
 ## 5. Salida 3D y otros motores

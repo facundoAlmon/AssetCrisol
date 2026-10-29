@@ -1,7 +1,7 @@
 // Ajustes de un asset sin tocar el json: los campos comunes por tipo (README > personaje.json) y los métodos de
 // animación. El json completo queda como modo avanzado, con un diff antes de guardar. Las elecciones (imagen, malla,
 // texturas) no se cambian acá: van por Decidir.
-import { html, useState, useEffect, useMemo, api, t, aviso, Icono, Cargando } from '../comunes.mjs'
+import { html, useState, useEffect, useMemo, api, t, aviso, Icono, Cargando, Plegable } from '../comunes.mjs'
 import { Candidatos, CLAVES_CANDIDATOS } from './candidatos.mjs'
 
 const leer = (obj, clave) => clave.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj)
@@ -189,8 +189,7 @@ export function Ajustes({ d, recargar }) {
     setGuardando(false)
   }
   return html`<div style="display:grid;gap:26px">
-    ${grupos.map(g => html`<section class="grupo-ajustes" key=${g}>
-      <h3>${t('aj.g.' + g)}</h3>
+    ${grupos.map(g => html`<section class="grupo-ajustes" key=${g}><${Plegable} titulo=${t('aj.g.' + g)} nivel="h3">
       <div class="fila">${lista.filter(c => c.g === g).map(c => html`<div key=${c.clave}
           style=${['area', 'animaciones', 'candidatos'].includes(c.tipo) ? 'grid-column:1/-1' : ''}>
         ${c.tipo === 'candidatos'
@@ -200,7 +199,7 @@ export function Ajustes({ d, recargar }) {
             }} />`
           : html`<${Campo} c=${c} valor=${valor(c)} cambiar=${v => setCambios({ ...cambios, [c.clave]: v })} />`}</div>`)}</div>
       ${g === 'animaciones' && html`<${Metodos} d=${d} />`}
-    </section>`)}
+    <//></section>`)}
     <div class="barra-guardar">
       <button class="boton primario" disabled=${!sucio || guardando || !!errorCand} title=${errorCand || ''} onClick=${guardar}><${Icono} n="check" />${t('aj.guardar')}</button>
       ${sucio && html`<button class="boton fantasma" onClick=${() => setCambios({})}>${t('aj.descartar')}</button>`}

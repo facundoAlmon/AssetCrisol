@@ -343,8 +343,8 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   si falta elegir algo. Se pueden seleccionar personajes para rehacerlos en lote (`crisol rehacer`).
 - **Crear**: el tipo (las recetas), una imagen de referencia (arrastrarla) o una descripción en inglés, el estilo y el
   nombre.
-- **Cada asset**: la cadena de pasos con su estado (hecho, desactualizado, pendiente) y un botón para correr o rehacer
-  cada uno; **Te toca elegir** muestra las candidatas (imagen, malla, texturas) para que la persona elija, y una
+- **Cada asset**: la cadena de pasos numerada, con qué hace cada uno, su estado (hecho, desactualizado, pendiente) y
+  un botón para correr o rehacerlo (las pestañas del visor llevan el número del paso que dejó cada resultado); **Te toca elegir** muestra las candidatas (imagen, malla, texturas) para que la persona elija, y una
   elección ya hecha se puede cambiar. El visor muestra el resultado: el personaje en 8 direcciones (animación y
   dirección a elección), el modelo **en 3D** (girar y acercar con el mouse o el dedo), el gif, el retrato, la hoja
   de revisión, las vistas. Los candidatos de malla salen como tarjetas, una por candidato: su render (todas en la
@@ -361,8 +361,9 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   que lo repintan) y pone Malla 3D en la cola. La elegida no se toca desde acá: se elige en **Te toca elegir**.
 - **Cola**: los pasos corren de a uno (también los que lance la terminal u otro programa esperan a la GPU), con el
   tiempo transcurrido y el estimado (de las duraciones medidas en esta PC), el log en vivo (con la hora de cada
-  línea) y cancelar. Si se cierra `crisol ui`, el paso que corre sigue hasta terminar y los que esperan arrancan al
+  línea) y cancelar. El historial se puede borrar (todo o lo marcado, con sus logs). Si se cierra `crisol ui`, el paso que corre sigue hasta terminar y los que esperan arrancan al
   volver a abrirla.
+- En el celular, los pasos, los grupos de ajustes y el historial de la cola se pliegan (con un resumen a la vista).
 - **Instalación**: lo que revisa `crisol doctor`; los pasos que no se pueden correr quedan apagados con el motivo.
 
 Corre en esta PC (escucha en `127.0.0.1`, sin cuentas ni internet), en español o inglés y con tema claro u

@@ -45,6 +45,10 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - `CONTRIBUTING.md`, plantillas de issues (error con `crisol doctor --json`, propuesta) y este CHANGELOG.
 
 ### Cambiado
+- `crisol ui`: los pasos van numerados y con su ayuda corta a la vista (antes, solo al pasar el mouse); las pestañas
+  del visor llevan el número del paso que dejó cada resultado, en ese orden. El historial de la cola se puede borrar
+  (todo o lo marcado, con sus logs). En el celular, los pasos (con cuántos hay hechos y cuál sigue), los grupos de
+  ajustes y el historial se pliegan.
 - `plantilla/vehiculo.json` pasó a `plantilla/recetas/vehiculo.json`.
 - `instalar.sh` probado en limpio con el nivel completo (44 min, ~138 GB).
 - Los tiempos de Pixal3D en objetos (README): el candidato `pixal3d` a 1536 tarda 1-8 min según el volumen.

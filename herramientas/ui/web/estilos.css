@@ -434,3 +434,17 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .clip .controles select.entrada { width: auto; min-width: 150px; max-width: 100%; }
 .clip .ventana { width: 104px; }
 .clip .controles .casilla { min-height: 40px; }
+
+/* secciones plegables (comunes.Plegable): en el celular el título es un botón */
+.cabeza-plegable { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.cabeza-plegable:last-child { margin-bottom: 0; }
+.grupo-ajustes > .cabeza-plegable { margin-bottom: 0; }
+.plegar { width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.plegar small { display: block; font-family: var(--cuerpo); font-weight: 400; font-size: 13px; margin-top: 2px; }
+.plegar svg { width: 20px; height: 20px; flex: none; color: var(--texto-2); transition: rotate .15s; }
+.plegar[aria-expanded="true"] svg { rotate: 180deg; }
+.cadena .doc-paso { color: var(--texto-3); font-size: 13px; }
+.num-paso { opacity: .65; font-variant-numeric: tabular-nums; margin-right: 5px; }
+.acciones-historial { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.lista-cola .marca-fila { width: 20px; height: 20px; flex: none; accent-color: var(--brasa); }

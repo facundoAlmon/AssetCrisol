@@ -33,6 +33,7 @@ export function t(clave, vars) {
 }
 // en objetos y vehículos, `blender` no arma un rig: renderiza las vistas (o arma el vehículo)
 export const nombrePaso = (p, tipo) => t(p === 'blender' && tipo && tipo !== 'personaje' ? 'paso.blender_' + tipo : 'paso.' + p)
+export const docPaso = (p, tipo) => t(p === 'blender' && tipo && tipo !== 'personaje' ? 'pasodoc.blender_' + tipo : 'pasodoc.' + p)
 
 // ---------- API ----------
 export async function api(ruta, { metodo = 'GET', cuerpo, crudo } = {}) {
@@ -165,6 +166,7 @@ const P = {
   check: 'M5 12.5l4.5 4.5L19 7.5',
   x: 'M6 6l12 12M18 6L6 18',
   atras: 'M15 5l-7 7 7 7',
+  abajo: 'M6 9l6 6 6-6',
   ampliar: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
   alerta: 'M12 4l9 16H3zM12 10v4M12 17.5v.5',
   info: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 11v6M12 7.5v.5',
@@ -195,6 +197,33 @@ export function Crisol({ lleno = 0.55 }) {
 }
 
 // ---------- piezas ----------
+// ---------- secciones plegables en el celular ----------
+const ANGOSTO = matchMedia('(max-width: 600px)')
+export function useAngosto() {
+  const [a, setA] = useState(ANGOSTO.matches)
+  useEffect(() => {
+    const f = () => setA(ANGOSTO.matches)
+    ANGOSTO.addEventListener('change', f)
+    return () => ANGOSTO.removeEventListener('change', f)
+  }, [])
+  return a
+}
+
+// en la compu, el título y el contenido de siempre; en el celular, el título es un botón que lo muestra u oculta
+// (`resumen` se ve con la sección cerrada). `nivel`: h2 de un panel o h3 de un grupo de ajustes.
+export function Plegable({ titulo, resumen, abierta = false, nivel = 'h2', extra, children }) {
+  const angosto = useAngosto()
+  const [abierto, setAbierto] = useState(abierta)
+  const H = nivel
+  if (!angosto) return html`<header class="cabeza-plegable"><${H}>${titulo}</${H}>${extra}</header>${children}`
+  return html`<header class="cabeza-plegable">
+      <${H} style="flex:1;min-width:0"><button class="plegar" aria-expanded=${abierto} onClick=${() => setAbierto(!abierto)}>
+        <span>${titulo}${!abierto && resumen && html`<small class="tenue">${resumen}</small>`}</span><${Icono} n="abajo" /></button></${H}>
+      ${abierto && extra}
+    </header>
+    ${abierto && children}`
+}
+
 export function Cargando() { return html`<p class="tenue" role="status">${t('comun.cargando')}</p>` }
 
 export function Error({ error, reintentar }) {
