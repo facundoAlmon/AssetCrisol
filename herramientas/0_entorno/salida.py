@@ -109,7 +109,8 @@ def correr_json(paso, nombre, carpetas, fn, estado_de=None):
     archivos, carpetas_n = cambios(antes, foto(carpetas))
     if codigo and error is None:          # salir(): falta elegir, falta un paso, GPU ocupada
         error = motivo or {FALTA_ELEGIR: 'falta elegir', FALTA_PASO: 'falta un paso anterior',
-                 GPU_OCUPADA: 'GPU ocupada', USO: 'argumentos', FALTA_INSTALAR: 'falta instalar algo'}.get(codigo, 'falló')
+                 GPU_OCUPADA: 'GPU ocupada', USO: 'argumentos', FALTA_INSTALAR: 'falta instalar algo',
+                 143: 'cortado (SIGTERM)'}.get(codigo, 'falló')
     r = {'paso': paso, 'nombre': nombre, 'ok': codigo == OK, 'codigo': codigo, 'error': error,
          'archivos': archivos, 'carpetas': carpetas_n,
          'mirar': [p for p in archivos if os.path.basename(p) in PARA_MIRAR], 'mensajes': copia.lineas}
