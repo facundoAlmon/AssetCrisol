@@ -115,7 +115,7 @@ Mejoras pedidas (2026-10-28):
 - [x] Articulaciones: casi siempre salen mal y al recalcular andan; recalcular sola en el paso (ver por qué la
       primera falla).
 - [ ] Cambiar el nombre de un asset.
-- [ ] Exportar: elegir qué archivos y bajarlos en un zip.
+- [x] Exportar: elegir qué archivos y bajarlos en un zip.
 - [x] Elegir la resolución de los sprites.
 - [x] Borrar el historial de la cola (todo o lo seleccionado).
 - [ ] Receta para cuadrúpedos (perro, gato, caballo, vaca...): toca el rig y las animaciones, no solo la UI.

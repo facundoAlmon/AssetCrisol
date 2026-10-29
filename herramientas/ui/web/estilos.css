@@ -455,3 +455,9 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .ayuda-paso dd { margin: 0; }
 .ayuda-paso a { color: var(--brasa); }
 .cadena .ayuda-paso { grid-column: 2 / -1; margin: 0; }
+.lista-exportar { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.lista-exportar .casilla { display: flex; align-items: flex-start; padding: 6px 0; }
+.lista-exportar .casilla > span { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.lista-exportar input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
+.boton.apagado { opacity: .5; pointer-events: none; }
+.lista-cola .que { overflow-wrap: anywhere; }

@@ -353,6 +353,9 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   hace (motor, seed, resolución, UltraTex), si ya está generado, **Ver en 3D** dentro de la tarjeta (hasta tres a la
   vez) y **Elegir esta**. Las mallas de antes de este cambio, sin vistas propias, muestran la hoja
   `trabajo/candidatos.png` hasta correr **Comparar mallas**.
+- **Exportar** (pestaña Archivos y logs): marcar qué bajar (la carpeta de Godot, las hojas de costado e iso, el
+  retrato, las anclas, el modelo 3D, las vistas previas o los archivos de origen) y bajarlo en un zip, también desde
+  otra PC o el celular.
 - **Ajustes** sin json: estilo, descripción, seeds, altura, cabeza, animaciones del iso y método de cada una
   (procedural o Kimodo), y el tamaño de los sprites (alto en pantalla, baldosa iso y calidad de cada hoja, con el
   tamaño que sale a la vista). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).

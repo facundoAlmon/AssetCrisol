@@ -185,6 +185,7 @@ const P = {
   pausa: 'M8 5v14M16 5v14',
   carpeta: 'M3 6h6l2 2h10v11H3z',
   subir: 'M12 16V4M7 9l5-5 5 5M4 20h16',
+  bajar: 'M12 4v12M7 11l5 5 5-5M4 20h16',
   punto: 'M12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2z',
   cubo: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
   centrar: 'M12 3v4M12 17v4M3 12h4M17 12h4M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',

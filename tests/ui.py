@@ -305,6 +305,20 @@ def main():
                  if pedir(base, 'vendor/three/' + r, crudo=True)[0] != 200]
         chequear(not malos, 'three.js vendorizado', ', '.join(malos))
 
+        print('exportar')
+        c, g = pedir(base, 'api/assets/caja/exportar')
+        ids = [x['id'] for x in g] if c == 200 else []
+        chequear('modelo' in ids and 'fuente' in ids, 'grupos para exportar de la caja', ids)
+        c, b = pedir(base, 'api/assets/caja/zip?grupos=modelo,fuente', crudo=True)
+        import io, zipfile
+        nombres = zipfile.ZipFile(io.BytesIO(b)).namelist() if c == 200 else []
+        esperados = sorted(f'caja/{r}' for x in g if x['id'] in ('modelo', 'fuente') for r in x['archivos'])
+        chequear(sorted(nombres) == esperados and 'caja/objeto.json' in nombres, 'zip con los grupos pedidos', nombres)
+        c, _ = pedir(base, 'api/assets/caja/zip?grupos=nada')
+        chequear(c == 400, 'zip de un grupo que no existe: 400')
+        c, _ = pedir(base, 'api/assets/..%2F..%2Fejemplos/exportar')
+        chequear(c == 404, 'nombre de asset con ..: 404')
+
         print('seguridad')
         c, _ = pedir(base, 'api/assets', host='evil.example:80')
         chequear(c == 403, 'Host ajeno: 403')
