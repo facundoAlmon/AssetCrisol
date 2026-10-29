@@ -51,7 +51,9 @@ crisol ui [--puerto 8190] [--no-abrir]              # UI web local (herramientas
   16 GB), `malla` 3-6
   min y `ultratex` 1-6 min (en background, esperar la notificación), `blender` segundos a 1 min, `iso` ~25 s.
 - Cada paso lee `<datos_dir>/<tipo>/<n>/personaje.json` y escribe en `<n>/trabajo/`; se puede re-correr aislado.
-  Logs: `trabajo/malla/trellis2.log`, `trabajo/blender_<modo>.log`, `trabajo/imagen/comfyui.log`.
+  Logs: `trabajo/malla/trellis2.log`, `trabajo/blender_<modo>.log` (cada línea con la hora: `0_entorno/sello.correr`
+  sella desde el paso; lo que se revisa de la salida de Blender sale de `correr(..., guardar=True)`, sin sellar; un
+  log nuevo, igual), `trabajo/imagen/comfyui.log` (sin hora: ComfyUI sigue vivo después del paso).
 - **Estilo**: su `prompt` define la imagen (`generar_imagen.componer_prompt` desde `imagen.descripcion`; con
   `imagen.descripcion` presente, `imagen.prompt` se ignora) y su `render` solo Blender. `moderno` y `moderno_juguete`
   tienen el mismo prompt (cambiar entre ellos = rehacer `blender`/`sprites`/`iso`, no la imagen); `semirealista`
