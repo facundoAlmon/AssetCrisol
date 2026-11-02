@@ -4,7 +4,7 @@ export default {
   imagen: {
     hace: 'Makes one candidate image per seed. With a reference, Qwen Image Edit redraws it in the style and keeps the design; without one, Z-Image Turbo (or FLUX.2) makes it up from the description. About 20 s per seed.',
     mirar: 'Pick the one with the right proportions (heads sometimes come out too big), full body, arms away from the body and legs a bit apart: whatever touches in the image gets fused in the mesh. No loose pieces (straps, pouches) and no text.',
-    mal: 'Try other seeds (Settings > Image) before changing the description. If the idea is right but has ugly details, use it as a reference and run it through Qwen again asking only for those changes. Squinting eyes: edit only the eyes, don\'t change the seed.',
+    mal: 'Try other seeds (Settings > Image) before changing the description. If the idea is right but has ugly details, use it as a reference and run it through Qwen again asking only for those changes. Squinting eyes: edit only the eyes, don\'t change the seed. If every candidate has something you didn\'t ask for (a garment, a material, a color), it comes from the style: remove it in Settings > Style prompt, not with a "no ..." in the description.',
     readme: '1-image-crisol-imagen',
   },
   vistas: {

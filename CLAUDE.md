@@ -61,7 +61,9 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `imagen.descripcion` presente, `imagen.prompt` se ignora) y su `render` solo Blender. `moderno` y `moderno_juguete`
   tienen el mismo prompt (cambiar entre ellos = rehacer `blender`/`sprites`/`iso`, no la imagen); `semirealista`
   cambia el prompt y comparte el render de `moderno`. `cargar()` fusiona `estilos/<estilo>.json` sobre `animacion3d.json` (base) en
-  `pj['_estilo']`; un bloque `render` del json pisa al del estilo. `blender()` escribe la config efectiva en
+  `pj['_estilo']`; un bloque `render` del json pisa al del estilo, y uno `prompt` (`render_personaje`/`render_objeto`, `tema`, `paleta`,
+  `extra`; `""` la saca) a esas partes del prompt (Ajustes > *Prompt del estilo*). El `tema` de un estilo no nombra
+  prendas ni materiales: todo asset los hereda ("denim" ponía jeans a todos). `blender()` escribe la config efectiva en
   `trabajo/_config.json`, que es lo que lee `blender_main.py`. Personas: `moderno`/`semirealista`;
   `moderno_juguete` solo para juguetes de plástico (en una persona la ropa sale lustrada: pasar a `moderno` y
   rehacer el render).
