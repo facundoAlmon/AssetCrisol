@@ -10,7 +10,8 @@ const leer = (obj, clave) => clave.split('.').reduce((o, k) => (o == null ? unde
 const SUPER = [1, 2, 3, 4].map(n => [n, `${n}×`])
 
 // tipos de campo: texto, area, numero, entero, seeds, bool, select (opciones; numerico: el valor es un número),
-// animaciones, resolucion (el texto con el tamaño que sale)
+// animaciones, resolucion (el texto con el tamaño que sale), parte_prompt (pisa una parte del prompt del estilo),
+// prompt_armado (el prompt que sale con lo guardado)
 function campos(d, estilos, animaciones) {
   const j = d.json
   const estilo = { g: 'estilo', clave: 'estilo', tipo: 'select', etiqueta: 'aj.estilo', ayuda: 'aj.estilo_ayuda',
@@ -30,6 +31,14 @@ function campos(d, estilos, animaciones) {
   const lista = [estilo,
     { g: 'imagen', clave: 'imagen.descripcion', tipo: 'area', etiqueta: 'aj.descripcion', ayuda: 'nuevo.descripcion_ayuda', ingles: true },
     { g: 'imagen', clave: 'imagen.seeds', tipo: 'seeds', etiqueta: 'aj.seeds', ayuda: 'aj.seeds_ayuda' }]
+  // las partes del prompt que pone el estilo, pisables por asset (bloque `prompt` del json; con un imagen.prompt a mano
+  // sin descripcion el estilo no entra en el prompt)
+  if (d.prompt_estilo && (leer(j, 'imagen.descripcion') || !leer(j, 'imagen.prompt'))) {
+    const partes = [d.tipo === 'personaje' ? 'render_personaje' : 'render_objeto', 'tema', 'paleta', 'extra']
+    lista.push(...partes.map(k => ({ g: 'prompt', clave: `prompt.${k}`, tipo: 'parte_prompt', etiqueta: 'aj.prompt_' + k.replace(/_.*/, ''),
+      ayuda: 'aj.prompt_' + k.replace(/_.*/, '') + '_ayuda', heredado: d.prompt_estilo[k] || '' })),
+    { g: 'prompt', clave: 'prompt_imagen', tipo: 'prompt_armado' })
+  }
   if (!leer(j, 'imagen.referencia')) {
     lista.push({ g: 'imagen', clave: 'imagen.motor', tipo: 'select', etiqueta: 'aj.motor_imagen',
       opciones: [['', t('aj.defecto')], ['zimage', 'Z-Image Turbo'], ['flux2', 'FLUX.2 Dev']] })
@@ -93,6 +102,21 @@ function Campo({ c, valor, cambiar }) {
           const s = new Set(marcadas); e.target.checked ? s.add(a.id) : s.delete(a.id)
           cambiar(s.size ? c.animaciones.map(x => x.id).filter(x => s.has(x)) : null)
         }} />${a.id} <span class="tenue chico">${a.godot}</span></label>`)}</div></fieldset>`
+  }
+  if (c.tipo === 'parte_prompt') {
+    // null = el del estilo (de placeholder); "" = sin esta parte; texto = el propio del asset
+    const propio = valor != null
+    return html`<div class="campo"><label for=${id}>${etiqueta}
+        <span class="tenue chico"> · ${t(valor === '' ? 'aj.prompt_sacado' : propio ? 'aj.prompt_propio' : 'aj.prompt_heredado')}</span></label>
+      <textarea class="entrada" id=${id} lang="en" style="min-height:64px" value=${valor ?? ''}
+        placeholder=${valor === '' ? t('aj.prompt_vacio') : c.heredado}
+        onInput=${e => cambiar(e.target.value === '' ? null : e.target.value)} />
+      ${ayuda}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+        ${!propio && c.heredado && html`<button class="boton fantasma chico" onClick=${() => cambiar(c.heredado)}>${t('aj.prompt_editar')}</button>`}
+        ${valor !== '' && c.heredado && html`<button class="boton fantasma chico" onClick=${() => cambiar('')}>${t('aj.prompt_sacar')}</button>`}
+        ${propio && html`<button class="boton fantasma chico" onClick=${() => cambiar(null)}>${t('aj.prompt_volver')}</button>`}
+      </div></div>`
   }
   let control
   if (c.tipo === 'area') {
@@ -232,8 +256,10 @@ export function Ajustes({ d, recargar }) {
   return html`<div style="display:grid;gap:26px">
     ${grupos.map(g => html`<section class="grupo-ajustes" key=${g}><${Plegable} titulo=${t('aj.g.' + g)} nivel="h3">
       <div class="fila">${lista.filter(c => c.g === g).map(c => html`<div key=${c.clave}
-          style=${['area', 'animaciones', 'candidatos', 'resolucion'].includes(c.tipo) ? 'grid-column:1/-1' : ''}>
+          style=${['area', 'animaciones', 'candidatos', 'resolucion', 'parte_prompt', 'prompt_armado'].includes(c.tipo) ? 'grid-column:1/-1' : ''}>
         ${c.tipo === 'resolucion' ? html`<${Resolucion} d=${d} valor=${k => valor({ clave: k })} />`
+          : c.tipo === 'prompt_armado' ? d.prompt_imagen && html`<div class="campo"><span>${t('aj.prompt_armado')}</span>
+              <small>${t('aj.prompt_armado_ayuda')}</small><pre class="mono chico" style="white-space:pre-wrap;margin:4px 0 0">${d.prompt_imagen}</pre></div>`
           : c.tipo === 'candidatos'
           ? html`<${Candidatos} key=${d.modificado + JSON.stringify(d.json.malla || {})} d=${d} onCambio=${(patch, error) => {
               setCambios(prev => ({ ...Object.fromEntries(Object.entries(prev).filter(([k]) => !CLAVES_CANDIDATOS.includes(k))), ...patch }))

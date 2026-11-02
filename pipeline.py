@@ -124,6 +124,9 @@ def cargar(nombre):
             est = pj['_estilo'] = cargar_estilo(pj.get('estilo') or CFG.get('estilo', 'animacion3d'))
             if pj.get('render'):   # retoques del render solo para este personaje u objeto (metal, rugosidad...)
                 est['render'] = _fusionar(est['render'], pj['render'])
+            if pj.get('prompt'):   # partes del prompt del estilo solo para este asset ("" la saca; null hereda)
+                est['prompt'] = _fusionar(est['prompt'], {k: v for k, v in pj['prompt'].items()
+                                                          if v is not None and not k.startswith('_')})
             if pj['_escenario']:
                 return pdir, pj
             ppu, baldosa = est['escala']['px_por_unidad'], est['escala']['baldosa_px']

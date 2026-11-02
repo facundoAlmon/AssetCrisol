@@ -18,6 +18,7 @@ import operaciones as op  # noqa: E402
 import deshacer  # noqa: E402 (herramientas/0_entorno: deshacer un paso y renombrar)
 import metodos  # noqa: E402 (herramientas/3_blender: la biblioteca de movimientos y sus candidatos, sin bpy)
 import armar_iso  # noqa: E402 (herramientas/4_sprites: nombre en Godot, fps y loop de cada animación)
+import generar_imagen  # noqa: E402 (herramientas/1_imagen: el prompt armado, para Ajustes)
 from cola import Cola  # noqa: E402
 
 WEB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'web')
@@ -429,7 +430,17 @@ def detalle_asset(n):
             'elecciones': elecciones(pdir, pj, e['tipo']), 'licencias': licencias, 'logs': logs,
             'mallas_hechas': mallas_hechas(pdir) if e['tipo'] != 'escenario' else {},
             # para el tamaño de los sprites en Ajustes: lo que pone el estilo cuando el json deja null
-            'escala': None if e['tipo'] == 'escenario' else {**pj['_estilo']['escala'], 'altura': pj['modelo'].get('altura')}}
+            'escala': None if e['tipo'] == 'escenario' else {**pj['_estilo']['escala'], 'altura': pj['modelo'].get('altura')},
+            **({} if e['tipo'] == 'escenario' else prompt_imagen(pj))}
+
+
+def prompt_imagen(pj):
+    """Para Ajustes: las partes del prompt del estilo (lo que hereda el bloque `prompt` del json que quede en null) y el
+    prompt armado con lo guardado."""
+    base = pipeline.cargar_estilo(pj['_estilo']['nombre'])['prompt']
+    return {'prompt_estilo': {k: v for k, v in base.items() if isinstance(v, str)},
+            'prompt_imagen': generar_imagen.componer_prompt(pj) if (pj.get('imagen') or {}).get('descripcion') or
+            (pj.get('imagen') or {}).get('prompt') else None}
 
 
 # ---------- catálogos ----------

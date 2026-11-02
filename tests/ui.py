@@ -426,6 +426,14 @@ def main():
         nuevo.setdefault('imagen', {})['elegida'] = 'otra'
         c, _ = pedir(base, 'api/assets/caja/json', 'PUT', {'json': nuevo})
         chequear(c == 400, 'json completo no cambia elecciones: 400')
+        c, d = pedir(base, 'api/assets/caja')
+        chequear(c == 200 and d.get('prompt_estilo', {}).get('render_objeto') and d.get('prompt_imagen'),
+                 'prompt del estilo y prompt armado en el detalle')
+        c, _ = pedir(base, 'api/assets/caja/json', 'PATCH', {'cambios': {'prompt.tema': 'a pirate ship deck', 'prompt.extra': ''}})
+        c2, d = pedir(base, 'api/assets/caja')
+        chequear(c == 200 and 'A pirate ship deck.' in (d.get('prompt_imagen') or '') and
+                 d['prompt_imagen'].endswith('no text.'), 'bloque prompt pisa el tema y saca el extra', d.get('prompt_imagen'))
+        c, _ = pedir(base, 'api/assets/caja/json', 'PATCH', {'cambios': {'prompt.tema': None, 'prompt.extra': None}})
 
         print('candidatos de malla')
         cands = {'pixal3d': {'motor': 'pixal3d', 'resolucion': 1024, 'seed': 1, 'caras': 200000},

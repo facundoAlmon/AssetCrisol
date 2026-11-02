@@ -3,7 +3,7 @@
   "prompt": {
     "render_personaje": "a stylized hand-painted 3D fantasy game character, painterly textures in the style of classic fantasy RPGs",
     "render_objeto": "a stylized hand-painted 3D fantasy game prop, painterly textures in the style of classic fantasy RPGs",
-    "tema": "medieval fantasy world: wool, linen, leather, iron, bronze and weathered wood; no modern or technological elements",
+    "tema": "medieval fantasy world with natural materials such as wool, linen, leather, iron, bronze and weathered wood; no modern or technological elements",
     "paleta": "warm earthy muted colors: ochre, rust, moss green, brown, desaturated blues",
     "extra": "soft warm lighting, plain light grey background"
   },

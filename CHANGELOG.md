@@ -7,6 +7,17 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ## [Sin publicar]
 
+### Agregado
+- Bloque `prompt` en el json de un asset (`render_personaje`/`render_objeto`, `tema`, `paleta`, `extra`): pisa esas
+  partes del prompt del estilo solo para ese asset (`""` la saca). En `crisol ui`, Ajustes > *Prompt del estilo*, con
+  el prompt que sale.
+
+### Cambiado
+- El `tema` de `moderno`, `moderno_juguete` y `semirealista` ya no dice "casual clothes, ... denim": los personajes
+  salían casi siempre con jeans. `medieval` y `futurista` nombran materiales del mundo pero no la ropa (sin "armor
+  panels"). Los assets ya hechos cambian recién al rehacer `imagen`.
+- La vista de atrás de los vehículos (`vistas`) ya no pide un alerón.
+
 ## [0.2.0-alpha.1] - 2026-10-29
 
 La UI en el navegador (`crisol ui`), con el editor de articulaciones y el personaje animado en 3D, y `crisol

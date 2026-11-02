@@ -609,7 +609,11 @@ porque lo necesita el paso 2:
 - el `extra` de todos los estilos pide **fondo liso claro** y luz suave (no sacarlo al crear un estilo).
 
 En `descripcion` va solo *quién es* (en inglés): ropa, pelo, colores, accesorios, expresión; aunque estén en la
-referencia, describirlos ayuda a que no los cambie. Para escribir el prompt entero a mano, usar `imagen.prompt` en
+referencia, describirlos ayuda a que no los cambie. Las partes que pone el estilo (`render_personaje`/`render_objeto`,
+`tema`, `paleta`, `extra`) se cambian para un solo asset con un bloque `prompt` en su json (o en `crisol ui` >
+Ajustes > *Prompt del estilo*, que muestra el prompt que sale): `"prompt": {"tema": "...", "paleta": ""}` pisa el
+tema y saca la paleta; lo que no está (o está en `null`) sale del estilo. Si el estilo empuja algo que no va (una
+prenda, un material, un color), sacarlo ahí y no con un "no ..." en la descripción. Para escribir el prompt entero a mano, usar `imagen.prompt` en
 vez de `descripcion` (el estilo entonces no entra en el prompt, solo en luces y posproceso). Con una foto de
 referencia y un estilo de dibujo, pedir "3D ... no outlines, not a 2D drawing": si no, Qwen devuelve una
 ilustración plana con contorno, mala para la malla.
@@ -966,6 +970,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `imagen.referencia` | archivo en la carpeta del personaje, o `null` para generar solo desde el prompt |
 | `imagen.descripcion` | quién es (en inglés); el prompt se arma con el estilo |
 | `imagen.prompt` | (alternativa) prompt completo escrito a mano, sin el estilo |
+| `prompt` | (opcional) `{render_personaje, render_objeto, tema, paleta, extra}`: pisa esas partes del prompt del estilo solo para este asset (`""` saca la parte; `null` o ausente, la del estilo) |
 | `imagen.seeds` | una candidata por seed |
 | `imagen.elegida` | seed elegida (o nombre de un archivo propio) |
 | `malla.motor` | `"pixal3d"` (plantilla de personajes) o `"trellis2"` |
@@ -1039,7 +1044,7 @@ un personaje y un objeto de prueba para ver que combinen antes de producir el re
 | sección | qué controla | dónde actúa |
 |---|---|---|
 | `prompt.render_personaje` / `render_objeto` | la técnica: "stylized 3D animated film CGI", "hand-painted", "low poly"... | paso 1 |
-| `prompt.tema` | la época o el mundo y sus materiales, y qué **no** debe aparecer | paso 1 |
+| `prompt.tema` | la época o el mundo y qué **no** debe aparecer; sin prendas ni materiales concretos (todo asset los heredaría: "denim" ponía jeans a todos) | paso 1 |
 | `prompt.paleta` | los colores dominantes | paso 1 |
 | `prompt.extra` | luz y fondo de la imagen (mantener el fondo liso claro) | paso 1 |
 | `render.luz_principal` / `luz_relleno` | `energia`, `elevacion_grados`, `azimut_grados`, `color` | Blender |

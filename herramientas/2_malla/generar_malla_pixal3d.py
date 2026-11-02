@@ -27,7 +27,7 @@ VISTAS_VEHICULO = {
     'front': 'exactly from the front: an exact front view, the nose of the car points straight at the camera, '
              'we see the headlights, the front bumper and the windshield, perfectly symmetric, not three-quarter',
     'back': 'exactly from behind: an exact rear view rotated 180 degrees, we see the tail lights, the rear bumper '
-            'and the rear wing, the headlights are not visible, perfectly symmetric, not three-quarter',
+            'and the back of the car, the headlights are not visible, perfectly symmetric, not three-quarter',
     'left': "exactly from its left side: an exact side profile view, the car's left side (driver side) is closest to "
             'the camera and the nose of the car points to the left edge of the image, both left wheels fully visible, '
             'not three-quarter',

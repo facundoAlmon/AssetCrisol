@@ -3,7 +3,7 @@
   "prompt": {
     "render_personaje": "a high quality stylized 3D sci-fi game character, sleek CGI render",
     "render_objeto": "a high quality stylized 3D sci-fi game prop, sleek CGI render",
-    "tema": "futuristic sci-fi setting: smooth armor panels, carbon fiber, brushed metal, glowing light strips; no medieval or rustic elements",
+    "tema": "futuristic sci-fi world with sleek materials such as smooth panels, brushed metal and glowing light strips; no medieval or rustic elements",
     "paleta": "cool palette: gunmetal grey, white, deep blue, with small cyan and magenta neon accents",
     "extra": "clean studio lighting, plain light grey background"
   },

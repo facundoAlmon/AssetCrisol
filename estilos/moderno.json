@@ -3,7 +3,7 @@
   "prompt": {
     "render_personaje": "a stylized 3D cartoon game character, clean toy-like CGI render",
     "render_objeto": "a stylized 3D cartoon game prop, clean toy-like CGI render",
-    "tema": "contemporary everyday world: casual clothes, plastic, denim, cardboard, painted metal",
+    "tema": "contemporary everyday world, present-day materials; no medieval, fantasy or sci-fi elements",
     "paleta": "bright but balanced colors, clean saturated primaries with neutral greys",
     "extra": "soft studio lighting, plain light grey background"
   },

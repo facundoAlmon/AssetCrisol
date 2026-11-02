@@ -72,13 +72,17 @@ def componer_prompt(pj):
     if not desc:
         return img['prompt']
     obj = pj.get('_objeto')
-    render = E['render_objeto' if obj else 'render_personaje']
+    # el bloque `prompt` del json pisa estas partes del estilo (pipeline.cargar); vacías se sacan
+    render = (E.get('render_objeto' if obj else 'render_personaje') or '').strip().rstrip('.')
     if img.get('referencia'):
-        partes = [f"Transform this {'object' if obj else 'character'} into {render}. Keep the same design: {desc}."]
+        destino = f' into {render}' if render else ''
+        partes = [f"Transform this {'object' if obj else 'character'}{destino}. Keep the same design: {desc}."]
     else:
-        partes = [f'{render[0].upper()}{render[1:]}: {desc}.']
-    partes += [f'{x.strip()[0].upper()}{x.strip()[1:].rstrip(".")}.' for x in (E.get('tema'), E.get('paleta')) if x]
-    partes.append(f"{ENCUADRE_OBJETO if obj else ENCUADRE_PERSONAJE}, {E['extra']}.")
+        partes = [f'{render[0].upper()}{render[1:]}: {desc}.' if render else f'{desc[0].upper()}{desc[1:]}.']
+    partes += [f'{x.strip()[0].upper()}{x.strip()[1:].rstrip(".")}.' for x in (E.get('tema'), E.get('paleta'))
+               if x and x.strip()]
+    extra = (E.get('extra') or '').strip().rstrip('.')
+    partes.append(f"{ENCUADRE_OBJETO if obj else ENCUADRE_PERSONAJE}{', ' + extra if extra else ''}.")
     return ' '.join(partes)
 
 
