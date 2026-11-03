@@ -284,6 +284,8 @@ export default {
   'exp.anclas_ayuda': 'Manos, cabeza y pies por cuadro iso, para colgarle cosas en el juego.',
   'exp.modelo': 'Modelo 3D',
   'exp.modelo_ayuda': 'El .glb texturizado (en personajes, también animado.glb con el rig y las animaciones; en vehículos, con las ruedas separadas).',
+  'exp.tiempo_real': 'Tiempo real (LODs)',
+  'exp.tiempo_real_ayuda': 'El modelo reducido para un juego 3D, en niveles de detalle (lod0 el más fino) con su textura achicada; en personajes, con el rig y las animaciones. lods.json dice las caras de cada uno.',
   'exp.tarjeta': 'Tarjeta',
   'exp.tarjeta_ayuda': 'La imagen del vehículo para un selector.',
   'exp.tema': 'Tema',

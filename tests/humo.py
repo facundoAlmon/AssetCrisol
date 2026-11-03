@@ -54,6 +54,17 @@ def hay(base, *rutas):
     return all(os.path.exists(os.path.join(base, r)) for r in rutas)
 
 
+def revisar_lods(base, n):
+    """trabajo/tiempo_real: tres LOD con caras de más a menos (el primero puede ser la malla entera)."""
+    r = os.path.join('trabajo', 'tiempo_real')
+    if not hay(base, os.path.join(r, 'lods.json'), *(os.path.join(r, f'{n}_lod{i}.glb') for i in range(3))):
+        return
+    with open(os.path.join(base, r, 'lods.json')) as f:
+        caras = [l['caras'] for l in json.load(f)['lods']]
+    if caras != sorted(caras, reverse=True) or len(set(caras)) < 3:
+        fallas.append(f'{n}: los LOD no bajan de caras ({caras})')
+
+
 def revisar_imagen(ruta, ancho_min=64, alto_min=64):
     """Que abra, tenga el tamaño mínimo y no esté vacía (todo transparente o de un solo color)."""
     from PIL import Image
@@ -132,6 +143,7 @@ def main():
                 animado = json.load(f)
             if not animado.get('caminar', {}).get('ciclo') or len(animado) < 15:
                 fallas.append(f'animado.json: sin caminar en loop o faltan animaciones ({list(animado)})')
+            revisar_lods(c, 'cris')
             revisar_aseprite(os.path.join(c, g, 'cris_sheet.json'), 'walk')
             revisar_imagen(os.path.join(c, g, 'cris_sheet.png'), 512, 512)
             if not RAPIDO and paso(env, 'iso', 'cris'):
@@ -162,6 +174,7 @@ def main():
                 continue
             if paso(env, 'blender', obj) and paso(env, 'sprites', obj) and paso(env, 'godot', obj):
                 hay(o, 'preview.png', os.path.join('godot', 'objetos', obj, f'{obj}_iso.tscn'))
+                revisar_lods(o, obj)
                 with open(os.path.join(o, 'godot', 'objetos', obj, f'{obj}_meta.json')) as f:
                     revisar_aseprite(os.path.join(o, 'godot', 'objetos', obj, f'{obj}_iso.json'),
                                      json.load(f)['iso']['direcciones'][0])

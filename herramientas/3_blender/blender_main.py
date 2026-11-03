@@ -926,6 +926,65 @@ def origen_px(size):
 # direcciones en pantalla (sentido horario desde la derecha) -> giro del personaje (0 = mira a la cámara)
 DIRECCIONES_ISO = [('e', 90), ('se', 45), ('s', 0), ('sw', -45), ('w', -90), ('nw', -135), ('n', 180), ('ne', 135)]
 
+
+# tiempo_real: caras de cada LOD (el 0 primero) y lado máximo de la textura; personajes y objetos
+TIEMPO_REAL = {'personaje': {'lods': [20000, 10000, 5000], 'textura_px': 2048},
+               'objeto': {'lods': [10000, 5000, 2000], 'textura_px': 2048}}
+
+
+def exportar_tiempo_real(mesh, arm=None):
+    """trabajo/tiempo_real/<n>_lod<i>.glb: la malla reducida (Decimate por colapso, que conserva UV y pesos) a las caras
+    de cada LOD de `tiempo_real.lods`, con la textura a `tiempo_real.textura_px` como mucho (la mitad en cada LOD
+    siguiente, hasta 256); en personajes, con el rig y las animaciones de animado.glb. `tiempo_real: false` lo apaga.
+    Va al final del modo: achica la imagen en memoria (lo anterior ya se exportó y guardó con la textura entera).
+    lods.json: archivo, caras, vértices y lado de la textura de cada LOD."""
+    cfg = PJ.get('tiempo_real', {})
+    if cfg is False:
+        return
+    cfg = dict(TIEMPO_REAL['personaje' if arm else 'objeto'], **(cfg or {}))
+    d = os.path.join(TRABAJO, 'tiempo_real'); os.makedirs(d, exist_ok=True)
+    for f in os.listdir(d):   # los LOD de una corrida anterior con otra lista
+        os.remove(os.path.join(d, f))
+    lado = cfg.get('textura_px')
+    imagenes = {n.image for m in mesh.data.materials if m and m.node_tree
+                for n in m.node_tree.nodes if n.type == 'TEX_IMAGE' and n.image}
+
+    def achicar(px):
+        for im in imagenes:
+            if px and max(im.size) > px:
+                k = px / max(im.size)
+                im.scale(max(1, round(im.size[0] * k)), max(1, round(im.size[1] * k)))
+    caras = sum(len(p.vertices) - 2 for p in mesh.data.polygons)   # en triángulos, como cuenta un motor
+    out = []
+    for i, objetivo in enumerate(cfg['lods']):
+        lod = mesh.copy(); lod.data = mesh.data.copy(); lod.name = f'{nombre}_lod{i}'
+        for c in mesh.users_collection:
+            c.objects.link(lod)
+        if objetivo < caras:
+            dec = lod.modifiers.new('decimar', 'DECIMATE')
+            dec.ratio = objetivo / caras
+            dec.use_collapse_triangulate = True
+            with bpy.context.temp_override(object=lod, active_object=lod):
+                bpy.ops.object.modifier_move_to_index(modifier='decimar', index=0)   # antes del Armature
+                bpy.ops.object.modifier_apply(modifier='decimar')
+        achicar(lado and max(256, lado >> i))   # cada LOD, la mitad de textura (se ve de más lejos)
+        archivo = f'{nombre}_lod{i}.glb'
+        bpy.ops.object.select_all(action='DESELECT')
+        lod.select_set(True)
+        if arm:
+            arm.select_set(True)
+        bpy.ops.export_scene.gltf(filepath=os.path.join(d, archivo), export_format='GLB', use_selection=True,
+                                  **({'export_animation_mode': 'ACTIONS', 'export_force_sampling': True,
+                                      'export_anim_slide_to_zero': True, 'export_optimize_animation_size': True}
+                                     if arm else {'export_animations': False}))
+        out.append({'archivo': archivo, 'caras': len(lod.data.polygons), 'vertices': len(lod.data.vertices),
+                    'textura_px': max((max(im.size) for im in imagenes), default=0)})
+        bpy.data.meshes.remove(lod.data)
+    with open(os.path.join(d, 'lods.json'), 'w') as f:
+        json.dump({'original': {'caras': caras, 'vertices': len(mesh.data.vertices)}, 'lods': out}, f, indent=1)
+    print('[blender] tiempo real:', ', '.join(f"lod{i} {o['caras']} caras" for i, o in enumerate(out)))
+
+
 if modo == 'guia':
     sc, cam = preparar_escena()
     col, mesh = importar()
@@ -1053,6 +1112,7 @@ elif modo == 'objeto':
                    'elevacion_grados': math.degrees(elev)}
     mesh.rotation_euler.z = 0
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(TRABAJO, f'{nombre}.blend'))
+    exportar_tiempo_real(mesh)
     with open(os.path.join(out, 'render.json'), 'w') as f:
         json.dump(info, f)
     print('OBJETO OK', info['dimensiones'])
@@ -1320,6 +1380,7 @@ if modo == 'construir':
     sc.frame_start, sc.frame_end = 1, 16
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(TRABAJO, f'{nombre}.blend'))
     exportar_animado(arm, acciones)
+    exportar_tiempo_real(mesh, arm)
     with open(os.path.join(TRABAJO, 'frames', 'frames.json'), 'w') as f:
         json.dump({'size': size, 'ppu': ppu, 'frames': info}, f)
     print('CONSTRUIR OK', info)

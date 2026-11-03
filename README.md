@@ -40,9 +40,9 @@ se funde el material para darle forma: acá entra una imagen y salen sprites, mo
 
 | | Asset | De una imagen sale... | Pasos clave |
 |---|---|---|---|
-| 🧍 | **Personaje animado** | rig + 15 animaciones (caminar, correr, saltar, golpe, patada, morir...) como hoja de sprites lateral, hojas **isométricas en 8 direcciones**, retrato y cuerpo de frente para una pantalla de selección, anclas por cuadro para colgarle equipo | `imagen` → `malla` → `blender` → `sprites` → `iso` |
+| 🧍 | **Personaje animado** | rig + 15 animaciones (caminar, correr, saltar, golpe, patada, morir...) como hoja de sprites lateral, hojas **isométricas en 8 direcciones**, retrato y cuerpo de frente para una pantalla de selección, anclas por cuadro para colgarle equipo, y el `.glb` animado en 3 LODs para un juego 3D | `imagen` → `malla` → `blender` → `sprites` → `iso` |
 | 🐕 | **Cuadrúpedo** | perro, gato, caballo: su propio esqueleto y 8 animaciones (paso, galope, salto, mordida, morir...) con las mismas hojas laterales e isométricas | `imagen` → `malla` → `guia` → `blender` → `sprites` → `iso` |
-| 📦 | **Objeto** | cajas, mesas, cofres, barriles: vista lateral + vistas isométricas con sombra de contacto, escenas `StaticBody2D` con colisión, o el `.glb` para un juego 3D | `imagen` → `malla` → `blender` → `sprites` |
+| 📦 | **Objeto** | cajas, mesas, cofres, barriles: vista lateral + vistas isométricas con sombra de contacto, escenas `StaticBody2D` con colisión, o el `.glb` en 3 LODs para un juego 3D | `imagen` → `malla` → `blender` → `sprites` |
 | 🚗 | **Vehículo** | `.glb` con las 4 ruedas separadas en su nodo (origen en el eje), carrocería con materiales `pintura`/`oscuro` y una tarjeta para un selector | `imagen` → `vistas` → `malla` → `blender` |
 | 🌲 | **Kit de escenario** | texturas repetibles de piso, camino y pared (detalle normalizado para teñir con los colores del tema), telón de fondo pintado y `tema.json` con los colores | `texturas` → `tema` |
 
@@ -566,6 +566,7 @@ AssetCrisol/
 │   │   ├── guia/             frente.png, costado.png, guia.png, guia.json
 │   │   ├── frames/           <animación>/NN.png (vista lateral)
 │   │   ├── animado.glb       la malla con el rig y una animación por acción (+ animado.json: tiempos de los cuadros)
+│   │   ├── tiempo_real/      <n>_lod0..2.glb: lo mismo reducido para un juego 3D (+ lods.json)
 │   │   ├── retrato/          retrato.png, frente.png, retrato.json
 │   │   ├── iso/              <animación>/<dirección>/NN.png, anclas.json
 │   │   ├── revision.png
@@ -807,6 +808,13 @@ los frames laterales y el retrato. Todas las animaciones son **en el lugar** (el
    con el IK de las piernas horneado; las de loop llegan hasta la pose que cierra el ciclo). `animado.json` dice qué
    tiempo del glTF es cada cuadro de los sprites. Lo usa el visor 3D animado de `crisol ui`; también sirve para
    llevar el personaje animado a otro motor (con los polígonos de la malla, 100-200 k caras).
+8. exporta **para tiempo real** `trabajo/tiempo_real/<n>_lod0.glb`, `_lod1` y `_lod2`: lo mismo (rig y animaciones)
+   con la malla reducida a 20 k, 10 k y 5 k triángulos (Decimate por colapso: conserva UV y pesos) y la textura a
+   2048, 1024 y 512 px. `lods.json` dice las caras, vértices y textura de cada uno. Se cambia con
+   `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096}` (caras de cada LOD, el primero el más fino;
+   cada LOD lleva la mitad de textura que el anterior, hasta 256) y se apaga con `"tiempo_real": false`. El LOD más
+   bajo puede mostrar costuras de la textura (boca, bordes): es para verlo de lejos. Godot arma sus propios LOD al
+   importar un `.glb`, así que ahí alcanza con `lod0`; en Unity o Unreal, cada archivo va a un nivel del LOD Group.
 
 </details>
 
@@ -1009,6 +1017,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `retrato.ancho_px` | (512) ancho del retrato (alto = 1.25 × ancho) |
 | `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (opcional) ver [Iso](#iso-pipelinepy-iso) |
+| `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado de la textura del primero; `false` = no exportarlos (ver 3b) |
 
 </details>
 
@@ -1123,7 +1132,9 @@ crisol blender barril && crisol sprites barril && crisol godot barril
 - `godot` → `<n>_lateral.tscn` (`StaticBody2D` + `Sprite2D` + colisión rectangular; origen = centro de la base) y
   `<n>_iso.tscn` (`StaticBody2D` con `objeto_iso.gd`: `direccion` cambia la celda y la huella como
   `CollisionPolygon2D`, también en el editor). `colision: false` las omite.
-- Para un juego 3D, `trabajo/malla/modelo.glb` se puede usar directo.
+- Para un juego 3D, `blender` deja `trabajo/tiempo_real/<n>_lod0..2.glb`: la malla reducida a 10 k, 5 k y 2 k
+  triángulos, centrada y apoyada en el piso, con la textura a 2048, 1024 y 512 px (`tiempo_real` cambia las caras o
+  lo apaga, como en los personajes). `trabajo/malla/modelo.glb` es la malla entera.
 
 **Vegetación**: las hojitas sueltas dan cáscaras con agujeros (a 512 cada hoja es menos de un vóxel). Pedir masas
 lisas: "big smooth puffy rounded green foliage clumps, no individual leaves, solid silhouette, toy-like", negativo
@@ -1315,8 +1326,8 @@ las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para
 
 ## Limitaciones
 
-- La topología de la malla es automática (triángulos): sirve para sprites y deformaciones simples, no para
-  animación facial ni para usar el personaje 3D en un juego sin retopología.
+- La topología de la malla es automática (triángulos): sirve para sprites, deformaciones simples y los LOD de
+  `tiempo_real` (reducidos, no retopologizados), no para animación facial.
 - El costado y la espalda se inventan a partir de la vista frontal (las vistas de Qwen ayudan, pero hay que mirarlas).
 - Los dedos no tienen huesos (mano entera = un hueso).
 - Los cuadrúpedos tienen un solo juego de animaciones (8) y sin Kimodo; orejas, mandíbula y crines no tienen huesos.

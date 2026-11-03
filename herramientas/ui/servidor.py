@@ -155,11 +155,13 @@ def grupos_exportar(pdir, pj, nombre, tipo):
              ('retrato', hay(f'{gd}/{nombre}_retrato.png', f'{gd}/{nombre}_frente.png')),
              ('anclas', hay(f'{t}/iso/anclas.json')),
              ('modelo', hay(f'{t}/malla/modelo.glb', f'{t}/animado.glb')),
+             ('tiempo_real', hay(f'{t}/tiempo_real/*')),
              ('previas', hay('preview.gif', 'preview_iso.gif', f'{t}/revision.png')),
              ('fuente', hay('personaje.json', 'referencia.png', rel(pdir, elegida) if elegida else ''))]
     elif tipo in ('objeto', 'vehiculo'):
         g = [('godot', hay('godot/**/*')),
              ('modelo', hay(f'{t}/vehiculo.glb') or hay(f'{t}/malla/modelo.glb')),
+             ('tiempo_real', hay(f'{t}/tiempo_real/*')),
              ('tarjeta', hay(f'{t}/tarjeta.png')),
              ('previas', hay('preview.png', f'{t}/revision.png')),
              ('fuente', hay('objeto.json', 'referencia.png', rel(pdir, elegida) if elegida else ''))]

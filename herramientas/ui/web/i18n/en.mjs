@@ -283,6 +283,8 @@ export default {
   'exp.anclas_ayuda': 'Hands, head and feet per iso frame, to attach things in the game.',
   'exp.modelo': '3D model',
   'exp.modelo_ayuda': 'The textured .glb (for characters, also animado.glb with the rig and animations; for vehicles, with separate wheels).',
+  'exp.tiempo_real': 'Real time (LODs)',
+  'exp.tiempo_real_ayuda': 'The reduced model for a 3D game, in levels of detail (lod0 the finest) with a smaller texture; for characters, with the rig and animations. lods.json lists the faces of each one.',
   'exp.tarjeta': 'Card',
   'exp.tarjeta_ayuda': 'The vehicle picture for a selector.',
   'exp.tema': 'Theme',

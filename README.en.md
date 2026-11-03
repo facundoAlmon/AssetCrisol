@@ -46,9 +46,9 @@ where material is melted down to give it shape: an image goes in, sprites, model
 
 | | Asset | From one image you get... | Key steps |
 |---|---|---|---|
-| 🧍 | **Animated character** | rig + 15 animations (walk, run, jump, punch, kick, die...) as a side-view sprite sheet, **isometric sheets in 8 directions**, a portrait and a front view for a selection screen, per-frame anchors to attach gear | `imagen` → `malla` → `blender` → `sprites` → `iso` |
+| 🧍 | **Animated character** | rig + 15 animations (walk, run, jump, punch, kick, die...) as a side-view sprite sheet, **isometric sheets in 8 directions**, a portrait and a front view for a selection screen, per-frame anchors to attach gear, and the animated `.glb` in 3 LODs for a 3D game | `imagen` → `malla` → `blender` → `sprites` → `iso` |
 | 🐕 | **Quadruped** | dog, cat, horse: its own skeleton and 8 animations (walk, gallop, jump, bite, die...) with the same side and isometric sheets | `imagen` → `malla` → `guia` → `blender` → `sprites` → `iso` |
-| 📦 | **Prop** | crates, tables, chests, barrels: side view + isometric views with a contact shadow, `StaticBody2D` scenes with collision, or the `.glb` for a 3D game | `imagen` → `malla` → `blender` → `sprites` |
+| 📦 | **Prop** | crates, tables, chests, barrels: side view + isometric views with a contact shadow, `StaticBody2D` scenes with collision, or the `.glb` in 3 LODs for a 3D game | `imagen` → `malla` → `blender` → `sprites` |
 | 🚗 | **Vehicle** | `.glb` with the 4 wheels split into their own nodes (origin on the axle), a body with `pintura` (paint) / `oscuro` (dark) materials and a card image for a selection screen | `imagen` → `vistas` → `malla` → `blender` |
 | 🌲 | **Scenery kit** | tileable floor, path and wall textures (normalized detail, tinted with the theme colors), a painted backdrop and `tema.json` with the colors | `texturas` → `tema` |
 
@@ -585,6 +585,7 @@ AssetCrisol/
 │   │   ├── guia/             frente.png, costado.png, guia.png, guia.json
 │   │   ├── frames/           <animation>/NN.png (side view)
 │   │   ├── animado.glb       the mesh with the rig and one animation per action (+ animado.json: frame times)
+│   │   ├── tiempo_real/      <n>_lod0..2.glb: the same, reduced for a 3D game (+ lods.json)
 │   │   ├── retrato/          retrato.png, frente.png, retrato.json
 │   │   ├── iso/              <animation>/<direction>/NN.png, anclas.json
 │   │   ├── revision.png
@@ -821,6 +822,13 @@ renders the side-view frames and the portrait. All animations are **in place** (
    with the leg IK baked; looping ones run up to the pose that closes the cycle). `animado.json` says which glTF time
    each sprite frame is. The animated 3D viewer of `crisol ui` uses it; it also works to take the animated character
    to another engine (with the mesh's polygon count, 100-200 k faces).
+8. exports **for real time** `trabajo/tiempo_real/<n>_lod0.glb`, `_lod1` and `_lod2`: the same (rig and animations)
+   with the mesh reduced to 20 k, 10 k and 5 k triangles (collapse Decimate: keeps UVs and weights) and the texture at
+   2048, 1024 and 512 px. `lods.json` lists the faces, vertices and texture of each one. Change it with
+   `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096}` (faces of each LOD, the finest first; each LOD
+   gets half the texture of the previous one, down to 256) and turn it off with `"tiempo_real": false`. The lowest
+   LOD may show texture seams (mouth, edges): it is meant to be seen from afar. Godot builds its own LODs when it
+   imports a `.glb`, so `lod0` is enough there; in Unity or Unreal, each file goes into one level of the LOD Group.
 
 </details>
 
@@ -1021,6 +1029,7 @@ The most used keys: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla.mot
 | `retrato.ancho_px` | (512) portrait width (height = 1.25 × width) |
 | `retrato.fuente` | (`"imagen"`) crop of `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (optional) see [Iso](#iso-pipelinepy-iso) |
+| `tiempo_real` | (optional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: faces of each LOD in `trabajo/tiempo_real/` and texture size of the first one; `false` = don't export them (see 3b) |
 
 </details>
 
@@ -1136,7 +1145,9 @@ crisol blender barrel && crisol sprites barrel && crisol godot barrel
 - `godot` → `<n>_lateral.tscn` (`StaticBody2D` + `Sprite2D` + rectangular collision; origin = center of the base) and
   `<n>_iso.tscn` (`StaticBody2D` with `objeto_iso.gd`: `direccion` changes the cell and the footprint as a
   `CollisionPolygon2D`, also in the editor). `colision: false` omits them.
-- For a 3D game, `trabajo/malla/modelo.glb` can be used directly.
+- For a 3D game, `blender` leaves `trabajo/tiempo_real/<n>_lod0..2.glb`: the mesh reduced to 10 k, 5 k and 2 k
+  triangles, centered and resting on the floor, with the texture at 2048, 1024 and 512 px (`tiempo_real` changes the
+  faces or turns it off, like for characters). `trabajo/malla/modelo.glb` is the full mesh.
 
 **Vegetation**: loose little leaves give shells full of holes (at 512 each leaf is less than a voxel). Ask for smooth
 masses: "big smooth puffy rounded green foliage clumps, no individual leaves, solid silhouette, toy-like", negative
@@ -1331,8 +1342,8 @@ isometric `TileMapLayer`; the 1.85 character is ≈145 px tall). To attach thing
 
 ## Limitations
 
-- Mesh topology is automatic (triangles): fine for sprites and simple deformation, not for facial animation or for
-  using the 3D character in a game without retopology.
+- Mesh topology is automatic (triangles): fine for sprites, simple deformation and the `tiempo_real` LODs (reduced,
+  not retopologized), not for facial animation.
 - Sides and back are invented from the front view (Qwen's views help, but you have to check them).
 - Fingers have no bones (whole hand = one bone).
 - Quadrupeds have a single set of 8 animations and no Kimodo; ears, jaw and manes have no bones.

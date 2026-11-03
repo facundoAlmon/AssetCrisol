@@ -23,7 +23,7 @@ def _patrones(paso, tipo, n):
         return {**comun,
                 'articulaciones': [f'{t}/guia/articulaciones.json', f'{t}/guia/pose_*.png'],   # + las de antes
                 'guia': [f'{t}/guia/guia.png', f'{t}/guia/guia.json', f'{t}/guia/frente.png', f'{t}/guia/costado.png'],
-                'blender': blend + [f'{t}/frames', f'{t}/animado.glb', f'{t}/animado.json'],
+                'blender': blend + [f'{t}/frames', f'{t}/animado.glb', f'{t}/animado.json', f'{t}/tiempo_real'],
                 'sprites': [f'{gd}/{n}_sheet.*', f'{gd}/{n}_meta.json', f'{gd}/{n}_retrato.png', f'{gd}/{n}_frente.png',
                             'preview.gif'],
                 'retrato': [f'{t}/retrato', f'{gd}/{n}_retrato.png', f'{gd}/{n}_frente.png'],
@@ -38,7 +38,7 @@ def _patrones(paso, tipo, n):
                 }.get(paso, [])
     if tipo == 'objeto':
         return {**comun,
-                'blender': blend + [f'{t}/render'],
+                'blender': blend + [f'{t}/render', f'{t}/tiempo_real'],
                 'sprites': [go, 'preview.png'],
                 'godot': [f'{go}/*.tscn', f'{go}/*.tres', 'godot/objetos/_comun'],
                 }.get(paso, [])
