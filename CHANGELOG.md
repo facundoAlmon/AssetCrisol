@@ -8,11 +8,19 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Agregado
+- **Cuadrúpedos** (`crisol nuevo <n> --receta cuadrupedo`): perros, gatos, caballos... con su propio esqueleto
+  (`modelo.esqueleto: "cuadrupedo"`: cuatro patas con IK, cuello, cabeza y cola), las articulaciones estimadas de la
+  malla (sin DWPose; el animal se gira solo para mirar adelante) y 8 animaciones procedurales (idle, paso, salto,
+  respirar, galope, mordida, herido y morir) con los nombres y cuadros del humanoide. La imagen sale de tres cuartos y
+  de costado; la malla, con TRELLIS.2 + UltraTex. El editor de articulaciones de `crisol ui` los entiende.
 - Bloque `prompt` en el json de un asset (`render_personaje`/`render_objeto`, `tema`, `paleta`, `extra`): pisa esas
   partes del prompt del estilo solo para ese asset (`""` la saca). En `crisol ui`, Ajustes > *Prompt del estilo*, con
   el prompt que sale.
 
 ### Cambiado
+- La `caja` de ejemplo se rehízo con TRELLIS.2 (antes era de Hunyuan3D-2, el motor viejo).
+- La hoja de sprites lleva solo las animaciones que se renderizaron (las que hay conservan su orden y, con idle,
+  caminata y salto, los índices 0-12).
 - El `tema` de `moderno`, `moderno_juguete` y `semirealista` ya no dice "casual clothes, ... denim": los personajes
   salían casi siempre con jeans. `medieval` y `futurista` nombran materiales del mundo pero no la ropa (sin "armor
   panels"). Los assets ya hechos cambian recién al rehacer `imagen`.

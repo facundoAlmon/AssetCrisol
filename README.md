@@ -426,6 +426,7 @@ La receta queda en `_receta` y su explicación en `_doc`.
 | `chibi` | personaje | pide brazos separados del cuerpo; avisa `articulaciones` (DWPose) y `pesos: "distancia"` |
 | `robot` | personaje | `modelo.pesos_rigidos` (placas que no se doblan); brazos separados |
 | `juguete` | personaje | estilo `moderno_juguete` (solo plástico: en personas lustra la ropa) |
+| `cuadrupedo` | personaje | perro, gato, caballo...: esqueleto de cuatro patas y sus animaciones, TRELLIS.2 + UltraTex, sin DWPose (ver [Cuadrúpedos](#cuadrúpedos)) |
 | `objeto` | objeto | TRELLIS.2 a 512 + candidatos `ultratex` y `pixal3d` (= `--objeto`) |
 | `vegetacion` | objeto | masas lisas de follaje, recorte `birefnet-general`, sin el candidato `pixal3d` |
 | `vehiculo` | objeto | la receta de autos (= `--vehiculo`, ver [Vehículos](#vehículos)) |
@@ -1061,6 +1062,34 @@ un personaje y un objeto de prueba para ver que combinen antes de producir el re
 
 ---
 
+## Cuadrúpedos
+
+Perros, gatos, caballos, vacas, zorros... (`crisol nuevo <n> --receta cuadrupedo`). Mismos pasos que un personaje,
+con otro esqueleto (`modelo.esqueleto: "cuadrupedo"`, `herramientas/3_blender/cuadrupedo.py`):
+
+```bash
+crisol nuevo firulais --receta cuadrupedo --descripcion "a scruffy brown farm dog with floppy ears and a white chest"
+crisol imagen firulais     # de tres cuartos y de costado, las cuatro patas separadas; elegir imagen.elegida
+crisol malla firulais      # TRELLIS.2 + UltraTex (Pixal3D de 4 vistas supone un humanoide de frente)
+crisol guia firulais       # mirar trabajo/guia/guia.png: patas, panza, hocico y cola
+crisol blender firulais && crisol sprites firulais && crisol iso firulais
+```
+
+- **Sin DWPose**: `blender` gira el animal para que mire adelante (el largo del cuerpo sobre Y, la cabeza del lado
+  más alto; si quedó al revés, `modelo.giro_grados: 180`) y estima las articulaciones de la malla: las cuatro patas
+  (por dónde tocan el piso), la panza y el lomo, el hocico y la cola. Revisarlas en `guia.png` y corregirlas en
+  `crisol ui` > Guía > Editar articulaciones (o en `modelo.articulaciones`, con los nombres de `cuadrupedo.JERARQUIA`).
+- **Huesos**: `root`, `hips`, `spine`, `chest`, `neck`, `head` (hasta el hocico), `tail.0-2` (si hay cola) y por
+  pata (`front`/`back`) `<p>_upper`, `<p>_lower`, `<p>_foot` con IK (`<p>_ik`, `<p>_pole`). Anclas: cadera, pecho,
+  cuello, cabeza y las cuatro patas.
+- **Animaciones** (procedurales, sin Kimodo): `idle`, `walk` (paso: trasera, delantera, trasera, delantera), `jump`,
+  `idle_loop`, `run` (galope), `punch` (una mordida), `hurt` y `die` (cae de costado). Mismos nombres y cuadros que
+  las del humanoide: la hoja conserva los índices 0-12 y saltea las que no tiene (rodar, patada, agacharse,
+  defender, lanzar, brazos arriba, cargar). `animacion.zancada_patas` y `animacion.levantar_pata` (fracción del alto
+  del hombro) ajustan el paso.
+- El encuadre sale del largo del cuerpo, no solo del alto. `modelo.altura` = del piso a lo más alto (cabeza u orejas).
+- Patas pegadas entre sí o a la panza se funden en la malla y no hay pesos que lo arreglen: regenerar la imagen.
+
 ## Objetos
 
 Cajas, mesas, cofres, barriles... Mismos pasos 1 y 2; cambia lo que hace Blender (sin esqueleto) y lo que se exporta.
@@ -1289,6 +1318,7 @@ las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para
   animación facial ni para usar el personaje 3D en un juego sin retopología.
 - El costado y la espalda se inventan a partir de la vista frontal (las vistas de Qwen ayudan, pero hay que mirarlas).
 - Los dedos no tienen huesos (mano entera = un hueso).
+- Los cuadrúpedos tienen un solo juego de animaciones (8) y sin Kimodo; orejas, mandíbula y crines no tienen huesos.
 - Los clips de Kimodo son de un cuerpo humano adulto: en chibis y cabezones las manos pueden no llegar o cruzar la
   cara.
 - Las animaciones procedurales son las mismas poses para todos: en proporciones raras la piña puede no llegar o la

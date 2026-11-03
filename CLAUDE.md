@@ -28,7 +28,7 @@ comentarios y docs en español. Todo corre local: no proponer servicios pagos ni
 
 ```bash
 crisol <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n> [--referencia img] [--objeto|--vehiculo] [--instalar <proyecto>]
-crisol nuevo <n> --receta <humanoide|chibi|robot|juguete|objeto|vegetacion|vehiculo|escenario> [--descripcion "..."]
+crisol nuevo <n> --receta <humanoide|chibi|robot|juguete|cuadrupedo|objeto|vegetacion|vehiculo|escenario> [--descripcion "..."]
 crisol estado [<n>] [--json]                        # qué está hecho, qué quedó viejo, qué falta elegir
 crisol deshacer <n> --paso <p> [--ver]              # borra lo que generó un paso (--ver: solo lo lista)
 crisol renombrar <n> --nuevo <m>                    # carpeta, godot/ y .blend; lo instalado en un juego no cambia
@@ -98,7 +98,9 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
 - `3_blender/`: `blender_main.py` (`construir` también exporta `trabajo/animado.glb` + `animado.json` para el visor 3D
   animado de la UI, `servidor.animado`; modos `limpia`, `guia`, `construir`, `retrato`, `reves`, `comparar`, `iso`,
   `anclas`, `objeto`, `alinear`), `rig_lib.py` (`PLANTILLA`, estimación, rig, pesos, `cortar_puentes`), `anim.py`
-  (`TODAS`, poses-dict `_pose`/`_poses`), `kimodo_clip.py` (NPZ → Action), `metodos.py` (procedural/kimodo por
+  (`TODAS`, poses-dict `_pose`/`_poses`), `cuadrupedo.py` (receta `cuadrupedo`, `modelo.esqueleto`: `JERARQUIA`,
+  `orientar`, `estimar_articulaciones` de la malla, rig con IK por pata y su `TODAS` de 8 animaciones con las carpetas
+  del humanoide; sin DWPose ni Kimodo), `kimodo_clip.py` (NPZ → Action), `metodos.py` (procedural/kimodo por
   animación, `CUADROS`; sin bpy ni numpy: biblioteca del repo `movimientos/biblioteca.json` + la propia de
   `<datos_dir>/movimientos/` que escribe `crisol clip`, por `CRISOL_MOVIMIENTOS`, que Blender hereda; lee los `.npz`
   candidatos con zipfile), `generar_movimiento.py` (venv Kimodo), `articulaciones_pose.py`
@@ -152,7 +154,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
 - **Iso**: direcciones `e,se,s,sw,w,nw,n,ne` (filas y sufijo `<anim>_<dir>`); cámara 30°; `baldosa_px` = ancho de 1×1.
 - **API del visual**: `set_frame(frame, flip_h)` (+ `frame_de`, `retrato`, `frente`); hijo directo del
   `CharacterBody2D`; origen = los pies. La sombra nunca va en los sprites: la dibuja el `.gd`.
-- **Huesos**: nombres de `rig_lib.PLANTILLA`, usados por `anim.py`; `.S` = lado +X, se espeja.
+- **Huesos**: nombres de `rig_lib.PLANTILLA`, usados por `anim.py`; `.S` = lado +X, se espeja. Cuadrúpedos:
+  `cuadrupedo.JERARQUIA` (otra cadena; `armar_tira` arma la hoja con las carpetas que haya, sin correr los índices).
 - **Orientación**: frente -Y, pies en z=0, alto `modelo.altura`; al renderizar el rig rota 90° en Z (mira a +X), cámara a nivel.
 - **Godot**: `godot/personajes/{_comun,<n>}/` replica `res://personajes/...`; `--instalar` conserva los `.import`
   (uid estable). Lo instalado se regenera, no se edita. No instalar en ningún proyecto sin que el usuario lo pida.

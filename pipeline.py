@@ -658,6 +658,9 @@ def paso_articulaciones(nombre):
     pdir, pj = cargar(nombre)
     if pj['_objeto']:
         sys.exit('[articulaciones] los objetos no tienen esqueleto')
+    if pj['modelo'].get('esqueleto') == 'cuadrupedo':
+        sys.exit('[articulaciones] DWPose es para humanoides: en un cuadrúpedo `blender` las estima de la malla; '
+                 'revisarlas con `crisol guia` (y corregirlas en crisol ui > Guía > Editar articulaciones)')
     reservar_gpu('articulaciones')
     blender('guia', pdir, pj)
     generar_imagen.asegurar_servidor(CFG, os.path.join(pdir, 'trabajo'))
@@ -1186,7 +1189,7 @@ def ejecutar(a):
     elif a.paso == 'todo':
         paso_malla(a.personaje)
         pj = cargar(a.personaje)[1]
-        if not pj['_objeto'] and not pj['modelo'].get('articulaciones'):
+        if not pj['_objeto'] and not pj['modelo'].get('articulaciones') and pj['modelo'].get('esqueleto') != 'cuadrupedo':
             paso_articulaciones(a.personaje)
         paso_blender(a.personaje); paso_sprites(a.personaje)
         paso_godot(a.personaje, a.instalar)

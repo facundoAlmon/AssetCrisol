@@ -62,6 +62,11 @@ ENCUADRE_PERSONAJE = ('Full body, front view, symmetrical, standing straight in 
                       'hands relaxed with palms facing the thighs, not touching the body, legs slightly apart with a '
                       'visible gap between them, feet pointing forward')
 ENCUADRE_OBJETO = 'Single object, three-quarter view from slightly above, whole object visible, centered, no text'
+# cuadrúpedos (modelo.esqueleto = "cuadrupedo"): de tres cuartos y de costado (de frente se tapa el cuerpo), las cuatro
+# patas derechas y separadas (patas juntas se funden en la malla) y la cola a la vista
+ENCUADRE_CUADRUPEDO = ('Full body, three-quarter side view from slightly above, the whole animal standing still on all '
+                       'four legs, legs straight and apart with a visible gap between each leg, the tail visible and '
+                       'away from the legs, head up looking forward, centered, no text')
 
 
 def componer_prompt(pj):
@@ -82,7 +87,9 @@ def componer_prompt(pj):
     partes += [f'{x.strip()[0].upper()}{x.strip()[1:].rstrip(".")}.' for x in (E.get('tema'), E.get('paleta'))
                if x and x.strip()]
     extra = (E.get('extra') or '').strip().rstrip('.')
-    partes.append(f"{ENCUADRE_OBJETO if obj else ENCUADRE_PERSONAJE}{', ' + extra if extra else ''}.")
+    encuadre = ENCUADRE_OBJETO if obj else (ENCUADRE_CUADRUPEDO if pj.get('modelo', {}).get('esqueleto') == 'cuadrupedo'
+                                            else ENCUADRE_PERSONAJE)
+    partes.append(f"{encuadre}{', ' + extra if extra else ''}.")
     return ' '.join(partes)
 
 

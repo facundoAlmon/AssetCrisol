@@ -129,10 +129,11 @@ def personaje(pdir, pj, nombre):
     meta, iso = os.path.join(g, f'{nombre}_meta.json'), os.path.join(g, 'iso', f'{nombre}_iso_meta.json')
     art = 'cargadas en modelo.articulaciones' if pj['modelo'].get('articulaciones') else 'estimadas (sin modelo.articulaciones)'
     marca = os.path.join(t, 'guia', 'articulaciones.json')
+    cuadrupedo = pj['modelo'].get('esqueleto') == 'cuadrupedo'   # DWPose es para humanoides: sin ese paso
+    pasos += [] if cuadrupedo else [_articulaciones(marca, glb, pj)]
     pasos += [
-        _articulaciones(marca, glb, pj),
         _paso('guia', os.path.join(t, 'guia', 'guia.png'), [glb], opcional=True, nota=art),
-        _paso('blender', blend, [glb, marca]),
+        _paso('blender', blend, [glb] if cuadrupedo else [glb, marca]),
         _paso('sprites', meta, [blend]),
         _paso('iso', iso, [glb]),
         _paso('anclas', os.path.join(t, 'iso', 'anclas.json'), [iso]),

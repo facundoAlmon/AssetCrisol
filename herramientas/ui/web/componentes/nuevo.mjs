@@ -3,7 +3,7 @@
 import { html, useState, useEffect, useRef, api, t, aviso, Icono, Cargando, Error } from '../comunes.mjs'
 
 const NOMBRE = /^[a-z0-9][a-z0-9_]{0,47}$/
-const ORDEN = ['humanoide', 'chibi', 'robot', 'juguete', 'objeto', 'vegetacion', 'vehiculo', 'escenario']
+const ORDEN = ['humanoide', 'chibi', 'robot', 'juguete', 'cuadrupedo', 'objeto', 'vegetacion', 'vehiculo', 'escenario']
 
 function sugerirNombre(texto) {
   return (texto || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')

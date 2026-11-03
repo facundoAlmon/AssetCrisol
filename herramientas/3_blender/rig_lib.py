@@ -159,23 +159,24 @@ def construir_rig(col, nombre, J):
     return arm
 
 
-def angulo_polo(arm, sd):
+def angulo_polo(arm, sd, muslo='thigh', canilla='shin', pie_='foot', objetivo='foot_ik', polo_='knee_pole'):
     """pole_angle del IK de la pierna que deja la rodilla en el plano cadera-tobillo-polo, apuntando al polo. Un -90°
     fijo solo sirve con la pierna derecha y vertical; con la pose A (piernas separadas, rodilla doblada en diagonal)
     la rodilla salía de ese plano y al doblarse se abría hacia afuera (en un muñeco con armadura el bueno era
     -30°/-150°). La fórmula clásica (eje X del muslo contra el polo proyectado) tampoco da: se calibra doblando la
-    pierna y probando ángulos."""
+    pierna y probando ángulos. Los nombres de la cadena son los del humanoide salvo que se pasen otros (las patas
+    de cuadrupedo.py)."""
     pb = arm.pose.bones
-    ik = pb[f'shin.{sd}'].constraints['IK']
+    ik = pb[f'{canilla}.{sd}'].constraints['IK']
     B = arm.data.bones
-    pie, polo = pb[f'foot_ik.{sd}'], B[f'knee_pole.{sd}'].head_local
-    largo = B[f'thigh.{sd}'].length + B[f'shin.{sd}'].length
+    pie, polo = pb[f'{objetivo}.{sd}'], B[f'{polo_}.{sd}'].head_local
+    largo = B[f'{muslo}.{sd}'].length + B[f'{canilla}.{sd}'].length
     pie.location = B[pie.name].matrix_local.to_3x3().inverted() @ Vector((0, -0.15 * largo, 0.3 * largo))
     vl = bpy.context.view_layer
 
     def error(a):
         ik.pole_angle = math.radians(a); vl.update()
-        cadera, rodilla, tobillo = pb[f'thigh.{sd}'].head, pb[f'shin.{sd}'].head, pb[f'foot.{sd}'].head
+        cadera, rodilla, tobillo = pb[f'{muslo}.{sd}'].head, pb[f'{canilla}.{sd}'].head, pb[f'{pie_}.{sd}'].head
         n = (tobillo - cadera).cross(polo - cadera).normalized()
         eje = (tobillo - cadera).normalized()
         sale = rodilla - cadera; sale -= eje * sale.dot(eje)          # hacia dónde se dobla la rodilla
@@ -185,7 +186,7 @@ def angulo_polo(arm, sd):
         # dobla bien la rodilla podía dejar el muslo girado 180° en reposo, y lo pesado al muslo (el borde del
         # delantal) daba media vuelta en todas las poses
         loc = pie.location.copy(); pie.location = (0, 0, 0); vl.update()
-        giro = max(abs(x) for h in ('thigh', 'shin')
+        giro = max(abs(x) for h in (muslo, canilla)
                    for fila in pb[f'{h}.{sd}'].matrix.to_3x3() - B[f'{h}.{sd}'].matrix_local.to_3x3() for x in fila)
         pie.location = loc
         return e + giro

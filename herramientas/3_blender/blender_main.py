@@ -17,10 +17,10 @@ import json, math, os, sys
 import bmesh
 import bpy
 from bpy_extras.object_utils import world_to_camera_view
-from mathutils import Euler, Vector
+from mathutils import Euler, Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import anim, kimodo_clip, rig_lib, vehiculo  # noqa: E402
+import anim, cuadrupedo, kimodo_clip, rig_lib, vehiculo  # noqa: E402
 
 modo, pdir = sys.argv[sys.argv.index('--') + 1:][:2]
 nombre = os.path.basename(os.path.normpath(pdir))
@@ -32,6 +32,9 @@ GLB = PJ.get('_glb') or os.path.join(TRABAJO, 'malla', 'modelo.glb')   # _glb: u
 ALTURA = PJ['modelo']['altura']
 ORTHO = ALTURA * 1.27          # encuadre con margen para brazos arriba / sombrero
 CAM_Z = ALTURA * 0.52
+# esqueleto de cuatro patas (receta cuadrupedo): cuadrupedo.py en vez de rig_lib + anim; el encuadre sale del largo
+CUADRUPEDO = PJ['modelo'].get('esqueleto') == 'cuadrupedo' and not PJ.get('_objeto')
+LARGO = ALTURA                 # largo del cuerpo (Y); importar() lo mide en los cuadrúpedos
 
 
 def preparar_escena():
@@ -158,6 +161,10 @@ def importar():
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     if PJ['modelo'].get('alinear') and PJ.get('_objeto') and not PJ.get('vehiculo'):   # los de Pixal3D ya vienen
         alinear_objeto(mesh)                                                           # alineados del paso malla
+    if CUADRUPEDO and modo in ('guia', 'construir', 'iso', 'anclas', 'reves', 'retrato'):
+        cuadrupedo.orientar(mesh)   # el largo sobre Y, la cabeza adelante (no en `limpia`: UltraTex usa la cámara)
+        if PJ['modelo'].get('giro_grados'):
+            mesh.data.transform(Matrix.Rotation(math.radians(PJ['modelo']['giro_grados']), 4, 'Z'))
     # normalizar: altura fija, pies en z=0, centrado en XY (frente = -Y, como sale de TRELLIS.2 y Pixal3D)
     vs = [v.co for v in mesh.data.vertices]
     zmin, zmax = min(v.z for v in vs), max(v.z for v in vs)
@@ -882,7 +889,23 @@ def oclusion(m, b, oc):
 
 def articulaciones(mesh):
     j = PJ['modelo'].get('articulaciones')
+    if CUADRUPEDO:
+        return cuadrupedo.desde_json(j, mesh, ALTURA) if j else cuadrupedo.estimar_articulaciones(mesh, ALTURA)
     return rig_lib.desde_json(j) if j else rig_lib.estimar_articulaciones(mesh, ALTURA)
+
+
+def encuadre_cuadrupedo(mesh):
+    """Un cuadrúpedo es más largo que alto: el encuadre lateral sale del largo (Y), con margen para el galope."""
+    global ORTHO, CAM_Z, LARGO
+    ys = [v.co.y for v in mesh.data.vertices]
+    LARGO = max(ys) - min(ys)
+    ORTHO = max(ALTURA * 1.27, LARGO * 1.2)
+    CAM_Z = ORTHO * 0.41
+
+
+def animaciones(a):
+    """[(carpeta, función)] de este personaje: las de cuadrupedo.py o las del humanoide (con su método)"""
+    return list(cuadrupedo.TODAS) if CUADRUPEDO else kimodo_clip.todas(a)
 
 
 def apuntar(cam, loc, rot):
@@ -911,6 +934,9 @@ if modo == 'guia':
     sc.render.film_transparent = False
     sc.render.resolution_x = sc.render.resolution_y = 1000
     cam.data.ortho_scale = ALTURA * 1.1
+    if CUADRUPEDO:
+        encuadre_cuadrupedo(mesh)
+        cam.data.ortho_scale = max(ALTURA, LARGO) * 1.1
     for vista, loc, rot in (('frente', (0, -10, ALTURA / 2), (math.pi / 2, 0, 0)),
                             ('costado', (10, 0, ALTURA / 2), (math.pi / 2, 0, math.pi / 2))):
         apuntar(cam, loc, rot)
@@ -1098,14 +1124,19 @@ else:
     sc, cam = preparar_escena()
     col, mesh = importar()
     J = articulaciones(mesh)
-    arm = rig_lib.construir_rig(col, f'{nombre}_rig', J)
-    arm['escala_plantilla'] = ALTURA / rig_lib.ALTURA_PLANTILLA
-    # piernas cortas (chibis): las bajadas de cadera de las poses se achican con el largo de pierna (cadera-tobillo
-    # respecto de la plantilla, desde 0,9: en los de proporciones normales no cambia nada). Sin esto el agachado bajaba
-    # la cadera de un chibi (pierna 0,37) más de lo que medían sus piernas y el torso se aplastaba contra ellas
-    B = arm.data.bones
-    pierna = (B['thigh.L'].head_local.z - B['shin.L'].tail_local.z) / (0.68 * arm['escala_plantilla'])
-    arm['factor_pierna'] = min(1.0, pierna / 0.9)
+    if CUADRUPEDO:
+        encuadre_cuadrupedo(mesh)
+        arm = cuadrupedo.construir_rig(col, f'{nombre}_rig', J)
+        arm['escala_plantilla'] = ALTURA / rig_lib.ALTURA_PLANTILLA
+    else:
+        arm = rig_lib.construir_rig(col, f'{nombre}_rig', J)
+        arm['escala_plantilla'] = ALTURA / rig_lib.ALTURA_PLANTILLA
+        # piernas cortas (chibis): las bajadas de cadera de las poses se achican con el largo de pierna (cadera-tobillo
+        # respecto de la plantilla, desde 0,9: en los de proporciones normales no cambia nada). Sin esto el agachado
+        # bajaba la cadera de un chibi (pierna 0,37) más de lo que medían sus piernas y el torso se aplastaba contra ellas
+        B = arm.data.bones
+        pierna = (B['thigh.L'].head_local.z - B['shin.L'].tail_local.z) / (0.68 * arm['escala_plantilla'])
+        arm['factor_pierna'] = min(1.0, pierna / 0.9)
     # radio en unidades de un personaje de 1.85 (3 cm); 0 = sin suavizar (como antes de TRELLIS.2)
     radio = PJ['modelo'].get('suavizar_pesos', 0.03) * ALTURA / rig_lib.ALTURA_PLANTILLA
     # lado del vóxel de la copia estanca, también en escala de 1.85; 0 = bone heat sobre la malla misma
@@ -1142,7 +1173,7 @@ else:
     a = PJ['animacion']
 
 
-HUESOS_ANCLA = ['hips', 'chest', 'neck', 'head', 'hand.R', 'hand.L', 'foot.R', 'foot.L']
+HUESOS_ANCLA = cuadrupedo.HUESOS_ANCLA if CUADRUPEDO else ['hips', 'chest', 'neck', 'head', 'hand.R', 'hand.L', 'foot.R', 'foot.L']
 
 
 def exportar_animado(arm, acciones):
@@ -1197,7 +1228,7 @@ def retratos():
     cam.data.ortho_scale = ORTHO
     apuntar(cam, (0, -10, CAM_Z), (math.pi / 2, 0, 0))
     arm.rotation_euler.z = 0
-    anim.idle(arm, a, pitch=rt.get('cabeza_grados', -5)); sc.frame_set(1)
+    (cuadrupedo if CUADRUPEDO else anim).idle(arm, a, pitch=rt.get('cabeza_grados', -5)); sc.frame_set(1)
     d = os.path.join(TRABAJO, 'retrato'); os.makedirs(d, exist_ok=True)
     render(os.path.join(d, 'frente.png'))
     ev = mesh.evaluated_get(bpy.context.evaluated_depsgraph_get())
@@ -1244,7 +1275,7 @@ def control_reves():
         px = np.array(im.pixels[:], dtype=np.float32).reshape(im.size[1], im.size[0], 4)
         bpy.data.images.remove(im)
         return px
-    funciones = dict(kimodo_clip.todas(a))
+    funciones = dict(animaciones(a))
     for nombre_anim, i in POSES_REVES:
         if nombre_anim not in funciones:
             continue
@@ -1274,7 +1305,7 @@ if modo == 'construir':
     arm.rotation_euler.z = math.radians(90)              # el personaje mira a la derecha (+X)
     info = {}
     acciones = {}
-    for nombre_anim, fn in kimodo_clip.todas(a):
+    for nombre_anim, fn in animaciones(a):
         frames = fn(arm, a)
         acciones[nombre_anim] = (arm.animation_data.action.name, frames)
         d = os.path.join(TRABAJO, 'frames', nombre_anim); os.makedirs(d, exist_ok=True)
@@ -1306,16 +1337,16 @@ elif modo in ('iso', 'anclas'):
     iso = PJ.get('isometrico', {})
     elev = math.radians(iso.get('elevacion_grados', 30))
     ppu = iso.get('baldosa_px', 128) / math.sqrt(2) * iso.get('superresolucion', 2)
-    orto = ALTURA * 1.45
+    orto = max(ALTURA * 1.45, LARGO * 1.25)
     size = int(math.ceil(orto * ppu / 2) * 2)
     sc.render.resolution_x = sc.render.resolution_y = size
     cam.data.ortho_scale = orto
     zc = ALTURA * 0.42
     apuntar(cam, (0, -10 * math.cos(elev), zc + 10 * math.sin(elev)), (math.pi / 2 - elev, 0, 0))
-    pedidas = iso.get('animaciones') or [n for n, _ in anim.TODAS]
     if 'cabeza_arriba_grados' in iso:  # desde arriba puede convenir otra inclinación que en la vista lateral
         a = dict(a, cabeza_arriba_grados=iso['cabeza_arriba_grados'])
-    funciones = dict(kimodo_clip.todas(a))
+    funciones = dict(animaciones(a))
+    pedidas = [n for n in iso.get('animaciones') or funciones if n in funciones]   # un cuadrúpedo no tiene todas
     info = {}
     anclas = {}
     for nombre_anim in pedidas:

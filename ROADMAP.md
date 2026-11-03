@@ -31,7 +31,7 @@ Dos tipos de usuario, los dos de primera:
 - [x] README (es/en), CLAUDE.md y AGENTS.md para el repo público.
 - [x] Comando `crisol` (`crisol todo cris`) como entrada a `pipeline.py`.
 - [x] Ejemplos versionados: Cris, sus objetos, una caja y dos escenarios (bosque, taller), probados con `tests/humo.py`.
-- [ ] Rehacer la caja de ejemplo con TRELLIS.2 (la malla actual salió del motor viejo, Hunyuan3D-2).
+- [x] Rehacer la caja de ejemplo con TRELLIS.2 (Z-Image seed 777, candidato trellis2, `modelo.alinear`).
 - [x] Gif de demo para la portada del README (`ejemplos/personajes/cris/demo_acciones.gif`; también `demo_paseo` y
       `demo_direcciones`).
 - [x] Textura de piso del bosque con un modelo de licencia comercial (Z-Image Turbo).
@@ -118,7 +118,8 @@ Mejoras pedidas (2026-10-28):
 - [x] Exportar: elegir qué archivos y bajarlos en un zip.
 - [x] Elegir la resolución de los sprites.
 - [x] Borrar el historial de la cola (todo o lo seleccionado).
-- [ ] Receta para cuadrúpedos (perro, gato, caballo, vaca...): toca el rig y las animaciones, no solo la UI.
+- [x] Receta para cuadrúpedos (perro, gato, caballo, vaca...): esqueleto propio (`cuadrupedo.py`), articulaciones
+      estimadas de la malla y 8 animaciones procedurales.
 
 ## 5. Salida 3D y otros motores
 - [x] Personaje como GLB con rig y animaciones (las mismas de los sprites): `trabajo/animado.glb`, también en el visor

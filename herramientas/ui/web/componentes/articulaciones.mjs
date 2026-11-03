@@ -3,21 +3,30 @@
 // (PUT api/assets/<n>/articulaciones), que redibuja guia.png y deja `blender` viejo.
 import { html, useState, useEffect, useRef, api, t, urlArchivo, Icono, Cargando, Error, aviso, encolar, nombrePaso } from '../comunes.mjs'
 
-const CENTRO = ['hips', 'spine', 'chest', 'neck', 'head']   // en el medio: de frente solo se mueven en z
-const SIN_DIBUJAR = n => n === 'root' || n.startsWith('knee_pole') || n.startsWith('foot_ik')
+// en el medio: de frente solo se mueven en z (la cola, de los cuadrúpedos)
+const CENTRO = ['hips', 'spine', 'chest', 'neck', 'head', 'tail.0', 'tail.1', 'tail.2']
+// polos de rodilla/pata y objetivos del IK (foot_ik; front_ik y back_ik en los cuadrúpedos): no se editan
+const POLO = n => n.startsWith('knee_pole') || /^(front|back)_pole\./.test(n)
+const SIN_DIBUJAR = n => n === 'root' || POLO(n) || n.startsWith('foot_ik') || /^(front|back)_ik\./.test(n)
+const cuadrupedo = J => 'front_upper.S' in J
 const base = n => n.replace(/\.[SLR]$/, '')
 const lado = n => n.match(/\.([SLR])$/)?.[1]
 // nombre de cada punto: el del primer extremo de hueso que está en la tabla (hueso sin lado . 0 cabeza / 1 cola)
 const NOMBRES = ['hips.0', 'spine.0', 'chest.0', 'neck.0', 'head.0', 'head.1', 'shoulder.0', 'shoulder.1', 'upper_arm.0',
   'forearm.0', 'hand.0', 'hand.1', 'thigh.0', 'shin.0', 'foot.0', 'foot.1']
+// los del cuadrúpedo (herramientas/3_blender/cuadrupedo.py), con sus textos en art.q.*
+const NOMBRES_Q = ['hips.0', 'spine.0', 'chest.0', 'neck.0', 'head.0', 'head.1', 'tail.0.0', 'tail.1.0', 'tail.2.0', 'tail.2.1',
+  'front_upper.0', 'front_lower.0', 'front_foot.0', 'front_foot.1', 'back_upper.0', 'back_lower.0', 'back_foot.0', 'back_foot.1']
+const etiqueta = (p, J) => t((cuadrupedo(J) ? 'art.q.' : 'art.p.') + p.nombre) + (p.lado && p.lado !== 'S' ? ` (${p.lado})` : '')
 const VISTAS = [['frente', 0], ['costado', 1]]   // vista y su eje horizontal (x, y); el vertical es z
 
 // Los puntos son los extremos de hueso que coinciden (la cola del muslo y la cabeza de la canilla son la rodilla):
 // mover uno mueve todos. El root y el polo de la rodilla no se editan (el polo sigue a la rodilla).
 function agrupar(J) {
   const puntos = []
+  const tabla = cuadrupedo(J) ? NOMBRES_Q : NOMBRES
   for (const [n, par] of Object.entries(J)) {
-    if (n === 'root' || n.startsWith('knee_pole')) continue
+    if (n === 'root' || POLO(n)) continue
     par.forEach((c, e) => {
       let p = puntos.find(p => p.c.every((v, i) => Math.abs(v - c[i]) < 1e-4))
       if (!p) puntos.push(p = { c, miembros: [] })
@@ -26,7 +35,7 @@ function agrupar(J) {
   }
   return puntos.map((p, id) => {
     const claves = p.miembros.map(([n, e]) => `${base(n)}.${e}`)
-    const nombre = NOMBRES.find(k => claves.includes(k)) || claves[0]
+    const nombre = tabla.find(k => claves.includes(k)) || claves[0]
     const lados = [...new Set(p.miembros.map(([n]) => lado(n)).filter(Boolean))]
     return { id, miembros: p.miembros, nombre, lado: lados[0], centro: p.miembros.every(([n]) => CENTRO.includes(n)) }
   })
@@ -73,8 +82,8 @@ export function EditorArticulaciones({ d, cerrar }) {
       if (!(p.centro && eje === 0)) c[eje] = Math.round(h * 1000) / 1000
       c[2] = Math.round(z * 1000) / 1000
     }
-    for (const n of Object.keys(N).filter(n => n.startsWith('knee_pole'))) {
-      const muslo = N['thigh.' + lado(n)]
+    for (const n of Object.keys(N).filter(POLO)) {
+      const muslo = N[(n.startsWith('knee_pole') ? 'thigh.' : n.replace(/_pole\..*/, '_upper.')) + lado(n)]
       if (!muslo) continue
       for (const c of N[n]) { c[0] = muslo[1][0]; c[2] = muslo[1][2] }
     }
@@ -101,7 +110,7 @@ export function EditorArticulaciones({ d, cerrar }) {
       url=${urlArchivo(d.nombre, g[vista], g.version)} recordar=${recordar} mover=${mover} actual=${actual} />`)}</div>
     <div class="editor-art-pie">
       <span class="chico" aria-live="polite" style="min-width:0;overflow-wrap:anywhere">${elegido
-        ? html`<b>${t('art.p.' + elegido.nombre)}${elegido.lado && elegido.lado !== 'S' ? ` (${elegido.lado})` : ''}</b>
+        ? html`<b>${etiqueta(elegido, J)}</b>
             <span class="mono"> x ${coord(elegido)[0].toFixed(3)} · y ${coord(elegido)[1].toFixed(3)} · z ${coord(elegido)[2].toFixed(3)}</span>`
         : html`<span class="tenue">${t(g.origen === 'estimadas' ? 'art.estimadas' : g.fuente === 'a mano' ? 'art.a_mano' : 'art.cargadas')}</span>`}</span>
       <div class="acciones">
@@ -171,7 +180,7 @@ function Vista({ vista, eje, g, J, puntos, sel, setSel, aPx, deUnidades, url, re
       }))}
       ${puntos.flatMap(p => (eje === 0 ? espejos(p.miembros.map(([n]) => n), J) : [1]).map(s => {
         const [x, y] = de(...p.miembros[0], s)
-        const titulo = t('art.p.' + p.nombre) + (p.lado && p.lado !== 'S' ? ` (${p.lado})` : '')
+        const titulo = etiqueta(p, J)
         return html`<g key=${p.id + '_' + s} class=${'art-punto' + (p.id === sel ? ' elegido' : '') + (s < 0 ? ' espejo' : '')}
           tabindex="0" role="button" aria-label=${titulo} aria-pressed=${p.id === sel}
           onPointerDown=${ev => bajar(ev, p, s)} onKeyDown=${ev => tecla(ev, p, s)} onFocus=${() => setSel(p.id)}>

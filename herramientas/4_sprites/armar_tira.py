@@ -32,10 +32,14 @@ ANIMACIONES = [
 ]
 
 
-def orden():
-    """[(carpeta, índice)], [nombre de cada frame], {animación: {frames, fps, loop}}"""
+def orden(carpetas=None):
+    """[(carpeta, índice)], [nombre de cada frame], {animación: {frames, fps, loop}}. Con `carpetas`, solo las
+    animaciones que están ahí (un cuadrúpedo no tiene rodar ni patada): las que hay conservan el orden y, mientras
+    estén idle, caminata y salto, los índices 0-12."""
     celdas, nombres, anims = [], [], {}
     for n, carpeta, idx, fps, loop, nfr in ANIMACIONES:
+        if carpetas is not None and carpeta not in carpetas:
+            continue
         idx = list(idx)
         anims[n] = {'frames': list(range(len(celdas), len(celdas) + len(idx))), 'fps': fps, 'loop': loop}
         celdas += [(carpeta, i) for i in idx]
@@ -91,8 +95,10 @@ def retratos(pdir, nombre, pj, dir_godot, meta):
 def armar(pdir, nombre, pj, dir_godot):
     fdir = os.path.join(pdir, 'trabajo', 'frames')
     P, sr = pj['_estilo']['posproceso'], pj['sprites']['superresolucion']
+    with open(os.path.join(fdir, 'frames.json')) as f:
+        celdas, nombres, anims = orden(set(json.load(f)['frames']))
     frames = [posproceso.aplicar(Image.open(os.path.join(fdir, a, f'{i:02d}.png')).convert('RGBA'), P, sr)
-              for a, i in ORDEN]
+              for a, i in celdas]
     W, H = frames[0].size
     boxes = [f.getchannel('A').point(lambda v: 255 if v > 8 else 0).getbbox() for f in frames]
     x0 = min(b[0] for b in boxes) - 2; y0 = min(b[1] for b in boxes) - 2
@@ -112,7 +118,7 @@ def armar(pdir, nombre, pj, dir_godot):
     alto = pj['sprites']['alto_en_pantalla_px']
     meta = {
         'imagen': f'{nombre}_sheet.png', 'frame_width': cw, 'frame_height': ch, 'frames': len(frames),
-        'hframes': COLUMNAS, 'vframes': filas, 'orden': NOMBRES, 'animaciones': ANIMS, 'escala': round(esc, 5),
+        'hframes': COLUMNAS, 'vframes': filas, 'orden': nombres, 'animaciones': anims, 'escala': round(esc, 5),
         'offset': [round(-cw / 2 * esc, 3), round(-pie * esc, 3)],
         'pie_y_px': pie, 'alto_en_pantalla_px': alto,
         'colision_sugerida': {'size': [round(alto * 0.24), round(alto * 0.77)], 'position': [0, -round(alto * 0.385)]},

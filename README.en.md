@@ -439,6 +439,7 @@ the json. The recipe is stored in `_receta` and its explanation in `_doc`.
 | `chibi` | character | asks for arms away from the body; points to `articulaciones` (DWPose) and `pesos: "distancia"` |
 | `robot` | character | `modelo.pesos_rigidos` (plates that don't bend); arms away from the body |
 | `juguete` | character | `moderno_juguete` style (plastic only: on people it makes clothes glossy) |
+| `cuadrupedo` | character | dog, cat, horse...: four-legged skeleton and its animations, TRELLIS.2 + UltraTex, no DWPose (see [Quadrupeds](#quadrupeds)) |
 | `objeto` | prop | TRELLIS.2 at 512 + `ultratex` and `pixal3d` candidates (= `--objeto`) |
 | `vegetacion` | prop | smooth foliage masses, `birefnet-general` cutout, no `pixal3d` candidate |
 | `vehiculo` | prop | the car recipe (= `--vehiculo`, see [Vehicles](#vehicles)) |
@@ -1073,6 +1074,33 @@ config and generate a test character and prop to check they match before produci
 
 ---
 
+## Quadrupeds
+
+Dogs, cats, horses, cows, foxes... (`crisol nuevo <n> --receta cuadrupedo`). Same steps as a character, with another
+skeleton (`modelo.esqueleto: "cuadrupedo"`, `herramientas/3_blender/cuadrupedo.py`):
+
+```bash
+crisol nuevo rex --receta cuadrupedo --descripcion "a scruffy brown farm dog with floppy ears and a white chest"
+crisol imagen rex     # three-quarter side view, four separated legs; pick imagen.elegida
+crisol malla rex      # TRELLIS.2 + UltraTex (4-view Pixal3D assumes a front-facing humanoid)
+crisol guia rex       # check trabajo/guia/guia.png: legs, belly, muzzle and tail
+crisol blender rex && crisol sprites rex && crisol iso rex
+```
+
+- **No DWPose**: `blender` turns the animal to face forward (body length along Y, head on the taller end; if it ends
+  up backwards, `modelo.giro_grados: 180`) and estimates the joints from the mesh: the four legs (where they touch
+  the ground), belly and back, muzzle and tail. Check them in `guia.png` and fix them in `crisol ui` > Guide > Edit
+  joints (or in `modelo.articulaciones`, with the names in `cuadrupedo.JERARQUIA`).
+- **Bones**: `root`, `hips`, `spine`, `chest`, `neck`, `head` (to the muzzle), `tail.0-2` (if it has a tail) and per
+  leg (`front`/`back`) `<p>_upper`, `<p>_lower`, `<p>_foot` with IK (`<p>_ik`, `<p>_pole`). Anchors: hips, chest,
+  neck, head and the four feet.
+- **Animations** (procedural, no Kimodo): `idle`, `walk` (lateral sequence), `jump`, `idle_loop`, `run` (gallop),
+  `punch` (a bite), `hurt` and `die` (falls on its side). Same names and frame counts as the humanoid ones: the sheet
+  keeps indices 0-12 and skips the ones it doesn't have (roll, kick, crouch, block, throw, arms up, charge).
+  `animacion.zancada_patas` and `animacion.levantar_pata` (fraction of shoulder height) tune the stride.
+- Framing comes from the body length, not only the height. `modelo.altura` = floor to the highest point.
+- Legs touching each other or the belly fuse in the mesh and no weights fix that: regenerate the image.
+
 ## Props
 
 Crates, tables, chests, barrels... Same steps 1 and 2; what changes is what Blender does (no skeleton) and what is
@@ -1306,6 +1334,7 @@ isometric `TileMapLayer`; the 1.85 character is ≈145 px tall). To attach thing
   using the 3D character in a game without retopology.
 - Sides and back are invented from the front view (Qwen's views help, but you have to check them).
 - Fingers have no bones (whole hand = one bone).
+- Quadrupeds have a single set of 8 animations and no Kimodo; ears, jaw and manes have no bones.
 - Kimodo clips are of an adult human body: on chibis and big-headed characters the hands may fall short or cross the
   face.
 - Procedural animations are the same poses for everyone: with odd proportions the punch may not reach or the guard

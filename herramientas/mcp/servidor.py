@@ -101,7 +101,7 @@ def esperar_trabajo(tid, segundos):
 
 @app.tool()
 def recetas() -> str:
-    """Tipos de asset que se pueden crear (humanoide, chibi, robot, juguete, objeto, vegetacion, vehiculo,
+    """Tipos de asset que se pueden crear (humanoide, chibi, robot, juguete, cuadrupedo, objeto, vegetacion, vehiculo,
     escenario), con qué pone cada receta."""
     return '\n'.join(f'- {r} ({pipeline.cargar_receta(r)["_base"]}): {pipeline.cargar_receta(r)["_doc"]}'
                      for r in pipeline.RECETAS)

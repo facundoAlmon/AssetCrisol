@@ -1,25 +1,47 @@
 {
-  "_doc": "Configuración de un objeto (caja, mesa, tronco...). Copiada por `crisol nuevo <nombre> --objeto`. Ver README.md > Objetos.",
+  "_doc": "Ejemplo de objeto de los tests (tests/humo.py): imagen con Z-Image Turbo (seed 777), malla TRELLIS.2 (candidato trellis2), con modelo.alinear (TRELLIS la dejó girada 34° como en la imagen). Ya trae trabajo/malla/modelo.glb: copiar a <datos_dir>/objetos/ y correr blender y sprites.",
   "tipo": "objeto",
   "imagen": {
     "referencia": null,
+    "motor": "zimage",
+    "_motor": "solo sin referencia: zimage (Z-Image Turbo, segundos, Apache-2.0) | flux2 (FLUX.2 Dev, ~3 min, no comercial). Con referencia siempre Qwen Image Edit",
     "descripcion": "a sturdy wooden crate made of light brown planks with dark metal corner brackets and nails",
+    "_descripcion": "El prompt se arma solo: estilo (render, tema, paleta) + descripcion + encuadre (objeto solo, tres cuartos desde arriba). Queda en trabajo/imagen/prompt.txt.",
     "seeds": [
       4242,
       777,
-      31337
+      31337,
+      11
     ],
-    "elegida": 4242
+    "elegida": 777
   },
   "malla": {
     "caras": 20000,
-    "octree": 384,
-    "pasos": 50,
-    "seed": 1234
+    "resolucion": 512,
+    "textura_px": 2048,
+    "seed": 1234,
+    "_doc": "TRELLIS.2: resolucion 512 | 1024 | 1536 (más = más detalle y VRAM; los objetos macizos a 1024 no entran en 16 GB). Candidatos (README > paso 2): ultratex = la de TRELLIS.2 repintada (cofre mejor, computadora peor) y pixal3d = Pixal3D de una vista (mejor geometría en el cofre; el paso malla lo endereza). malla genera los tres y arma trabajo/candidatos.png: elegir malla.elegida y correr malla de nuevo (copia). Sacar candidatos para ahorrar GPU (~1 y ~4 min). \"motor\":",
+    "candidatos": {
+      "ultratex": {
+        "desde": "trellis2",
+        "ultratex": {
+          "seed": 1,
+          "giro": 45
+        }
+      },
+      "pixal3d": {
+        "motor": "pixal3d",
+        "resolucion": 1536,
+        "seed": 1,
+        "caras": 200000
+      }
+    },
+    "elegida": "trellis2"
   },
   "modelo": {
     "altura": 0.7,
-    "giro_grados": 0
+    "giro_grados": 0,
+    "alinear": true
   },
   "lateral": {
     "px_por_unidad": null,
@@ -31,5 +53,6 @@
     "direcciones": 4,
     "sombra": true
   },
+  "_escalas": "px_por_unidad / baldosa_px en null = los del estilo",
   "colision": true
 }

@@ -31,7 +31,7 @@ def dibujar(gdir):
             lados = [s for s in lados if not n.endswith('.S') or n[:-2] + ('.L' if s > 0 else '.R') not in J]
             for s in lados:
                 a = P(h[eje] * (s if eje == 0 else 1), h[2]); b = P(t[eje] * (s if eje == 0 else 1), t[2])
-                ctrl = n.startswith(('foot_ik', 'knee_pole', 'root'))
+                ctrl = n.startswith(('foot_ik', 'knee_pole', 'root', 'front_ik', 'back_ik', 'front_pole', 'back_pole'))
                 d.line([a, b], fill=(255, 150, 0) if ctrl else (0, 170, 0), width=3)
                 d.ellipse((a[0] - 5, a[1] - 5, a[0] + 5, a[1] + 5), fill=(255, 220, 0), outline=(0, 0, 0))
         d.text((10, px - 20), f'{vista}  (ejes: {"X" if eje == 0 else "Y, frente a la izquierda"} / Z)  '
