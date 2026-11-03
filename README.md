@@ -41,6 +41,7 @@ se funde el material para darle forma: acá entra una imagen y salen sprites, mo
 | | Asset | De una imagen sale... | Pasos clave |
 |---|---|---|---|
 | 🧍 | **Personaje animado** | rig + 15 animaciones (caminar, correr, saltar, golpe, patada, morir...) como hoja de sprites lateral, hojas **isométricas en 8 direcciones**, retrato y cuerpo de frente para una pantalla de selección, anclas por cuadro para colgarle equipo | `imagen` → `malla` → `blender` → `sprites` → `iso` |
+| 🐕 | **Cuadrúpedo** | perro, gato, caballo: su propio esqueleto y 8 animaciones (paso, galope, salto, mordida, morir...) con las mismas hojas laterales e isométricas | `imagen` → `malla` → `guia` → `blender` → `sprites` → `iso` |
 | 📦 | **Objeto** | cajas, mesas, cofres, barriles: vista lateral + vistas isométricas con sombra de contacto, escenas `StaticBody2D` con colisión, o el `.glb` para un juego 3D | `imagen` → `malla` → `blender` → `sprites` |
 | 🚗 | **Vehículo** | `.glb` con las 4 ruedas separadas en su nodo (origen en el eje), carrocería con materiales `pintura`/`oscuro` y una tarjeta para un selector | `imagen` → `vistas` → `malla` → `blender` |
 | 🌲 | **Kit de escenario** | texturas repetibles de piso, camino y pared (detalle normalizado para teñir con los colores del tema), telón de fondo pintado y `tema.json` con los colores | `texturas` → `tema` |

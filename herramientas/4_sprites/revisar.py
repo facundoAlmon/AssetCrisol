@@ -85,11 +85,14 @@ def revisar(pdir, nombre):
                 out.append(_recorte(cel, desde, hasta) if recortar else cel)
         return out if recortar else _union(out)
 
+    cuadrupedo = 'kick' not in A   # receta cuadrupedo: sin brazos, patada ni rodar
     filas = [
         _fila('cabeza: idle | caminata | correr (mirar al frente, igual que en el idle)',
               cuadros([('idle', 0), ('walk', 0), ('walk', 3), ('walk', 6), ('run', 3)], 0.0, 0.3)),
-        _fila('brazos: caminata | correr | golpe | bloqueo (codo marcado, sin plastilina)',
-              cuadros([('walk', 1), ('walk', 5), ('run', 3), ('punch', 2), ('punch', 3), ('block', 0)], 0.15, 0.6)),
+        _fila('patas: caminata | galope | mordida (rodillas y codos hacia donde van, sin plastilina)'
+              if cuadrupedo else 'brazos: caminata | correr | golpe | bloqueo (codo marcado, sin plastilina)',
+              cuadros([('walk', 1), ('walk', 5), ('run', 3), ('punch', 2), ('punch', 3), ('block', 0)],
+                      0.3 if cuadrupedo else 0.15, 1.0 if cuadrupedo else 0.6)),
     ]
     iso = os.path.join(d, 'iso')
     walk = os.path.join(iso, f'{nombre}_iso_walk.png')
@@ -105,8 +108,9 @@ def revisar(pdir, nombre):
             return _union([hw.crop((c * iw, r * ih, (c + 1) * iw, (r + 1) * ih)) for c in range(cols)])
         filas.append(_fila('caminata iso de frente (s): pies bajo el cuerpo, piernas casi paralelas', fila_iso('s')))
         filas.append(_fila('caminata iso de espalda (n): lo que inventó UltraTex atrás', fila_iso('n')))
-    filas.append(_fila('poses: patada | rodar | morir | lanzar | brazos arriba',
-                       cuadros([('kick', 3), ('roll', 3), ('die', 5), ('throw', 3), ('arms_up', 3)], recortar=False)))
+    filas.append(_fila('poses: salto | morir' if cuadrupedo else 'poses: patada | rodar | morir | lanzar | brazos arriba',
+                       cuadros([('jump', 1), ('jump', 2), ('die', 5)] if cuadrupedo else
+                               [('kick', 3), ('roll', 3), ('die', 5), ('throw', 3), ('arms_up', 3)], recortar=False)))
     reves = os.path.join(pdir, 'trabajo', 'reves')
     if os.path.isdir(reves):
         fs = sorted(f for f in os.listdir(reves) if f.endswith('.png'))

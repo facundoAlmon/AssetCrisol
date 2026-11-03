@@ -47,6 +47,7 @@ where material is melted down to give it shape: an image goes in, sprites, model
 | | Asset | From one image you get... | Key steps |
 |---|---|---|---|
 | 🧍 | **Animated character** | rig + 15 animations (walk, run, jump, punch, kick, die...) as a side-view sprite sheet, **isometric sheets in 8 directions**, a portrait and a front view for a selection screen, per-frame anchors to attach gear | `imagen` → `malla` → `blender` → `sprites` → `iso` |
+| 🐕 | **Quadruped** | dog, cat, horse: its own skeleton and 8 animations (walk, gallop, jump, bite, die...) with the same side and isometric sheets | `imagen` → `malla` → `guia` → `blender` → `sprites` → `iso` |
 | 📦 | **Prop** | crates, tables, chests, barrels: side view + isometric views with a contact shadow, `StaticBody2D` scenes with collision, or the `.glb` for a 3D game | `imagen` → `malla` → `blender` → `sprites` |
 | 🚗 | **Vehicle** | `.glb` with the 4 wheels split into their own nodes (origin on the axle), a body with `pintura` (paint) / `oscuro` (dark) materials and a card image for a selection screen | `imagen` → `vistas` → `malla` → `blender` |
 | 🌲 | **Scenery kit** | tileable floor, path and wall textures (normalized detail, tinted with the theme colors), a painted backdrop and `tema.json` with the colors | `texturas` → `tema` |
