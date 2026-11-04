@@ -32,6 +32,12 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   el prompt que sale.
 
 ### Cambiado
+- `crisol ui`, **Movimientos**: los pasos a la vista (generar, mirar y recortar, biblioteca, rehacer), las variantes
+  agrupadas por generación con el esqueleto animado (también los candidatos viejos sin hoja de esqueletos) y el
+  recorte marcando un instante; cada clip dice qué personajes lo usan. Está en la barra del celular.
+- `crisol ui`, **Resultado > Animación**: la hoja de costado animada, una animación por vez (antes, el gif con todas
+  juntas y los nombres ilegibles). **Ajustes > Animaciones**: el método se elige solo donde hay clip de Kimodo (antes
+  el botón «kimodo» estaba deshabilitado sin explicación) y las animaciones del iso vienen todas marcadas.
 - La `caja` de ejemplo se rehízo con TRELLIS.2 (antes era de Hunyuan3D-2, el motor viejo).
 - La hoja de sprites lleva solo las animaciones que se renderizaron (las que hay conservan su orden y, con idle,
   caminata y salto, los índices 0-12).

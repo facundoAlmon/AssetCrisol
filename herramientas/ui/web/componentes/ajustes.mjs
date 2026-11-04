@@ -125,12 +125,14 @@ function Campo({ c, valor, cambiar }) {
       onChange=${e => cambiar(e.target.checked ? (c.previo && typeof c.previo === 'object' ? c.previo : {}) : false)} />${etiqueta}</label>${ayuda}</div>`
   }
   if (c.tipo === 'animaciones') {
-    const marcadas = new Set(valor || [])
+    // null (sin lista) = todas: se muestran todas marcadas; con todas marcadas se vuelve a null; la última no se desmarca
+    const todas = c.animaciones.map(x => x.id)
+    const marcadas = new Set(valor?.length ? valor : todas)
     return html`<fieldset class="campo" style="border:0;padding:0;margin:0"><legend style="font-weight:600;font-size:14px;margin-bottom:6px">${etiqueta}</legend>
       ${ayuda}<div class="animaciones-ajuste">${c.animaciones.map(a => html`<label class="casilla" key=${a.id}>
-        <input type="checkbox" checked=${marcadas.has(a.id)} onChange=${e => {
+        <input type="checkbox" checked=${marcadas.has(a.id)} disabled=${marcadas.size === 1 && marcadas.has(a.id)} onChange=${e => {
           const s = new Set(marcadas); e.target.checked ? s.add(a.id) : s.delete(a.id)
-          cambiar(s.size ? c.animaciones.map(x => x.id).filter(x => s.has(x)) : null)
+          cambiar(s.size === todas.length ? null : todas.filter(x => s.has(x)))
         }} />${a.id} <span class="tenue chico">${a.godot}</span></label>`)}</div></fieldset>`
   }
   if (c.tipo === 'parte_prompt') {
@@ -199,20 +201,22 @@ function Metodos({ d }) {
     setGuardando(true)
     try {
       setLista(await api(`assets/${encodeURIComponent(d.nombre)}/metodos`, { metodo: 'POST', cuerpo: { cambios: { [anim]: metodo } } }))
-      aviso(t('aj.guardado'))
+      aviso(t('aj.metodo_guardado', { a: anim, m: metodo }))
     } catch (e) { aviso(e.message, 'error') }
     setGuardando(false)
   }
+  // solo las que tienen un clip de Kimodo en la biblioteca se pueden cambiar; el resto sale con las poses procedurales
+  const conClip = lista.filter(a => a.metodo === 'kimodo' || a.nota.startsWith('kimodo'))
+  const sinClip = lista.filter(a => !conClip.includes(a))
   return html`<div class="campo"><span>${t('paso.metodo')}</span><small>${t('aj.metodos_ayuda')}</small>
-    <div class="animaciones-ajuste" style="margin-top:6px">${lista.map(a => {
-      const hayKimodo = a.metodo === 'kimodo' || a.nota.startsWith('kimodo')
-      return html`<div class="anim" key=${a.animacion} title=${a.nota}>
+    ${conClip.length > 0 && html`<div class="animaciones-ajuste" style="margin-top:6px">${conClip.map(a => html`<div class="anim" key=${a.animacion} title=${a.nota}>
         <span>${a.animacion}</span>
         <div class="segmentos" role="group" aria-label=${a.animacion}>
-          ${['procedural', 'kimodo'].map(m => html`<button aria-pressed=${a.metodo === m} disabled=${guardando || (m === 'kimodo' && !hayKimodo)}
+          ${['procedural', 'kimodo'].map(m => html`<button aria-pressed=${a.metodo === m} disabled=${guardando}
             onClick=${() => a.metodo !== m && cambiar(a.animacion, m)}>${m}</button>`)}
-        </div></div>`
-    })}</div></div>`
+        </div></div>`)}</div>`}
+    ${sinClip.length > 0 && html`<p class="chico tenue" style="margin:8px 0 0">${t('aj.metodos_sin_clip', { a: sinClip.map(a => a.animacion).join(', ') })}${' '}
+      <a href="#/movimientos">${t('aj.metodos_ir')}</a></p>`}</div>`
 }
 
 function diffLineas(a, b) {

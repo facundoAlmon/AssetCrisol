@@ -257,6 +257,16 @@ def animado(pdir):
     return out
 
 
+def hoja_meta(pdir, nombre):
+    """El meta de la hoja de costado (para el reproductor de Resultado > Animación), con la carpeta relativa."""
+    r = os.path.join(pdir, 'godot', 'personajes', nombre, f'{nombre}_meta.json')
+    if not os.path.exists(r):
+        return None
+    m = op.leer(r)
+    m['carpeta'] = os.path.relpath(os.path.dirname(r), pdir)
+    return {k: m[k] for k in ('imagen', 'frame_width', 'frame_height', 'hframes', 'animaciones', 'carpeta') if k in m}
+
+
 def iso_meta(pdir, nombre):
     """El meta de las hojas iso de un personaje (para el reproductor por dirección), con la carpeta relativa."""
     r = os.path.join(pdir, 'godot', 'personajes', nombre, 'iso', f'{nombre}_iso_meta.json')
@@ -443,6 +453,7 @@ def detalle_asset(n):
     return {**resumen_asset(n), 'carpeta': pdir, 'json': op.leer(ruta), 'archivo_json': os.path.basename(ruta),
             'pasos': e['pasos'], 'decidir': e['decidir'], 'visuales': visuales(pdir, pj, n, e['tipo']),
             'iso': iso_meta(pdir, n) if e['tipo'] == 'personaje' else None,
+            'hoja': hoja_meta(pdir, n) if e['tipo'] == 'personaje' else None,
             'animado': animado(pdir) if e['tipo'] == 'personaje' else None,
             'tiempo_real': tiempo_real(pdir, n) if e['tipo'] in ('personaje', 'objeto') else None,
             'tiempo_real_general': pipeline.CFG.get('tiempo_real'),   # el de config.json (false = apagado para todos)
@@ -524,11 +535,29 @@ def movimientos():
     candidatos de `crisol movimiento`, con su hoja de esqueletos."""
     d = os.path.join(pipeline.DATOS, 'movimientos', 'candidatos')
     bib = metodos.biblioteca()
+    # qué personajes humanoides arman cada animación de la biblioteca con su clip (por su json o por defecto)
+    usan = {a: [] for a in bib}
+    d_pj = os.path.join(pipeline.DATOS, 'personajes')
+    for n in sorted(os.listdir(d_pj)) if os.path.isdir(d_pj) else []:
+        try:
+            with open(os.path.join(d_pj, n, 'personaje.json')) as f:
+                pj = json.load(f)
+        except (OSError, ValueError):
+            continue
+        if (pj.get('modelo') or {}).get('esqueleto') == 'cuadrupedo':
+            continue
+        for a in bib:
+            try:
+                if metodos.metodo(a, pj.get('animacion') or {}, bib) == 'kimodo':
+                    usan[a].append(n)
+            except ValueError:
+                pass
     return {'animaciones': list(metodos.CUADROS),
+            'cuadros': {a: {'cuadros': c, 'loop': l} for a, (c, l) in metodos.CUADROS.items()},
             'biblioteca': [{'animacion': a, 'origen': c['_origen'], 'clip': c['clip'],
                             'recomendado': bool(c.get('recomendado')), 'desde': c.get('desde'), 'hasta': c.get('hasta'),
                             'duracion': c.get('duracion'), 'prompt': c.get('prompt'), 'candidato': c.get('candidato'),
-                            'nota': c.get('_nota')} for a, c in bib.items()],
+                            'nota': c.get('_nota'), 'usan': usan.get(a, [])} for a, c in bib.items()],
             'candidatos': metodos.candidatos(d)}
 
 
@@ -843,6 +872,8 @@ class Manejador(BaseHTTPRequestHandler):
             return self.json(movimientos())
         if p == ['movimientos', 'clip'] and m == 'POST':
             return self.clip(self.cuerpo_json())
+        if p == ['movimientos', 'esqueleto'] and m == 'GET':
+            return self.esqueleto_movimiento(q)
         if p == ['recetas']:
             return self.json(recetas())
         if p == ['estilos']:
@@ -921,6 +952,26 @@ class Manejador(BaseHTTPRequestHandler):
             self.send_header('X-Content-Type-Options', 'nosniff')
             self.end_headers()
             shutil.copyfileobj(tmp, self.wfile, 1 << 20)
+
+    def esqueleto_movimiento(self, q):
+        """El clip de costado para animarlo en la página (metodos.esqueleto): ?candidato=<anim>_s<seed>_<i> o
+        ?animacion=<anim> (el clip de la biblioteca)."""
+        cand, anim = q.get('candidato'), q.get('animacion')
+        if cand:
+            if not metodos.CANDIDATO.match(cand):
+                return self.error(400, 'candidato inválido')
+            ruta = os.path.join(pipeline.DATOS, 'movimientos', 'candidatos', cand + '.npz')
+        else:
+            c = metodos.biblioteca().get(anim or '')
+            if not c:
+                return self.error(404, 'no hay clip para esa animación')
+            ruta = metodos.ruta_clip(c)
+        if not os.path.isfile(ruta):
+            return self.error(404, 'no existe el clip')
+        try:
+            return self.json(metodos.esqueleto(ruta))
+        except (OSError, KeyError, ValueError, zipfile.BadZipFile) as e:
+            return self.error(400, f'no se pudo leer el clip: {e}')
 
     def hoja_movimiento(self, archivo, q):
         """Una hoja de esqueletos de `crisol movimiento` (movimientos/candidatos/<anim>_s<seed>.png); con

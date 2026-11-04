@@ -353,10 +353,10 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
   .principal { padding: 18px 16px 96px; }
   .dos-columnas { grid-template-columns: minmax(0, 1fr); }
   .barra-abajo {
-    display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; inset: auto 0 0 0; z-index: 40;
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; inset: auto 0 0 0; z-index: 40;
     background: var(--superficie); border-top: 1px solid var(--linea); padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
   }
-  .barra-abajo a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; min-height: 48px; font-size: 12px; text-decoration: none; color: var(--texto-2); border-radius: var(--r-chico); position: relative; }
+  .barra-abajo a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; min-height: 48px; font-size: 11px; text-decoration: none; color: var(--texto-2); border-radius: var(--r-chico); position: relative; }
   .barra-abajo a[aria-current="page"] { color: var(--brasa); }
   .barra-abajo svg { width: 22px; height: 22px; }
   .barra-abajo .colada { position: absolute; left: 14px; right: 14px; top: 0; height: 3px; }
@@ -442,9 +442,22 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .clip { min-width: 0; display: grid; gap: 10px; padding: 12px; border: 1px solid var(--linea); border-radius: var(--r); background: var(--superficie-2); }
 .clip > header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .clip > p { margin: 0; }
-.clip .esqueletos { overflow-x: auto; border-radius: var(--r-chico); background: #fff; }
-.clip .esqueletos button { display: block; border: 0; padding: 0; background: transparent; cursor: zoom-in; }
-.clip .esqueletos img { display: block; height: 120px; width: auto; max-width: none; }
+/* esqueleto animado de un clip (movimientos.mjs) */
+.esqueleto { display: grid; gap: 8px; min-width: 0; }
+.esqueleto canvas { width: 100%; max-width: 360px; aspect-ratio: 4 / 3; height: auto; border-radius: var(--r-chico); border: 1px solid var(--linea); }
+.esqueleto.cargando { min-height: 120px; place-items: center; }
+.esqueleto-controles { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; min-width: 0; }
+.barra-clip { flex: 1 1 160px; min-width: 0; display: block; position: relative; }
+.barra-clip input { width: 100%; display: block; }
+/* la ventana desde/hasta, marcada debajo de la barra */
+.barra-clip::after { content: ""; position: absolute; left: var(--a); right: calc(100% - var(--b)); bottom: -3px; height: 3px; border-radius: 2px; background: var(--brasa); }
+.variantes { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.variante { display: grid; gap: 10px; align-content: start; min-width: 0; padding: 10px; border: 1px solid var(--linea); border-radius: var(--r-chico); background: var(--superficie); }
+.variante > header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.pasos-mov { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.pasos-mov li { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--linea); border-radius: var(--r); background: var(--superficie); }
+.pasos-mov li > div { display: grid; gap: 2px; }
+h2 .num-paso { margin-right: 8px; }
 .clip .controles { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
 .clip .controles .campo { min-width: 0; }
 .clip .controles select.entrada { width: auto; min-width: 150px; max-width: 100%; }
@@ -504,3 +517,4 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
   .editor-art-vistas { grid-template-columns: minmax(0, 1fr); }
   .editor-art-vista svg { max-height: none; }
 }
+.pasos-mov .num-paso { display: grid; place-items: center; flex: none; width: 26px; height: 26px; margin: 0; border-radius: 50%; background: var(--brasa); color: #fff; opacity: 1; font-weight: 700; }

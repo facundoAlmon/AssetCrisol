@@ -103,6 +103,58 @@ def info_clip(ruta):
     return r
 
 
+# los huesos que se dibujan (los de la hoja de esqueletos de generar_movimiento.py, esqueleto somaskel77)
+PALITOS = [('Hips', 'Spine1'), ('Spine1', 'Chest'), ('Chest', 'Neck1'), ('Neck1', 'Head'), ('Head', 'HeadEnd')]
+for _l in ('Left', 'Right'):
+    PALITOS += [('Chest', _l + 'Shoulder'), (_l + 'Shoulder', _l + 'Arm'), (_l + 'Arm', _l + 'ForeArm'),
+                (_l + 'ForeArm', _l + 'Hand'), ('Hips', _l + 'Leg'), (_l + 'Leg', _l + 'Shin'),
+                (_l + 'Shin', _l + 'Foot'), (_l + 'Foot', _l + 'ToeBase')]
+
+
+def _floats(descr, b):
+    import array
+    if descr not in ('<f4', '<f8'):
+        raise ValueError(f'tipo {descr} no soportado')
+    a = array.array('f' if descr == '<f4' else 'd')
+    a.frombytes(b)
+    return a
+
+
+def esqueleto(ruta):
+    """El clip de costado para el reproductor de crisol ui: {fps, cuadros, huesos: [[i, j, izquierda]], cuadros_xy:
+    [[x0, y0, x1, y1, ...] por cuadro]} con x = adelante (z del clip) e y = arriba, en el lugar (sin el avance de la
+    raíz), en metros con 3 decimales. Lo mismo que dibuja la hoja de esqueletos, pero entero y animable."""
+    with zipfile.ZipFile(ruta) as z:
+        descr, forma, b = _npy(z, 'nombres', True)
+        if not descr.startswith('<U'):
+            raise ValueError('nombres: no es texto')
+        largo = int(descr[2:]) * 4
+        nombres = [b[i:i + largo].decode('utf-32-le').rstrip('\0') for i in range(0, len(b), largo)]
+        descr, (t, n, _), b = _npy(z, 'posed_joints', True)
+        P = _floats(descr, b)
+        descr, _, b = _npy(z, 'smooth_root_pos', True)
+        R = _floats(descr, b)
+        try:
+            descr, _, b = _npy(z, 'fps', True)
+            fps = _floats(descr, b)[0]
+        except KeyError:
+            fps = 30.0
+    usados = sorted({x for par in PALITOS for x in par if x in nombres}, key=nombres.index)
+    pos = {x: i for i, x in enumerate(usados)}
+    idx = [nombres.index(x) for x in usados]
+    cuadros = []
+    for k in range(t):
+        rx, rz = R[k * 3], R[k * 3 + 2]
+        fila = []
+        for j in idx:
+            o = (k * n + j) * 3
+            fila += [round(P[o + 2] - rz, 3), round(P[o + 1], 3)]
+        cuadros.append(fila)
+    return {'fps': fps, 'cuadros': t,
+            'huesos': [[pos[a], pos[b], 'Left' in a + b] for a, b in PALITOS if a in pos and b in pos],
+            'cuadros_xy': cuadros}
+
+
 def candidatos(carpeta):
     """Los clips de `crisol movimiento` en `carpeta` (movimientos/candidatos), los más nuevos primero:
     [{id, animacion, seed, muestra, hoja, modificado, cuadros, fps, duracion, prompt}]."""

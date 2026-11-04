@@ -292,6 +292,60 @@ function Mirar({ d, cola }) {
 }
 
 // ---------- visor ----------
+// La hoja de costado animada (Resultado > Animación): una animación por vez, a su fps, con pausa y una barra para ir a un
+// cuadro. Los cuadros son índices de la grilla de la hoja (fila × hframes + columna; armar_tira.ANIMACIONES).
+export function ReproductorLateral({ nombre, meta, version, gif }) {
+  const anims = Object.keys(meta.animaciones)
+  const [anim, setAnim] = useState(anims.includes('walk') ? 'walk' : anims[0])
+  const [pausa, setPausa] = useState(matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [k, setK] = useState(0)
+  const lienzo = useRef(null)
+  const img = useRef(null)
+  const a = meta.animaciones[anim]
+  const n = a.frames.length
+  const dibujar = i => {
+    const c = lienzo.current, im = img.current
+    if (!c || !im?.complete) return
+    const f = a.frames[Math.min(i, n - 1)], hf = meta.hframes || 13
+    const g = c.getContext('2d')
+    g.clearRect(0, 0, c.width, c.height)
+    g.drawImage(im, (f % hf) * meta.frame_width, Math.floor(f / hf) * meta.frame_height, meta.frame_width, meta.frame_height, 0, 0, c.width, c.height)
+  }
+  useEffect(() => {
+    const im = new Image()
+    im.onload = () => dibujar(k)
+    im.src = urlArchivo(nombre, `${meta.carpeta}/${meta.imagen}`, version)
+    img.current = im
+  }, [version])
+  useEffect(() => { setK(0) }, [anim])
+  useEffect(() => { dibujar(k) }, [k, anim])
+  useEffect(() => {   // sin loop: 700 ms en el último cuadro y vuelve a empezar, como el reproductor iso
+    if (pausa || n < 2) return
+    let i = k, espera = null
+    const timer = setInterval(() => {
+      if (espera) return
+      if (i + 1 < n) i++
+      else if (a.loop) i = 0
+      else { espera = setTimeout(() => { espera = null; i = 0; setK(0) }, 700); return }
+      setK(i)
+    }, 1000 / Math.max(1, a.fps))
+    return () => { clearInterval(timer); clearTimeout(espera) }
+  }, [anim, pausa])
+  return html`<div class="iso">
+    <div class="damero visor nitido" style="min-height:0"><canvas ref=${lienzo} width=${meta.frame_width} height=${meta.frame_height} aria-label=${anim} /></div>
+    <div class="controles-iso">
+      <select class="entrada" value=${anim} onChange=${e => setAnim(e.target.value)} aria-label=${t('visor.animacion')}>
+        ${anims.map(x => html`<option value=${x}>${x}</option>`)}
+      </select>
+      ${n > 1 ? html`<button class="boton chico" onClick=${() => setPausa(!pausa)}><${Icono} n=${pausa ? 'correr' : 'pausa'} />${t(pausa ? 'visor.reproducir' : 'visor.pausa')}</button>
+        <input type="range" min="0" max=${n - 1} step="1" value=${k} onInput=${e => { setPausa(true); setK(+e.target.value) }} aria-label=${t('visor.cuadro')} />
+        <span class="mono chico tenue">${t('visor.lat_cuadro', { i: k + 1, n, fps: a.fps, loop: t(a.loop ? 'visor.lat_loop' : 'visor.lat_una') })}</span>`
+      : html`<span class="chico tenue">${t('visor.lat_quieta')}</span>`}
+      ${gif && html`<button class="boton chico fantasma" onClick=${() => verGrande(gif, 'preview.gif')}>${t('visor.lat_gif')}</button>`}
+    </div>
+  </div>`
+}
+
 export function ReproductorIso({ nombre, meta, version }) {
   const anims = Object.keys(meta.animaciones)
   const [anim, setAnim] = useState(anims.includes('walk') ? 'walk' : anims[0])
@@ -396,6 +450,8 @@ function Visor({ d }) {
       ? html`<${ReproductorIso} nombre=${d.nombre} meta=${d.iso} version=${v} />`
       : g.id === 'guia' && editando
       ? html`<${EditorArticulaciones} d=${d} cerrar=${() => setEditando(false)} />`
+      : g.id === 'animacion' && d.hoja
+      ? html`<${ReproductorLateral} nombre=${d.nombre} meta=${d.hoja} version=${v} gif=${urlArchivo(d.nombre, 'preview.gif', v)} key=${v} />`
       : g.id === 'juego3d'
       ? html`<${Juego3D} d=${d} archivo=${archivo} version=${v} />`
       : g.id === '3d' || g.id === 'animado'

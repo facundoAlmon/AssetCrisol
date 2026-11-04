@@ -143,6 +143,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `componentes/articulaciones.mjs` es el editor de articulaciones (sobre `trabajo/guia/{frente,costado}.png` con la
   cámara de `guia.json`; `servidor.guardar_articulaciones` escribe `modelo.articulaciones` + `_articulaciones_previas`,
   redibuja `guia.png` con `dibujar_guia` y marca `articulaciones.json` con `fuente: "a mano"`).
+  `componentes/movimientos.mjs`: el esqueleto animado de cada clip sale de `api/movimientos/esqueleto`
+  (`metodos.esqueleto`, sin numpy); Resultado > Animación es `ReproductorLateral` (`servidor.hoja_meta`).
   `componentes/candidatos.mjs` edita `malla.candidatos` con el formato de `pipeline.candidatos_malla` (lo que un
   candidato no pisa lo hereda del principal: solo escribe las claves que cambian) y nunca `malla.elegida`.
   Probar con `python3 tests/ui.py` (sin GPU) y mirar capturas (claro/oscuro, 390 px) antes de dar un cambio por bueno.

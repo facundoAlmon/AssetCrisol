@@ -382,6 +382,8 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   frame. It comes from the Rig and animations step (`trabajo/animado.glb`). In every 3D viewer: two fingers (or
   right-click) move the camera, double-tap or double-click focuses the touched point (the face, a foot) and there is
   full screen.
+- **Animation** (Result, characters): the side-view sheet animated, one animation at a time at its pace, with pause
+  and a bar to go to a frame; the `preview.gif` with all of them together is one button away.
 - **3D game** (Result, characters and props): the reduced model from `trabajo/tiempo_real/`, one LOD at a time with
   its faces and vertices, as wireframe if asked («Show faces»), animated for characters, with the maps, texture,
   bones and the weight of each file. In Result > Review, the review sheet and the close-up one, with their names.
@@ -956,9 +958,11 @@ Adding a clip without `--recomendado` keeps what that animation had. Then redo `
 of the characters that use it. To ship your own clip with AssetCrisol, copy the `.npz` and the entry to
 `herramientas/3_blender/movimientos/`.
 
-In `crisol ui`, **Motions** does all of this without a terminal: generate (through the queue), look at the skeleton row
-of each sample, add it to the library with its window, choose whether it is the default method, remove it and use it in
-a character (the same as Settings > Animations of the character).
+In `crisol ui`, **Motions** does all of this without a terminal, in four visible steps: generate (through the queue);
+watch each variant with its animated side-view skeleton (grouped by generation) and trim it by pausing at a moment
+(«from here» / «to here», the kept part marked on the bar); add it to the library for every character or only some
+(each clip says which characters use it); and redo rig, iso and anchors of those characters. Also on a phone. In
+Settings > Animations of a character, the method is chosen only for the animations that have a clip.
 
 Prompts in English and concrete. Animations that can use a clip: those in `metodos.CUADROS` (all except `idle`,
 `saltar`, `agacharse` and `defender`).

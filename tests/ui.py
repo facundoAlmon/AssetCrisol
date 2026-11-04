@@ -201,6 +201,15 @@ def probar_movimientos(base, datos):
     chequear(c == 200 and Image.open(__import__('io').BytesIO(b)).size == (600, 240), 'fila de la hoja de una muestra')
     c, _ = pedir(base, 'movimientos/correr_s3.png?fila=2', crudo=True)
     chequear(c == 404, 'fila que no está: 404')
+    c, e = pedir(base, 'api/movimientos/esqueleto?candidato=correr_s3_1')
+    chequear(c == 200 and e.get('cuadros') == 90 and len(e.get('cuadros_xy', [])) == 90 and len(e.get('huesos', [])) == 21
+             and len(e['cuadros_xy'][0]) == 2 * (1 + max(max(h[0], h[1]) for h in e['huesos'])), 'esqueleto animable de un candidato',
+             {k: v for k, v in e.items() if k != 'cuadros_xy'} if c == 200 else e)
+    c, e = pedir(base, 'api/movimientos/esqueleto?animacion=caminar')
+    chequear(c == 200 and e.get('cuadros', 0) > 0, 'esqueleto del clip de la biblioteca')
+    c, _ = pedir(base, 'api/movimientos/esqueleto?candidato=../../x')
+    chequear(c == 400, 'esqueleto con un nombre inválido: 400')
+    chequear(all(isinstance(x.get('usan'), list) for x in d.get('biblioteca', [])), 'la biblioteca dice qué personajes usan cada clip')
     c, _ = pedir(base, 'api/movimientos/clip', 'POST', {'animacion': 'correr', 'candidato': 'correr_s3_1'}, origen=False)
     chequear(c == 403, 'pasar un clip sin Origin: 403')
     for malo in ({'animacion': 'idle', 'candidato': 'correr_s3_1'}, {'animacion': 'correr', 'candidato': '../x_s1_0'},

@@ -371,6 +371,8 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   un cuadro. Sale del paso Rig y animaciones (`trabajo/animado.glb`). En todos los visores 3D: dos dedos (o el clic
   derecho) mueven la cámara, doble toque o doble clic enfoca el punto tocado (la cara, un pie) y hay pantalla
   completa.
+- **Animación** (Resultado, personajes): la hoja de costado animada, una animación por vez a su ritmo, con pausa y una
+  barra para ir a un cuadro; el `preview.gif` con todas juntas queda a un botón.
 - **Juego 3D** (Resultado, personajes y objetos): el modelo reducido de `trabajo/tiempo_real/`, un LOD por vez con sus
   caras y vértices, en alambre si se pide («Ver las caras»), animado en personajes, con los mapas, la textura, los
   huesos y el peso de cada archivo. En Resultado > Revisión, la hoja de revisión y la de cerca, con su nombre.
@@ -944,9 +946,11 @@ son segundos del clip (sin `desde`, en un ciclo, de un apoyo del pie izquierdo a
 personajes que lo usen. Para que un clip propio venga con AssetCrisol, copiar el `.npz` y la entrada a
 `herramientas/3_blender/movimientos/`.
 
-En `crisol ui`, **Movimientos** hace todo esto sin terminal: generar (por la cola), mirar la fila de esqueletos de cada
-muestra, pasarla a la biblioteca con su ventana, elegir si es el método por defecto, quitarla y usarla en un personaje
-(lo mismo que Ajustes > Animaciones del personaje).
+En `crisol ui`, **Movimientos** hace todo esto sin terminal, en cuatro pasos a la vista: generar (por la cola); mirar
+cada variante con su esqueleto animado de costado (agrupadas por generación) y recortarla pausando en un instante
+(«desde acá» / «hasta acá», la parte que queda marcada en la barra); pasarla a la biblioteca para todos los personajes o
+solo para algunos (cada clip dice qué personajes lo usan); y rehacer rig, iso y anclas de esos personajes. También en
+el celular. En Ajustes > Animaciones de un personaje, el método se elige solo en las animaciones que tienen clip.
 
 Prompts en inglés y concretos. Animaciones con clip posible: las de `metodos.CUADROS` (todas menos `idle`, `saltar`,
 `agacharse` y `defender`).
