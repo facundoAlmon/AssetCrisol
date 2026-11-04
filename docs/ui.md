@@ -28,7 +28,7 @@ placa de video. Tres reglas que vas a ver en todo el manual:
   también si otro programa está usando la placa.
 - **Cada paso se puede rehacer o deshacer** sin perder lo demás.
 
-**Abrirla.** Con AssetCrisol instalado ([README > Empezá acá](../README.md#empezá-acá)), en una terminal:
+**Abrirla.** Con AssetCrisol instalado ([README > Empezá acá](../README.md#empezar)), en una terminal:
 
 ```bash
 crisol ui
@@ -316,7 +316,7 @@ En **Movimientos**:
 ![Exportar](ui/img/es/exportar.webp)
 
 - **Carpeta de Godot**: escenas, scripts, hojas y metas, para copiar a la raíz de un proyecto de Godot. Cómo usarla:
-  README > [Guía de Godot](../README.md#guía-de-godot).
+  README > [Guía de Godot](../README.md#guia-de-godot).
 - **Hoja de costado** e **Isométrico**: las hojas de sprites con un `.json` estilo Aseprite, que leen Unity, Phaser,
   Defold y la mayoría de los motores 2D.
 - **Retrato y frente**, **Anclas** (dónde están las manos y la cabeza en cada cuadro, para colgarle una espada o un

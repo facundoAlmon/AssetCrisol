@@ -9,14 +9,14 @@ Personajes animados · objetos · vehículos · kits de escenario → sprites, `
 [![Licencia: GPL-3.0](https://img.shields.io/badge/licencia-GPL--3.0-blue)](LICENSE)
 [![Plataforma: Linux](https://img.shields.io/badge/plataforma-Linux-FCC624?logo=linux&logoColor=black)](#requisitos)
 [![GPU: NVIDIA 16 GB](https://img.shields.io/badge/GPU-NVIDIA%2016%20GB-76B900?logo=nvidia&logoColor=white)](#requisitos)
-[![Godot 4](https://img.shields.io/badge/Godot-4-478CBF?logo=godotengine&logoColor=white)](#guía-de-godot)
+[![Godot 4](https://img.shields.io/badge/Godot-4-478CBF?logo=godotengine&logoColor=white)](#guia-de-godot)
 [![Blender 5.1](https://img.shields.io/badge/Blender-5.1-F5792A?logo=blender&logoColor=white)](#3b-blender-crisol-blender)
 
 <img src="ejemplos/personajes/cris/demo_acciones.gif" alt="Cris, la protagonista del proyecto, en vista isométrica: reposo, caminar, correr, golpe, patada, salto, rodar y brazos arriba" width="300">
 
 *Cris, la protagonista del proyecto: sprites isométricos generados de punta a punta con AssetCrisol.*
 
-**[Sitio web](https://facundoalmon.github.io/AssetCrisol/)** · [English](README.en.md) · [Manual de la UI](docs/ui.md) · [Roadmap](ROADMAP.md) · [Empezá acá](#empezá-acá) · [Para agentes de IA](#para-agentes-de-ia) · [Contribuir](CONTRIBUTING.md) · [Cambios](CHANGELOG.md)
+**[Sitio web](https://facundoalmon.github.io/AssetCrisol/)** · [English](README.en.md) · [Manual de la UI](docs/ui.md) · [Roadmap](ROADMAP.md) · [Empezá acá](#empezar) · [Para agentes de IA](#para-agentes-de-ia) · [Contribuir](CONTRIBUTING.md) · [Cambios](CHANGELOG.md)
 
 </div>
 
@@ -68,6 +68,8 @@ en su carpeta `trabajo/`, así que **cualquier paso se puede repetir por separad
 malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 
 ---
+
+<a name="empezar"></a>
 
 ## Empezá acá
 
@@ -1005,7 +1007,7 @@ Ver [Qué mirar en cada paso](#qué-mirar-en-cada-paso-receta-para-humanoides), 
 
 ### 5. Godot (`crisol godot`)
 
-Ver [Guía de Godot](#guía-de-godot).
+Ver [Guía de Godot](#guia-de-godot).
 
 ---
 
@@ -1280,6 +1282,8 @@ crisol tema bosque                 # -> trabajo/tema/{piso,camino,pared}.png + t
 </details>
 
 ---
+
+<a name="guia-de-godot"></a>
 
 ## Guía de Godot
 
