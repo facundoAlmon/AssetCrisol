@@ -7,6 +7,11 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ## [Sin publicar]
 
+## [0.3.0-alpha.1] - 2026-11-04
+
+Modelos para juegos 3D (LODs, huesos de Mixamo, materiales horneados), cuadrúpedos, la revisión de cerca y
+Movimientos más claro en `crisol ui`. La imagen Docker está en `ghcr.io/facundoalmon/assetcrisol:0.3.0-alpha.1`.
+
 ### Agregado
 - **Modelos para tiempo real**: `blender` deja también en `trabajo/tiempo_real/` la malla reducida (Decimate por
   colapso, que conserva UV y pesos) a 20 k, 10 k y 5 k triángulos en personajes (con el rig y las animaciones) y a
@@ -172,6 +177,7 @@ está en `ghcr.io/facundoalmon/assetcrisol:0.1.0-alpha.1`.
 - Hojas con `.json` estilo Aseprite para otros motores; `render.emisivo`; vitrina de los ejemplos.
 - `tests/humo.py`: test de humo sin generación (~3 min).
 
-[Sin publicar]: https://github.com/facundoAlmon/AssetCrisol/compare/v0.2.0-alpha.1...main
+[Sin publicar]: https://github.com/facundoAlmon/AssetCrisol/compare/v0.3.0-alpha.1...main
+[0.3.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.3.0-alpha.1
 [0.2.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.2.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.1.0-alpha.1
