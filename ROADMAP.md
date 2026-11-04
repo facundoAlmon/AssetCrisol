@@ -188,6 +188,9 @@ Revisión de animaciones y movimientos (2026-11-04):
 - [ ] Opciones dudosas: `modelo.simetria` y `render.oscuro_brillante` (probadas sin uso claro): documentar o sacar.
 
 ## Ideas para después
+- Animación desde un video con MoCapAnything V2 (cualquier esqueleto, MIT): probado el 2026-11-04 con un cuadrúpedo y un
+  humanoide; anda local (~10 GB de GPU) pero copia el tipo de movimiento y no el movimiento (peor que la caminata
+  procedural de los cuadrúpedos y que Kimodo), y saca el fondo con RMBG-1.4 (no comercial). Esperar una versión mejor.
 - Galería comunitaria de estilos y recetas.
 - Tiempos medidos en otras placas (12 GB, 24 GB) para ampliar los requisitos con datos.
 - Aviso de uso responsable: propiedad intelectual de personajes ajenos y fotos de personas reales.
