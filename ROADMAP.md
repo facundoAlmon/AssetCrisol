@@ -165,10 +165,9 @@ Errores vistos armando el manual de la UI (2026-11-04):
 
 ## 7. Documentación, landing y v0.1
 - [x] Vitrina de los ejemplos (`docs/vitrina/`, imágenes con `herramientas/4_sprites/vitrina.py`), para la landing.
-- [ ] Landing en GitHub Pages: qué hace, galería antes/después, requisitos, "empezá acá" para personas y agentes.
-      Hecha en `docs/index.html` (bilingüe; el proceso de Cris con `vitrina.py`, la galería en `docs/vitrina/`): falta
-      activar Pages (rama `main`, carpeta `/docs`) y poner la URL en el repo.
-- [ ] Manual de `crisol ui` (`docs/ui.md`, `docs/ui.en.md`) con capturas que se rehacen con `tests/capturas_ui.py`
+- [x] Landing en GitHub Pages: qué hace, galería antes/después, requisitos, "empezá acá" para personas y agentes.
+      https://facundoalmon.github.io/AssetCrisol/ (`docs/index.html`, bilingüe; Pages desde `main` `/docs`).
+- [x] Manual de `crisol ui` (`docs/ui.md`, `docs/ui.en.md`) con capturas que se rehacen con `tests/capturas_ui.py`
       (Playwright sobre el Chrome instalado; es/en, claro/oscuro, celular).
 - [ ] Docs bilingües: instalación, primer asset, recetas por tipo, referencia de `personaje.json` y estilos,
       problemas conocidos, preguntas sobre licencias.
@@ -183,7 +182,7 @@ Errores vistos armando el manual de la UI (2026-11-04):
         rutas de config.json, aunque no va a instalar ni cambiar nada; no lista los modelos de DWPose ni rembg.
   - [ ] Falta la instalación desde cero de verdad (Docker y nativo, en otra PC o un disco vacío).
 - [x] CONTRIBUTING, plantillas de issues (con `crisol doctor --json`), CHANGELOG. Issues en español o inglés.
-- [ ] Tag `v0.1`.
+- [x] Primera versión para usar: `v0.4.0` (2026-11-04; las anteriores eran alfas), con su imagen Docker.
 - [ ] Post de lanzamiento (es/en) y difusión (Reddit, Show HN, itch.io, comunidades de gamedev, Discords de ComfyUI
       y Godot); después, un devlog por versión.
 

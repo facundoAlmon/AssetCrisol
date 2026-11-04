@@ -21,9 +21,9 @@ Animated characters · props · vehicles · scenery kits → sprites, `.glb` fil
 </div>
 
 > [!WARNING]
-> **Work in progress.** The code works, but docs, examples and installation are still being tidied up for the first
-> v0.1 release (alpha versions so far: see [CHANGELOG.md](CHANGELOG.md)). Configurations may break between versions. What is done and what is next:
-> [ROADMAP.md](ROADMAP.md) (Spanish).
+> **In development (0.x).** The code works and has been tested with dozens of assets, but versions may break
+> configurations (noted in [CHANGELOG.md](CHANGELOG.md)). What is done and what is next: [ROADMAP.md](ROADMAP.md)
+> (Spanish).
 
 > [!NOTE]
 > **About names.** The code, the CLI and the config are in Spanish, so step names, keys and files stay in Spanish in

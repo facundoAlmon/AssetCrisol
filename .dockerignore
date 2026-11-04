@@ -11,3 +11,8 @@ __pycache__
 /escenarios
 /movimientos
 herramientas/3_blender/movimientos/candidatos
+# los assets que instala demo/preparar.sh y lo que genera Godot
+/demo/personajes
+/demo/objetos
+/demo/escenarios
+/demo/.godot

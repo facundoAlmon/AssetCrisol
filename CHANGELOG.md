@@ -7,6 +7,12 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ## [Sin publicar]
 
+## [0.4.0] - 2026-11-04
+
+La primera versión para usar sin ser parte del proyecto: un manual de la UI con capturas, la landing en GitHub Pages,
+una demo en Godot y la documentación revisada por un agente que la siguió sin contexto. La imagen Docker está en
+`ghcr.io/facundoalmon/assetcrisol:0.4.0`.
+
 ### Agregado
 - **Manual de `crisol ui`** ([docs/ui.md](docs/ui.md), [en](docs/ui.en.md)): un personaje de punta a punta, ver el
   resultado, qué hacer cuando algo sale mal, ajustes, otros tipos de asset, movimientos, exportar y licencias, con
@@ -23,8 +29,12 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ### Arreglado
 - `crisol ui`: los campos numéricos (altura, seeds, duración y recorte de un clip) se rearmaban a medio escribir y
   "1.65" quedaba 651.
+- `crisol ui`, Exportar > *Archivos de origen*: incluye la imagen de referencia que nombra el json (`base_<seed>.png`),
+  no solo un `referencia.png`.
 - `crisol ui`: mientras falta elegir la imagen, Resultado ya no dice "Corré el primer paso"; "Mirá esto antes de
   seguir" no repite las candidatas de *Te toca elegir* y muestra las hojas anchas (vistas) a lo ancho.
+- README: anclas internas rotas, la estructura del repo, numpy para `tema`, `anclas` y `guia` en la tanda de los
+  ejemplos, `tema.colores: false` y Godot 4.4 o más nuevo.
 
 ## [0.3.0-alpha.1] - 2026-11-04
 

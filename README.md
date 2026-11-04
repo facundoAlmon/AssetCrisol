@@ -21,9 +21,9 @@ Personajes animados · objetos · vehículos · kits de escenario → sprites, `
 </div>
 
 > [!WARNING]
-> **En construcción.** El código funciona, pero la documentación, los ejemplos y la instalación todavía se están
-> ordenando para la v0.1 (hoy hay versiones alfa: ver [CHANGELOG.md](CHANGELOG.md)). Puede haber cambios que rompan configuraciones. Qué
-> está hecho y qué falta: [ROADMAP.md](ROADMAP.md).
+> **En desarrollo (0.x).** El código funciona y está probado con decenas de assets, pero entre versiones puede haber
+> cambios que rompan configuraciones (se avisan en [CHANGELOG.md](CHANGELOG.md)). Qué está hecho y qué falta:
+> [ROADMAP.md](ROADMAP.md).
 
 Todo corre en tu PC: sin APIs pagas ni servicios en la nube. *Crisol* (en inglés, *crucible*) es el recipiente donde
 se funde el material para darle forma: acá entra una imagen y salen sprites, modelos y escenas.
