@@ -445,6 +445,7 @@ def detalle_asset(n):
             'iso': iso_meta(pdir, n) if e['tipo'] == 'personaje' else None,
             'animado': animado(pdir) if e['tipo'] == 'personaje' else None,
             'tiempo_real': tiempo_real(pdir, n) if e['tipo'] in ('personaje', 'objeto') else None,
+            'tiempo_real_general': pipeline.CFG.get('tiempo_real'),   # el de config.json (false = apagado para todos)
             'elecciones': elecciones(pdir, pj, e['tipo']), 'licencias': licencias, 'logs': logs,
             'mallas_hechas': mallas_hechas(pdir) if e['tipo'] != 'escenario' else {},
             # para el tamaño de los sprites en Ajustes: lo que pone el estilo cuando el json deja null

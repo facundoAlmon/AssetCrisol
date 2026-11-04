@@ -97,7 +97,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   → `modelo.glb`; el del motor queda en `modelo_motor.glb`; `espalda`/`costados` con las vistas de Qwen).
 - `3_blender/`: `blender_main.py` (`construir` también exporta `trabajo/animado.glb` + `animado.json` para el visor 3D
   animado de la UI, `servidor.animado`; `construir` y `objeto` terminan con `exportar_tiempo_real` → `trabajo/tiempo_real/`
-  (LODs con Decimate, huesos de Mixamo, `hornear_mapas` en Cycles CPU; bloque `tiempo_real`); modos `limpia`, `guia`, `construir`, `retrato`, `reves`, `comparar`, `iso`,
+  (LODs con Decimate, huesos de Mixamo, `hornear_mapas` en Cycles CPU; bloque `tiempo_real`, con el de `config.json`
+  por defecto: `pipeline.tiempo_real_efectivo`); modos `limpia`, `guia`, `construir`, `retrato`, `reves`, `comparar`, `iso`,
   `anclas`, `objeto`, `alinear`), `rig_lib.py` (`PLANTILLA`, estimación, rig, pesos, `cortar_puentes`), `anim.py`
   (`TODAS`, poses-dict `_pose`/`_poses`), `cuadrupedo.py` (receta `cuadrupedo`, `modelo.esqueleto`: `JERARQUIA`,
   `orientar`, `estimar_articulaciones` de la malla, rig con IK por pata y su `TODAS` de 8 animaciones con las carpetas

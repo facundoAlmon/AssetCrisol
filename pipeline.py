@@ -111,6 +111,18 @@ def cargar_estilo(nombre):
     return est
 
 
+def tiempo_real_efectivo(propio):
+    """El bloque tiempo_real (modelo para juego 3D, paso blender) de un asset: el suyo si lo tiene (`...` o null = no)
+    y si no el de config.json (`"tiempo_real": false` lo apaga para todos los assets; un bloque, valores por defecto).
+    Un bloque propio se fusiona sobre el de la config; `{}` en el asset lo prende aunque la config lo apague."""
+    general = CFG.get('tiempo_real')
+    if propio is ... or propio is None:   # null = como la config
+        return general if general is not None else {}
+    if isinstance(propio, dict) and isinstance(general, dict):
+        return {**general, **propio}
+    return propio
+
+
 def cargar(nombre):
     """personajes/<n>/personaje.json u objetos/<n>/objeto.json + su estilo -> configuración efectiva.
     pj['_objeto'] / pj['_escenario'] dicen cuál es, pj['_estilo'] trae el estilo; las escalas que el json deja en
@@ -129,6 +141,7 @@ def cargar(nombre):
                                                           if v is not None and not k.startswith('_')})
             if pj['_escenario']:
                 return pdir, pj
+            pj['tiempo_real'] = tiempo_real_efectivo(pj['tiempo_real'] if 'tiempo_real' in pj else ...)
             ppu, baldosa = est['escala']['px_por_unidad'], est['escala']['baldosa_px']
             iso = pj.setdefault('isometrico', {})
             if iso.get('baldosa_px') is None:

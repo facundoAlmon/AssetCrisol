@@ -14,6 +14,7 @@
     "U2NET_HOME": "/ruta/a/.u2net"
   },
   "blender": "/ruta/a/blender-5.1/blender",
+  "_tiempo_real": "opcional: \"tiempo_real\": false no arma el modelo para juego 3D (trabajo/tiempo_real/, ~20 MB y ~10 s por asset en el paso blender) salvo en los assets que lo pidan; un bloque {lods, textura_px, mapas, huesos} cambia los valores por defecto",
   "godot": "/ruta/a/Godot_v4.x_linux.x86_64",
   "modelos_imagen": {
     "qwen_unet": "qwen_image_edit_2511_int8_convrot.safetensors",

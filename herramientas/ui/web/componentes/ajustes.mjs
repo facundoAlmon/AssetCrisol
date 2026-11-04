@@ -74,8 +74,12 @@ function campos(d, estilos, animaciones) {
   }
   // el modelo para un juego 3D (trabajo/tiempo_real/, paso blender): tiempo_real false lo apaga
   const cuadrupedo = leer(j, 'modelo.esqueleto') === 'cuadrupedo'
-  lista.push({ g: 'juego3d', clave: 'tiempo_real', tipo: 'juego3d_activo', etiqueta: 'aj.j3d_activo', ayuda: 'aj.j3d_activo_ayuda' })
-  if (j.tiempo_real !== false) {
+  // sin bloque propio vale el de config.json (false = apagado para todos)
+  const general = d.tiempo_real_general
+  const activo = (j.tiempo_real == null ? general : j.tiempo_real) !== false
+  lista.push({ g: 'juego3d', clave: 'tiempo_real', tipo: 'juego3d_activo', etiqueta: 'aj.j3d_activo',
+    ayuda: general === false ? 'aj.j3d_general_apagado' : 'aj.j3d_activo_ayuda', activo })
+  if (activo) {
     const lods = d.tipo === 'personaje'
       ? { alta: [40000, 20000, 10000], liviana: [10000, 5000, 2000] }
       : { alta: [20000, 10000, 4000], liviana: [5000, 2500, 1000] }
@@ -117,7 +121,7 @@ function Campo({ c, valor, cambiar }) {
     return html`<label class="casilla"><input type="checkbox" checked=${!!valor} onChange=${e => cambiar(e.target.checked)} />${etiqueta}</label>`
   }
   if (c.tipo === 'juego3d_activo') {   // tiempo_real: false = apagado; prenderlo deja lo que tenía (o el por defecto)
-    return html`<div class="campo"><label class="casilla"><input type="checkbox" checked=${valor !== false}
+    return html`<div class="campo"><label class="casilla"><input type="checkbox" checked=${c.activo}
       onChange=${e => cambiar(e.target.checked ? (c.previo && typeof c.previo === 'object' ? c.previo : {}) : false)} />${etiqueta}</label>${ayuda}</div>`
   }
   if (c.tipo === 'animaciones') {

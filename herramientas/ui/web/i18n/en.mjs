@@ -399,6 +399,7 @@ export default {
   'aj.g.juego3d': '3D game',
   'aj.j3d_activo': 'Export the model for a 3D game',
   'aj.j3d_activo_ayuda': 'The blender step leaves the reduced mesh in three levels of detail, with its maps (and for characters, with the rig and animations). See it in Result > 3D game and download it in Export.',
+  'aj.j3d_general_apagado': 'Turned off for every asset in config.json ("tiempo_real": false); checking it turns it on just for this one. Leaves the reduced mesh in three levels of detail, with its maps.',
   'aj.j3d_calidad': 'Quality (faces per level)',
   'aj.j3d_calidad_ayuda': 'More faces = more detail and more weight in the game. See it in Result > 3D game.',
   'aj.j3d_media': 'Medium, default ({c})',

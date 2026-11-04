@@ -400,6 +400,7 @@ export default {
   'aj.g.juego3d': 'Juego 3D',
   'aj.j3d_activo': 'Exportar el modelo para un juego 3D',
   'aj.j3d_activo_ayuda': 'El paso blender deja la malla reducida en tres niveles de detalle, con sus mapas (y en personajes, con el rig y las animaciones). Se ve en Resultado > Juego 3D y se baja en Exportar.',
+  'aj.j3d_general_apagado': 'Apagado para todos los assets en config.json ("tiempo_real": false); marcarlo lo prende solo para este. Deja la malla reducida en tres niveles de detalle, con sus mapas.',
   'aj.j3d_calidad': 'Calidad (caras de cada nivel)',
   'aj.j3d_calidad_ayuda': 'Más caras = más detalle y más peso en el juego. Se ve en Resultado > Juego 3D.',
   'aj.j3d_media': 'Media, por defecto ({c})',

@@ -61,9 +61,12 @@ def revisar_lods(base, n):
     if not hay(base, *(os.path.join(r, a) for a in ('lods.json', f'{n}.glb', f'{n}_lods.glb'))):
         return
     with open(os.path.join(base, r, 'lods.json')) as f:
-        caras = [l['caras'] for l in json.load(f)['lods']]
+        info = json.load(f)
+    caras = [l['caras'] for l in info['lods']]
     if caras != sorted(caras, reverse=True) or len(set(caras)) < 3:
         fallas.append(f'{n}: los LOD no bajan de caras ({caras})')
+    if 'normal' not in info.get('mapas', []):   # se hornearon los mapas (el material de los ejemplos es uno)
+        fallas.append(f'{n}: sin mapa de normales horneado ({info.get("mapas")})')
 
 
 def revisar_imagen(ruta, ancho_min=64, alto_min=64):
@@ -127,6 +130,7 @@ def main():
     tmp = tempfile.mkdtemp(prefix='crisol_humo_')
     print(f'[humo] carpeta temporal: {tmp}')
     cfg['datos_dir'] = os.path.join(tmp, 'datos')
+    cfg.pop('tiempo_real', None)   # la config de la PC puede apagar el modelo para juego 3D: acá se prueba
     with open(os.path.join(tmp, 'config.json'), 'w') as f:
         json.dump(cfg, f, indent=1)
     shutil.copytree(os.path.join(RAIZ, 'ejemplos'), cfg['datos_dir'])

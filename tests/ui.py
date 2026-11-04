@@ -389,6 +389,32 @@ def main():
         rutas = [r for r, _ in v.get('borraria', [])] if c == 200 else []
         chequear({'trabajo/animado.glb', 'trabajo/animado.json'} <= set(rutas), 'deshacer blender borra el 3D animado', rutas)
 
+        print('juego 3D')
+        tr = os.path.join(t, 'tiempo_real'); os.makedirs(tr, exist_ok=True)
+        for n in ('cris.glb', 'cris_lods.glb'):
+            shutil.copy(os.path.join(t, 'malla', 'modelo.glb'), os.path.join(tr, n))
+        with open(os.path.join(tr, 'lods.json'), 'w') as f:
+            json.dump({'original': {'caras': 80000, 'vertices': 40000}, 'textura_px': 2048, 'mapas': ['normal'],
+                       'archivos': {'cris.glb': 'LOD0 solo (Godot)', 'cris_lods.glb': 'todos los LOD'}, 'huesos': 'mixamo',
+                       'lods': [{'nombre': f'cris_LOD{i}', 'caras': 20000 >> i, 'vertices': 10000 >> i} for i in range(3)]}, f)
+        c, d = pedir(base, 'api/assets/cris')
+        j3 = d.get('tiempo_real') or {}
+        chequear(any(g['id'] == 'juego3d' and g['paso'] == 'blender' and g['archivos'] == ['trabajo/tiempo_real/cris_lods.glb']
+                     for g in d.get('visuales', [])), 'grupo Juego 3D en el visor, del paso blender')
+        chequear(len(j3.get('lods', [])) == 3 and j3.get('pesos', {}).get('cris_lods.glb', 0) > 0, 'lods.json y pesos para el visor', j3)
+        chequear(d.get('tiempo_real_general') == cfg.get('tiempo_real'), 'tiempo_real de config.json para Ajustes',
+                 d.get('tiempo_real_general'))
+        c, g = pedir(base, 'api/assets/cris/exportar')
+        tre = next((x['archivos'] for x in g if x['id'] == 'tiempo_real'), []) if c == 200 else []
+        chequear('trabajo/tiempo_real/cris_lods.glb' in tre and 'trabajo/tiempo_real/lods.json' in tre, 'exportar > juego 3D', tre)
+        c, v = pedir(base, 'api/assets/cris/deshacer?paso=blender')
+        rutas = [r for r, _ in v.get('borraria', [])] if c == 200 else []
+        chequear(any(r.startswith('trabajo/tiempo_real') for r in rutas), 'deshacer blender borra tiempo_real', rutas)
+        c, _ = pedir(base, 'api/assets/cris/json', 'PATCH', {'cambios': {'tiempo_real': {}, 'tiempo_real.huesos': 'godot'}})
+        c2, d = pedir(base, 'api/assets/cris')
+        chequear(c == 200 and d['json'].get('tiempo_real') == {'huesos': 'godot'}, 'Ajustes > Juego 3D: prender y elegir huesos',
+                 d['json'].get('tiempo_real'))
+
         print('exportar')
         c, g = pedir(base, 'api/assets/caja/exportar')
         ids = [x['id'] for x in g] if c == 200 else []

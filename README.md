@@ -837,7 +837,13 @@ los frames laterales y el retrato. Todas las animaciones son **en el lugar** (el
    relieve de la malla entera (lo que el Decimate le sacó; cada LOD, a la mitad de lado), un **ORM** con la
    rugosidad y el metal cuando no son parejos (`render.metal_gris`, `oscuro_brillante`) y la **emisión** si el estilo
    la usa (`render.emisivo`). Con `"mapas": ["normal", "orm", "ao"]` suma la **oclusión ambiente** (canal R del ORM,
-   ~20 s más); `[]` deja solo el color base.
+   ~20 s más); `[]` deja solo el color base. Se hornea solo en mallas de un material (las de TRELLIS.2 y Pixal3D);
+   con más de uno sale el color base y el log lo avisa.
+
+   **Peso y tiempo**: `trabajo/tiempo_real/` ocupa ~20-25 MB por personaje y suma ~10 s al paso `blender`. Si el
+   juego no es 3D, `"tiempo_real": false` en **`config.json`** lo apaga para todos los assets; uno lo vuelve a prender
+   con `"tiempo_real": {}` en su json (o desde Ajustes > Juego 3D). Un bloque en la config cambia los valores por
+   defecto de todos (el del asset se fusiona encima).
 
    `lods.json` dice las caras y vértices de cada LOD y qué mapas salieron. Se cambia con
    `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096, "huesos": "godot"}` (caras de cada LOD, el

@@ -850,7 +850,13 @@ renders the side-view frames and the portrait. All animations are **in place** (
    relief (what the Decimate took away; each LOD at half the size), an **ORM** with roughness and metal when they are
    not uniform (`render.metal_gris`, `oscuro_brillante`) and the **emission** if the style uses it
    (`render.emisivo`). With `"mapas": ["normal", "orm", "ao"]` it adds **ambient occlusion** (R channel of the ORM,
-   ~20 s more); `[]` keeps only the base color.
+   ~20 s more); `[]` keeps only the base color. Baking only works on single-material meshes (TRELLIS.2's and
+   Pixal3D's); with more than one, the base color goes out and the log says so.
+
+   **Size and time**: `trabajo/tiempo_real/` takes ~20-25 MB per character and adds ~10 s to the `blender` step. If
+   the game is not 3D, `"tiempo_real": false` in **`config.json`** turns it off for every asset; one asset turns it
+   back on with `"tiempo_real": {}` in its json (or from Settings > 3D game). A block in the config changes the
+   defaults for all of them (the asset's own is merged on top).
 
    `lods.json` lists the faces and vertices of each LOD and which maps were made. Change it with
    `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096, "huesos": "godot"}` (faces of each LOD, the
