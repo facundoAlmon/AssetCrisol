@@ -12,6 +12,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   resultado, qué hacer cuando algo sale mal, ajustes, otros tipos de asset, movimientos, exportar y licencias, con
   capturas en español e inglés. `tests/capturas_ui.py` las rehace (Playwright sobre el Chrome instalado).
 
+- Landing para GitHub Pages (`docs/index.html`): qué hace, Cris paso a paso (`vitrina.py` arma `proceso_1..5.jpg`),
+  qué se puede hacer, la UI y los agentes, requisitos, instalación y licencias, en español e inglés.
+
 ### Arreglado
 - `crisol ui`: los campos numéricos (altura, seeds, duración y recorte de un clip) se rearmaban a medio escribir y
   "1.65" quedaba 651.

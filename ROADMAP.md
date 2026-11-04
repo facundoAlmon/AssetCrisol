@@ -165,6 +165,8 @@ Errores vistos armando el manual de la UI (2026-11-04):
 ## 7. Documentación, landing y v0.1
 - [x] Vitrina de los ejemplos (`docs/vitrina/`, imágenes con `herramientas/4_sprites/vitrina.py`), para la landing.
 - [ ] Landing en GitHub Pages: qué hace, galería antes/después, requisitos, "empezá acá" para personas y agentes.
+      Hecha en `docs/index.html` (bilingüe; el proceso de Cris con `vitrina.py`, la galería en `docs/vitrina/`): falta
+      activar Pages (rama `main`, carpeta `/docs`) y poner la URL en el repo.
 - [ ] Manual de `crisol ui` (`docs/ui.md`, `docs/ui.en.md`) con capturas que se rehacen con `tests/capturas_ui.py`
       (Playwright sobre el Chrome instalado; es/en, claro/oscuro, celular).
 - [ ] Docs bilingües: instalación, primer asset, recetas por tipo, referencia de `personaje.json` y estilos,

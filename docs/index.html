@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AssetCrisol</title>
+<meta name="description" content="De una imagen o una descripción a personajes animados, objetos, vehículos y escenarios para juegos 2D y 3D. En tu PC, con IA open source. / From one image to game assets, on your PC, with open-source AI.">
+<meta property="og:title" content="AssetCrisol">
+<meta property="og:description" content="De una imagen a assets de juego 2D y 3D, en tu PC, con IA open source.">
+<meta property="og:image" content="https://facundoalmon.github.io/AssetCrisol/vitrina/img/taller.gif">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M6 8h20l-3 18H9z' fill='%23f08a3c'/><path d='M8 13h16l-1.5 10h-13z' fill='%232e343c'/></svg>">
+<!-- La landing de GitHub Pages (carpeta docs/ de main). Imágenes: vitrina/img (herramientas/4_sprites/vitrina.py) y
+     ui/img (tests/capturas_ui.py). Los .md se enlazan en GitHub, que los muestra renderizados. -->
+<style>
+  :root {
+    --fondo: #2e343c; --panel: #383f49; --panel-2: #323941; --borde: #4a525e; --texto: #e6e8eb; --suave: #a9b0ba;
+    --acento: #f08a3c; --acento-osc: #c8672a; --si: #6fbf73; --no: #e0705f;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--fondo); color: var(--texto);
+         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  html[lang="es"] [lang="en"], html[lang="en"] [lang="es"] { display: none !important; }
+  a { color: var(--acento); }
+  main { max-width: 1080px; margin: 0 auto; padding: 0 16px 64px; }
+  img { display: block; max-width: 100%; height: auto; }
+  code { font: .92em ui-monospace, "SFMono-Regular", Menlo, monospace; background: var(--panel-2);
+         border: 1px solid var(--borde); border-radius: 4px; padding: 0 4px; }
+  pre { background: #22272e; border: 1px solid var(--borde); border-radius: 8px; padding: 12px 14px; overflow-x: auto;
+        font: 13.5px/1.6 ui-monospace, "SFMono-Regular", Menlo, monospace; margin: 0; }
+  pre .c { color: var(--suave); }
+
+  /* barra */
+  .barra { position: sticky; top: 0; z-index: 2; background: rgba(46, 52, 60, .92); backdrop-filter: blur(6px);
+           border-bottom: 1px solid var(--borde); }
+  .barra div { max-width: 1080px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 18px; }
+  .marca { color: var(--texto); text-decoration: none; font-weight: 800; font-size: 1.1rem; display: flex; gap: 8px;
+           align-items: center; margin-right: auto; }
+  .barra nav { display: flex; gap: 16px; font-size: .95rem; }
+  .barra nav a { color: var(--suave); text-decoration: none; }
+  .barra nav a:hover { color: var(--texto); }
+  button { background: var(--panel); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px;
+           padding: 5px 11px; font: inherit; font-size: .9rem; cursor: pointer; }
+  @media (max-width: 640px) { .barra nav { display: none; } }
+
+  /* portada */
+  .portada { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 32px; align-items: center;
+             padding: 48px 0 24px; }
+  @media (max-width: 820px) { .portada { grid-template-columns: 1fr; padding-top: 28px; } }
+  h1 { font-size: clamp(1.9rem, 4.6vw, 2.9rem); line-height: 1.12; margin: 0 0 14px; letter-spacing: -.01em; }
+  h1 em { font-style: normal; color: var(--acento); }
+  .bajada { color: var(--suave); font-size: 1.08rem; margin: 0 0 22px; max-width: 60ch; }
+  .botones { display: flex; flex-wrap: wrap; gap: 10px; }
+  .boton { display: inline-block; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: 650;
+           border: 1px solid var(--borde); color: var(--texto); background: var(--panel); }
+  .boton.primario { background: var(--acento); border-color: var(--acento); color: #1f2329; }
+  .boton:hover { filter: brightness(1.08); }
+  .sellos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; padding: 0; list-style: none; }
+  .sellos li { font-size: .85rem; color: var(--suave); border: 1px solid var(--borde); border-radius: 999px; padding: 2px 10px; }
+  .heroe { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; padding: 10px; }
+  .heroe img { margin: 0 auto; border-radius: 6px; }
+
+  section { padding-top: 56px; }
+  h2 { font-size: clamp(1.4rem, 3vw, 1.8rem); margin: 0 0 8px; }
+  h3 { font-size: 1.1rem; margin: 0 0 6px; }
+  p.intro { color: var(--suave); margin: 0 0 22px; max-width: 72ch; }
+
+  /* proceso */
+  .proceso { display: grid; gap: 12px; grid-template-columns: repeat(6, minmax(0, 1fr)); counter-reset: paso;
+             padding: 0; margin: 0; list-style: none; }
+  @media (max-width: 900px) { .proceso { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .proceso { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .proceso li { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; overflow: hidden;
+                display: flex; flex-direction: column; }
+  .proceso img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #d9dadc; }
+  .proceso .texto { padding: 10px 11px 12px; font-size: .88rem; color: var(--suave); }
+  .proceso b { display: block; color: var(--texto); font-size: .95rem; margin-bottom: 2px; }
+  .proceso b::before { counter-increment: paso; content: counter(paso) " · "; color: var(--acento); }
+  .proceso .tu { display: inline-block; margin-top: 6px; font-size: .78rem; color: var(--acento);
+                 border: 1px solid var(--acento-osc); border-radius: 4px; padding: 0 5px; }
+  .nota { color: var(--suave); font-size: .92rem; margin-top: 14px; }
+
+  /* tipos */
+  .tipos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  .tipo { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 12px;
+          display: flex; flex-direction: column; gap: 10px; }
+  .tipo .arte { background: var(--panel-2); border-radius: 6px; display: grid; place-items: center; height: 190px;
+                overflow: hidden; }
+  .tipo .arte img { max-height: 190px; width: auto; }
+  .tipo p { margin: 0; font-size: .92rem; color: var(--suave); }
+
+  /* dos caminos */
+  .caminos { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (max-width: 820px) { .caminos { grid-template-columns: minmax(0, 1fr); } }
+  .camino { min-width: 0; background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; padding: 18px;
+            display: flex; flex-direction: column; gap: 12px; }
+  .camino p { margin: 0; color: var(--suave); }
+  .camino img { border-radius: 8px; border: 1px solid var(--borde); }
+  .camino ul { margin: 0; padding-left: 20px; color: var(--suave); }
+
+  /* requisitos */
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { color: var(--suave); font-weight: 600; width: 22%; }
+  .instalar { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 22px; }
+  @media (max-width: 820px) { .instalar { grid-template-columns: minmax(0, 1fr); } }
+  .instalar > div { min-width: 0; }
+
+  .licencia { display: inline-block; font-size: .8rem; border-radius: 4px; padding: 1px 6px; border: 1px solid currentColor; }
+  .licencia.si { color: var(--si); } .licencia.no { color: var(--no); }
+  footer { margin-top: 64px; color: var(--suave); font-size: .9rem; border-top: 1px solid var(--borde); padding-top: 16px;
+           display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+</style>
+</head>
+<body>
+<header class="barra"><div>
+  <a class="marca" href="#"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 8h20l-3 18H9z" fill="#f08a3c"/><path d="M8 13h16l-1.5 10h-13z" fill="#2e343c"/></svg>AssetCrisol</a>
+  <nav>
+    <a href="#como"><span lang="es">Cómo funciona</span><span lang="en">How it works</span></a>
+    <a href="vitrina/"><span lang="es">Galería</span><span lang="en">Gallery</span></a>
+    <a href="#empezar"><span lang="es">Empezá acá</span><span lang="en">Start here</span></a>
+    <a href="https://github.com/facundoAlmon/AssetCrisol">GitHub</a>
+  </nav>
+  <button id="idioma" type="button" aria-label="Cambiar idioma / Change language">English</button>
+</div></header>
+
+<main>
+  <div class="portada">
+    <div>
+      <h1>
+        <span lang="es">De una imagen a <em>assets de juego</em>, en tu PC</span>
+        <span lang="en">From one image to <em>game assets</em>, on your PC</span>
+      </h1>
+      <p class="bajada">
+        <span lang="es">AssetCrisol convierte un boceto, una foto o una descripción en personajes animados, objetos,
+          vehículos y escenarios listos para juegos 2D, 2.5D y 3D. Con IA open source que corre en tu placa de video:
+          sin cuentas, sin nube, sin pagar por imagen.</span>
+        <span lang="en">AssetCrisol turns a sketch, a photo or a description into animated characters, props, vehicles
+          and scenery ready for 2D, 2.5D and 3D games. With open-source AI running on your graphics card: no accounts,
+          no cloud, no pay-per-image.</span>
+      </p>
+      <div class="botones">
+        <a class="boton primario" href="#empezar"><span lang="es">Empezá acá</span><span lang="en">Start here</span></a>
+        <a class="boton" href="vitrina/"><span lang="es">Ver la galería</span><span lang="en">See the gallery</span></a>
+        <a class="boton" href="https://github.com/facundoAlmon/AssetCrisol">GitHub</a>
+      </div>
+      <ul class="sellos">
+        <li>GPL-3.0</li>
+        <li>Linux + NVIDIA 16 GB</li>
+        <li><span lang="es">sprites isométricos en 8 direcciones</span><span lang="en">8-direction isometric sprites</span></li>
+        <li><span lang="es">Godot, .glb y hojas estilo Aseprite</span><span lang="en">Godot, .glb and Aseprite-style sheets</span></li>
+      </ul>
+    </div>
+    <div class="heroe">
+      <img src="vitrina/img/taller.gif" width="744" height="308"
+           alt="Cris, la protagonista de los ejemplos, en vista isométrica en su taller entre un horno, un yunque, un crisol, una caja de herramientas y un martillo / Cris, the examples' protagonist, in isometric view in her workshop">
+    </div>
+  </div>
+
+  <section id="como">
+    <h2><span lang="es">Cómo funciona</span><span lang="en">How it works</span></h2>
+    <p class="intro">
+      <span lang="es">Cada paso deja algo para mirar y se puede rehacer por separado. Lo que importa lo decidís vos:
+        la página o el agente te muestra las opciones y espera.</span>
+      <span lang="en">Every step leaves something to look at and can be redone on its own. You make the calls that
+        matter: the page or the agent shows you the options and waits.</span>
+    </p>
+    <ol class="proceso">
+      <li><img src="vitrina/img/proceso_1.jpg" width="420" height="420" loading="lazy" alt="La idea: Cris generada desde una descripción / The idea: Cris generated from a description">
+        <div class="texto"><b><span lang="es">La idea</span><span lang="en">The idea</span></b>
+          <span lang="es">Una descripción en inglés (Z-Image) o tu propio boceto o foto.</span>
+          <span lang="en">An English description (Z-Image) or your own sketch or photo.</span>
+          <span class="tu"><span lang="es">elegís una</span><span lang="en">you pick one</span></span></div></li>
+      <li><img src="vitrina/img/proceso_2.jpg" width="420" height="420" loading="lazy" alt="La imagen limpia, sin piezas sueltas / The clean image, no loose pieces">
+        <div class="texto"><b><span lang="es">La imagen</span><span lang="en">The image</span></b>
+          <span lang="es">Qwen la redibuja en el estilo, de cuerpo entero y lista para 3D.</span>
+          <span lang="en">Qwen redraws it in the style, full body and ready for 3D.</span></div></li>
+      <li><img src="vitrina/img/proceso_3.jpg" width="420" height="420" loading="lazy" alt="Costados y espalda / Sides and back">
+        <div class="texto"><b><span lang="es">Las vistas</span><span lang="en">The views</span></b>
+          <span lang="es">Espalda y costados, para que el 3D no invente lo que no se ve.</span>
+          <span lang="en">Back and sides, so the 3D does not make up what it cannot see.</span></div></li>
+      <li><img src="vitrina/img/proceso_4.jpg" width="420" height="420" loading="lazy" alt="El modelo 3D texturizado / The textured 3D model">
+        <div class="texto"><b><span lang="es">El modelo 3D</span><span lang="en">The 3D model</span></b>
+          <span lang="es">Pixal3D o TRELLIS.2, repintado con UltraTex. Entre 3 y 8 minutos.</span>
+          <span lang="en">Pixal3D or TRELLIS.2, repainted with UltraTex. 3 to 8 minutes.</span>
+          <span class="tu"><span lang="es">elegís una</span><span lang="en">you pick one</span></span></div></li>
+      <li><img src="vitrina/img/proceso_5.jpg" width="420" height="420" loading="lazy" alt="Las articulaciones sobre el modelo / Joints over the model">
+        <div class="texto"><b><span lang="es">El esqueleto</span><span lang="en">The skeleton</span></b>
+          <span lang="es">Articulaciones con DWPose, rig, pesos y 15 animaciones en Blender.</span>
+          <span lang="en">Joints with DWPose, rig, weights and 15 animations in Blender.</span></div></li>
+      <li><img src="vitrina/img/cris_direcciones.gif" width="600" height="380" loading="lazy" alt="Cris caminando en 8 direcciones / Cris walking in 8 directions" style="object-fit:contain;background:#2e343c">
+        <div class="texto"><b><span lang="es">Al juego</span><span lang="en">Into the game</span></b>
+          <span lang="es">Hojas de costado e isométricas, retrato, el .glb animado y una carpeta para Godot.</span>
+          <span lang="en">Side and isometric sheets, portrait, the animated .glb and a Godot folder.</span></div></li>
+    </ol>
+    <p class="nota">
+      <span lang="es">Todo lo de esta página salió de AssetCrisol sin retoques. Unos 15 minutos de placa por personaje;
+        de Blender en adelante, segundos.</span>
+      <span lang="en">Everything on this page came out of AssetCrisol untouched. About 15 minutes of graphics card time
+        per character; from Blender on, seconds.</span>
+    </p>
+  </section>
+
+  <section id="que">
+    <h2><span lang="es">Qué podés hacer</span><span lang="en">What you can make</span></h2>
+    <p class="intro">
+      <span lang="es">Una receta por tipo de asset prepara todo; vos solo describís.</span>
+      <span lang="en">A recipe per kind of asset sets everything up; you just describe it.</span>
+    </p>
+    <div class="tipos">
+      <div class="tipo"><div class="arte"><img src="vitrina/img/cris_acciones.gif" width="300" height="300" loading="lazy" alt="Cris: caminar, correr, golpe, patada, salto / Cris: walk, run, punch, kick, jump"></div>
+        <h3><span lang="es">Personajes</span><span lang="en">Characters</span></h3>
+        <p><span lang="es">Personas, chibis, robots, juguetes y cuadrúpedos. 15 animaciones (8 en cuadrúpedos), de costado
+          y en isométrico, con retrato y anclas para colgarles equipo.</span>
+          <span lang="en">People, chibis, robots, toys and quadrupeds. 15 animations (8 for quadrupeds), side and
+          isometric, with a portrait and anchors to hang gear on.</span></p></div>
+      <div class="tipo"><div class="arte"><img src="vitrina/img/horno.gif" loading="lazy" alt="Horno girando / Rotating furnace"></div>
+        <h3><span lang="es">Objetos</span><span lang="en">Props</span></h3>
+        <p><span lang="es">Cajas, muebles, herramientas, plantas. Vistas isométricas con su huella de colisión, o el
+          .glb con niveles de detalle.</span>
+          <span lang="en">Crates, furniture, tools, plants. Isometric views with their collision footprint, or the .glb
+          with levels of detail.</span></p></div>
+      <div class="tipo"><div class="arte"><img src="vitrina/img/camioneta.jpg" width="576" height="324" loading="lazy" alt="Camioneta roja en tres cuartos / Red pickup truck, three-quarter view"></div>
+        <h3><span lang="es">Vehículos</span><span lang="en">Vehicles</span></h3>
+        <p><span lang="es">Un .glb con la carrocería y las cuatro ruedas separadas, listas para girar.</span>
+          <span lang="en">A .glb with the body and the four wheels apart, ready to spin.</span></p></div>
+      <div class="tipo"><div class="arte"><img src="vitrina/img/taller.png" width="1152" height="384" loading="lazy" alt="Piso de piedra, camino y pared de ladrillo / Stone floor, path and brick wall"></div>
+        <h3><span lang="es">Escenarios</span><span lang="en">Scenery</span></h3>
+        <p><span lang="es">Piso, camino y pared que se repiten sin costuras, un telón de fondo y los colores del tema.</span>
+          <span lang="en">Seamless floor, path and wall, a backdrop and the theme colors.</span></p></div>
+    </div>
+    <p class="nota"><a href="vitrina/"><span lang="es">Toda la galería →</span><span lang="en">The whole gallery →</span></a></p>
+  </section>
+
+  <section id="caminos">
+    <h2><span lang="es">Dos maneras de usarlo</span><span lang="en">Two ways to use it</span></h2>
+    <p class="intro">
+      <span lang="es">Las dos son de primera: no hace falta saber programar para ninguna.</span>
+      <span lang="en">Both are first-class: neither needs coding skills.</span>
+    </p>
+    <div class="caminos">
+      <div class="camino">
+        <h3><span lang="es">En el navegador</span><span lang="en">In the browser</span></h3>
+        <p><span lang="es"><code>crisol ui</code> abre una página en tu PC (o en el celular, en tu red): creás el asset,
+          corrés los pasos, elegís entre las candidatas y bajás el resultado en un zip. Sin terminal ni archivos de
+          configuración.</span>
+          <span lang="en"><code>crisol ui</code> opens a page on your PC (or your phone, on your network): create the
+          asset, run the steps, choose among the candidates and download the result as a zip. No terminal, no config
+          files.</span></p>
+        <img lang="es" src="ui/img/es/asset.webp" width="1400" height="900" loading="lazy" alt="La página de un asset en crisol ui: la cadena de pasos y el resultado en isométrico">
+        <img lang="en" src="ui/img/en/asset.webp" width="1400" height="900" loading="lazy" alt="An asset page in crisol ui: the chain of steps and the isometric result">
+        <p><a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/ui.md" lang="es">Manual de la UI, paso a paso →</a>
+          <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/ui.en.md" lang="en">The UI manual, step by step →</a></p>
+      </div>
+      <div class="camino">
+        <h3><span lang="es">Con un agente de IA</span><span lang="en">With an AI agent</span></h3>
+        <p><span lang="es">Claude Code u otro agente instala AssetCrisol, corre los pasos y te muestra lo que tenés que
+          decidir. Pedís en tus palabras ("un caballero con armadura azul, para un juego isométrico") y elegís mirando
+          las imágenes.</span>
+          <span lang="en">Claude Code or another agent installs AssetCrisol, runs the steps and shows you what you need
+          to decide. Ask in your own words ("a knight in blue armor, for an isometric game") and choose by looking at
+          the images.</span></p>
+        <pre><span class="c"># <span lang="es">el servidor MCP, para Claude Code</span><span lang="en">the MCP server, for Claude Code</span></span>
+claude mcp add assetcrisol -- /ruta/AssetCrisol/crisol mcp</pre>
+        <ul>
+          <li><span lang="es">Herramientas MCP: recetas, crear, estado, correr, ver, elegir. Devuelven las imágenes para
+            que el agente te las muestre.</span>
+            <span lang="en">MCP tools: recipes, create, status, run, view, choose. They return the images so the agent
+            can show them to you.</span></li>
+          <li><span lang="es">El agente nunca elige por vos la imagen, la malla ni las texturas.</span>
+            <span lang="en">The agent never picks the image, the mesh or the textures for you.</span></li>
+          <li><span lang="es">Sin MCP: cada paso tiene <code>--json</code> y <code>crisol estado</code> dice qué sigue.</span>
+            <span lang="en">Without MCP: every step has <code>--json</code> and <code>crisol estado</code> says what comes next.</span></li>
+        </ul>
+        <p><a href="https://github.com/facundoAlmon/AssetCrisol#para-agentes-de-ia" lang="es">Para agentes de IA →</a>
+          <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/README.en.md#for-ai-agents" lang="en">For AI agents →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="empezar">
+    <h2><span lang="es">Empezá acá</span><span lang="en">Start here</span></h2>
+    <p class="intro">
+      <span lang="es">Todo corre en tu PC. Los modelos se bajan una vez.</span>
+      <span lang="en">Everything runs on your PC. The models are downloaded once.</span>
+    </p>
+    <table>
+      <tr><th><span lang="es">Sistema</span><span lang="en">System</span></th>
+        <td><span lang="es"><b>Linux</b> (probado en Linux Mint 22 / Ubuntu 24.04). Windows y macOS no están probados.</span>
+          <span lang="en"><b>Linux</b> (tested on Linux Mint 22 / Ubuntu 24.04). Windows and macOS are not tested.</span></td></tr>
+      <tr><th>GPU</th>
+        <td><span lang="es"><b>NVIDIA con 16 GB de VRAM</b> (probado en una RTX 4080 Super). Con menos, la malla no entra.</span>
+          <span lang="en"><b>NVIDIA with 16 GB of VRAM</b> (tested on an RTX 4080 Super). With less, the mesh does not fit.</span></td></tr>
+      <tr><th>RAM</th><td><span lang="es">probado con 64 GB; 32 GB debería alcanzar</span><span lang="en">tested with 64 GB; 32 GB should be enough</span></td></tr>
+      <tr><th><span lang="es">Disco</span><span lang="en">Disk</span></th>
+        <td><span lang="es">~90 GB (nivel mínimo) o ~135 GB (completo), más ~0,5-1 GB por personaje</span>
+          <span lang="en">~90 GB (minimum level) or ~135 GB (full), plus ~0.5-1 GB per character</span></td></tr>
+    </table>
+    <div class="instalar">
+      <div>
+        <h3><span lang="es">Instalación nativa</span><span lang="en">Native install</span></h3>
+        <pre>git clone https://github.com/facundoAlmon/AssetCrisol.git
+cd AssetCrisol
+./instalar.sh --plan     <span class="c"># <span lang="es">qué va a hacer</span><span lang="en">what it will do</span></span>
+./instalar.sh            <span class="c"># <span lang="es">~1 h, la mayor parte bajando</span><span lang="en">~1 h, mostly downloading</span></span>
+./crisol ui</pre>
+      </div>
+      <div>
+        <h3>Docker</h3>
+        <pre>docker pull ghcr.io/facundoalmon/assetcrisol
+<span class="c"># <span lang="es">modelos en un volumen, tus assets en ./assets</span><span lang="en">models in a volume, your assets in ./assets</span></span>
+alias crisol='docker run --rm -it --gpus all \
+  -v crisol-modelos:/modelos -v "$PWD/assets":/datos \
+  ghcr.io/facundoalmon/assetcrisol'
+crisol modelos &amp;&amp; crisol doctor</pre>
+      </div>
+    </div>
+    <p class="nota">
+      <span lang="es">Dos modelos piden aceptar sus condiciones en Hugging Face (DINOv3 y FLUX.2 Klein): el instalador
+        avisa cuáles. Detalle: <a href="https://github.com/facundoAlmon/AssetCrisol#empezá-acá">README > Empezá acá</a>
+        y <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/docker.md">Docker</a>.</span>
+      <span lang="en">Two models ask you to accept their terms on Hugging Face (DINOv3 and FLUX.2 Klein): the installer
+        tells you which. Details: <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/README.en.md#start-here">README > Start here</a>
+        and <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/docker.en.md">Docker</a>.</span>
+    </p>
+  </section>
+
+  <section id="licencias">
+    <h2><span lang="es">Licencias</span><span lang="en">Licenses</span></h2>
+    <p class="intro">
+      <span lang="es">El código es libre (GPL-3.0). Cada modelo de IA tiene su licencia y algunos no permiten vender lo
+        que generan: cada asset dice si salió <span class="licencia si">comercial</span> o
+        <span class="licencia no">no comercial</span>. La receta por defecto para personas repinta con UltraTex (no
+        comercial); para un juego que vas a vender, se saca el repintado y queda todo comercial.
+        <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/licencias.md">Detalle por modelo</a>.</span>
+      <span lang="en">The code is free software (GPL-3.0). Each AI model has its own license and some do not allow
+        selling what they make: every asset says whether it came out <span class="licencia si">commercial</span> or
+        <span class="licencia no">non-commercial</span>. The default recipe for people repaints with UltraTex
+        (non-commercial); for a game you will sell, drop the repaint and everything stays commercial.
+        <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/licenses.md">Details per model</a>.</span>
+    </p>
+  </section>
+
+  <footer>
+    <span><span lang="es">AssetCrisol está en construcción (0.x): el formato puede cambiar entre versiones.</span>
+      <span lang="en">AssetCrisol is a work in progress (0.x): formats may change between versions.</span></span>
+    <span><a href="https://github.com/facundoAlmon/AssetCrisol">GitHub</a> ·
+      <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/CHANGELOG.md">Changelog</a> ·
+      <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/ROADMAP.md">Roadmap</a> ·
+      <a href="https://github.com/facundoAlmon/AssetCrisol/issues"><span lang="es">Reportar un problema</span><span lang="en">Report an issue</span></a></span>
+  </footer>
+</main>
+<script>
+  // el idioma: el guardado, o el del navegador; lo comparte con la galería (vitrina/)
+  const boton = document.getElementById('idioma');
+  function poner(l) {
+    document.documentElement.lang = l;
+    boton.textContent = l === 'es' ? 'English' : 'Español';
+    try { localStorage.setItem('crisol_idioma', l); } catch (e) {}
+  }
+  let inicial = 'es';
+  try { inicial = localStorage.getItem('crisol_idioma') || (navigator.language.startsWith('es') ? 'es' : 'en'); } catch (e) {}
+  poner(inicial);
+  boton.addEventListener('click', () => poner(document.documentElement.lang === 'es' ? 'en' : 'es'));
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ uso: python3 herramientas/4_sprites/vitrina.py [--salida carpeta]
 Antes: copiar los ejemplos a datos_dir y correr `blender` + `sprites` (+ `iso` de cris) de cada uno y `tema` de los
 escenarios (`tests/humo.py --dejar` deja todo hecho en una carpeta temporal: ASSETCRISOL_CONFIG=<esa>/config.json).
 
-Salida: cris_acciones.gif (acciones mirando al sudoeste), cris_paseo.gif (camina por el piso), cris_direcciones.gif
+Salida: proceso_1..5.jpg (Cris paso a paso: idea, imagen, vistas, modelo, articulaciones), cris_acciones.gif (acciones mirando al sudoeste), cris_paseo.gif (camina por el piso), cris_direcciones.gif
 (las 8 direcciones), taller.gif (Cris entre sus objetos, a la misma escala), <objeto>.gif (gira en sus 4 direcciones),
 <vehiculo>.jpg (tres cuartos de la revisión de `blender`) y <escenario>.png (las texturas elegidas, repetidas).
 """
@@ -238,12 +238,71 @@ def vehiculo(d, n, out):
     print(f'[vitrina] {os.path.basename(out)}: {im.size}, {os.path.getsize(out) // 1024} KB')
 
 
+def proceso(d, salida, lado=420):
+    """Cris paso a paso, una imagen por etapa (los textos van en la página): proceso_1 la idea (Z-Image, la base de
+    la referencia), _2 la imagen limpia (Qwen, la elegida), _3 las vistas de espalda y costados, _4 el modelo 3D
+    (render de la guía) y _5 las articulaciones sobre el modelo (guia.png, con la caja de _4: misma cámara)."""
+    c = os.path.join(d, 'personajes', 'cris')
+    pj = json.load(open(os.path.join(c, 'personaje.json')))
+    t = os.path.join(c, 'trabajo')
+
+    def mascara(im):
+        """lo que no es el fondo liso (el color de la esquina) y es opaco"""
+        im = im.convert('RGBA')
+        f = im.getpixel((4, 4))[:3]
+        r, g, b, a = im.split()
+        dif = Image.merge('RGB', [Image.eval(ch, lambda v, k=k: abs(v - f[k])) for k, ch in enumerate((r, g, b))])
+        dif = dif.convert('L').point(lambda v: 255 if v > 12 else 0)
+        return Image.composite(dif, Image.new('L', im.size), a.point(lambda v: 255 if v > 20 else 0))
+
+    def caja(im):
+        x0, y0, x1, y1 = mascara(im).filter(ImageFilter.MinFilter(5)).getbbox()   # sin pelusas sueltas
+        alto = round((y1 - y0) * 1.12)
+        cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+        return (cx - alto // 2, cy - alto // 2, cx + alto // 2, cy + alto // 2)
+
+    def cuadrado(im, k):
+        fondo = im.convert('RGB').getpixel((4, 4))
+        lienzo = Image.new('RGB', (k[2] - k[0], k[3] - k[1]), fondo)
+        lienzo.paste(im.convert('RGB'), (-k[0], -k[1]))
+        return lienzo.resize((lado, lado), Image.LANCZOS)
+
+    ref = pj['imagen'].get('referencia')
+    salidas = {}
+    if ref:
+        im = Image.open(os.path.join(c, ref)); salidas[1] = cuadrado(im, caja(im))
+    im = Image.open(os.path.join(t, 'imagen', f"cand_{pj['imagen']['elegida']}.png")); salidas[2] = cuadrado(im, caja(im))
+    # vistas: costado, espalda y costado en columnas; el fondo de cada una se rellena desde las esquinas con el de la
+    # espalda (flood fill: no toca lo de adentro de la figura), para que no se vean las costuras entre columnas
+    from PIL import ImageDraw
+    vs = [Image.open(os.path.join(t, 'imagen', f'vista_{v}.png')).convert('RGB') for v in ('left', 'back', 'right')]
+    fondo = vs[1].getpixel((4, 4))
+    im = Image.new('RGB', (lado, lado), fondo)
+    for k, v in enumerate(vs):
+        for esquina in ((0, 0), (v.width - 1, 0), (0, v.height - 1), (v.width - 1, v.height - 1)):
+            ImageDraw.floodfill(v, esquina, fondo, thresh=28)
+        fig = cuadrado(v, caja(v))
+        im.paste(fig.crop((lado // 3, 0, lado * 2 // 3, lado)), (k * lado // 3, 0))
+    salidas[3] = im
+    frente = Image.open(os.path.join(t, 'guia', 'frente.png'))
+    bx = caja(frente)
+    salidas[4] = cuadrado(frente, bx)
+    g = Image.open(os.path.join(t, 'guia', 'guia.png')).convert('RGB')
+    g = g.crop((0, 0, g.width // 2, g.height)).resize(frente.size)
+    salidas[5] = cuadrado(g, bx)
+    for i, im in salidas.items():
+        out = os.path.join(salida, f'proceso_{i}.jpg')
+        im.save(out, quality=86, optimize=True)
+        print(f'[vitrina] {os.path.basename(out)}: {im.size}, {os.path.getsize(out) // 1024} KB')
+
+
 def main():
     salida = sys.argv[sys.argv.index('--salida') + 1] if '--salida' in sys.argv else os.path.join(RAIZ, 'docs', 'vitrina',
                                                                                                     'img')
     os.makedirs(salida, exist_ok=True)
     d = datos_dir()
     cris = Cris(d)
+    proceso(d, salida)
     acciones(cris, os.path.join(salida, 'cris_acciones.gif'))
     paseo(cris, os.path.join(salida, 'cris_paseo.gif'))
     direcciones(cris, os.path.join(salida, 'cris_direcciones.gif'))
