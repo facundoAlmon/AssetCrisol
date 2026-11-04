@@ -121,6 +121,12 @@ Mejoras pedidas (2026-10-28):
 - [x] Receta para cuadrúpedos (perro, gato, caballo, vaca...): esqueleto propio (`cuadrupedo.py`), articulaciones
       estimadas de la malla y 8 animaciones procedurales.
 
+Revisión de animaciones y movimientos (2026-11-04):
+- [x] Movimientos no se entendía: pasos a la vista, esqueleto animado por variante (también los candidatos sin hoja
+      PNG), recorte marcando un instante, qué personajes usan cada clip; faltaba en la barra del celular.
+- [x] Ajustes > Animaciones: el botón «kimodo» deshabilitado sin explicación en las animaciones sin clip.
+- [x] Resultado > Animación: el gif con las 15 animaciones juntas y los nombres ilegibles → la hoja animada de a una.
+
 ## 5. Salida 3D y otros motores
 - [x] Personaje como GLB con rig y animaciones (las mismas de los sprites): `trabajo/animado.glb`, también en el visor
       3D de `crisol ui`.
