@@ -124,9 +124,9 @@ Mejoras pedidas (2026-10-28):
 ## 5. Salida 3D y otros motores
 - [x] Personaje como GLB con rig y animaciones (las mismas de los sprites): `trabajo/animado.glb`, también en el visor
       3D de `crisol ui`.
-- [x] Polígonos para tiempo real + LODs, conservando UV y pesos: `trabajo/tiempo_real/<n>_lod0..2.glb` (personajes
-      20/10/5 k triángulos con rig y animaciones, objetos 10/5/2 k; textura 2048/1024/512). Falta: vehículos (piezas
-      separadas) y costuras de textura en el LOD más bajo.
+- [x] Polígonos para tiempo real + LODs, conservando UV y pesos: `trabajo/tiempo_real/<n>.glb` (LOD0, para Godot) y
+      `<n>_lods.glb` (un esqueleto con `<n>_LOD0..2`; personajes 20/10/5 k triángulos con rig y animaciones, objetos
+      10/5/2 k; textura 2048). Falta: vehículos (piezas separadas) y costuras de textura en el LOD más bajo.
 - [ ] Revisión de cerca: lo que en un sprite no se nota (codos, ropa que atraviesa, costuras de textura).
 - [ ] Esqueleto compatible: mapeo a Mixamo, Humanoid de Unity y `SkeletonProfileHumanoid` de Godot (sin dedos ni cara).
 - [ ] Materiales completos (normal, AO, metal) como opción.

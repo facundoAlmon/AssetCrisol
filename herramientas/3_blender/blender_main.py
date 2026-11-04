@@ -933,31 +933,31 @@ TIEMPO_REAL = {'personaje': {'lods': [20000, 10000, 5000], 'textura_px': 2048},
 
 
 def exportar_tiempo_real(mesh, arm=None):
-    """trabajo/tiempo_real/<n>_lod<i>.glb: la malla reducida (Decimate por colapso, que conserva UV y pesos) a las caras
-    de cada LOD de `tiempo_real.lods`, con la textura a `tiempo_real.textura_px` como mucho (la mitad en cada LOD
-    siguiente, hasta 256); en personajes, con el rig y las animaciones de animado.glb. `tiempo_real: false` lo apaga.
-    Va al final del modo: achica la imagen en memoria (lo anterior ya se exportó y guardó con la textura entera).
-    lods.json: archivo, caras, vértices y lado de la textura de cada LOD."""
+    """trabajo/tiempo_real/: la malla reducida (Decimate por colapso, que conserva UV y pesos) a las caras de cada LOD de
+    `tiempo_real.lods`, con la textura a `tiempo_real.textura_px` como mucho; en personajes, con el rig y las
+    animaciones de animado.glb. Dos archivos: <n>.glb solo con el LOD0 (Godot arma sus LOD al importar: con las tres
+    mallas las dibujaría superpuestas) y <n>_lods.glb con un esqueleto y las mallas <n>_LOD0.._LOD<k> colgadas de él
+    (el nombre que buscan Unity y Unreal para el LOD Group). `tiempo_real: false` lo apaga. Va al final del modo:
+    achica la imagen en memoria (lo anterior ya se exportó y guardó con la textura entera). lods.json: caras y
+    vértices de cada LOD."""
     cfg = PJ.get('tiempo_real', {})
     if cfg is False:
         return
     cfg = dict(TIEMPO_REAL['personaje' if arm else 'objeto'], **(cfg or {}))
     d = os.path.join(TRABAJO, 'tiempo_real'); os.makedirs(d, exist_ok=True)
-    for f in os.listdir(d):   # los LOD de una corrida anterior con otra lista
+    for f in os.listdir(d):   # lo de una corrida anterior
         os.remove(os.path.join(d, f))
     lado = cfg.get('textura_px')
-    imagenes = {n.image for m in mesh.data.materials if m and m.node_tree
-                for n in m.node_tree.nodes if n.type == 'TEX_IMAGE' and n.image}
-
-    def achicar(px):
-        for im in imagenes:
-            if px and max(im.size) > px:
-                k = px / max(im.size)
-                im.scale(max(1, round(im.size[0] * k)), max(1, round(im.size[1] * k)))
+    for im in {n.image for m in mesh.data.materials if m and m.node_tree
+               for n in m.node_tree.nodes if n.type == 'TEX_IMAGE' and n.image}:
+        if lado and max(im.size) > lado:
+            k = lado / max(im.size)
+            im.scale(max(1, round(im.size[0] * k)), max(1, round(im.size[1] * k)))
     caras = sum(len(p.vertices) - 2 for p in mesh.data.polygons)   # en triángulos, como cuenta un motor
-    out = []
+    lods = []
     for i, objetivo in enumerate(cfg['lods']):
-        lod = mesh.copy(); lod.data = mesh.data.copy(); lod.name = f'{nombre}_lod{i}'
+        lod = mesh.copy(); lod.data = mesh.data.copy()
+        lod.name = lod.data.name = f'{nombre}_LOD{i}'
         for c in mesh.users_collection:
             c.objects.link(lod)
         if objetivo < caras:
@@ -967,23 +967,28 @@ def exportar_tiempo_real(mesh, arm=None):
             with bpy.context.temp_override(object=lod, active_object=lod):
                 bpy.ops.object.modifier_move_to_index(modifier='decimar', index=0)   # antes del Armature
                 bpy.ops.object.modifier_apply(modifier='decimar')
-        achicar(lado and max(256, lado >> i))   # cada LOD, la mitad de textura (se ve de más lejos)
-        archivo = f'{nombre}_lod{i}.glb'
+        lods.append(lod)
+
+    def exportar(archivo, objetos):
         bpy.ops.object.select_all(action='DESELECT')
-        lod.select_set(True)
-        if arm:
-            arm.select_set(True)
+        for o in objetos + ([arm] if arm else []):
+            o.select_set(True)
         bpy.ops.export_scene.gltf(filepath=os.path.join(d, archivo), export_format='GLB', use_selection=True,
                                   **({'export_animation_mode': 'ACTIONS', 'export_force_sampling': True,
                                       'export_anim_slide_to_zero': True, 'export_optimize_animation_size': True}
                                      if arm else {'export_animations': False}))
-        out.append({'archivo': archivo, 'caras': len(lod.data.polygons), 'vertices': len(lod.data.vertices),
-                    'textura_px': max((max(im.size) for im in imagenes), default=0)})
-        bpy.data.meshes.remove(lod.data)
+    lods[0].name = lods[0].data.name = nombre   # en el de Godot, sin sufijo
+    exportar(f'{nombre}.glb', lods[:1])
+    lods[0].name = lods[0].data.name = f'{nombre}_LOD0'
+    exportar(f'{nombre}_lods.glb', lods)
     with open(os.path.join(d, 'lods.json'), 'w') as f:
-        json.dump({'original': {'caras': caras, 'vertices': len(mesh.data.vertices)}, 'lods': out}, f, indent=1)
-    print('[blender] tiempo real:', ', '.join(f"lod{i} {o['caras']} caras" for i, o in enumerate(out)))
-
+        json.dump({'original': {'caras': caras, 'vertices': len(mesh.data.vertices)}, 'textura_px': lado,
+                   'archivos': {f'{nombre}.glb': 'LOD0 solo (Godot)', f'{nombre}_lods.glb': 'todos los LOD'},
+                   'lods': [{'nombre': o.name, 'caras': len(o.data.polygons), 'vertices': len(o.data.vertices)}
+                            for o in lods]}, f, indent=1)
+    print('[blender] tiempo real:', ', '.join(f'LOD{i} {len(o.data.polygons)} caras' for i, o in enumerate(lods)))
+    for o in lods:
+        bpy.data.meshes.remove(o.data)
 
 if modo == 'guia':
     sc, cam = preparar_escena()

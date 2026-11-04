@@ -55,9 +55,10 @@ def hay(base, *rutas):
 
 
 def revisar_lods(base, n):
-    """trabajo/tiempo_real: tres LOD con caras de más a menos (el primero puede ser la malla entera)."""
+    """trabajo/tiempo_real: <n>.glb, <n>_lods.glb y tres LOD con caras de más a menos (el primero puede ser la malla
+    entera)."""
     r = os.path.join('trabajo', 'tiempo_real')
-    if not hay(base, os.path.join(r, 'lods.json'), *(os.path.join(r, f'{n}_lod{i}.glb') for i in range(3))):
+    if not hay(base, *(os.path.join(r, a) for a in ('lods.json', f'{n}.glb', f'{n}_lods.glb'))):
         return
     with open(os.path.join(base, r, 'lods.json')) as f:
         caras = [l['caras'] for l in json.load(f)['lods']]
