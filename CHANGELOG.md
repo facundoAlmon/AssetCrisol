@@ -14,7 +14,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   `<n>_lods.glb` (un esqueleto con las mallas `<n>_LOD0..2`, para Unity y Unreal), más `lods.json`. Se ajusta con
   el bloque `tiempo_real` del json (`false` lo apaga). En `crisol ui`, Exportar > Tiempo real. Los huesos de los
   humanoides salen con los nombres de Mixamo (Unity Humanoid, Unreal, mapeo automático de Godot) o, con
-  `tiempo_real.huesos: "godot"`, los de `SkeletonProfileHumanoid`; sin los huesos auxiliares del IK.
+  `tiempo_real.huesos: "godot"`, los de `SkeletonProfileHumanoid`; sin los huesos auxiliares del IK. Materiales
+  horneados (Cycles en CPU): mapa de normales por LOD con el relieve de la malla entera, ORM con la rugosidad y el
+  metal del estilo, emisión y, con `tiempo_real.mapas` `"ao"`, oclusión ambiente.
 - **Revisión de cerca** (paso `revisar`): `trabajo/revision_cerca.png` con codos, hombros, rodillas, cadera y cara
   de cerca en las poses que más los doblan, de frente y de costado, con textura y el interior a la vista en magenta
   (ropa que se atraviesa, codos de plastilina, costuras de la textura); en cuadrúpedos, patas y cara. En `crisol ui`,

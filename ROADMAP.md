@@ -132,7 +132,8 @@ Mejoras pedidas (2026-10-28):
 - [x] Esqueleto compatible en `tiempo_real/`: nombres de Mixamo (Unity Humanoid, Unreal, mapeo automático de Godot) o de
       `SkeletonProfileHumanoid` (`tiempo_real.huesos`), sin los auxiliares del IK (sin dedos ni cara). Falta probarlo
       dentro de Unity y Unreal (no están en esta PC).
-- [ ] Materiales completos (normal, AO, metal) como opción.
+- [x] Materiales completos en `tiempo_real/`: normales horneadas de la malla entera a cada LOD, ORM (rugosidad, metal y,
+      con `"ao"`, oclusión) y emisión, de lo que el estilo arma con nodos (`tiempo_real.mapas`).
 - [x] Sprites para otros motores: hoja + json estilo Aseprite/TexturePacker (Unity, Phaser, Defold...).
 
 ## 6. Robustez

@@ -828,7 +828,14 @@ los frames laterales y el retrato. Todas las animaciones son **en el lugar** (el
    llevan horneado). El reposo es en pose A: si Unity lo pide, *Enforce T-Pose* en la configuración del Avatar. Los
    cuadrúpedos conservan sus nombres (no hay un estándar). Sin dedos ni huesos de la cara.
 
-   `lods.json` dice las caras y vértices de cada LOD. Se cambia con
+   **Materiales**: el glTF solo lleva imágenes, así que lo que el estilo arma con nodos en Blender se hornea (Cycles en
+   el procesador, sin usar la GPU) para que el 3D se vea como los sprites: un **mapa de normales** por LOD con el
+   relieve de la malla entera (lo que el Decimate le sacó; cada LOD, a la mitad de lado), un **ORM** con la
+   rugosidad y el metal cuando no son parejos (`render.metal_gris`, `oscuro_brillante`) y la **emisión** si el estilo
+   la usa (`render.emisivo`). Con `"mapas": ["normal", "orm", "ao"]` suma la **oclusión ambiente** (canal R del ORM,
+   ~20 s más); `[]` deja solo el color base.
+
+   `lods.json` dice las caras y vértices de cada LOD y qué mapas salieron. Se cambia con
    `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096, "huesos": "godot"}` (caras de cada LOD, el
    primero el más fino) y se apaga con `"tiempo_real": false`. El LOD más bajo puede mostrar costuras de la textura (boca, bordes): es para
    verlo de lejos.
@@ -1034,7 +1041,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `retrato.ancho_px` | (512) ancho del retrato (alto = 1.25 × ancho) |
 | `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (opcional) ver [Iso](#iso-pipelinepy-iso) |
-| `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado máximo de la textura; `huesos`: `"mixamo"` (por defecto), `"godot"` o `"crisol"`; `false` = no exportarlos (ver 3b) |
+| `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado máximo de la textura; `huesos`: `"mixamo"` (por defecto), `"godot"` o `"crisol"`; `mapas`: `["normal", "orm"]` (por defecto), `"ao"` suma la oclusión; `false` = no exportarlos (ver 3b) |
 
 </details>
 
@@ -1150,7 +1157,7 @@ crisol blender barril && crisol sprites barril && crisol godot barril
   `<n>_iso.tscn` (`StaticBody2D` con `objeto_iso.gd`: `direccion` cambia la celda y la huella como
   `CollisionPolygon2D`, también en el editor). `colision: false` las omite.
 - Para un juego 3D, `blender` deja en `trabajo/tiempo_real/` la malla reducida a 10 k, 5 k y 2 k triángulos,
-  centrada y apoyada en el piso, con la textura a 2048 px: `<n>.glb` (solo el LOD0, para Godot) y `<n>_lods.glb`
+  centrada y apoyada en el piso, con la textura a 2048 px y los mapas horneados: `<n>.glb` (solo el LOD0, para Godot) y `<n>_lods.glb`
   (los tres LOD, para Unity y Unreal), como en los personajes (paso 3b). `trabajo/malla/modelo.glb` es la malla entera.
 
 **Vegetación**: las hojitas sueltas dan cáscaras con agujeros (a 512 cada hoja es menos de un vóxel). Pedir masas

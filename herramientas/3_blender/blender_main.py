@@ -928,8 +928,9 @@ DIRECCIONES_ISO = [('e', 90), ('se', 45), ('s', 0), ('sw', -45), ('w', -90), ('n
 
 
 # tiempo_real: caras de cada LOD (el 0 primero) y lado máximo de la textura; personajes y objetos
-TIEMPO_REAL = {'personaje': {'lods': [20000, 10000, 5000], 'textura_px': 2048, 'huesos': 'mixamo'},
-               'objeto': {'lods': [10000, 5000, 2000], 'textura_px': 2048}}
+TIEMPO_REAL = {'personaje': {'lods': [20000, 10000, 5000], 'textura_px': 2048, 'huesos': 'mixamo',
+                             'mapas': ['normal', 'orm']},
+               'objeto': {'lods': [10000, 5000, 2000], 'textura_px': 2048, 'mapas': ['normal', 'orm']}}
 
 
 # nombres de huesos para otros motores (tiempo_real.huesos): Mixamo (lo reconocen Unity, Unreal y el mapeo automático
@@ -961,6 +962,160 @@ def renombrar_huesos(arm, esquema):
                 b = fc.data_path.split('"')[1]
                 if b in nuevos:
                     fc.data_path = fc.data_path.replace(f'["{b}"]', f'["{nuevos[b]}"]', 1)
+
+
+def _grupo_gltf():
+    """Grupo de nodos 'glTF Material Output' con la entrada Occlusion: así el exportador de glTF lleva el mapa de
+    oclusión (el canal R del ORM)."""
+    g = bpy.data.node_groups.get('glTF Material Output')
+    if not g:
+        g = bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')
+        g.interface.new_socket('Occlusion', in_out='INPUT', socket_type='NodeSocketFloat')
+    return g
+
+
+def hornear_mapas(mesh, lods, arm, mapas):
+    """Materiales para tiempo real (`tiempo_real.mapas`): el glTF solo lleva imágenes, así que lo que el estilo arma con
+    nodos se hornea en Cycles (CPU: no pisa la GPU) en la malla entera, en su UV, que los LOD conservan:
+    - "orm": rugosidad (G) y metal (B) de lo que llega al Principled (metal_gris, oscuro_brillante); con "ao", la
+      oclusión ambiente en R. Si rugosidad y metal son constantes y no hay "ao", van como números y no hay imagen.
+    - la emisión (render.emisivo), si el material la tiene: va siempre que haya "orm".
+    - "normal": un mapa de normales por LOD con el relieve de la malla entera (de la alta a la baja), lo que el
+      Decimate le sacó; el de cada LOD, a la mitad de lado que el anterior.
+    Deja en cada LOD su propio material glTF (color base + lo horneado). En reposo: la pose no entra. Devuelve qué
+    mapas salieron."""
+    import numpy as np
+    mats = [m for m in mesh.data.materials if m and m.node_tree]
+    if len(mats) != 1:
+        print(f'[blender] tiempo real: {len(mats)} materiales, sin hornear mapas (solo con uno)')
+        return []
+    m = mats[0]
+    nt = m.node_tree
+    b = next((n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'), None)
+    salida = next((n for n in nt.nodes if n.type == 'OUTPUT_MATERIAL' and n.is_active_output), None)
+    base = next((n.image for n in nt.nodes if n.type == 'TEX_IMAGE' and n.image), None)
+    if not (b and salida and base):
+        print('[blender] tiempo real: material sin Principled o sin textura, sin hornear mapas')
+        return []
+    w, h = base.size
+    sc.render.engine = 'CYCLES'
+    sc.cycles.device = 'CPU'
+    sc.cycles.samples = 1
+    bk = sc.render.bake
+    bk.margin = max(4, w // 256); bk.use_clear = True
+    if arm:
+        arm.data.pose_position = 'REST'
+
+    def imagen(nombre_im, datos=True, k=0):
+        im = bpy.data.images.new(nombre_im, max(256, w >> k), max(256, h >> k), alpha=False)
+        if datos:
+            im.colorspace_settings.name = 'Non-Color'
+        return im
+
+    def hornear(obj, material, im, tipo, **kw):
+        """Hornea `tipo` de `obj` en `im` (nodo de imagen activo en `material`)."""
+        nodo = material.node_tree.nodes.new('ShaderNodeTexImage'); nodo.image = im
+        material.node_tree.nodes.active = nodo
+        bpy.ops.object.select_all(action='DESELECT')
+        for o in kw.pop('desde', []):
+            o.select_set(True)
+        obj.select_set(True); bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.bake(type=tipo, **kw)
+        material.node_tree.nodes.remove(nodo)
+
+    def hornear_entrada(nombre_entrada):
+        """Lo que llega a una entrada del Principled, por emisión (EMIT copia el valor tal cual)."""
+        em = nt.nodes.new('ShaderNodeEmission')
+        nt.links.new(b.inputs[nombre_entrada].links[0].from_socket, em.inputs['Color'])
+        previo = salida.inputs['Surface'].links[0].from_socket
+        nt.links.new(em.outputs['Emission'], salida.inputs['Surface'])
+        im = imagen(f'{nombre}_{nombre_entrada}')
+        hornear(mesh, m, im, 'EMIT')
+        nt.links.new(previo, salida.inputs['Surface'])
+        nt.nodes.remove(em)
+        px = np.array(im.pixels[:], dtype=np.float32).reshape(h, w, 4)[..., 0]
+        bpy.data.images.remove(im)
+        return px
+
+    def valor(nombre_entrada):
+        e = b.inputs[nombre_entrada]
+        return hornear_entrada(nombre_entrada) if e.is_linked else float(e.default_value)
+
+    orm = emision = None
+    rug, met = valor('Roughness'), valor('Metallic')
+    ao = None
+    if 'ao' in mapas:
+        sc.cycles.samples = 32
+        if sc.world:   # Cycles hornea AO hasta la distancia del mundo (10 m por defecto: todo se tapa a sí mismo)
+            sc.world.light_settings.distance = ESTILO.get('oclusion', {}).get('distancia', 0.08) * ALTURA / 1.85
+        im = imagen(f'{nombre}_ao')
+        for lod in lods:   # están encima de la malla entera: le harían sombra
+            lod.hide_render = True
+        hornear(mesh, m, im, 'AO')
+        for lod in lods:
+            lod.hide_render = False
+        ao = np.array(im.pixels[:], dtype=np.float32).reshape(h, w, 4)[..., 0]
+        bpy.data.images.remove(im)
+        sc.cycles.samples = 1
+    if 'orm' in mapas and (ao is not None or not isinstance(rug, float) or not isinstance(met, float)):
+        orm = imagen(f'{nombre}_orm')
+        px = np.ones((h, w, 4), dtype=np.float32)
+        px[..., 0] = 1.0 if ao is None else ao
+        px[..., 1] = rug
+        px[..., 2] = met
+        orm.pixels[:] = px.ravel()
+        orm.pack()
+    fuerza = b.inputs['Emission Strength']
+    if 'orm' in mapas and (fuerza.is_linked or fuerza.default_value > 0) and (
+            b.inputs['Emission Color'].is_linked or any(b.inputs['Emission Color'].default_value[:3])):
+        emision = imagen(f'{nombre}_emision', datos=False)
+        hornear(mesh, m, emision, 'EMIT')
+        emision.pack()
+    for i, lod in enumerate(lods):
+        lm = bpy.data.materials.new(f'{nombre}_LOD{i}')
+        lm.use_nodes = True
+        lm.use_backface_culling = m.use_backface_culling   # dos caras como el original: con una, donde se ve el
+        # interior (la fila de revés en magenta) quedaría un agujero
+        lt = lm.node_tree
+        lb = next(n for n in lt.nodes if n.type == 'BSDF_PRINCIPLED')
+        tb = lt.nodes.new('ShaderNodeTexImage'); tb.image = base
+        lt.links.new(tb.outputs['Color'], lb.inputs['Base Color'])
+        if orm:
+            to = lt.nodes.new('ShaderNodeTexImage'); to.image = orm
+            sep = lt.nodes.new('ShaderNodeSeparateColor')
+            lt.links.new(to.outputs['Color'], sep.inputs['Color'])
+            lt.links.new(sep.outputs['Green'], lb.inputs['Roughness'])
+            lt.links.new(sep.outputs['Blue'], lb.inputs['Metallic'])
+            if ao is not None:
+                g = lt.nodes.new('ShaderNodeGroup'); g.node_tree = _grupo_gltf()
+                lt.links.new(sep.outputs['Red'], g.inputs['Occlusion'])
+        else:
+            lb.inputs['Roughness'].default_value = rug if isinstance(rug, float) else float(rug.mean())
+            lb.inputs['Metallic'].default_value = met if isinstance(met, float) else float(met.mean())
+        if emision:
+            te = lt.nodes.new('ShaderNodeTexImage'); te.image = emision
+            lt.links.new(te.outputs['Color'], lb.inputs['Emission Color'])
+            lb.inputs['Emission Strength'].default_value = 1.0
+        lod.data.materials.clear()
+        lod.data.materials.append(lm)
+        if 'normal' in mapas:
+            nm = imagen(f'{nombre}_LOD{i}_normal', k=i)   # cada LOD, la mitad (se ve de más lejos)
+            if len(lod.data.polygons) < len(mesh.data.polygons):
+                hornear(lod, lm, nm, 'NORMAL', desde=[mesh], use_selected_to_active=True,
+                        cage_extrusion=0.01 * ALTURA, max_ray_distance=0.04 * ALTURA)
+                nm.pack()
+                tn = lt.nodes.new('ShaderNodeTexImage'); tn.image = nm
+                mapa = lt.nodes.new('ShaderNodeNormalMap')
+                lt.links.new(tn.outputs['Color'], mapa.inputs['Color'])
+                lt.links.new(mapa.outputs['Normal'], lb.inputs['Normal'])
+            else:   # el LOD es la malla entera: no hay relieve que devolver
+                bpy.data.images.remove(nm)
+    if arm:
+        arm.data.pose_position = 'POSE'
+    hechos = [x for x, si in (('orm', orm), ('ao', ao is not None), ('emision', emision), ('normal', 'normal' in mapas))
+              if si]
+    print('[blender] tiempo real: mapas', ', '.join(hechos))
+    return hechos
 
 
 def exportar_tiempo_real(mesh, arm=None):
@@ -1001,6 +1156,7 @@ def exportar_tiempo_real(mesh, arm=None):
                 bpy.ops.object.modifier_move_to_index(modifier='decimar', index=0)   # antes del Armature
                 bpy.ops.object.modifier_apply(modifier='decimar')
         lods.append(lod)
+    mapas = hornear_mapas(mesh, lods, arm, cfg['mapas']) if cfg.get('mapas') else []
 
     if arm:
         if not CUADRUPEDO and cfg['huesos'] != 'crisol':
@@ -1022,7 +1178,7 @@ def exportar_tiempo_real(mesh, arm=None):
     lods[0].name = lods[0].data.name = f'{nombre}_LOD0'
     exportar(f'{nombre}_lods.glb', lods)
     with open(os.path.join(d, 'lods.json'), 'w') as f:
-        json.dump({'original': {'caras': caras, 'vertices': len(mesh.data.vertices)}, 'textura_px': lado,
+        json.dump({'original': {'caras': caras, 'vertices': len(mesh.data.vertices)}, 'textura_px': lado, 'mapas': mapas,
                    'archivos': {f'{nombre}.glb': 'LOD0 solo (Godot)', f'{nombre}_lods.glb': 'todos los LOD'},
                    **({'huesos': 'cuadrupedo' if CUADRUPEDO else cfg['huesos']} if arm else {}),
                    'lods': [{'nombre': o.name, 'caras': len(o.data.polygons), 'vertices': len(o.data.vertices)}

@@ -841,7 +841,14 @@ renders the side-view frames and the portrait. All animations are **in place** (
    baked). The rest pose is an A-pose: if Unity asks, *Enforce T-Pose* in the Avatar configuration. Quadrupeds keep
    their names (there is no standard). No finger or face bones.
 
-   `lods.json` lists the faces and vertices of each LOD. Change it with
+   **Materials**: glTF only carries images, so whatever the style builds with nodes in Blender is baked (Cycles on
+   the CPU, without using the GPU) so the 3D looks like the sprites: a **normal map** per LOD with the full mesh's
+   relief (what the Decimate took away; each LOD at half the size), an **ORM** with roughness and metal when they are
+   not uniform (`render.metal_gris`, `oscuro_brillante`) and the **emission** if the style uses it
+   (`render.emisivo`). With `"mapas": ["normal", "orm", "ao"]` it adds **ambient occlusion** (R channel of the ORM,
+   ~20 s more); `[]` keeps only the base color.
+
+   `lods.json` lists the faces and vertices of each LOD and which maps were made. Change it with
    `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096, "huesos": "godot"}` (faces of each LOD, the
    finest first) and turn it off with `"tiempo_real": false`. The lowest LOD may show texture seams (mouth, edges): it is meant to be seen
    from afar.
@@ -1045,7 +1052,7 @@ The most used keys: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla.mot
 | `retrato.ancho_px` | (512) portrait width (height = 1.25 × width) |
 | `retrato.fuente` | (`"imagen"`) crop of `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (optional) see [Iso](#iso-pipelinepy-iso) |
-| `tiempo_real` | (optional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: faces of each LOD in `trabajo/tiempo_real/` and maximum texture size; `huesos`: `"mixamo"` (default), `"godot"` or `"crisol"`; `false` = don't export them (see 3b) |
+| `tiempo_real` | (optional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: faces of each LOD in `trabajo/tiempo_real/` and maximum texture size; `huesos`: `"mixamo"` (default), `"godot"` or `"crisol"`; `mapas`: `["normal", "orm"]` (default), `"ao"` adds occlusion; `false` = don't export them (see 3b) |
 
 </details>
 
@@ -1162,7 +1169,7 @@ crisol blender barrel && crisol sprites barrel && crisol godot barrel
   `<n>_iso.tscn` (`StaticBody2D` with `objeto_iso.gd`: `direccion` changes the cell and the footprint as a
   `CollisionPolygon2D`, also in the editor). `colision: false` omits them.
 - For a 3D game, `blender` leaves in `trabajo/tiempo_real/` the mesh reduced to 10 k, 5 k and 2 k triangles,
-  centered and resting on the floor, with the texture at 2048 px: `<n>.glb` (LOD0 only, for Godot) and `<n>_lods.glb`
+  centered and resting on the floor, with the texture at 2048 px and the baked maps: `<n>.glb` (LOD0 only, for Godot) and `<n>_lods.glb`
   (all three LODs, for Unity and Unreal), like for characters (step 3b). `trabajo/malla/modelo.glb` is the full mesh.
 
 **Vegetation**: loose little leaves give shells full of holes (at 512 each leaf is less than a voxel). Ask for smooth
