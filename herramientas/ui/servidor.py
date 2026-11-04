@@ -181,7 +181,7 @@ YA_COMPRIMIDOS = ('.png', '.gif', '.glb', '.jpg', '.webp')
 
 # qué paso deja cada grupo del visor (la UI les pone su número de la cadena); en vehículos, `blender` arma el 3D y la
 # revisión
-PASO_VISUAL = {'animacion': 'sprites', '3d': 'malla', 'animado': 'blender', 'iso': 'iso', 'retrato': 'sprites', 'revision': 'revisar',
+PASO_VISUAL = {'animacion': 'sprites', '3d': 'malla', 'animado': 'blender', 'juego3d': 'blender', 'iso': 'iso', 'retrato': 'sprites', 'revision': 'revisar',
                'hoja': 'sprites', 'guia': 'guia', 'tarjeta': 'blender', 'objeto': 'sprites', 'comparar': 'malla',
                'tema': 'tema', 'repetibles': 'tema', 'malla': 'malla', 'vistas': 'vistas', 'imagen': 'imagen'}
 
@@ -204,6 +204,7 @@ def visuales(pdir, pj, nombre, tipo):
         if os.path.isfile(os.path.join(pdir, t, 'animado.json')):
             grupo('animado', f'{t}/animado.glb')
         grupo('3d', f'{t}/malla/modelo.glb')
+        grupo('juego3d', f'{t}/tiempo_real/{nombre}_lods.glb')
         grupo('iso', 'preview_iso.gif')
         grupo('retrato', f'{gd}/{nombre}_retrato.png', f'{gd}/{nombre}_frente.png')
         grupo('revision', f'{t}/revision.png', f'{t}/revision_cerca.png')
@@ -215,6 +216,7 @@ def visuales(pdir, pj, nombre, tipo):
         grupo('revision', f'{t}/revision.png')
     elif tipo == 'objeto':
         grupo('3d', f'{t}/malla/modelo.glb')
+        grupo('juego3d', f'{t}/tiempo_real/{nombre}_lods.glb')
         grupo('objeto', 'preview.png', *sorted(rel(pdir, r) for r in glob.glob(os.path.join(pdir, t, 'render', 'iso_*.png'))),
               f'{t}/render/lateral.png')
         grupo('comparar', f'{t}/candidatos.png')
@@ -227,6 +229,19 @@ def visuales(pdir, pj, nombre, tipo):
         grupo('vistas', f'{t}/imagen/vistas.png')
         grupo('imagen', rel(pdir, est.imagen_elegida(pdir, pj)), 'referencia.png')
     return g
+
+
+def tiempo_real(pdir, nombre):
+    """trabajo/tiempo_real/lods.json para el visor «Juego 3D» y Ajustes: los LOD (nombre, caras, vértices), los mapas
+    horneados, el lado de la textura, los huesos y el peso de cada archivo. None sin el paso hecho."""
+    d = os.path.join(pdir, 'trabajo', 'tiempo_real')
+    r = os.path.join(d, 'lods.json')
+    if not os.path.exists(r):
+        return None
+    info = op.leer(r)
+    info['pesos'] = {a: os.path.getsize(os.path.join(d, a)) for a in info.get('archivos', {})
+                     if os.path.exists(os.path.join(d, a))}
+    return info
 
 
 def animado(pdir):
@@ -429,6 +444,7 @@ def detalle_asset(n):
             'pasos': e['pasos'], 'decidir': e['decidir'], 'visuales': visuales(pdir, pj, n, e['tipo']),
             'iso': iso_meta(pdir, n) if e['tipo'] == 'personaje' else None,
             'animado': animado(pdir) if e['tipo'] == 'personaje' else None,
+            'tiempo_real': tiempo_real(pdir, n) if e['tipo'] in ('personaje', 'objeto') else None,
             'elecciones': elecciones(pdir, pj, e['tipo']), 'licencias': licencias, 'logs': logs,
             'mallas_hechas': mallas_hechas(pdir) if e['tipo'] != 'escenario' else {},
             # para el tamaño de los sprites en Ajustes: lo que pone el estilo cuando el json deja null

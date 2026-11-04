@@ -12,7 +12,7 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   colapso, que conserva UV y pesos) a 20 k, 10 k y 5 k triángulos en personajes (con el rig y las animaciones) y a
   10 k, 5 k y 2 k en objetos, con la textura a 2048 px: `<n>.glb` (solo el LOD0, para Godot, que arma sus LOD) y
   `<n>_lods.glb` (un esqueleto con las mallas `<n>_LOD0..2`, para Unity y Unreal), más `lods.json`. Se ajusta con
-  el bloque `tiempo_real` del json (`false` lo apaga). En `crisol ui`, Exportar > Tiempo real. Los huesos de los
+  el bloque `tiempo_real` del json (`false` lo apaga). En `crisol ui`, Resultado > Juego 3D (un LOD por vez, en alambre si se pide), Ajustes > Juego 3D y Exportar > Juego 3D. Los huesos de los
   humanoides salen con los nombres de Mixamo (Unity Humanoid, Unreal, mapeo automático de Godot) o, con
   `tiempo_real.huesos: "godot"`, los de `SkeletonProfileHumanoid`; sin los huesos auxiliares del IK. Materiales
   horneados (Cycles en CPU): mapa de normales por LOD con el relieve de la malla entera, ORM con la rugosidad y el

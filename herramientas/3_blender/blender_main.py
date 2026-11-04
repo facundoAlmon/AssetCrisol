@@ -1131,7 +1131,8 @@ def exportar_tiempo_real(mesh, arm=None):
     cfg = PJ.get('tiempo_real', {})
     if cfg is False:
         return
-    cfg = dict(TIEMPO_REAL['personaje' if arm else 'objeto'], **(cfg or {}))
+    # null = el valor por defecto (así lo guarda Ajustes > Juego 3D al volver a «por defecto»)
+    cfg = dict(TIEMPO_REAL['personaje' if arm else 'objeto'], **{k: v for k, v in (cfg or {}).items() if v is not None})
     d = os.path.join(TRABAJO, 'tiempo_real'); os.makedirs(d, exist_ok=True)
     for f in os.listdir(d):   # lo de una corrida anterior
         os.remove(os.path.join(d, f))

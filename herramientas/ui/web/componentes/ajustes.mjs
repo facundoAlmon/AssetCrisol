@@ -72,6 +72,28 @@ function campos(d, estilos, animaciones) {
         opciones: [['', t('aj.defecto') + ' (3×)'], ...SUPER] },
       { g: 'sprites', clave: 'resolucion', tipo: 'resolucion' })
   }
+  // el modelo para un juego 3D (trabajo/tiempo_real/, paso blender): tiempo_real false lo apaga
+  const cuadrupedo = leer(j, 'modelo.esqueleto') === 'cuadrupedo'
+  lista.push({ g: 'juego3d', clave: 'tiempo_real', tipo: 'juego3d_activo', etiqueta: 'aj.j3d_activo', ayuda: 'aj.j3d_activo_ayuda' })
+  if (j.tiempo_real !== false) {
+    const lods = d.tipo === 'personaje'
+      ? { alta: [40000, 20000, 10000], liviana: [10000, 5000, 2000] }
+      : { alta: [20000, 10000, 4000], liviana: [5000, 2500, 1000] }
+    lista.push(
+      { g: 'juego3d', clave: 'tiempo_real.lods', tipo: 'select', etiqueta: 'aj.j3d_calidad', ayuda: 'aj.j3d_calidad_ayuda',
+        valores: lods, opciones: [['', t('aj.j3d_media', { c: d.tipo === 'personaje' ? '20k/10k/5k' : '10k/5k/2k' })],
+          ['alta', t('aj.j3d_alta', { c: lods.alta.map(x => x / 1000 + 'k').join('/') })],
+          ['liviana', t('aj.j3d_liviana', { c: lods.liviana.map(x => x / 1000 + 'k').join('/') })]] },
+      { g: 'juego3d', clave: 'tiempo_real.textura_px', tipo: 'select', numerico: true, etiqueta: 'aj.j3d_textura',
+        opciones: [['', t('aj.defecto') + ' (2048 px)'], [1024, '1024 px'], [4096, '4096 px']] },
+      { g: 'juego3d', clave: 'tiempo_real.mapas', tipo: 'select', etiqueta: 'aj.j3d_mapas', ayuda: 'aj.j3d_mapas_ayuda',
+        valores: { ao: ['normal', 'orm', 'ao'], color: [] },
+        opciones: [['', t('aj.j3d_mapas_defecto')], ['ao', t('aj.j3d_mapas_ao')], ['color', t('aj.j3d_mapas_color')]] })
+    if (d.tipo === 'personaje' && !cuadrupedo) {
+      lista.push({ g: 'juego3d', clave: 'tiempo_real.huesos', tipo: 'select', etiqueta: 'aj.j3d_huesos', ayuda: 'aj.j3d_huesos_ayuda',
+        opciones: [['', t('aj.defecto') + ' (Mixamo)'], ['godot', 'Godot (SkeletonProfileHumanoid)'], ['crisol', 'AssetCrisol']] })
+    }
+  }
   return lista
 }
 
@@ -93,6 +115,10 @@ function Campo({ c, valor, cambiar }) {
   const id = 'aj-' + c.clave.replaceAll('.', '-')
   if (c.tipo === 'bool') {
     return html`<label class="casilla"><input type="checkbox" checked=${!!valor} onChange=${e => cambiar(e.target.checked)} />${etiqueta}</label>`
+  }
+  if (c.tipo === 'juego3d_activo') {   // tiempo_real: false = apagado; prenderlo deja lo que tenía (o el por defecto)
+    return html`<div class="campo"><label class="casilla"><input type="checkbox" checked=${valor !== false}
+      onChange=${e => cambiar(e.target.checked ? (c.previo && typeof c.previo === 'object' ? c.previo : {}) : false)} />${etiqueta}</label>${ayuda}</div>`
   }
   if (c.tipo === 'animaciones') {
     const marcadas = new Set(valor || [])
@@ -121,6 +147,10 @@ function Campo({ c, valor, cambiar }) {
   let control
   if (c.tipo === 'area') {
     control = html`<textarea class="entrada" id=${id} lang=${c.ingles ? 'en' : null} value=${valor ?? ''} onInput=${e => cambiar(e.target.value || null)} />`
+  } else if (c.tipo === 'select' && c.valores) {   // opciones con nombre para valores que no son texto (listas)
+    const clave = Object.keys(c.valores).find(k => JSON.stringify(c.valores[k]) === JSON.stringify(valor)) ?? ''
+    control = html`<select class="entrada" id=${id} value=${clave} onChange=${e => cambiar(e.target.value === '' ? null : c.valores[e.target.value])}>
+      ${c.opciones.map(([v, n]) => html`<option value=${v}>${n}</option>`)}</select>`
   } else if (c.tipo === 'select') {
     control = html`<select class="entrada" id=${id} value=${valor ?? ''} onChange=${e => cambiar(e.target.value === '' ? null : c.numerico ? Number(e.target.value) : e.target.value)}>
       ${c.opciones.map(([v, n]) => html`<option value=${v}>${n}</option>`)}</select>`
@@ -239,7 +269,9 @@ export function Ajustes({ d, recargar }) {
   useEffect(() => setCambios({}), [d])
   if (avanzado) return html`<${Avanzado} d=${d} recargar=${recargar} volver=${() => setAvanzado(false)} />`
   if (!cat) return html`<${Cargando} />`
-  const lista = campos(d, cat.estilos, cat.animaciones)
+  // Juego 3D: los campos según la casilla de ahora (también sin guardar)
+  const vista = 'tiempo_real' in cambios ? { ...d, json: { ...d.json, tiempo_real: cambios.tiempo_real } } : d
+  const lista = campos(vista, cat.estilos, cat.animaciones)
   const grupos = [...new Set(lista.map(c => c.g))]
   const valor = c => (c.clave in cambios ? cambios[c.clave] : leer(d.json, c.clave))
   const sucio = Object.keys(cambios).length > 0
@@ -265,7 +297,10 @@ export function Ajustes({ d, recargar }) {
               setCambios(prev => ({ ...Object.fromEntries(Object.entries(prev).filter(([k]) => !CLAVES_CANDIDATOS.includes(k))), ...patch }))
               setErrorCand(error)
             }} />`
-          : html`<${Campo} c=${c} valor=${valor(c)} cambiar=${v => setCambios({ ...cambios, [c.clave]: v })} />`}</div>`)}</div>
+          : html`<${Campo} c=${c.tipo === 'juego3d_activo' ? { ...c, previo: d.json.tiempo_real } : c} valor=${valor(c)} cambiar=${v => setCambios(
+              c.tipo === 'juego3d_activo'   // apagado: las subclaves no van (tiempo_real deja de ser un bloque)
+                ? { ...Object.fromEntries(Object.entries(cambios).filter(([k]) => !k.startsWith('tiempo_real.'))), [c.clave]: v }
+                : { ...cambios, [c.clave]: v })} />`}</div>`)}</div>
       ${g === 'animaciones' && html`<${Metodos} d=${d} />`}
     <//></section>`)}
     <div class="barra-guardar">

@@ -38,13 +38,13 @@ export default {
     readme: '3a-joint-guide-crisol-guia',
   },
   blender: {
-    hace: 'In Blender: gives the mesh a skeleton, works out how much each bone moves each part (weights), builds every animation and renders its side-view frames. It also leaves the animated 3D character (trabajo/animado.glb) and, for a 3D game, reduced in 3 levels of detail (trabajo/tiempo_real/, in Export > Real time). Seconds to a minute.',
+    hace: 'In Blender: gives the mesh a skeleton, works out how much each bone moves each part (weights), builds every animation and renders its side-view frames. It also leaves the animated 3D character (trabajo/animado.glb) and, for a 3D game, reduced in 3 levels of detail (trabajo/tiempo_real/, in Export > 3D game). Seconds to a minute.',
     mirar: 'The animations in "Animated 3D" (orbiting it, in full screen or frame by frame with the bar) and, after "Sprite sheet", from the side: elbows and knees bending right, nothing stretching oddly, the face looking ahead.',
     mal: 'Face looking up or down: Settings > Model > Head up (negative lifts the face). "Clay" elbows, dragged pieces or arms fused to the body: see the weights section of the README. Wrong joints break everything else: check the guide first.',
     readme: '3b-blender-crisol-blender',
   },
   blender_objeto: {
-    hace: 'In Blender: renders the prop in the 8 isometric directions and from the side, with the chosen light and style. It also leaves the mesh reduced in 3 levels of detail for a 3D game (trabajo/tiempo_real/, in Export > Real time).',
+    hace: 'In Blender: renders the prop in the 8 isometric directions and from the side, with the chosen light and style. It also leaves the mesh reduced in 3 levels of detail for a 3D game (trabajo/tiempo_real/, in Export > 3D game).',
     mirar: 'The prop upright and whole in every view.',
     mal: 'If it is turned, Settings > Model > Rotation. Missing parts or holes come from the mesh: try another seed.',
     readme: 'props',

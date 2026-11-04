@@ -360,16 +360,20 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   instalado en un juego sigue con el nombre viejo. En la terminal: `crisol deshacer <n> --paso <p> [--ver]` y
   `crisol renombrar <n> --nuevo <m>`.
 - **Exportar** (pestaña Archivos y logs): marcar qué bajar (la carpeta de Godot, las hojas de costado e iso, el
-  retrato, las anclas, el modelo 3D, las vistas previas o los archivos de origen) y bajarlo en un zip, también desde
+  retrato, las anclas, el modelo 3D, el de juego 3D, las vistas previas o los archivos de origen) y bajarlo en un zip, también desde
   otra PC o el celular.
 - **Ajustes** sin json: estilo, descripción, seeds, altura, cabeza, animaciones del iso y método de cada una
   (procedural o Kimodo), y el tamaño de los sprites (alto en pantalla, baldosa iso y calidad de cada hoja, con el
-  tamaño que sale a la vista). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
+  tamaño que sale a la vista), y el **Juego 3D** (prenderlo o apagarlo, calidad de los LOD, textura, mapas y nombres
+  de los huesos). El json completo queda como modo avanzado (con los cambios a la vista antes de guardar).
 - **3D animado** (Resultado, personajes): el personaje con su rig, girando con el mouse o el dedo, en la animación
   que se elija y al ritmo de las hojas (los cuadros de los sprites a su fps, interpolados), con una barra para ir a
   un cuadro. Sale del paso Rig y animaciones (`trabajo/animado.glb`). En todos los visores 3D: dos dedos (o el clic
   derecho) mueven la cámara, doble toque o doble clic enfoca el punto tocado (la cara, un pie) y hay pantalla
   completa.
+- **Juego 3D** (Resultado, personajes y objetos): el modelo reducido de `trabajo/tiempo_real/`, un LOD por vez con sus
+  caras y vértices, en alambre si se pide («Ver las caras»), animado en personajes, con los mapas, la textura, los
+  huesos y el peso de cada archivo. En Resultado > Revisión, la hoja de revisión y la de cerca, con su nombre.
 - **Editor de articulaciones** (Resultado > Guía > Editar articulaciones): los puntos del esqueleto sobre los
   renders de frente y de costado, para arrastrarlos (o moverlos con las flechas). De frente, lo de un lado se copia al
   otro y el polo de la rodilla la sigue. Guardar escribe `modelo.articulaciones` (las de antes quedan en

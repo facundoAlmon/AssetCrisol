@@ -12,10 +12,10 @@ FONDO = (120, 120, 120, 255)
 ALTO = 260
 
 
-def _fuente():
+def _fuente(tam=16):
     for f in ('DejaVuSans.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'):
         try:
-            return ImageFont.truetype(f, 16)
+            return ImageFont.truetype(f, tam)
         except OSError:
             pass
     return ImageFont.load_default()
@@ -44,14 +44,16 @@ def _recorte(cel, desde, hasta):
     return cel.crop((max(0, bb[0] - 8), bb[1] + int(h * desde), min(cel.width, bb[2] + 8), bb[1] + int(h * hasta)))
 
 
-def _fila(titulo, imgs, alto=ALTO):
+def _fila(titulo, imgs, alto=ALTO, letra=16):
     imgs = [i.resize((max(1, int(i.width * alto / i.height)), alto)) for i in imgs if i.height]
-    ancho = max(400, sum(i.width for i in imgs))
-    fila = Image.new('RGBA', (ancho, alto + 26), FONDO)
-    ImageDraw.Draw(fila).text((6, 4), titulo, fill=(255, 255, 255, 255), font=_fuente())
+    fuente = _fuente(letra)
+    ancho = max(400, sum(i.width for i in imgs), int(fuente.getlength(titulo)) + 12)
+    arriba = letra + 10
+    fila = Image.new('RGBA', (ancho, alto + arriba), FONDO)
+    ImageDraw.Draw(fila).text((6, 4), titulo, fill=(255, 255, 255, 255), font=fuente)
     x = 0
     for i in imgs:
-        fila.alpha_composite(i, (x, 26))
+        fila.alpha_composite(i, (x, arriba))
         x += i.width
     return fila
 
@@ -160,7 +162,7 @@ def revisar_cerca(pdir):
         poses = ' | '.join(dict.fromkeys(t['pose'] for t in de_zona))
         filas.append(_fila(f"{zona} ({poses}): {MIRAR_CERCA.get(zona, '')}; magenta {peor:.1f} %"
                            + ('  << REVISAR' if peor > UMBRAL_REVES else ''),
-                           [Image.open(os.path.join(d, t['archivo'])).convert('RGBA') for t in de_zona], 300))
+                           [Image.open(os.path.join(d, t['archivo'])).convert('RGBA') for t in de_zona], 300, letra=28))
     ancho = max(f.width for f in filas)
     img = Image.new('RGBA', (ancho, sum(f.height for f in filas)), FONDO)
     y = 0

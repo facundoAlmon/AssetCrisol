@@ -3,6 +3,8 @@
 // mouse o el dedo, encuadre por la caja del modelo. Al desmontar libera geometrías, texturas y el contexto WebGL.
 // Con `animaciones` (el personaje con rig, trabajo/animado.glb) reproduce la elegida al ritmo de los sprites, con una
 // barra para ir a un cuadro. Doble clic o doble toque enfoca el punto tocado; pantalla completa con el botón.
+// Con `malla` muestra solo las mallas cuyo nombre termina así (un LOD de tiempo_real/<n>_lods.glb); con `alambre`, las
+// aristas (para ver cuántas caras quedaron).
 import { html, useState, useEffect, useRef, t, Icono } from '../comunes.mjs'
 
 let three = null   // los módulos, una sola vez
@@ -48,7 +50,7 @@ function liberar(obj) {
   })
 }
 
-export function Visor3D({ url, titulo, alto, animaciones }) {
+export function Visor3D({ url, titulo, alto, animaciones, malla, alambre }) {
   const caja = useRef(null)
   const api = useRef(null)   // {reiniciar, girar(bool)}
   const [estado, setEstado] = useState('cargando')   // cargando | listo | error
@@ -163,6 +165,14 @@ export function Visor3D({ url, titulo, alto, animaciones }) {
           controles.update()
         },
         girar: si => { controles.autoRotate = si },
+        mostrar: (sufijo, aristas) => {
+          if (!modelo) return
+          modelo.traverse(o => {
+            if (!o.isMesh) return
+            o.visible = !sufijo || o.name.endsWith(sufijo)
+            for (const m of [].concat(o.material || [])) m.wireframe = !!aristas
+          })
+        },
         medir,
         animar: nombreClip => {
           if (!mixer) return
@@ -216,6 +226,7 @@ export function Visor3D({ url, titulo, alto, animaciones }) {
   }, [url])
 
   useEffect(() => { api.current?.girar(girar && !quieto()) }, [girar, estado])
+  useEffect(() => { if (estado === 'listo') api.current?.mostrar(malla, alambre) }, [malla, alambre, estado])
   useEffect(() => {   // la animación elegida desde el principio; la pausa la deja donde está
     const a = animaciones?.[anim]
     Object.assign(reproduccion.current, { a, s: 0, x: 0 })

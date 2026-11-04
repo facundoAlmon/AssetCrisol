@@ -137,6 +137,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   Los candidatos de malla en *Te toca elegir* son tarjetas (`DecisionMalla` de `asset.mjs`, datos de
   `servidor.opcion_malla`): vistas de `trabajo/comparar/<c>/<vista>.png` (las deja `pipeline.comparar_candidatos`) o,
   en vehículos, `tarjeta_<c>.png`/`revision_<c>_<vista>.png`.
+  Juego 3D: `servidor.tiempo_real` (lods.json + pesos) → `Juego3D` de `asset.mjs` (Visor3D con `malla`=`_LOD<i>` y
+  `alambre`) y la sección `juego3d` de `ajustes.mjs` (`tiempo_real: false` lo apaga; las claves en null = por defecto).
   `componentes/articulaciones.mjs` es el editor de articulaciones (sobre `trabajo/guia/{frente,costado}.png` con la
   cámara de `guia.json`; `servidor.guardar_articulaciones` escribe `modelo.articulaciones` + `_articulaciones_previas`,
   redibuja `guia.png` con `dibujar_guia` y marca `articulaciones.json` con `fuente: "a mano"`).

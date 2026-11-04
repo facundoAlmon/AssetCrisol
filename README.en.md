@@ -372,15 +372,19 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   is already installed in a game keeps the old name. From the terminal: `crisol deshacer <n> --paso <p> [--ver]` and
   `crisol renombrar <n> --nuevo <m>`.
 - **Export** (Files and logs tab): check what to download (the Godot folder, the side and iso sheets, the portrait,
-  the anchors, the 3D model, the previews or the source files) and get it as a zip, also from another PC or a phone.
+  the anchors, the 3D model, the 3D game one, the previews or the source files) and get it as a zip, also from another PC or a phone.
 - **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
   one (procedural or Kimodo), and the sprite size (on-screen height, iso tile and the quality of each sheet, with the
-  resulting size in view). The full json stays as an advanced mode (with the changes shown before saving).
+  resulting size in view), and the **3D game** (on or off, LOD quality, texture, maps and bone names). The full json
+  stays as an advanced mode (with the changes shown before saving).
 - **Animated 3D** (Result, characters): the character with its rig, orbiting with the mouse or a finger, in the
   chosen animation and at the sheets' pace (the sprite frames at their fps, interpolated), with a bar to go to a
   frame. It comes from the Rig and animations step (`trabajo/animado.glb`). In every 3D viewer: two fingers (or
   right-click) move the camera, double-tap or double-click focuses the touched point (the face, a foot) and there is
   full screen.
+- **3D game** (Result, characters and props): the reduced model from `trabajo/tiempo_real/`, one LOD at a time with
+  its faces and vertices, as wireframe if asked («Show faces»), animated for characters, with the maps, texture,
+  bones and the weight of each file. In Result > Review, the review sheet and the close-up one, with their names.
 - **Joint editor** (Result > Guide > Edit joints): the skeleton points over the front and side renders, to drag
   them (or move them with the arrow keys). In the front view one side is copied to the other and the knee pole follows
   the knee. Saving writes `modelo.articulaciones` (the previous ones stay in `_articulaciones_previas`: **Undo** on

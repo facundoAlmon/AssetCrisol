@@ -3,6 +3,7 @@
 import {
   html, useState, useEffect, useRef, useGlobal, api, t, urlArchivo, urlMini, Icono, Chip, Cargando, Error, verGrande,
   trabajosDe, encolar, nombrePaso, docPaso, ayudaPaso, urlReadme, aviso, duracion, Colada, transcurrido, Plegable,
+  idiomaActual,
 } from '../comunes.mjs'
 import { Ajustes } from './ajustes.mjs'
 import { Visor3D } from './visor3d.mjs'
@@ -347,6 +348,32 @@ export function ReproductorIso({ nombre, meta, version }) {
   </div>`
 }
 
+// el modelo para un juego 3D (trabajo/tiempo_real/<n>_lods.glb): un LOD por vez, con sus caras, en alambre si se pide
+function Juego3D({ d, archivo, version }) {
+  const tr = d.tiempo_real
+  const [k, setK] = useState(0)
+  const [alambre, setAlambre] = useState(false)
+  if (!tr) return null
+  const lod = tr.lods[Math.min(k, tr.lods.length - 1)]
+  const num = x => x.toLocaleString(idiomaActual())
+  const mapas = (tr.mapas || []).map(m => t('j3d.mapa_' + m)).join(', ') || t('j3d.sin_mapas')
+  return html`<div>
+    <div class="controles-3d" style="margin-bottom:10px">
+      <div class="segmentos" role="group" aria-label=${t('j3d.nivel')}>${tr.lods.map((x, i) => html`<button aria-pressed=${i === k}
+        onClick=${() => setK(i)}>LOD${i} <span class="tenue chico">${num(x.caras)}</span></button>`)}</div>
+      <label class="chico"><input type="checkbox" checked=${alambre} onChange=${e => setAlambre(e.target.checked)} /> ${t('j3d.alambre')}</label>
+    </div>
+    <${Visor3D} url=${urlArchivo(d.nombre, archivo, version)} key=${archivo} animaciones=${d.animado} malla=${'_LOD' + k} alambre=${alambre} />
+    <p class="chico" style="margin-top:8px">${t('j3d.resumen', { caras: num(lod.caras), vertices: num(lod.vertices),
+      original: num(tr.original.caras), tex: tr.textura_px || '—', mapas })}${tr.huesos ? ' ' + t('j3d.huesos', { h: t('j3d.huesos_' + tr.huesos) }) : ''}</p>
+    <p class="tenue chico">${t('j3d.archivos', { godot: `${d.nombre}.glb`, lods: `${d.nombre}_lods.glb`,
+      pg: tamano(tr.pesos?.[`${d.nombre}.glb`] || 0), pl: tamano(tr.pesos?.[`${d.nombre}_lods.glb`] || 0) })}</p>
+  </div>`
+}
+
+// nombre de un archivo del visor en la tira de miniaturas (los que tienen uno en i18n: arch.<archivo>)
+const nombreArchivo = x => { const k = 'arch.' + x.split('/').pop(); const s = t(k); return s === k ? null : s }
+
 function Visor({ d }) {
   // en el orden de la cadena (con su número); se abre en el primero de antes: el resultado más terminado
   const porDefecto = [...(d.iso ? [{ id: 'iso_reproductor', paso: 'iso' }] : []), ...d.visuales]
@@ -369,10 +396,12 @@ function Visor({ d }) {
       ? html`<${ReproductorIso} nombre=${d.nombre} meta=${d.iso} version=${v} />`
       : g.id === 'guia' && editando
       ? html`<${EditorArticulaciones} d=${d} cerrar=${() => setEditando(false)} />`
+      : g.id === 'juego3d'
+      ? html`<${Juego3D} d=${d} archivo=${archivo} version=${v} />`
       : g.id === '3d' || g.id === 'animado'
       ? html`<${Visor3D} url=${urlArchivo(d.nombre, archivo, v)} key=${archivo} animaciones=${g.id === 'animado' ? d.animado : null} />
           <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>`
-      : html`<div class=${'visor damero' + (nitido ? ' nitido' : '')}>
+      : html`<div class=${'visor damero' + (nitido ? ' nitido' : '') + (archivo.endsWith('revision_cerca.png') ? ' largo' : '')}>
           <img src=${archivo.endsWith('.gif') ? urlArchivo(d.nombre, archivo, v) : urlMini(d.nombre, archivo, 1400, '', v)} alt=${archivo} />
           <div class="herramientas">
             <button class="icono-boton" style="background:var(--superficie-2)" aria-pressed=${nitido} title=${t('visor.nitido')}
@@ -381,8 +410,8 @@ function Visor({ d }) {
               onClick=${() => verGrande(urlArchivo(d.nombre, archivo, v), archivo)}><${Icono} n="ampliar" titulo=${t('visor.ampliar')} /></button>
           </div>
         </div>
-        ${g.archivos.length > 1 && html`<div class="tira">${g.archivos.map((x, k) => html`<button class="damero" aria-pressed=${k === i}
-          onClick=${() => setI(k)} title=${x}><img src=${urlMini(d.nombre, x, 160, '', v)} alt=${x} /></button>`)}</div>`}
+        ${g.archivos.length > 1 && html`<div class="tira">${g.archivos.map((x, k) => html`<button class=${'damero' + (nombreArchivo(x) ? ' con-nombre' : '')} aria-pressed=${k === i}
+          onClick=${() => setI(k)} title=${x}><img src=${urlMini(d.nombre, x, 160, '', v)} alt=${x} />${nombreArchivo(x) && html`<span>${nombreArchivo(x)}</span>`}</button>`)}</div>`}
         <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>
         ${g.id === 'guia' && html`<button class="boton" style="margin-top:4px" onClick=${() => setEditando(true)}>
           <${Icono} n="editar" />${t('art.editar')}</button>`}`}
