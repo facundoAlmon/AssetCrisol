@@ -139,7 +139,8 @@ Errores vistos armando el manual de la UI (2026-11-04):
       necesitó la exploradora del manual (manos que tocan los bolsillos del pantalón).
 - [ ] El estado de cada paso usa el lenguaje de la terminal ("imagen.elegida = 777 no existe, pero la malla ya está",
       "sin trabajo/imagen/vistas.png"): pasarlo a palabras para quien no conoce el json (los ejemplos lo muestran).
-      En inglés, ese detalle y la descripción de los estilos (en Nuevo) salen en español.
+      En inglés, ese detalle y la descripción de los estilos (en Nuevo) salen en español. Los ejemplos dicen "4 candidata(s)
+      en trabajo/imagen/candidatos.png" aunque ese archivo no viene.
 
 ## 5. Salida 3D y otros motores
 - [x] Personaje como GLB con rig y animaciones (las mismas de los sprites): `trabajo/animado.glb`, también en el visor
@@ -175,7 +176,11 @@ Errores vistos armando el manual de la UI (2026-11-04):
 - [x] Video corto de la UI (`docs/vitrina/img/ui_recorrido.mp4`, en la landing): grabado con el screencast de Chrome.
 - [ ] Video corto con un agente (Claude Code eligiendo con la persona).
 - [ ] Prueba en limpio: instalar desde cero (Docker y nativo) siguiendo solo la doc, una vez una persona y otra un
-      agente sin contexto.
+      agente sin contexto. Hecha la primera parte con un agente (2026-11-04, sobre esta instalación: plan, doctor,
+      ejemplos, demo, manual): 13 hallazgos de docs, arreglados salvo estos:
+  - [ ] `instalar.sh --plan` con todo instalado avisa que el destino no tiene lugar para ~135 GB y que va a completar
+        rutas de config.json, aunque no va a instalar ni cambiar nada; no lista los modelos de DWPose ni rembg.
+  - [ ] Falta la instalación desde cero de verdad (Docker y nativo, en otra PC o un disco vacío).
 - [x] CONTRIBUTING, plantillas de issues (con `crisol doctor --json`), CHANGELOG. Issues en español o inglés.
 - [ ] Tag `v0.1`.
 - [ ] Post de lanzamiento (es/en) y difusión (Reddit, Show HN, itch.io, comunidades de gamedev, Discords de ComfyUI

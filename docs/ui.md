@@ -73,6 +73,8 @@ referencia. En total son unos 15 minutos de la placa y tres decisiones tuyas.
 
 ![Crear un asset](ui/img/es/nuevo.webp)
 
+*(En la captura el nombre es otro porque la exploradora ya existe.)*
+
 **Crear** te lleva a la página del asset.
 
 ### La cadena de pasos
@@ -108,7 +110,7 @@ puede cambiar después con **Cambiar la elección**, en el paso.
 
 ### Mirar las vistas
 
-**Siguiente: Vistas de costado y espalda** dibuja cómo es el personaje de espalda y de costado (un minuto y medio). La
+**Siguiente: Vistas de costado y espalda** dibuja cómo es el personaje de espalda y de costado (un minuto). La
 malla usa esas vistas, así que conviene mirarlas antes de seguir:
 
 ![Las vistas de costado y espalda](ui/img/es/elegir_vistas.webp)
@@ -354,7 +356,7 @@ Detalle por modelo y preguntas frecuentes: [docs/licencias.md](licencias.md). Es
 
 ### Rehacer las capturas
 
-Las imágenes de este manual salen de `tests/capturas_ui.py`, con la UI corriendo sobre una carpeta de datos aparte
+Las imágenes de este manual salen de `tests/capturas_ui.py` (necesita `uv`, que pone Playwright, y `google-chrome`), con la UI corriendo sobre una carpeta de datos aparte
 (nunca la de trabajo): los ejemplos con sus pasos hechos y la exploradora del capítulo 1.
 
 ```bash

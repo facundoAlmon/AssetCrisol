@@ -33,7 +33,7 @@ crisol todo bandido
 - **Gated models** (DINOv3 and FLUX.2 Klein): accept their terms on Hugging Face with your account. `crisol modelos`
   asks for a read token (or pass it with `-e HF_TOKEN=hf_...`); it is stored in the volume.
 - Generated files belong to the owner of the folder mounted at `/datos`.
-- To try it without generating anything: `cp -r ejemplos/* assets/` and `crisol blender cris && crisol sprites cris`.
+- To try it without generating anything, with the repo cloned: `cp -r ejemplos/* assets/` and `crisol blender cris && crisol sprites cris`.
 - A shell inside: `crisol bash`.
 
 ## Publishing (maintainers)

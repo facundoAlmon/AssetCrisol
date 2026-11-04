@@ -22,7 +22,7 @@ Personajes animados · objetos · vehículos · kits de escenario → sprites, `
 
 > [!WARNING]
 > **En construcción.** El código funciona, pero la documentación, los ejemplos y la instalación todavía se están
-> ordenando para la primera versión pública (v0.1 en camino). Puede haber cambios que rompan configuraciones. Qué
+> ordenando para la v0.1 (hoy hay versiones alfa: ver [CHANGELOG.md](CHANGELOG.md)). Puede haber cambios que rompan configuraciones. Qué
 > está hecho y qué falta: [ROADMAP.md](ROADMAP.md).
 
 Todo corre en tu PC: sin APIs pagas ni servicios en la nube. *Crisol* (en inglés, *crucible*) es el recipiente donde
@@ -94,7 +94,7 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 | ComfyUI | reciente (con los nodos nativos de Pixal3D, TRELLIS.2 y BiRefNet) y el CLI `comfy` (`comfy-cli`) en su venv. |
 | TRELLIS.2 | repo de Microsoft con su venv (Python 3.10). |
 | Kimodo | **opcional**: solo para generar clips de movimiento nuevos (los incluidos se leen sin Kimodo). |
-| Godot | **opcional**: 4.x, solo para `godot --instalar` (importación headless). |
+| Godot | **opcional**: 4.4 o más nuevo, para `godot --instalar` (importación headless) y la [demo](demo/README.md). |
 
 **Disco por nivel** (lo que baja e instala `instalar.sh`):
 
@@ -305,14 +305,17 @@ avisos `MISSING`/`UNEXPECTED` del LoRA al cargar son normales.
 `ejemplos/` trae a **Cris**, la protagonista del proyecto (una herrera joven de pelo cobrizo con antiparras), sus
 objetos (`crisol`, `yunque`, `martillo`, `horno`, `caja_herramientas`), su `camioneta` (receta de vehículos), una `caja` y dos escenarios (`bosque` y
 `taller`, el taller de Cris), cada uno con su json. Cris y los objetos traen ya su `trabajo/malla/modelo.glb`, así
-que se puede correr todo **de Blender en adelante** sin ComfyUI ni TRELLIS.2 (solo Blender y Pillow):
+que se puede correr todo **de Blender en adelante** sin generar nada con IA: alcanza con Blender y Pillow (`tema` usa
+también numpy: si el python del sistema no lo tiene, usa el del venv de ComfyUI):
 
 ```bash
 cp -r ejemplos/* <datos_dir>/        # personajes/, objetos/, escenarios/
 crisol blender cris                  # rig + animaciones + frames (≈1 min)
 crisol sprites cris                  # hoja + preview.gif + retrato
 crisol iso cris                      # 8 direcciones isométricas (≈25 s) -> preview_iso.gif
+crisol anclas cris                   # manos y cabeza por cuadro iso (≈3 s)
 crisol revisar cris                  # hoja de control -> trabajo/revision.png
+crisol guia cris                     # la guía de articulaciones (Resultado > Guía y su editor en crisol ui)
 crisol blender yunque && crisol sprites yunque   # -> objetos/yunque/preview.png (igual los otros)
 crisol tema bosque                   # texturas repetibles + colores del tema (trae las texturas elegidas)
 crisol tema taller                   # lo mismo: piso de piedra, camino y pared de ladrillo
@@ -356,8 +359,8 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
   de revisión, las vistas. Los candidatos de malla salen como tarjetas, una por candidato: su render (todas en la
   misma vista: frente, tres cuartos, costados o espalda; en vehículos la tarjeta y las vistas de `blender`), cómo se
   hace (motor, seed, resolución, UltraTex), si ya está generado, **Ver en 3D** dentro de la tarjeta (hasta tres a la
-  vez) y **Elegir esta**. Las mallas de antes de este cambio, sin vistas propias, muestran la hoja
-  `trabajo/candidatos.png` hasta correr **Comparar mallas**.
+  vez) y **Elegir esta**. Si un candidato todavía no tiene sus vistas (mallas hechas con una versión anterior), se
+  muestra la hoja `trabajo/candidatos.png` hasta correr **Comparar mallas**.
 - **Deshacer** un paso (en la cadena, junto a su estado): muestra qué va a borrar y cuánto pesa antes de confirmar;
   no toca el json ni las elecciones (Repintar textura vuelve a la malla del motor y Detectar articulaciones a las de
   antes). **Cambiar el nombre** (el lápiz junto al nombre): carpeta, `godot/` y el `.blend`; lo que ya esté
@@ -493,8 +496,8 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
    Mirar la **cara de cerca** (ver el consejo de arriba).
 5. **Articulaciones** (`crisol articulaciones`): revisar `guia.png` (y `pose_frente.png`, lo que vio DWPose).
    Con muñecos y juguetes DWPose suele no detectar a nadie: ahí acomodarlas a mano (con el editor de `crisol ui` o en
-   el json, ver [3a](#3a-guía-de-articulaciones-pipelinepy-guia)).
-6. **Animación**: los valores por defecto andan; ver [3b](#3b-blender-pipelinepy-blender) si la cara no mira al
+   el json, ver [3a](#3a-guía-de-articulaciones-crisol-guia)).
+6. **Animación**: los valores por defecto andan; ver [3b](#3b-blender-crisol-blender) si la cara no mira al
    frente o los codos doblan raro.
 7. **Revisar** (`crisol revisar`, después de `sprites` + `iso`): `trabajo/revision.png` junta la cabeza de
    costado (idle, caminata, correr), los codos doblados, la caminata iso de frente y de espalda, las poses clave y el
@@ -556,8 +559,8 @@ AssetCrisol/
 ├── pipeline.py               orquestador (python3 del sistema; necesita Pillow)
 ├── config.ejemplo.json       modelo de config.json (no versionado)
 ├── estilos/                  animacion3d.json (base) y los demás (ver Estilos)
-├── plantilla/                personaje.json, objeto.json, vehiculo.json, escenario.json: valores por defecto
-├── ejemplos/                 Cris, caja y bosque, listos para copiar a datos_dir
+├── plantilla/                personaje.json, objeto.json, escenario.json (valores por defecto) y recetas/ por tipo
+├── ejemplos/                 Cris, sus objetos y su camioneta, una caja y dos escenarios, para copiar a datos_dir
 └── herramientas/
     ├── 1_imagen/     generar_imagen.py + recetas de ComfyUI (qwen_edit, flux2_t2i); Z-Image en Python
     ├── 2_malla/      generar_malla_pixal3d.py (ComfyUI), generar_malla_trellis.py (venv TRELLIS.2),
@@ -1058,7 +1061,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `retrato.hombros` | (0.55) cuánto se ve debajo del cuello, relativo al alto de la cabeza |
 | `retrato.ancho_px` | (512) ancho del retrato (alto = 1.25 × ancho) |
 | `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render |
-| `isometrico.*` | (opcional) ver [Iso](#iso-pipelinepy-iso) |
+| `isometrico.*` | (opcional) ver [Iso](#iso-crisol-iso) |
 | `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado máximo de la textura; `huesos`: `"mixamo"` (por defecto), `"godot"` o `"crisol"`; `mapas`: `["normal", "orm"]` (por defecto), `"ao"` suma la oclusión; `false` = no exportarlos (ver 3b) |
 
 </details>
@@ -1268,7 +1271,8 @@ crisol tema bosque                 # -> trabajo/tema/{piso,camino,pared}.png + t
 - **`tema`**: saca la luz de fondo (degradés, viñeta) y guarda el **detalle** en lineal: píxel / promedio × 0,5 (gris
   medio = el color del tema). El juego hace color × detalle × 2 en un shader (piso desde arriba, paredes
   triplanar). `tema.contraste` 0,5, `repeticion_m` 6 (metros por repetición), `px` 512. `tema.colores`: los promedios
-  de cada textura van al tema (`floor_color`, `path_color`, `wall_color`).
+  de cada textura van al tema (`floor_color`, `path_color`, `wall_color`); con `false` no, y el juego pone los suyos
+  (el bosque de ejemplo lo usa así).
 - **Fondo** (`vista: "fondo"`): telón pintado 1344×768, repetible solo a lo ancho. `tema` funde el 40 % de arriba con
   el color del cielo (`background_color`) y el 10 % de abajo con el del suelo (`backdrop_ground`), en color de verdad
   (no es detalle).
@@ -1330,7 +1334,7 @@ En `godot/personajes/<n>/iso/`:
 
 Cámara 30°, `isometrico.baldosa_px` = ancho en pantalla de una baldosa de 1×1 unidad (128 → baldosas de 128×64 como
 las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para colgarle cosas, ver
-[Anclas](#anclas-pipelinepy-anclas).
+[Anclas](#anclas-crisol-anclas).
 
 ### Objetos
 

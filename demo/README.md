@@ -17,7 +17,7 @@ nuevo, con su ruta en `config.json` (`godot`): `--instalar` lo usa para importar
 ```bash
 cd demo
 ./preparar.sh               # ~5 min: blender, sprites e iso de Cris y sus objetos, tema del taller, godot --instalar acá
-godot --path .              # o abrir project.godot en el editor
+godot --path .              # (la ruta de `godot` de tu config.json) o abrir project.godot en el editor
 ```
 
 Si en tu `datos_dir` no están los ejemplos, `preparar.sh` los copia de `ejemplos/` (no pisa los que ya estén).
@@ -37,6 +37,8 @@ Si en tu `datos_dir` no están los ejemplos, `preparar.sh` los copia de `ejemplo
 - `cris.gd` es un `CharacterBody2D` con `cris_iso.tscn` adentro: le pasa a `set_animacion(nombre, velocidad)` la
   animación y la dirección en pantalla, y el visual elige la más cercana de las 8. La sombra la dibuja el visual.
 - 1 unidad = 1 metro y una baldosa de 1×1 mide 128 px de ancho (`baldosa_px` del estilo).
+- Las texturas del tema se leen como imagen (preparar.sh las copia sin pasar por el importador): en el editor y al
+  correrla anda, pero exportar la demo necesitaría importarlas y cargarlas con `load()` (Godot avisa al correrla).
 
 ---
 
@@ -52,7 +54,7 @@ Godot 4.4 or newer, with its path in `config.json` (`godot`): `--instalar` uses 
 ```bash
 cd demo
 ./preparar.sh               # ~5 min: blender, sprites and iso for Cris and her props, the workshop theme, godot --instalar here
-godot --path .              # or open project.godot in the editor
+godot --path .              # (the `godot` path in your config.json) or open project.godot in the editor
 ```
 
 Arrows or WASD to walk (Shift to run), J / K / L to punch / kick / raise arms, Space to jump.

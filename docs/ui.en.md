@@ -75,6 +75,8 @@ About 15 minutes of graphics card time and three decisions from you.
 
 ![Create an asset](ui/img/en/nuevo.webp)
 
+*(The screenshot uses another name because the explorer already exists.)*
+
 **Create** takes you to the asset page.
 
 ### The chain of steps
@@ -109,7 +111,7 @@ changed later with **Change the choice**, in the step.
 
 ### Check the views
 
-**Next: Side and back views** draws the character from the back and the sides (a minute and a half). The mesh uses
+**Next: Side and back views** draws the character from the back and the sides (about a minute). The mesh uses
 those views, so look at them before going on:
 
 ![Side and back views](ui/img/en/elegir_vistas.webp)
@@ -353,7 +355,7 @@ Details per model and FAQ: [docs/licenses.md](licenses.md). It is a guide, not l
 
 ### Rebuilding the screenshots
 
-The images in this manual come from `tests/capturas_ui.py`, with the UI running on a separate data folder (never your
+The images in this manual come from `tests/capturas_ui.py` (it needs `uv`, which brings Playwright, and `google-chrome`), with the UI running on a separate data folder (never your
 working one): the examples with their steps done and the explorer from chapter 1.
 
 ```bash

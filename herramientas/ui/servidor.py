@@ -147,6 +147,10 @@ def grupos_exportar(pdir, pj, nombre, tipo):
         return out
 
     elegida = est.imagen_elegida(pdir, pj) if tipo != 'escenario' else None
+    # la referencia que nombra el json (base_<seed>.png, una foto...), si está en la carpeta del asset
+    ref = (pj.get('imagen') or {}).get('referencia') if tipo != 'escenario' else None
+    ref = os.path.realpath(os.path.join(pdir, ref)) if ref else ''
+    ref = rel(pdir, ref) if ref.startswith(os.path.realpath(pdir) + os.sep) else ''
     if tipo == 'personaje':
         gd = f'godot/personajes/{nombre}'
         g = [('godot', hay('godot/**/*')),
@@ -157,14 +161,14 @@ def grupos_exportar(pdir, pj, nombre, tipo):
              ('modelo', hay(f'{t}/malla/modelo.glb', f'{t}/animado.glb')),
              ('tiempo_real', hay(f'{t}/tiempo_real/*')),
              ('previas', hay('preview.gif', 'preview_iso.gif', f'{t}/revision.png', f'{t}/revision_cerca.png')),
-             ('fuente', hay('personaje.json', 'referencia.png', rel(pdir, elegida) if elegida else ''))]
+             ('fuente', hay('personaje.json', 'referencia.png', ref, rel(pdir, elegida) if elegida else ''))]
     elif tipo in ('objeto', 'vehiculo'):
         g = [('godot', hay('godot/**/*')),
              ('modelo', hay(f'{t}/vehiculo.glb') or hay(f'{t}/malla/modelo.glb')),
              ('tiempo_real', hay(f'{t}/tiempo_real/*')),
              ('tarjeta', hay(f'{t}/tarjeta.png')),
              ('previas', hay('preview.png', f'{t}/revision.png')),
-             ('fuente', hay('objeto.json', 'referencia.png', rel(pdir, elegida) if elegida else ''))]
+             ('fuente', hay('objeto.json', 'referencia.png', ref, rel(pdir, elegida) if elegida else ''))]
     else:
         g = [('tema', hay(f'{t}/tema/*')), ('previas', hay('preview.png')), ('fuente', hay('escenario.json'))]
     out = []

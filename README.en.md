@@ -22,7 +22,7 @@ Animated characters · props · vehicles · scenery kits → sprites, `.glb` fil
 
 > [!WARNING]
 > **Work in progress.** The code works, but docs, examples and installation are still being tidied up for the first
-> public release (v0.1 coming). Configurations may break between versions. What is done and what is next:
+> v0.1 release (alpha versions so far: see [CHANGELOG.md](CHANGELOG.md)). Configurations may break between versions. What is done and what is next:
 > [ROADMAP.md](ROADMAP.md) (Spanish).
 
 > [!NOTE]
@@ -100,7 +100,7 @@ texture) are always made by a person looking at a candidates sheet.
 | ComfyUI | recent (with the native Pixal3D, TRELLIS.2 and BiRefNet nodes) and the `comfy` CLI (`comfy-cli`) in its venv. |
 | TRELLIS.2 | Microsoft's repo with its own venv (Python 3.10). |
 | Kimodo | **optional**: only to generate new motion clips (the bundled ones are read without Kimodo). |
-| Godot | **optional**: 4.x, only for `godot --instalar` (headless import). |
+| Godot | **optional**: 4.4 or newer, for `godot --instalar` (headless import) and the [demo](demo/README.md). |
 
 **Disk per level** (what `instalar.sh` downloads and installs):
 
@@ -314,15 +314,18 @@ the GPU. The `MISSING`/`UNEXPECTED` LoRA warnings on load are normal.
 `ejemplos/` (examples) contains **Cris**, the project's main character (a young blacksmith with copper hair and goggles), her
 props (`crisol` crucible, `yunque` anvil, `martillo` hammer, `horno` furnace, `caja_herramientas` toolbox), her `camioneta` pickup truck (vehicle recipe), a crate
 (`caja`) and two scenery kits (`bosque`, a forest, and `taller`, Cris's workshop), each with its json. Cris and the
-props already include their `trabajo/malla/modelo.glb`, so you can run everything **from Blender onwards** without ComfyUI or TRELLIS.2
-(just Blender and Pillow):
+props already include their `trabajo/malla/modelo.glb`, so you can run everything **from Blender onwards** without
+generating anything with AI: Blender and Pillow are enough (`tema` also uses numpy: if the system python lacks it,
+it uses ComfyUI's venv):
 
 ```bash
 cp -r ejemplos/* <datos_dir>/        # personajes/, objetos/, escenarios/
 crisol blender cris                  # rig + animations + frames (~1 min)
 crisol sprites cris                  # sheet + preview.gif + portrait
 crisol iso cris                      # 8 isometric directions (~25 s) -> preview_iso.gif
+crisol anclas cris                   # hands and head per iso frame (~3 s)
 crisol revisar cris                  # review sheet -> trabajo/revision.png
+crisol guia cris                     # the joint guide (Result > Guide and its editor in crisol ui)
 crisol blender yunque && crisol sprites yunque   # -> objetos/yunque/preview.png (same for the others)
 crisol tema bosque                   # tileable textures + theme colors (the chosen textures are included)
 crisol tema taller                   # same: stone floor, brick path and wall
@@ -367,9 +370,9 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
   the portrait, the review sheet, the views, and the model **in 3D** (rotate and zoom with the mouse or a finger).
   Mesh candidates show up as cards, one per candidate: its render (all in the same view: front, three quarters,
   sides or back; for vehicles the card and the `blender` views), how it is made (engine, seed, resolution, UltraTex),
-  whether it is generated yet, **View in 3D** inside the card (up to three at once) and **Choose this one**. Meshes
-  from before this change, without views of their own, show the `trabajo/candidatos.png` sheet until you run
-  **Compare meshes**.
+  whether it is generated yet, **View in 3D** inside the card (up to three at once) and **Choose this one**. A
+  candidate without its own views yet (meshes made with an older version) shows the `trabajo/candidatos.png` sheet
+  until you run **Compare meshes**.
 - **Undo** a step (in the chain, next to its state): shows what it will delete and how much it weighs before
   confirming; it does not touch the json or the choices (Repaint texture goes back to the engine mesh and Detect
   joints to the previous ones). **Rename** (the pencil next to the name): folder, `godot/` and the `.blend`; whatever
@@ -507,8 +510,8 @@ The template already has these values; this is what to look at and what to chang
    the **face up close** (see the tip above).
 5. **Joints** (`crisol articulaciones`): check `guia.png` (and `pose_frente.png`, what DWPose saw). With dolls
    and toys DWPose often detects nobody: place them by hand (with the `crisol ui` editor or in the json, see
-   [3a](#3a-joint-guide-pipelinepy-guia)).
-6. **Animation**: the defaults work; see [3b](#3b-blender-pipelinepy-blender) if the face does not look forward or
+   [3a](#3a-joint-guide-crisol-guia)).
+6. **Animation**: the defaults work; see [3b](#3b-blender-crisol-blender) if the face does not look forward or
    the elbows bend oddly.
 7. **Review** (`crisol revisar`, after `sprites` + `iso`): `trabajo/revision.png` gathers the head in profile
    (idle, walk, run), bent elbows, the iso walk from the front and from the back, the key poses and the
@@ -574,8 +577,8 @@ AssetCrisol/
 ├── pipeline.py               orchestrator (system python3; needs Pillow)
 ├── config.ejemplo.json       template for config.json (not versioned)
 ├── estilos/                  animacion3d.json (base) and the others (see Styles)
-├── plantilla/                personaje.json, objeto.json, vehiculo.json, escenario.json: defaults
-├── ejemplos/                 Cris, crate and forest, ready to copy into datos_dir
+├── plantilla/                personaje.json, objeto.json, escenario.json (defaults) and recetas/ per kind
+├── ejemplos/                 Cris, her props and pickup, a crate and two scenery kits, to copy into datos_dir
 └── herramientas/
     ├── 1_imagen/     generar_imagen.py + ComfyUI recipes (qwen_edit, flux2_t2i); Z-Image in Python
     ├── 2_malla/      generar_malla_pixal3d.py (ComfyUI), generar_malla_trellis.py (TRELLIS.2 venv),
@@ -1069,7 +1072,7 @@ The most used keys: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla.mot
 | `retrato.hombros` | (0.55) how much shows below the neck, relative to the head's height |
 | `retrato.ancho_px` | (512) portrait width (height = 1.25 × width) |
 | `retrato.fuente` | (`"imagen"`) crop of `sin_fondo.png`; `"modelo"` = render |
-| `isometrico.*` | (optional) see [Iso](#iso-pipelinepy-iso) |
+| `isometrico.*` | (optional) see [Iso](#iso-crisol-iso) |
 | `tiempo_real` | (optional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: faces of each LOD in `trabajo/tiempo_real/` and maximum texture size; `huesos`: `"mixamo"` (default), `"godot"` or `"crisol"`; `mapas`: `["normal", "orm"]` (default), `"ao"` adds occlusion; `false` = don't export them (see 3b) |
 
 </details>
@@ -1283,7 +1286,8 @@ Texture keys: `piso` floor, `camino` path, `pared` wall.
 - **`tema`**: removes the background lighting (gradients, vignette) and stores the **detail** in linear: pixel /
   average × 0.5 (mid gray = the theme color). The game does color × detail × 2 in a shader (floor from above, walls
   triplanar). `tema.contraste` 0.5, `repeticion_m` 6 (meters per repeat), `px` 512. `tema.colores`: each texture's
-  average goes into the theme (`floor_color`, `path_color`, `wall_color`).
+  average goes into the theme (`floor_color`, `path_color`, `wall_color`); with `false` it does not, and the game
+  sets its own (the example forest does this).
 - **Backdrop** (`vista: "fondo"`): a 1344×768 painted backdrop, tileable horizontally only. `tema` blends the top
   40 % into the sky color (`background_color`) and the bottom 10 % into the ground color (`backdrop_ground`), in real
   color (not detail).
@@ -1345,7 +1349,7 @@ In `godot/personajes/<n>/iso/`:
 
 30° camera, `isometrico.baldosa_px` = on-screen width of a 1×1-unit tile (128 → 128×64 tiles like those of an
 isometric `TileMapLayer`; the 1.85 character is ≈145 px tall). To attach things, see
-[Anchors](#anchors-pipelinepy-anclas).
+[Anchors](#anchors-crisol-anclas).
 
 ### Props
 
