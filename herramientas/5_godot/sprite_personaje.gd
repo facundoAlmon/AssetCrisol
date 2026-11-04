@@ -1,6 +1,6 @@
 extends Node2D
 
-# Visual de un personaje generado con generador-personajes (render 3D -> hoja de sprites en grilla).
+# Visual de un personaje generado con AssetCrisol (render 3D -> hoja de sprites en grilla).
 # Mira a la derecha; frames: 0 quieto, 1-8 caminata, 9 despegue, 10 subida, 11 cima, 12 caída, y desde el 13
 # las animaciones agregadas después (ver `animaciones` o <nombre>_meta.json).
 # La hoja viene en superresolución y el Sprite se escala (ver <nombre>_visual.tscn).

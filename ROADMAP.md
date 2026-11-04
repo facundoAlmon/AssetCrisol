@@ -171,7 +171,8 @@ Errores vistos armando el manual de la UI (2026-11-04):
       (Playwright sobre el Chrome instalado; es/en, claro/oscuro, celular).
 - [ ] Docs bilingües: instalación, primer asset, recetas por tipo, referencia de `personaje.json` y estilos,
       problemas conocidos, preguntas sobre licencias.
-- [ ] Demos: proyecto Godot de ejemplo (Cris caminando por el taller iso) y videos cortos con la UI y con un agente.
+- [x] Demo en Godot: `demo/` (Cris caminando por el taller iso entre sus objetos; `preparar.sh` instala los ejemplos).
+- [ ] Videos cortos con la UI y con un agente.
 - [ ] Prueba en limpio: instalar desde cero (Docker y nativo) siguiendo solo la doc, una vez una persona y otra un
       agente sin contexto.
 - [x] CONTRIBUTING, plantillas de issues (con `crisol doctor --json`), CHANGELOG. Issues en español o inglés.

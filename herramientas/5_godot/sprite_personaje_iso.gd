@@ -1,6 +1,6 @@
 extends Node2D
 
-# Visual isométrico (2:1) de un personaje de generador-personajes: AnimatedSprite2D con una animación
+# Visual isométrico (2:1) de un personaje de AssetCrisol: AnimatedSprite2D con una animación
 # por acción y dirección ("walk_se", "idle_n", ...; ver <nombre>_iso_frames.tres). El origen = los pies.
 # La sombra no viene en los sprites: se dibuja acá como una elipse en el piso.
 # API: set_animacion(nombre, direccion) — direccion es un vector en pantalla (p. ej. la velocidad);

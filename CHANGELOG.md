@@ -15,6 +15,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - Landing para GitHub Pages (`docs/index.html`): qué hace, Cris paso a paso (`vitrina.py` arma `proceso_1..5.jpg`),
   qué se puede hacer, la UI y los agentes, requisitos, instalación y licencias, en español e inglés.
 
+- **Demo en Godot** (`demo/`): Cris camina por su taller isométrico entre sus objetos, con el piso y las paredes del tema
+  `taller`; `demo/preparar.sh` instala los ejemplos con `godot --instalar`.
+
 ### Arreglado
 - `crisol ui`: los campos numéricos (altura, seeds, duración y recorte de un clip) se rearmaban a medio escribir y
   "1.65" quedaba 651.

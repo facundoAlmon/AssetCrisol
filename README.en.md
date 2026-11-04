@@ -335,6 +335,9 @@ XL Turbo (CreativeML Open RAIL++-M). The workshop ships its 3 chosen textures, a
 checks what it leaves and, if Godot is configured, instantiates the scenes in an empty project: ~3 min, exits with 1
 if something fails.
 
+**Godot demo**: [`demo/`](demo/README.md) is a Godot 4 project where Cris walks around her workshop among her props.
+`demo/preparar.sh` does the above and installs it there (~5 min); then `godot --path demo`.
+
 `ejemplos/personajes/cris/` also has the demo gifs, made from its iso sprites:
 [`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (the one at the top),
 [`demo_paseo.gif`](ejemplos/personajes/cris/demo_paseo.gif) (walking on an iso floor) and

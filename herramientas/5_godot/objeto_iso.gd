@@ -1,7 +1,7 @@
 @tool
 extends StaticBody2D
 
-# Objeto isométrico de generador-personajes: Sprite2D con una celda por dirección y la huella en el piso
+# Objeto isométrico de AssetCrisol: Sprite2D con una celda por dirección y la huella en el piso
 # como colisión. Cambiar `direccion` (también en el editor) gira el objeto. El origen = centro de la base
 # (apto para y_sort).
 

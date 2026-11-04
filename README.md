@@ -324,6 +324,9 @@ El bosque trae solo las 4 texturas elegidas: el piso con Z-Image Turbo (Apache-2
 `python3 tests/humo.py` hace todo esto solo en una carpeta temporal (sin tocar `datos_dir`), revisa lo que deja y, si
 hay Godot, instancia las escenas en un proyecto vacío: ~3 min, sale con 1 si algo falla.
 
+**Demo en Godot**: [`demo/`](demo/README.md) es un proyecto de Godot 4 donde Cris camina por su taller entre sus
+objetos. `demo/preparar.sh` hace lo de arriba y lo instala ahí (~5 min); después, `godot --path demo`.
+
 En `ejemplos/personajes/cris/` también están los gifs de demo, armados con sus sprites iso:
 [`demo_acciones.gif`](ejemplos/personajes/cris/demo_acciones.gif) (el de arriba),
 [`demo_paseo.gif`](ejemplos/personajes/cris/demo_paseo.gif) (camina por un piso iso) y
