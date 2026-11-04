@@ -928,8 +928,39 @@ DIRECCIONES_ISO = [('e', 90), ('se', 45), ('s', 0), ('sw', -45), ('w', -90), ('n
 
 
 # tiempo_real: caras de cada LOD (el 0 primero) y lado máximo de la textura; personajes y objetos
-TIEMPO_REAL = {'personaje': {'lods': [20000, 10000, 5000], 'textura_px': 2048},
+TIEMPO_REAL = {'personaje': {'lods': [20000, 10000, 5000], 'textura_px': 2048, 'huesos': 'mixamo'},
                'objeto': {'lods': [10000, 5000, 2000], 'textura_px': 2048}}
+
+
+# nombres de huesos para otros motores (tiempo_real.huesos): Mixamo (lo reconocen Unity, Unreal y el mapeo automático
+# de Godot) o los de SkeletonProfileHumanoid de Godot. Lados: .L = izquierda del personaje (+X)
+HUESOS_MOTOR = {
+    'mixamo': {'root': 'Root', 'hips': 'Hips', 'spine': 'Spine', 'chest': 'Spine1', 'neck': 'Neck', 'head': 'Head',
+               'shoulder': '{lado}Shoulder', 'upper_arm': '{lado}Arm', 'forearm': '{lado}ForeArm', 'hand': '{lado}Hand',
+               'thigh': '{lado}UpLeg', 'shin': '{lado}Leg', 'foot': '{lado}Foot'},
+    'godot': {'root': 'Root', 'hips': 'Hips', 'spine': 'Spine', 'chest': 'Chest', 'neck': 'Neck', 'head': 'Head',
+              'shoulder': '{lado}Shoulder', 'upper_arm': '{lado}UpperArm', 'forearm': '{lado}LowerArm',
+              'hand': '{lado}Hand', 'thigh': '{lado}UpperLeg', 'shin': '{lado}LowerLeg', 'foot': '{lado}Foot'},
+}
+
+
+def renombrar_huesos(arm, esquema):
+    """Renombra los huesos del rig humanoide al esquema de HUESOS_MOTOR y corrige las curvas de todas las Actions
+    (Blender solo arregla las de la Action asignada). Los grupos de vértices y las restricciones siguen solos."""
+    tabla = HUESOS_MOTOR[esquema]
+    nuevos = {}
+    for b in arm.data.bones:
+        base, _, lado = b.name.partition('.')
+        if base in tabla:
+            nuevos[b.name] = tabla[base].format(lado={'L': 'Left', 'R': 'Right'}.get(lado, ''))
+    for viejo, nuevo in nuevos.items():
+        arm.data.bones[viejo].name = nuevo
+    for act in bpy.data.actions:
+        for fc in anim._fcurves(act):
+            if fc.data_path.startswith('pose.bones["'):
+                b = fc.data_path.split('"')[1]
+                if b in nuevos:
+                    fc.data_path = fc.data_path.replace(f'["{b}"]', f'["{nuevos[b]}"]', 1)
 
 
 def exportar_tiempo_real(mesh, arm=None):
@@ -937,7 +968,9 @@ def exportar_tiempo_real(mesh, arm=None):
     `tiempo_real.lods`, con la textura a `tiempo_real.textura_px` como mucho; en personajes, con el rig y las
     animaciones de animado.glb. Dos archivos: <n>.glb solo con el LOD0 (Godot arma sus LOD al importar: con las tres
     mallas las dibujaría superpuestas) y <n>_lods.glb con un esqueleto y las mallas <n>_LOD0.._LOD<k> colgadas de él
-    (el nombre que buscan Unity y Unreal para el LOD Group). `tiempo_real: false` lo apaga. Va al final del modo:
+    (el nombre que buscan Unity y Unreal para el LOD Group). Sin los huesos auxiliares del IK (va horneado) y, en
+    humanoides, con los nombres de `tiempo_real.huesos` ("mixamo", "godot" o "crisol" = los del rig). Renombra en
+    el lugar: va después de guardar el .blend. `tiempo_real: false` lo apaga. Va al final del modo:
     achica la imagen en memoria (lo anterior ya se exportó y guardó con la textura entera). lods.json: caras y
     vértices de cada LOD."""
     cfg = PJ.get('tiempo_real', {})
@@ -969,13 +1002,20 @@ def exportar_tiempo_real(mesh, arm=None):
                 bpy.ops.object.modifier_apply(modifier='decimar')
         lods.append(lod)
 
+    if arm:
+        if not CUADRUPEDO and cfg['huesos'] != 'crisol':
+            renombrar_huesos(arm, cfg['huesos'])
+        raiz = next(b for b in arm.data.bones if not b.parent)
+        raiz.use_deform = True   # export_def_bones deja solo los que deforman: la raíz (saltos) va igual
+
     def exportar(archivo, objetos):
         bpy.ops.object.select_all(action='DESELECT')
         for o in objetos + ([arm] if arm else []):
             o.select_set(True)
         bpy.ops.export_scene.gltf(filepath=os.path.join(d, archivo), export_format='GLB', use_selection=True,
                                   **({'export_animation_mode': 'ACTIONS', 'export_force_sampling': True,
-                                      'export_anim_slide_to_zero': True, 'export_optimize_animation_size': True}
+                                      'export_anim_slide_to_zero': True, 'export_optimize_animation_size': True,
+                                      'export_def_bones': True}
                                      if arm else {'export_animations': False}))
     lods[0].name = lods[0].data.name = nombre   # en el de Godot, sin sufijo
     exportar(f'{nombre}.glb', lods[:1])
@@ -984,6 +1024,7 @@ def exportar_tiempo_real(mesh, arm=None):
     with open(os.path.join(d, 'lods.json'), 'w') as f:
         json.dump({'original': {'caras': caras, 'vertices': len(mesh.data.vertices)}, 'textura_px': lado,
                    'archivos': {f'{nombre}.glb': 'LOD0 solo (Godot)', f'{nombre}_lods.glb': 'todos los LOD'},
+                   **({'huesos': 'cuadrupedo' if CUADRUPEDO else cfg['huesos']} if arm else {}),
                    'lods': [{'nombre': o.name, 'caras': len(o.data.polygons), 'vertices': len(o.data.vertices)}
                             for o in lods]}, f, indent=1)
     print('[blender] tiempo real:', ', '.join(f'LOD{i} {len(o.data.polygons)} caras' for i, o in enumerate(lods)))

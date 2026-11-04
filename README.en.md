@@ -830,9 +830,16 @@ renders the side-view frames and the portrait. All animations are **in place** (
      **For Unity, Unreal and others**: the engine draws one or another depending on how much of the screen the
      character takes up (in Unity, a *LOD Group* with one level per mesh; in Unreal, each LOD's *Screen Size*).
 
+   Bones come out with **Mixamo names** (`Hips`, `Spine`, `LeftArm`, `LeftForeArm`, `LeftUpLeg`...), which Unity's
+   *Humanoid*, Unreal's retargeter and Godot's automatic mapping (*Retarget > Bone Map* with
+   `SkeletonProfileHumanoid`) recognize on their own; with `"huesos": "godot"`, that profile's names (`LeftUpperArm`,
+   `LeftLowerArm`...), and with `"crisol"`, the rig's own. The IK helper bones are left out (the animations have it
+   baked). The rest pose is an A-pose: if Unity asks, *Enforce T-Pose* in the Avatar configuration. Quadrupeds keep
+   their names (there is no standard). No finger or face bones.
+
    `lods.json` lists the faces and vertices of each LOD. Change it with
-   `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096}` (faces of each LOD, the finest first) and turn
-   it off with `"tiempo_real": false`. The lowest LOD may show texture seams (mouth, edges): it is meant to be seen
+   `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096, "huesos": "godot"}` (faces of each LOD, the
+   finest first) and turn it off with `"tiempo_real": false`. The lowest LOD may show texture seams (mouth, edges): it is meant to be seen
    from afar.
 
 </details>
@@ -1034,7 +1041,7 @@ The most used keys: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla.mot
 | `retrato.ancho_px` | (512) portrait width (height = 1.25 × width) |
 | `retrato.fuente` | (`"imagen"`) crop of `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (optional) see [Iso](#iso-pipelinepy-iso) |
-| `tiempo_real` | (optional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: faces of each LOD in `trabajo/tiempo_real/` and maximum texture size; `false` = don't export them (see 3b) |
+| `tiempo_real` | (optional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: faces of each LOD in `trabajo/tiempo_real/` and maximum texture size; `huesos`: `"mixamo"` (default), `"godot"` or `"crisol"`; `false` = don't export them (see 3b) |
 
 </details>
 

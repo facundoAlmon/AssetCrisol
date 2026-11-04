@@ -12,7 +12,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   colapso, que conserva UV y pesos) a 20 k, 10 k y 5 k triángulos en personajes (con el rig y las animaciones) y a
   10 k, 5 k y 2 k en objetos, con la textura a 2048 px: `<n>.glb` (solo el LOD0, para Godot, que arma sus LOD) y
   `<n>_lods.glb` (un esqueleto con las mallas `<n>_LOD0..2`, para Unity y Unreal), más `lods.json`. Se ajusta con
-  el bloque `tiempo_real` del json (`false` lo apaga). En `crisol ui`, Exportar > Tiempo real.
+  el bloque `tiempo_real` del json (`false` lo apaga). En `crisol ui`, Exportar > Tiempo real. Los huesos de los
+  humanoides salen con los nombres de Mixamo (Unity Humanoid, Unreal, mapeo automático de Godot) o, con
+  `tiempo_real.huesos: "godot"`, los de `SkeletonProfileHumanoid`; sin los huesos auxiliares del IK.
 - **Cuadrúpedos** (`crisol nuevo <n> --receta cuadrupedo`): perros, gatos, caballos... con su propio esqueleto
   (`modelo.esqueleto: "cuadrupedo"`: cuatro patas con IK, cuello, cabeza y cola), las articulaciones estimadas de la
   malla (sin DWPose; el animal se gira solo para mirar adelante) y 8 animaciones procedurales (idle, paso, salto,

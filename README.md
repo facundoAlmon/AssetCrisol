@@ -816,9 +816,16 @@ los frames laterales y el retrato. Todas las animaciones son **en el lugar** (el
      **Para Unity, Unreal y otros**: el motor dibuja una u otra según cuánto ocupe el personaje en pantalla (en Unity,
      un *LOD Group* con un nivel por malla; en Unreal, el *Screen Size* de cada LOD).
 
+   Los huesos salen con los **nombres de Mixamo** (`Hips`, `Spine`, `LeftArm`, `LeftForeArm`, `LeftUpLeg`...), que
+   reconocen solos el *Humanoid* de Unity, el retargeter de Unreal y el mapeo automático de Godot (*Retarget >
+   Bone Map* con `SkeletonProfileHumanoid`); con `"huesos": "godot"`, los de ese perfil (`LeftUpperArm`,
+   `LeftLowerArm`...), y con `"crisol"`, los del rig. Van sin los huesos auxiliares del IK (las animaciones lo
+   llevan horneado). El reposo es en pose A: si Unity lo pide, *Enforce T-Pose* en la configuración del Avatar. Los
+   cuadrúpedos conservan sus nombres (no hay un estándar). Sin dedos ni huesos de la cara.
+
    `lods.json` dice las caras y vértices de cada LOD. Se cambia con
-   `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096}` (caras de cada LOD, el primero el más fino) y
-   se apaga con `"tiempo_real": false`. El LOD más bajo puede mostrar costuras de la textura (boca, bordes): es para
+   `"tiempo_real": {"lods": [30000, 12000, 4000], "textura_px": 4096, "huesos": "godot"}` (caras de cada LOD, el
+   primero el más fino) y se apaga con `"tiempo_real": false`. El LOD más bajo puede mostrar costuras de la textura (boca, bordes): es para
    verlo de lejos.
 
 </details>
@@ -1022,7 +1029,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `retrato.ancho_px` | (512) ancho del retrato (alto = 1.25 × ancho) |
 | `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (opcional) ver [Iso](#iso-pipelinepy-iso) |
-| `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado máximo de la textura; `false` = no exportarlos (ver 3b) |
+| `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado máximo de la textura; `huesos`: `"mixamo"` (por defecto), `"godot"` o `"crisol"`; `false` = no exportarlos (ver 3b) |
 
 </details>
 
