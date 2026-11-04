@@ -60,7 +60,7 @@
   .heroe { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; padding: 10px; }
   .heroe img { margin: 0 auto; border-radius: 6px; }
 
-  section { padding-top: 56px; }
+  section { padding-top: 56px; scroll-margin-top: 20px; }
   h2 { font-size: clamp(1.4rem, 3vw, 1.8rem); margin: 0 0 8px; }
   h3 { font-size: 1.1rem; margin: 0 0 6px; }
   p.intro { color: var(--suave); margin: 0 0 22px; max-width: 72ch; }
@@ -89,14 +89,33 @@
   .tipo .arte img { max-height: 190px; width: auto; }
   .tipo p { margin: 0; font-size: .92rem; color: var(--suave); }
 
-  /* dos caminos */
-  .caminos { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  @media (max-width: 820px) { .caminos { grid-template-columns: minmax(0, 1fr); } }
-  .camino { min-width: 0; background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; padding: 18px;
-            display: flex; flex-direction: column; gap: 12px; }
-  .camino p { margin: 0; color: var(--suave); }
-  .camino img { border-radius: 8px; border: 1px solid var(--borde); }
-  .camino ul { margin: 0; padding-left: 20px; color: var(--suave); }
+  /* maneras de usarlo */
+  .tres { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 820px) { .tres { grid-template-columns: minmax(0, 1fr); } }
+  .via { display: flex; flex-direction: column; gap: 4px; background: var(--panel); border: 1px solid var(--borde);
+         border-radius: 10px; padding: 14px 16px; text-decoration: none; color: var(--suave); font-size: .93rem; }
+  .via b { color: var(--texto); font-size: 1.05rem; }
+  .via b::after { content: " →"; color: var(--acento); }
+  .via:hover { border-color: var(--acento-osc); }
+  .dos { display: grid; gap: 18px; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  @media (max-width: 820px) { .dos { grid-template-columns: minmax(0, 1fr); } }
+  .col { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .col h3 { margin-top: 6px; }
+  .texto-col { margin: 0; color: var(--suave); }
+  .charla { min-width: 0; background: var(--panel-2); border: 1px solid var(--borde); border-radius: 12px; padding: 14px;
+            display: flex; flex-direction: column; gap: 10px; }
+  .titulo-charla { font-size: .8rem; color: var(--suave); text-transform: uppercase; letter-spacing: .06em; }
+  .charla p { margin: 0; padding: 9px 12px; border-radius: 10px; max-width: 88%; font-size: .94rem; }
+  .charla .vos { align-self: flex-end; background: var(--acento-osc); color: #fff; border-bottom-right-radius: 3px; }
+  .charla .agente { align-self: flex-start; background: var(--panel); border: 1px solid var(--borde); border-bottom-left-radius: 3px; }
+  .charla .herr { display: block; font: .76rem ui-monospace, Menlo, monospace; color: var(--acento); margin-bottom: 4px; }
+  table.compacta { font-size: .9rem; }
+  table.compacta td { padding: 6px 8px; }
+  table.compacta td:first-child { white-space: nowrap; width: 1%; }
+  ul.reglas { margin: 0; padding-left: 20px; color: var(--suave); }
+  .pendiente { margin: 0; font-size: .88rem; color: var(--suave); border: 1px dashed var(--borde); border-radius: 8px;
+               padding: 8px 12px; }
+  .pendiente::before { content: "▶ "; color: var(--acento); }
 
   /* requisitos */
   table { width: 100%; border-collapse: collapse; font-size: .95rem; }
@@ -118,6 +137,7 @@
   <nav>
     <a href="#como"><span lang="es">Cómo funciona</span><span lang="en">How it works</span></a>
     <a href="vitrina/"><span lang="es">Galería</span><span lang="en">Gallery</span></a>
+    <a href="#caminos"><span lang="es">Usarlo</span><span lang="en">Use it</span></a>
     <a href="#empezar"><span lang="es">Empezá acá</span><span lang="en">Start here</span></a>
     <a href="https://github.com/facundoAlmon/AssetCrisol">GitHub</a>
   </nav>
@@ -246,51 +266,159 @@
   </section>
 
   <section id="caminos">
-    <h2><span lang="es">Dos maneras de usarlo</span><span lang="en">Two ways to use it</span></h2>
+    <h2><span lang="es">Tres maneras de usarlo</span><span lang="en">Three ways to use it</span></h2>
     <p class="intro">
-      <span lang="es">Las dos son de primera: no hace falta saber programar para ninguna.</span>
-      <span lang="en">Both are first-class: neither needs coding skills.</span>
+      <span lang="es">Las tres hacen lo mismo y podés mezclarlas: arrancar un personaje en la terminal y elegir la
+        malla en el navegador, o pedírselo a un agente y mirar el resultado en la UI.</span>
+      <span lang="en">All three do the same and you can mix them: start a character in the terminal and pick the mesh
+        in the browser, or ask an agent and look at the result in the UI.</span>
     </p>
-    <div class="caminos">
-      <div class="camino">
-        <h3><span lang="es">En el navegador</span><span lang="en">In the browser</span></h3>
-        <p><span lang="es"><code>crisol ui</code> abre una página en tu PC (o en el celular, en tu red): creás el asset,
-          corrés los pasos, elegís entre las candidatas y bajás el resultado en un zip. Sin terminal ni archivos de
-          configuración.</span>
-          <span lang="en"><code>crisol ui</code> opens a page on your PC (or your phone, on your network): create the
-          asset, run the steps, choose among the candidates and download the result as a zip. No terminal, no config
-          files.</span></p>
-        <video lang="es" src="vitrina/img/ui_recorrido.mp4" poster="ui/img/es/asset.webp" width="1280" height="720"
-          autoplay muted loop playsinline preload="metadata" style="width:100%;height:auto;border-radius:8px;border:1px solid var(--borde)"
-          aria-label="Recorrido por crisol ui: la biblioteca, una exploradora en isométrico y en 3D animado, sus ajustes, Cris en juego 3D y los movimientos"></video>
-        <img lang="en" src="ui/img/en/asset.webp" width="1400" height="900" loading="lazy" alt="An asset page in crisol ui: the chain of steps and the isometric result">
-        <p><a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/ui.md" lang="es">Manual de la UI, paso a paso →</a>
-          <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/ui.en.md" lang="en">The UI manual, step by step →</a></p>
+    <div class="tres">
+      <a class="via" href="#ui"><b><span lang="es">En el navegador</span><span lang="en">In the browser</span></b>
+        <span lang="es">Para diseñar sin terminal ni archivos: creás, elegís y bajás el zip.</span>
+        <span lang="en">To design with no terminal or files: create, choose and download the zip.</span></a>
+      <a class="via" href="#mcp"><b><span lang="es">Con un agente de IA</span><span lang="en">With an AI agent</span></b>
+        <span lang="es">Le pedís en tus palabras a Claude Code (u otro) y elegís mirando las imágenes que te muestra.</span>
+        <span lang="en">Ask Claude Code (or another) in your own words and choose by looking at the images it shows you.</span></a>
+      <a class="via" href="#cli"><b><span lang="es">En la terminal</span><span lang="en">In the terminal</span></b>
+        <span lang="es">Un comando por paso, en lote o desde tus scripts, con salida <code>--json</code>.</span>
+        <span lang="en">One command per step, in batches or from your scripts, with <code>--json</code> output.</span></a>
+    </div>
+  </section>
+
+  <section id="ui">
+    <h2><span lang="es">En el navegador</span><span lang="en">In the browser</span></h2>
+    <p class="intro">
+      <span lang="es"><code>crisol ui</code> abre una página en tu PC (o en el celular, en tu red): creás el asset,
+        corrés los pasos, elegís entre las candidatas y bajás el resultado en un zip. Sin terminal ni archivos de
+        configuración.</span>
+      <span lang="en"><code>crisol ui</code> opens a page on your PC (or your phone, on your network): create the
+        asset, run the steps, choose among the candidates and download the result as a zip. No terminal, no config
+        files.</span>
+    </p>
+    <div class="heroe">
+      <video lang="es" src="vitrina/img/ui_recorrido.mp4" poster="ui/img/es/asset.webp" width="1280" height="720"
+        autoplay muted loop playsinline preload="metadata" style="display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:6px"
+        aria-label="Recorrido por crisol ui: la biblioteca, una exploradora en isométrico y en 3D animado, sus ajustes, Cris en juego 3D y los movimientos"></video>
+      <img lang="en" src="ui/img/en/asset.webp" width="1400" height="900" loading="lazy" alt="An asset page in crisol ui: the chain of steps and the isometric result">
+    </div>
+    <p class="nota"><a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/ui.md" lang="es">Manual de la UI, paso a paso, con un personaje de punta a punta →</a>
+      <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/docs/ui.en.md" lang="en">The UI manual, step by step, with a character start to finish →</a></p>
+  </section>
+
+  <section id="mcp">
+    <h2><span lang="es">Con un agente de IA (MCP)</span><span lang="en">With an AI agent (MCP)</span></h2>
+    <p class="intro">
+      <span lang="es"><code>crisol mcp</code> es un servidor <a href="https://modelcontextprotocol.io">MCP</a>: cualquier
+        agente que lo hable (Claude Code, Claude Desktop, otros) puede crear assets, correr los pasos y mostrarte las
+        imágenes. Vos hablás en tus palabras; el agente arma la descripción, espera los pasos largos y te trae lo que
+        hay que decidir.</span>
+      <span lang="en"><code>crisol mcp</code> is an <a href="https://modelcontextprotocol.io">MCP</a> server: any agent
+        that speaks it (Claude Code, Claude Desktop, others) can create assets, run the steps and show you the images.
+        You talk in your own words; the agent writes the description, waits for the long steps and brings you what
+        needs deciding.</span>
+    </p>
+    <div class="dos">
+      <div class="charla" aria-label="Ejemplo de una conversación / Example conversation">
+        <div class="titulo-charla"><span lang="es">Así es una conversación (ejemplo)</span><span lang="en">What a conversation looks like (example)</span></div>
+        <p class="vos"><span lang="es">Quiero una caballera con armadura azul para mi juego isométrico.</span>
+          <span lang="en">I want a knight in blue armor for my isometric game.</span></p>
+        <p class="agente"><span class="herr">recetas · crear · correr imagen</span>
+          <span lang="es">Salieron cuatro candidatas. La 2 tiene los brazos separados y la armadura entera; la 4 trae una
+            capa, que al animar se pega al cuerpo. ¿Cuál elegís?</span>
+          <span lang="en">Four candidates came out. Number 2 has the arms apart and the whole armor; number 4 has a cape,
+            which sticks to the body when animated. Which one do you pick?</span></p>
+        <p class="vos"><span lang="es">La 2.</span><span lang="en">Number 2.</span></p>
+        <p class="agente"><span class="herr">elegir · correr vistas · correr malla · esperar</span>
+          <span lang="es">Estos son los dos candidatos de malla, de frente y de espalda. El de Pixal3D tiene la cara más
+            limpia.</span>
+          <span lang="en">These are the two mesh candidates, front and back. The Pixal3D one has the cleaner face.</span></p>
+        <p class="vos"><span lang="es">Dale con ese.</span><span lang="en">Go with that one.</span></p>
+        <p class="agente"><span class="herr">elegir · correr blender, sprites, iso, revisar · ver</span>
+          <span lang="es">Listo: 15 animaciones en 8 direcciones. En la revisión los codos doblan bien y no hay ropa que se
+            atraviese. Te dejo la caminata isométrica.</span>
+          <span lang="en">Done: 15 animations in 8 directions. In the review the elbows bend well and no clothes clip
+            through. Here is the isometric walk.</span></p>
       </div>
-      <div class="camino">
-        <h3><span lang="es">Con un agente de IA</span><span lang="en">With an AI agent</span></h3>
-        <p><span lang="es">Claude Code u otro agente instala AssetCrisol, corre los pasos y te muestra lo que tenés que
-          decidir. Pedís en tus palabras ("un caballero con armadura azul, para un juego isométrico") y elegís mirando
-          las imágenes.</span>
-          <span lang="en">Claude Code or another agent installs AssetCrisol, runs the steps and shows you what you need
-          to decide. Ask in your own words ("a knight in blue armor, for an isometric game") and choose by looking at
-          the images.</span></p>
-        <pre><span class="c"># <span lang="es">el servidor MCP, para Claude Code</span><span lang="en">the MCP server, for Claude Code</span></span>
-claude mcp add assetcrisol -- /ruta/AssetCrisol/crisol mcp</pre>
-        <ul>
-          <li><span lang="es">Herramientas MCP: recetas, crear, estado, correr, ver, elegir. Devuelven las imágenes para
-            que el agente te las muestre.</span>
-            <span lang="en">MCP tools: recipes, create, status, run, view, choose. They return the images so the agent
-            can show them to you.</span></li>
-          <li><span lang="es">El agente nunca elige por vos la imagen, la malla ni las texturas.</span>
-            <span lang="en">The agent never picks the image, the mesh or the textures for you.</span></li>
-          <li><span lang="es">Sin MCP: cada paso tiene <code>--json</code> y <code>crisol estado</code> dice qué sigue.</span>
-            <span lang="en">Without MCP: every step has <code>--json</code> and <code>crisol estado</code> says what comes next.</span></li>
+      <div class="col">
+        <h3><span lang="es">Conectarlo</span><span lang="en">Connect it</span></h3>
+        <pre><span class="c"># Claude Code</span>
+claude mcp add assetcrisol -- /ruta/AssetCrisol/crisol mcp
+<span class="c"># <span lang="es">otro cliente</span><span lang="en">another client</span></span>
+{"command": "/ruta/AssetCrisol/crisol", "args": ["mcp"]}</pre>
+        <h3><span lang="es">Las herramientas</span><span lang="en">The tools</span></h3>
+        <table class="compacta">
+          <tr><td><code>recetas</code> · <code>crear</code></td><td><span lang="es">los tipos de asset y crear uno (descripción en inglés, o una referencia)</span><span lang="en">the asset kinds and creating one (English description, or a reference)</span></td></tr>
+          <tr><td><code>estado</code></td><td><span lang="es">qué está hecho, qué sigue y qué falta decidir, con las hojas como imágenes</span><span lang="en">what is done, what comes next and what needs deciding, with the sheets as images</span></td></tr>
+          <tr><td><code>correr</code> · <code>esperar</code></td><td><span lang="es">un paso; los largos (la malla) siguen en segundo plano</span><span lang="en">a step; the long ones (the mesh) keep going in the background</span></td></tr>
+          <tr><td><code>ver</code></td><td><span lang="es">cualquier imagen del asset (un gif, como grilla de cuadros)</span><span lang="en">any image of the asset (a gif, as a grid of frames)</span></td></tr>
+          <tr><td><code>elegir</code></td><td><span lang="es">anota <b>lo que elegiste vos</b>: imagen, malla, texturas</span><span lang="en">records <b>what you chose</b>: image, mesh, textures</span></td></tr>
+          <tr><td><code>ajustar</code> · <code>doctor</code></td><td><span lang="es">cambiar ajustes (no las elecciones) y revisar la instalación</span><span lang="en">change settings (not the choices) and check the installation</span></td></tr>
+        </table>
+        <ul class="reglas">
+          <li><span lang="es">El agente <b>nunca elige por vos</b>: te muestra las opciones y pregunta.</span>
+            <span lang="en">The agent <b>never chooses for you</b>: it shows you the options and asks.</span></li>
+          <li><span lang="es">Una generación por vez en la placa: si está ocupada, el paso espera solo.</span>
+            <span lang="en">One generation at a time on the card: if it is busy, the step waits by itself.</span></li>
+          <li><span lang="es">Sin MCP también anda: un agente que corre comandos usa la <a href="#cli">CLI</a> con <code>--json</code>
+            (instrucciones en <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/AGENTS.md">AGENTS.md</a>).</span>
+            <span lang="en">It works without MCP too: an agent that runs commands uses the <a href="#cli">CLI</a> with <code>--json</code>
+            (instructions in <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/AGENTS.md">AGENTS.md</a>).</span></li>
         </ul>
-        <p><a href="https://github.com/facundoAlmon/AssetCrisol#para-agentes-de-ia" lang="es">Para agentes de IA →</a>
-          <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/README.en.md#for-ai-agents" lang="en">For AI agents →</a></p>
+        <p class="pendiente"><span lang="es">Video de una sesión real con un agente: pendiente.</span>
+          <span lang="en">Video of a real session with an agent: coming soon.</span></p>
       </div>
     </div>
+    <p class="nota"><a href="https://github.com/facundoAlmon/AssetCrisol#servidor-mcp" lang="es">README &gt; Servidor MCP →</a>
+      <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/README.en.md#mcp-server" lang="en">README &gt; MCP server →</a></p>
+  </section>
+
+  <section id="cli">
+    <h2><span lang="es">En la terminal (CLI)</span><span lang="en">In the terminal (CLI)</span></h2>
+    <p class="intro">
+      <span lang="es">Un comando por paso. Cada uno lee el json del asset y escribe en su carpeta, así que se puede
+        rehacer cualquiera por separado, en lote o desde un script.</span>
+      <span lang="en">One command per step. Each reads the asset's json and writes to its folder, so any of them can be
+        redone on its own, in a batch or from a script.</span>
+    </p>
+    <div class="dos">
+      <div class="col">
+        <h3><span lang="es">Un personaje, de punta a punta</span><span lang="en">A character, start to finish</span></h3>
+        <pre>crisol nuevo caballera --receta humanoide \
+  --descripcion "a young knight in blue plate armor"
+crisol imagen caballera        <span class="c"># <span lang="es">4 candidatas, ~20 s c/u</span><span lang="en">4 candidates, ~20 s each</span></span>
+<span class="c"># <span lang="es">elegir: imagen.elegida en personaje.json</span><span lang="en">choose: imagen.elegida in personaje.json</span></span>
+crisol vistas caballera        <span class="c"># <span lang="es">espalda y costados</span><span lang="en">back and sides</span></span>
+crisol malla caballera         <span class="c"># <span lang="es">el modelo 3D, 3-8 min</span><span lang="en">the 3D model, 3-8 min</span></span>
+crisol articulaciones caballera
+crisol blender caballera       <span class="c"># <span lang="es">rig y animaciones, ~1 min</span><span lang="en">rig and animations, ~1 min</span></span>
+crisol sprites caballera
+crisol iso caballera           <span class="c"># <span lang="es">8 direcciones</span><span lang="en">8 directions</span></span>
+crisol revisar caballera       <span class="c"># <span lang="es">la hoja de control</span><span lang="en">the check sheet</span></span>
+crisol godot caballera</pre>
+      </div>
+      <div class="col">
+        <h3><span lang="es">Los de todos los días</span><span lang="en">The everyday ones</span></h3>
+        <pre>crisol estado [caballera]      <span class="c"># <span lang="es">qué sigue</span><span lang="en">what is next</span></span>
+crisol doctor                  <span class="c"># <span lang="es">qué está instalado</span><span lang="en">what is installed</span></span>
+crisol rehacer todos           <span class="c"># <span lang="es">rig..revisión en lote</span><span lang="en">rig..review in a batch</span></span>
+crisol deshacer caballera --paso iso
+crisol metodo caballera correr=kimodo</pre>
+        <h3><span lang="es">Para scripts y agentes</span><span lang="en">For scripts and agents</span></h3>
+        <p class="texto-col"><span lang="es">Con <code>--json</code>, cada paso deja en la salida un solo JSON: lo que escribió, qué
+          mirar y el estado después. Nunca pregunta nada y sale con un código que dice qué pasó:</span>
+          <span lang="en">With <code>--json</code>, every step prints a single JSON: what it wrote, what to look at and
+          the state afterwards. It never asks anything and exits with a code that says what happened:</span></p>
+        <table class="compacta">
+          <tr><td><code>0</code> · <code>1</code> · <code>2</code></td><td><span lang="es">bien · falló · argumentos mal</span><span lang="en">ok · failed · bad arguments</span></td></tr>
+          <tr><td><code>3</code></td><td><span lang="es">la placa está ocupada (con <code>--sin-esperar</code>)</span><span lang="en">the card is busy (with <code>--sin-esperar</code>)</span></td></tr>
+          <tr><td><code>4</code> · <code>5</code></td><td><span lang="es">falta elegir algo · falta un paso anterior</span><span lang="en">something needs choosing · a previous step is missing</span></td></tr>
+          <tr><td><code>6</code></td><td><span lang="es">a la instalación le falta algo para ese paso</span><span lang="en">the installation lacks something for that step</span></td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="nota"><a href="https://github.com/facundoAlmon/AssetCrisol#comandos" lang="es">README &gt; Comandos, y cada paso en detalle →</a>
+      <a href="https://github.com/facundoAlmon/AssetCrisol/blob/main/README.en.md#commands" lang="en">README &gt; Commands, and each step in detail →</a></p>
   </section>
 
   <section id="empezar">

@@ -174,7 +174,8 @@ Errores vistos armando el manual de la UI (2026-11-04):
       problemas conocidos, preguntas sobre licencias.
 - [x] Demo en Godot: `demo/` (Cris caminando por el taller iso entre sus objetos; `preparar.sh` instala los ejemplos).
 - [x] Video corto de la UI (`docs/vitrina/img/ui_recorrido.mp4`, en la landing): grabado con el screencast de Chrome.
-- [ ] Video corto con un agente (Claude Code eligiendo con la persona).
+- [ ] Video corto con un agente (Claude Code eligiendo con la persona): se graba después del lanzamiento; la landing
+      lo marca como pendiente en la sección del MCP.
 - [ ] Prueba en limpio: instalar desde cero (Docker y nativo) siguiendo solo la doc, una vez una persona y otra un
       agente sin contexto. Hecha la primera parte con un agente (2026-11-04, sobre esta instalación: plan, doctor,
       ejemplos, demo, manual): 13 hallazgos de docs, arreglados salvo estos:

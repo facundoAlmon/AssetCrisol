@@ -12,8 +12,10 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   resultado, qué hacer cuando algo sale mal, ajustes, otros tipos de asset, movimientos, exportar y licencias, con
   capturas en español e inglés. `tests/capturas_ui.py` las rehace (Playwright sobre el Chrome instalado).
 
-- Landing para GitHub Pages (`docs/index.html`): qué hace, Cris paso a paso (`vitrina.py` arma `proceso_1..5.jpg`),
-  qué se puede hacer, la UI y los agentes, requisitos, instalación y licencias, en español e inglés.
+- Landing en GitHub Pages (https://facundoalmon.github.io/AssetCrisol/, `docs/index.html`): qué hace, Cris paso a
+  paso (`vitrina.py` arma `proceso_1..5.jpg`), qué se puede hacer, la demo en Godot, las tres maneras de usarlo (la UI
+  con un video del recorrido, un agente por MCP con una conversación de ejemplo y la CLI con `--json` y sus códigos),
+  requisitos, instalación y licencias, en español e inglés.
 
 - **Demo en Godot** (`demo/`): Cris camina por su taller isométrico entre sus objetos, con el piso y las paredes del tema
   `taller`; `demo/preparar.sh` instala los ejemplos con `godot --instalar`.
