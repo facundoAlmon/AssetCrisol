@@ -3,7 +3,7 @@
 // biblioteca (`crisol clip`) y decidir si la usan todos los personajes o solo algunos (`crisol metodo <n>
 // anim=kimodo`), 4) rehacer rig, iso y anclas de los que la usen. Cada clip se ve con su esqueleto de costado animado
 // (api/movimientos/esqueleto, metodos.esqueleto: no hace falta la hoja PNG de esqueletos).
-import { html, useState, useEffect, useRef, useGlobal, api, t, aviso, Icono, Cargando, Chip, encolar } from '../comunes.mjs'
+import { html, useState, useEffect, useRef, useGlobal, api, t, aviso, Icono, Cargando, Chip, encolar, EntradaNumero } from '../comunes.mjs'
 
 const segundos = v => (v === '' || v === null || v === undefined ? '' : String(v))
 const num = v => (v === '' || v === null || v === undefined || Number.isNaN(Number(v)) ? null : Number(v))
@@ -131,11 +131,11 @@ export function Movimientos() {
             <select class="entrada" value=${f.animacion} onChange=${e => campo('animacion', e.target.value)}>
               ${mov.animaciones.map(a => html`<option value=${a}>${a}</option>`)}</select></label>
           <label class="campo"><span>${t('mov.duracion')}</span>
-            <input class="entrada" type="number" min="1" max="10" step="0.5" value=${f.duracion} onInput=${e => campo('duracion', Number(e.target.value))} /></label>
+            <${EntradaNumero} min="1" max="10" step="0.5" valor=${f.duracion} vacio=${0} cambiar=${n => campo('duracion', n)} /></label>
           <label class="campo"><span>${t('mov.seed')}</span>
-            <input class="entrada" type="number" step="1" value=${f.seed} onInput=${e => campo('seed', Number(e.target.value))} /></label>
+            <${EntradaNumero} step="1" valor=${f.seed} vacio=${0} cambiar=${n => campo('seed', n)} /></label>
           <label class="campo"><span>${t('mov.muestras')}</span>
-            <input class="entrada" type="number" min="1" max="8" step="1" value=${f.muestras} onInput=${e => campo('muestras', Number(e.target.value))} /></label>
+            <${EntradaNumero} min="1" max="8" step="1" valor=${f.muestras} vacio=${0} cambiar=${n => campo('muestras', n)} /></label>
         </div>
         <label class="campo"><span>${t('mov.prompt')}</span>
           <textarea class="entrada" lang="en" placeholder="a person walks forward at a relaxed pace" value=${f.prompt}
@@ -209,11 +209,11 @@ function Variante({ c, animaciones, porAnim, clip }) {
 function Ventana({ v, set }) {
   return html`
     <label class="campo ventana"><span>${t('mov.desde')}</span>
-      <input class="entrada" type="number" min="0" step="0.05" placeholder=${t('mov.inicio')} value=${v.desde}
-        onInput=${e => set({ ...v, desde: e.target.value })} /></label>
+      <${EntradaNumero} min="0" step="0.05" placeholder=${t('mov.inicio')} valor=${v.desde}
+        cambiar=${(n, texto) => set({ ...v, desde: texto })} /></label>
     <label class="campo ventana"><span>${t('mov.hasta')}</span>
-      <input class="entrada" type="number" min="0" step="0.05" placeholder=${t('mov.fin')} value=${v.hasta}
-        onInput=${e => set({ ...v, hasta: e.target.value })} /></label>`
+      <${EntradaNumero} min="0" step="0.05" placeholder=${t('mov.fin')} valor=${v.hasta}
+        cambiar=${(n, texto) => set({ ...v, hasta: texto })} /></label>`
 }
 
 function EnBiblioteca({ c, clip, personajes, recargar }) {

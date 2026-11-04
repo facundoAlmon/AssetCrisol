@@ -3,7 +3,7 @@
 // la repinta con UltraTex). Ver pipeline.candidatos_malla. Escribe por el PATCH de Ajustes, nunca `malla.elegida`:
 // esa la elige la persona en "Te toca elegir". `malla` no rehace un candidato que ya tiene trabajo/malla_<c>/: para
 // que tome un cambio hay que borrarlo ("Rehacer este candidato").
-import { html, useState, useEffect, api, t, aviso, Icono, Chip, encolar } from '../comunes.mjs'
+import { html, useState, useEffect, api, t, aviso, Icono, Chip, encolar, EntradaNumero } from '../comunes.mjs'
 
 const NOMBRE = /^[a-z0-9][a-z0-9_]{0,31}$/
 const MOTORES = [['trellis2', 'TRELLIS.2'], ['pixal3d', 'Pixal3D']]
@@ -165,7 +165,7 @@ function Fila({ d, f, filas, hechas, cambiar, quitar, sucio }) {
             }}>${MOTORES.map(([v, n]) => html`<option value=${v}>${n}</option>`)}</select>
             ${f.principal && html`<small>${t('cand.principal_ayuda')}</small>`}</label>
           <label class="campo" for=${id('seed')}><span>${t('aj.seed_malla')}</span>
-            <input class="entrada" id=${id('seed')} type="number" step="1" value=${f.seed} onInput=${e => cambiar({ seed: Number(e.target.value) })} /></label>
+            <${EntradaNumero} id=${id('seed')} step="1" valor=${f.seed} vacio=${0} cambiar=${n => cambiar({ seed: n })} /></label>
           <label class="campo" for=${id('res')}><span>${t('cand.resolucion')}</span>
             <select class="entrada" id=${id('res')} value=${f.resolucion} onChange=${e => cambiar({ resolucion: Number(e.target.value) })}>
               ${[...new Set([...RESOLUCIONES[f.motor], f.resolucion])].sort((a, b) => a - b).map(r => html`<option value=${r}>${r}</option>`)}
@@ -174,7 +174,7 @@ function Fila({ d, f, filas, hechas, cambiar, quitar, sucio }) {
               : !f.principal && f.ini && f.orig && !('resolucion' in f.orig) && !cambio(f, 'resolucion') ? html`<small>${t('cand.res_hereda')}</small>` : ''}</label>`}
       ${f.tipo === 'motor' && html`<label class="casilla"><input type="checkbox" checked=${f.ut} onChange=${e => cambiar({ ut: e.target.checked })} />${t('cand.con_ultratex')}</label>`}
       ${(f.tipo === 'ultratex' || f.ut) && html`<label class="campo" for=${id('ut')}><span>${t('aj.seed_ultratex')}</span>
-        <input class="entrada" id=${id('ut')} type="number" step="1" value=${f.utSeed} onInput=${e => cambiar({ utSeed: Number(e.target.value) })} /></label>`}
+        <${EntradaNumero} id=${id('ut')} step="1" valor=${f.utSeed} vacio=${0} cambiar=${n => cambiar({ utSeed: n })} /></label>`}
     </div>
     ${editada && html`<p class="aviso-cand chico"><${Icono} n="alerta" />${t('cand.ya_hecho')}</p>`}
   </article>`

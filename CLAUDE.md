@@ -148,6 +148,9 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `componentes/candidatos.mjs` edita `malla.candidatos` con el formato de `pipeline.candidatos_malla` (lo que un
   candidato no pisa lo hereda del principal: solo escribe las claves que cambian) y nunca `malla.elegida`.
   Probar con `python3 tests/ui.py` (sin GPU) y mirar capturas (claro/oscuro, 390 px) antes de dar un cambio por bueno.
+  Manual: `docs/ui.md` + `docs/ui.en.md`; sus capturas (`docs/ui/img/{es,en}/*.webp`) las saca `tests/capturas_ui.py`
+  (Playwright + Chrome, sobre una UI con datos aparte; las capturas solo miran: corta si la cola cambia). Al cambiar
+  una pantalla del manual, rehacer su captura (`--solo`).
 - `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,escenario}.json`, `ejemplos/`.
 - `plantilla/recetas/*.json` (`crisol nuevo --receta`): `_base` (qué plantilla pisan), `_doc`, `_agregar_descripcion`,
   `_borrar`. Lo que se aprenda de un tipo de asset (un gotcha con arreglo por json) va a su receta y a la tabla del README.

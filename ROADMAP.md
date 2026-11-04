@@ -127,6 +127,20 @@ Revisión de animaciones y movimientos (2026-11-04):
 - [x] Ajustes > Animaciones: el botón «kimodo» deshabilitado sin explicación en las animaciones sin clip.
 - [x] Resultado > Animación: el gif con las 15 animaciones juntas y los nombres ilegibles → la hoja animada de a una.
 
+Errores vistos armando el manual de la UI (2026-11-04):
+- [x] Los campos numéricos (altura, seeds, duración y recorte de un clip) rearmaban el texto a medio escribir: "1.65"
+      quedaba 651. Ahora guardan el texto mientras se escribe (`EntradaNumero` de `comunes.mjs`).
+- [x] Con las candidatas de imagen a la vista, Resultado decía "Corré el primer paso".
+- [x] "Mirá esto antes de seguir" repetía en miniatura las candidatas de *Te toca elegir*, y las hojas anchas (vistas)
+      quedaban ilegibles en un cuadrado de 120 px.
+- [ ] Elegir un candidato de malla deja Malla 3D "desactualizado" y el botón dice *Siguiente: Malla 3D*: parece que va a
+      generar de nuevo (minutos) y solo copia el elegido. Copiarlo al elegir, o que el botón lo diga.
+- [ ] Pesos por zonas desde la UI: dibujar las cajas de `modelo.pesos_zonas` sobre la guía (hoy solo el json). Lo
+      necesitó la exploradora del manual (manos que tocan los bolsillos del pantalón).
+- [ ] El estado de cada paso usa el lenguaje de la terminal ("imagen.elegida = 777 no existe, pero la malla ya está",
+      "sin trabajo/imagen/vistas.png"): pasarlo a palabras para quien no conoce el json (los ejemplos lo muestran).
+      En inglés, ese detalle y la descripción de los estilos (en Nuevo) salen en español.
+
 ## 5. Salida 3D y otros motores
 - [x] Personaje como GLB con rig y animaciones (las mismas de los sprites): `trabajo/animado.glb`, también en el visor
       3D de `crisol ui`.
@@ -151,6 +165,8 @@ Revisión de animaciones y movimientos (2026-11-04):
 ## 7. Documentación, landing y v0.1
 - [x] Vitrina de los ejemplos (`docs/vitrina/`, imágenes con `herramientas/4_sprites/vitrina.py`), para la landing.
 - [ ] Landing en GitHub Pages: qué hace, galería antes/después, requisitos, "empezá acá" para personas y agentes.
+- [ ] Manual de `crisol ui` (`docs/ui.md`, `docs/ui.en.md`) con capturas que se rehacen con `tests/capturas_ui.py`
+      (Playwright sobre el Chrome instalado; es/en, claro/oscuro, celular).
 - [ ] Docs bilingües: instalación, primer asset, recetas por tipo, referencia de `personaje.json` y estilos,
       problemas conocidos, preguntas sobre licencias.
 - [ ] Demos: proyecto Godot de ejemplo (Cris caminando por el taller iso) y videos cortos con la UI y con un agente.

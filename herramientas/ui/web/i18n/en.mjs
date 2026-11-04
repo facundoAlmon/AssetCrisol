@@ -112,6 +112,7 @@ export default {
   'asset.ajustes': 'Settings',
   'asset.archivos': 'Files and logs',
   'asset.sin_resultado': 'Nothing to see yet. Run the first step.',
+  'asset.sin_resultado_elegir': 'Pick one of the options above: what comes out of it shows up here.',
   'asset.carpeta': 'Folder',
   'asset.licencias': 'Licenses',
   'asset.no_comercial': 'Made with a model that does not allow commercial use.',

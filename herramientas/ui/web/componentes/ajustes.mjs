@@ -1,7 +1,7 @@
 // Ajustes de un asset sin tocar el json: los campos comunes por tipo (README > personaje.json) y los métodos de
 // animación. El json completo queda como modo avanzado, con un diff antes de guardar. Las elecciones (imagen, malla,
 // texturas) no se cambian acá: van por Decidir.
-import { html, useState, useEffect, useMemo, api, t, aviso, Icono, Cargando, Plegable, nombrePaso } from '../comunes.mjs'
+import { html, useState, useEffect, useMemo, api, t, aviso, Icono, Cargando, Plegable, nombrePaso, EntradaNumero } from '../comunes.mjs'
 import { Candidatos, CLAVES_CANDIDATOS } from './candidatos.mjs'
 
 const leer = (obj, clave) => clave.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj)
@@ -163,9 +163,8 @@ function Campo({ c, valor, cambiar }) {
   } else if (c.tipo === 'seeds') {
     control = html`<${Seeds} id=${id} valor=${valor} cambiar=${cambiar} />`
   } else {
-    control = html`<input class="entrada" id=${id} type="number" step=${c.tipo === 'entero' ? 1 : c.paso} value=${valor ?? ''}
-      placeholder=${c.auto != null ? t('aj.auto', { v: c.auto }) : null}
-      onInput=${e => cambiar(e.target.value === '' ? (c.nulo ? null : undefined) : Number(e.target.value))} />`
+    control = html`<${EntradaNumero} id=${id} step=${c.tipo === 'entero' ? 1 : c.paso} valor=${valor} cambiar=${cambiar}
+      vacio=${c.nulo ? null : undefined} placeholder=${c.auto != null ? t('aj.auto', { v: c.auto }) : null} />`
   }
   return html`<label class="campo" for=${id}><span>${etiqueta}</span>${control}${ayuda}</label>`
 }

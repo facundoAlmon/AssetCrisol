@@ -16,6 +16,23 @@ export function guardarPref(clave, valor) {
   try { localStorage.setItem('crisol.' + clave, valor) } catch { /* sin almacenamiento */ }
 }
 
+// ---------- campo numérico ----------
+// Con su propio texto mientras se escribe: a medio escribir ("1.", "-") el navegador da value '' y, si eso volvía al
+// estado, el campo se rearmaba y el cursor saltaba ("1.65" quedaba 651). cambiar(número, texto) recibe el número
+// solo cuando el texto es válido; vacío → `vacio`. Lo demás (id, step, min, placeholder...) va al <input>.
+export function EntradaNumero({ valor, cambiar, vacio, ...resto }) {
+  const [texto, setTexto] = useState(valor ?? '')
+  useEffect(() => {   // un cambio de afuera (descartar, guardar, otro campo que lo mueve)
+    if (texto === '' ? valor != null && valor !== '' : Number(texto) !== Number(valor)) setTexto(valor ?? '')
+  }, [valor])
+  return html`<input class="entrada" type="number" ...${resto} value=${texto} onInput=${e => {
+    if (e.target.validity.badInput) return   // a medio escribir: el texto queda en el navegador, el estado no cambia
+    const v = e.target.value
+    setTexto(v)
+    cambiar(v === '' ? vacio : Number(v), v)
+  }} />`
+}
+
 // ---------- i18n ----------
 const IDIOMAS = { es, en }
 let idioma = leerPref('idioma', (navigator.language || 'es').startsWith('es') ? 'es' : 'en')

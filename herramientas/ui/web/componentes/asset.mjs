@@ -277,15 +277,16 @@ function Mirar({ d, cola }) {
   const [cerrado, setCerrado] = useState(null)
   const rutas = (ultimo?.resultado?.mirar || []).filter(r => r.startsWith(d.carpeta + '/')).map(r => r.slice(d.carpeta.length + 1))
   if (!ultimo || !rutas.length || cerrado === ultimo.id || Date.now() / 1000 - ultimo.fin > 3600) return null
-  // lo que pedía mirar era para elegir (imagen, malla, texturas) y ya se eligió: no queda nada que mirar
-  const pedia = ultimo.resultado?.decidir || []
-  if (pedia.length && !pedia.some(c => (d.decidir || []).some(x => x.clave === c))) return null
+  // lo que pedía mirar era para elegir (imagen, malla, texturas): si falta elegir ya está en Te toca elegir, y si ya
+  // se eligió no queda nada que mirar
+  if ((ultimo.resultado?.decidir || []).length) return null
   return html`<section class="aviso brasa" style="margin-bottom:20px;flex-wrap:wrap">
     <${Icono} n="info" />
     <div style="flex:1;display:grid;gap:10px;min-width:0">
       <b>${t('asset.mirar')} (${nombrePaso(ultimo.paso, d.tipo)})</b>
       <div class="tira" style="padding:0">${rutas.map(r => html`<button onClick=${() => verGrande(urlArchivo(d.nombre, r, ultimo.fin), r)} title=${r}
-        class="damero" style="width:120px;height:120px"><img src=${urlMini(d.nombre, r, 240, '', Math.round(ultimo.fin))} alt=${r} /></button>`)}</div>
+        class="damero" style="width:auto;height:160px;max-width:100%;padding:0"><img src=${urlMini(d.nombre, r, 1280, '', Math.round(ultimo.fin))} alt=${r}
+        style="height:100%;width:auto;max-width:100%;object-fit:contain" /></button>`)}</div>
     </div>
     <button class="icono-boton" onClick=${() => setCerrado(ultimo.id)} aria-label=${t('visor.cerrar')}><${Icono} n="x" /></button>
   </section>`
@@ -438,7 +439,7 @@ function Visor({ d }) {
   const [nitido, setNitido] = useState(false)
   const [editando, setEditando] = useState(false)
   useEffect(() => { if (!grupos.some(g => g.id === gid)) setGid(porDefecto[0]?.id) }, [d])
-  if (!grupos.length) return html`<div class="vacio"><p>${t('asset.sin_resultado')}</p></div>`
+  if (!grupos.length) return html`<div class="vacio"><p>${t((d.decidir || []).length ? 'asset.sin_resultado_elegir' : 'asset.sin_resultado')}</p></div>`
   const g = grupos.find(x => x.id === gid) || grupos[0]
   const v = Math.round(d.modificado)
   const archivo = g.archivos?.[Math.min(i, g.archivos.length - 1)]

@@ -7,6 +7,17 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ## [Sin publicar]
 
+### Agregado
+- **Manual de `crisol ui`** ([docs/ui.md](docs/ui.md), [en](docs/ui.en.md)): un personaje de punta a punta, ver el
+  resultado, qué hacer cuando algo sale mal, ajustes, otros tipos de asset, movimientos, exportar y licencias, con
+  capturas en español e inglés. `tests/capturas_ui.py` las rehace (Playwright sobre el Chrome instalado).
+
+### Arreglado
+- `crisol ui`: los campos numéricos (altura, seeds, duración y recorte de un clip) se rearmaban a medio escribir y
+  "1.65" quedaba 651.
+- `crisol ui`: mientras falta elegir la imagen, Resultado ya no dice "Corré el primer paso"; "Mirá esto antes de
+  seguir" no repite las candidatas de *Te toca elegir* y muestra las hojas anchas (vistas) a lo ancho.
+
 ## [0.3.0-alpha.1] - 2026-11-04
 
 Modelos para juegos 3D (LODs, huesos de Mixamo, materiales horneados), cuadrúpedos, la revisión de cerca y

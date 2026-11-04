@@ -342,7 +342,8 @@ if something fails.
 
 ### In the browser (`crisol ui`)
 
-Everything in this guide can also be done from a page in the browser, without a terminal or json:
+Everything in this guide can also be done from a page in the browser, without a terminal or json. Step by step, with
+screenshots: **[`crisol ui` manual](docs/ui.en.md)**.
 
 ```bash
 crisol ui                    # opens http://127.0.0.1:8190/ (--puerto N, --no-abrir)

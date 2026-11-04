@@ -113,6 +113,7 @@ export default {
   'asset.ajustes': 'Ajustes',
   'asset.archivos': 'Archivos y logs',
   'asset.sin_resultado': 'Todavía no hay nada para ver. Corré el primer paso.',
+  'asset.sin_resultado_elegir': 'Elegí arriba una de las opciones: lo que sale de ella aparece acá.',
   'asset.carpeta': 'Carpeta',
   'asset.licencias': 'Licencias',
   'asset.no_comercial': 'Salió de un modelo que no permite uso comercial.',

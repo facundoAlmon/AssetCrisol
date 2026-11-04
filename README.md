@@ -331,7 +331,8 @@ En `ejemplos/personajes/cris/` también están los gifs de demo, armados con sus
 
 ### En el navegador (`crisol ui`)
 
-Todo lo de esta guía se puede hacer también desde una página en el navegador, sin terminal ni json:
+Todo lo de esta guía se puede hacer también desde una página en el navegador, sin terminal ni json. Paso a paso y con
+capturas: **[manual de `crisol ui`](docs/ui.md)**.
 
 ```bash
 crisol ui                    # abre http://127.0.0.1:8190/ (--puerto N, --no-abrir)
