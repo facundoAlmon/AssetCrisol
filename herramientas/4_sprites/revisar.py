@@ -2,7 +2,9 @@
 # sola imagen -> trabajo/revision.png. Filas: cabeza de costado (idle, caminata, correr: ¿mira al frente o al
 # cielo?), brazos (codos doblados en caminata, correr, golpe y bloqueo: ¿plastilina?), caminata iso de frente (¿pies
 # muy separados, rodillas juntas, puntas adentro?), espalda iso (lo que inventó UltraTex), poses clave y revés (el
-# interior de la malla a la vista, en magenta: lo renderiza `blender` en trabajo/reves/).
+# interior de la malla a la vista, en magenta: lo renderiza `blender` en trabajo/reves/). Aparte, la revisión de
+# cerca (trabajo/revision_cerca.png): codos, hombros, rodillas, cadera y cara de cerca (trabajo/cerca/), lo que en
+# un sprite no se nota y en 3D sí.
 import json, os
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 
@@ -128,5 +130,43 @@ def revisar(pdir, nombre):
         img.alpha_composite(f, (0, y))
         y += f.height
     dst = os.path.join(pdir, 'trabajo', 'revision.png')
+    img.convert('RGB').save(dst)
+    cerca = revisar_cerca(pdir)
+    return dst + (f' y {cerca}' if cerca else '')
+
+
+# qué mirar en cada zona de la revisión de cerca
+MIRAR_CERCA = {'codo': 'codo marcado, sin plastilina ni pliegues que se cruzan',
+               'hombro': 'axila y hombro sin estirarse ni hundirse',
+               'rodilla': 'rodilla con forma, el pantalón sin atravesarse',
+               'cadera': 'entrepierna sin estirarse, el cinto o la remera sin atravesar',
+               'pata delantera': 'codo y muñeca de la pata hacia donde van',
+               'pata trasera': 'rodilla y garrón hacia donde van, sin plastilina',
+               'cara': 'ojos, boca y costuras de la textura'}
+
+
+def revisar_cerca(pdir):
+    """trabajo/revision_cerca.png: una fila por zona con sus poses de frente y de costado (de trabajo/cerca/, que deja
+    `blender` en el modo reves) y el peor % de interior a la vista (magenta) de la zona."""
+    d = os.path.join(pdir, 'trabajo', 'cerca')
+    try:
+        tomas = json.load(open(os.path.join(d, 'cerca.json')))
+    except OSError:
+        return None
+    filas = []
+    for zona in dict.fromkeys(t['zona'] for t in tomas):
+        de_zona = [t for t in tomas if t['zona'] == zona]
+        peor = max(t['magenta'] for t in de_zona)
+        poses = ' | '.join(dict.fromkeys(t['pose'] for t in de_zona))
+        filas.append(_fila(f"{zona} ({poses}): {MIRAR_CERCA.get(zona, '')}; magenta {peor:.1f} %"
+                           + ('  << REVISAR' if peor > UMBRAL_REVES else ''),
+                           [Image.open(os.path.join(d, t['archivo'])).convert('RGBA') for t in de_zona], 300))
+    ancho = max(f.width for f in filas)
+    img = Image.new('RGBA', (ancho, sum(f.height for f in filas)), FONDO)
+    y = 0
+    for f in filas:
+        img.alpha_composite(f, (0, y))
+        y += f.height
+    dst = os.path.join(pdir, 'trabajo', 'revision_cerca.png')
     img.convert('RGB').save(dst)
     return dst

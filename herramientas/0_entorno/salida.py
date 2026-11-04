@@ -10,7 +10,7 @@ FALTA_PASO = 5     # falta la salida de un paso anterior (correr ese paso primer
 FALTA_INSTALAR = 6 # a la instalación le falta algo que el paso necesita (`crisol doctor`)
 
 # imágenes para mostrarle a la persona o mirar antes de dar el paso por bueno
-PARA_MIRAR = ('candidatos.png', 'vistas.png', 'revision.png', 'guia.png', 'preview.gif', 'preview_iso.gif',
+PARA_MIRAR = ('candidatos.png', 'vistas.png', 'revision.png', 'revision_cerca.png', 'guia.png', 'preview.gif', 'preview_iso.gif',
               'preview.png', 'ultratex_vistas.png', 'ultratex_espalda.png', 'ultratex_costados.png', 'tarjeta.png')
 MAX_POR_CARPETA = 20   # más archivos nuevos en una carpeta (frames, celdas iso): se resume la carpeta
 

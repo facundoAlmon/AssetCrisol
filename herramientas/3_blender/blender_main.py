@@ -1364,7 +1364,6 @@ def control_reves():
     descartar las caras de atrás; donde difieren, lo que se veía era una cara de atrás -> magenta sobre el render ->
     trabajo/reves/<anim>_<costado|frente>.png. Magenta = se ve el interior de la malla: agujeros, capas escondidas
     que atraviesan la de afuera al moverse, normales al revés (en los sprites, manchas oscuras)."""
-    import numpy as np
     sc.render.engine = 'BLENDER_WORKBENCH'
     sh = sc.display.shading
     sh.light = 'STUDIO'; sh.color_type = 'TEXTURE'
@@ -1372,15 +1371,6 @@ def control_reves():
     cam.data.ortho_scale = ORTHO
     apuntar(cam, (0, -10, CAM_Z), (math.pi / 2, 0, 0))
     d = os.path.join(TRABAJO, 'reves'); os.makedirs(d, exist_ok=True)
-    tmp = os.path.join(d, '_tmp.png')
-
-    def pixeles(culling):
-        sh.show_backface_culling = culling
-        render(tmp)
-        im = bpy.data.images.load(tmp)
-        px = np.array(im.pixels[:], dtype=np.float32).reshape(im.size[1], im.size[0], 4)
-        bpy.data.images.remove(im)
-        return px
     funciones = dict(animaciones(a))
     for nombre_anim, i in POSES_REVES:
         if nombre_anim not in funciones:
@@ -1389,15 +1379,102 @@ def control_reves():
         sc.frame_set(frames[min(i, len(frames) - 1)])
         for vista, giro in (('costado', 90), ('frente', 0)):
             arm.rotation_euler.z = math.radians(giro)
-            con, sin = pixeles(False), pixeles(True)
-            dif = (np.abs(con - sin).max(axis=2) > 0.04) & (con[..., 3] > 0.5)
-            con[dif] = (1, 0, 1, 1)
-            im = bpy.data.images.new('reves', con.shape[1], con.shape[0], alpha=True)
-            im.pixels[:] = con.ravel()
-            im.filepath_raw = os.path.join(d, f'{nombre_anim}_{vista}.png'); im.file_format = 'PNG'
-            im.save()
-            bpy.data.images.remove(im)
+            render_reves(os.path.join(d, f'{nombre_anim}_{vista}.png'))
+    arm.rotation_euler.z = math.radians(90)
+
+
+def render_reves(path):
+    """Render Workbench con textura (ya configurado) con las caras de atrás a la vista en magenta: renderiza con y sin
+    descartar las caras de atrás y donde difieren lo que se veía era una cara de atrás. Devuelve el % de la figura
+    en magenta."""
+    import numpy as np
+    sh = sc.display.shading
+    tmp = path + '.tmp.png'
+
+    def pixeles(culling):
+        sh.show_backface_culling = culling
+        render(tmp)
+        im = bpy.data.images.load(tmp)
+        px = np.array(im.pixels[:], dtype=np.float32).reshape(im.size[1], im.size[0], 4)
+        bpy.data.images.remove(im)
+        return px
+    con, sin = pixeles(False), pixeles(True)
     os.remove(tmp)
+    opaco = con[..., 3] > 0.5
+    dif = (np.abs(con - sin).max(axis=2) > 0.04) & opaco
+    con[dif] = (1, 0, 1, 1)
+    im = bpy.data.images.new('reves', con.shape[1], con.shape[0], alpha=True)
+    im.pixels[:] = con.ravel()
+    im.filepath_raw = path; im.file_format = 'PNG'
+    im.save()
+    bpy.data.images.remove(im)
+    return 100 * float(dif.sum()) / max(1, int(opaco.sum()))
+
+
+# revisión de cerca (paso revisar): (zona, cadena de 3 huesos -la articulación es la cabeza del del medio-, poses
+# [(animación, cuadro)], lado del encuadre × altura). De cada pose, el lado (.L/.R) más doblado. 'cara': la cabeza.
+ZONAS_CERCA = [
+    ('codo', ('upper_arm', 'forearm', 'hand'), [('golpe', 2), ('lanzar', 3), ('brazos_arriba', 3)], 0.3),
+    ('hombro', ('shoulder', 'upper_arm', 'forearm'), [('brazos_arriba', 3), ('golpe', 2)], 0.36),
+    ('rodilla', ('thigh', 'shin', 'foot'), [('agacharse', 0), ('patada', 3), ('correr', 3)], 0.3),
+    ('cadera', ('hips', 'thigh', 'shin'), [('patada', 3), ('agacharse', 0)], 0.4),
+    ('cara', None, [('idle', 0)], None),
+]
+ZONAS_CERCA_CUADRUPEDO = [
+    ('pata delantera', ('front_upper', 'front_lower', 'front_foot'), [('correr', 3), ('golpe', 2), ('saltar', 2)], 0.5),
+    ('pata trasera', ('back_upper', 'back_lower', 'back_foot'), [('correr', 3), ('saltar', 2), ('morir', 5)], 0.5),
+    ('cara', None, [('idle', 0)], None),
+]
+
+
+def control_cerca():
+    """Revisión de cerca (paso revisar): lo que en un sprite no se nota y en 3D sí. Planos cercanos de codos,
+    hombros, rodillas, cadera y cara en las poses que más los doblan, de frente y de costado (la cara, de frente y de
+    tres cuartos), en Workbench con textura (costuras, manchas, codos de plastilina) y el interior a la vista en
+    magenta (ropa que atraviesa, agujeros) -> trabajo/cerca/<zona>_<pose>_<vista>.png + cerca.json (% de magenta)."""
+    sc.render.engine = 'BLENDER_WORKBENCH'
+    sh = sc.display.shading
+    sh.light = 'STUDIO'; sh.color_type = 'TEXTURE'
+    sc.render.resolution_x = sc.render.resolution_y = 480
+    arm.rotation_euler.z = 0   # de frente (-Y), su izquierda (.L) en +X
+    d = os.path.join(TRABAJO, 'cerca'); os.makedirs(d, exist_ok=True)
+    for f in os.listdir(d):
+        os.remove(os.path.join(d, f))
+    funciones = dict(animaciones(a))
+    M = arm.matrix_world
+    out = []
+    for zona, cadena, poses, lado in ZONAS_CERCA_CUADRUPEDO if CUADRUPEDO else ZONAS_CERCA:
+        for nombre_anim, i in poses:
+            if nombre_anim not in funciones:
+                continue
+            frames = funciones[nombre_anim](arm, a)
+            sc.frame_set(frames[min(i, len(frames) - 1)])
+            pb = arm.pose.bones
+            if cadena is None:   # cara: entre la base y la punta de la cabeza, un poco abajo de la mitad
+                h = pb['head']
+                centro = M @ h.head.lerp(h.tail, 0.4)
+                orto = (h.tail - h.head).length * 0.95
+                vistas = [('frente', Vector((0, -1, 0.05))), ('tres cuartos', Vector((0.75, -0.75, 0.1)))]
+            else:
+                def doblez(s):
+                    p = [M @ pb[f'{b}.{s}' if f'{b}.{s}' in pb else b].head for b in cadena]
+                    return (p[1] - p[0]).angle(p[2] - p[1], 0)
+                s = max(('L', 'R'), key=doblez)
+                centro = M @ pb[f'{cadena[1]}.{s}'].head
+                orto = lado * ALTURA
+                x = 1 if s == 'L' else -1
+                vistas = [('frente', Vector((0.25 * x, -1, 0.15))), ('costado', Vector((x, -0.15, 0.15)))]
+            cam.data.ortho_scale = orto
+            for vista, dirv in vistas:
+                dirv = dirv.normalized()
+                cam.location = centro + dirv * 6
+                cam.rotation_euler = (-dirv).to_track_quat('-Z', 'Y').to_euler()
+                archivo = f"{zona.replace(' ', '_')}_{nombre_anim}_{vista.replace(' ', '_')}.png"
+                pct = render_reves(os.path.join(d, archivo))
+                out.append({'archivo': archivo, 'zona': zona, 'pose': nombre_anim, 'vista': vista,
+                            'magenta': round(pct, 2)})
+    with open(os.path.join(d, 'cerca.json'), 'w') as f:
+        json.dump(out, f, indent=1)
     arm.rotation_euler.z = math.radians(90)
 
 
@@ -1433,6 +1510,7 @@ if modo == 'construir':
 
 elif modo == 'reves':
     control_reves()
+    control_cerca()
     print('REVES OK')
 
 elif modo == 'retrato':

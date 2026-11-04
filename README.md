@@ -490,7 +490,12 @@ La plantilla ya trae estos valores; acá está qué mirar y qué tocar si sale m
    costado (idle, caminata, correr), los codos doblados, la caminata iso de frente y de espalda, las poses clave y el
    **revés**: 7 poses donde lo que se ve del interior de la malla sale en magenta (agujeros, normales al revés, el
    interior del pantalón al agacharse). Avisa si alguna pose (sin contar rodar) pasa del 3 % de la figura; la boca
-   abierta marca siempre y no es un problema. Es lo último que hay que mirar antes de usar el personaje.
+   abierta marca siempre y no es un problema. Además, `trabajo/revision_cerca.png` es la **revisión de cerca**: lo
+   que en un sprite no se nota y en 3D (o con `sprites.superresolucion` alta) sí. Codos, hombros, rodillas, cadera y
+   cara de cerca, en las poses que más los doblan (el lado más doblado), de frente y de costado, con textura y el
+   interior en magenta: codos de plastilina, ropa que se atraviesa, costuras y manchas de la textura (los cuadrúpedos:
+   patas delanteras, traseras y cara; las tomas sueltas quedan en `trabajo/cerca/`). Es lo último que hay que mirar
+   antes de usar el personaje.
 8. **Cambios del rig o las animaciones**: `crisol rehacer a,b,c` (o `todos`) corre `blender` → `sprites` →
    `iso` → `anclas` → `revisar` en cada uno, sigue si uno falla y al final lista las fallas.
 

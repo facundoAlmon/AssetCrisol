@@ -15,6 +15,10 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   el bloque `tiempo_real` del json (`false` lo apaga). En `crisol ui`, Exportar > Tiempo real. Los huesos de los
   humanoides salen con los nombres de Mixamo (Unity Humanoid, Unreal, mapeo automático de Godot) o, con
   `tiempo_real.huesos: "godot"`, los de `SkeletonProfileHumanoid`; sin los huesos auxiliares del IK.
+- **Revisión de cerca** (paso `revisar`): `trabajo/revision_cerca.png` con codos, hombros, rodillas, cadera y cara
+  de cerca en las poses que más los doblan, de frente y de costado, con textura y el interior a la vista en magenta
+  (ropa que se atraviesa, codos de plastilina, costuras de la textura); en cuadrúpedos, patas y cara. En `crisol ui`,
+  junto a la hoja de revisión.
 - **Cuadrúpedos** (`crisol nuevo <n> --receta cuadrupedo`): perros, gatos, caballos... con su propio esqueleto
   (`modelo.esqueleto: "cuadrupedo"`: cuatro patas con IK, cuello, cabeza y cola), las articulaciones estimadas de la
   malla (sin DWPose; el animal se gira solo para mirar adelante) y 8 animaciones procedurales (idle, paso, salto,

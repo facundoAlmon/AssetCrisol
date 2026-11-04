@@ -504,8 +504,12 @@ The template already has these values; this is what to look at and what to chang
    (idle, walk, run), bent elbows, the iso walk from the front and from the back, the key poses and the
    **inside-out** row: 7 poses where whatever shows of the mesh's interior is drawn magenta (holes, flipped normals,
    the inside of the trousers when crouching). It warns if any pose (not counting the roll) goes over 3 % of the
-   figure; an open mouth always shows up and is not a problem. It is the last thing to check before using the
-   character.
+   figure; an open mouth always shows up and is not a problem. Also, `trabajo/revision_cerca.png` is the **close-up
+   review**: what you don't notice in a sprite but do in 3D (or with a high `sprites.superresolucion`). Elbows,
+   shoulders, knees, hips and face up close, in the poses that bend them most (the most bent side), from the front
+   and the side, textured and with the interior in magenta: clay-like elbows, clothes passing through, texture seams
+   and stains (quadrupeds: front legs, hind legs and face; the single shots stay in `trabajo/cerca/`). It is the
+   last thing to check before using the character.
 8. **Rig or animation changes**: `crisol rehacer a,b,c` (or `todos`) runs `blender` → `sprites` → `iso` →
    `anclas` → `revisar` on each one, carries on if one fails and lists the failures at the end.
 

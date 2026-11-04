@@ -80,9 +80,9 @@ export default {
     readme: 'anclas-crisol-anclas',
   },
   revisar: {
-    hace: 'Arma una hoja de control con la cabeza de costado, los codos doblados, la caminata iso de frente y de espalda, las poses clave y el "revés": lo que se ve del interior de la malla, en magenta.',
+    hace: 'Arma una hoja de control con la cabeza de costado, los codos doblados, la caminata iso de frente y de espalda, las poses clave y el "revés": lo que se ve del interior de la malla, en magenta. Aparte, la revisión de cerca: codos, hombros, rodillas, cadera y cara de cerca en las poses que más los doblan.',
     mirar: 'Es lo último que hay que mirar antes de usar el personaje. Avisa si en alguna pose el revés pasa del 3 % (la boca abierta siempre marca y no es un problema).',
-    mal: 'Manchas magenta grandes: agujeros o ropa que se atraviesa al animar. Probá otra malla o, si son caras al revés, la opción de normales del README.',
+    mal: 'Manchas magenta grandes: agujeros o ropa que se atraviesa al animar. De cerca, codos que se aplastan: la opción de preservar volumen o los pesos (README). Probá otra malla o, si son caras al revés, la opción de normales del README.',
     readme: 'qué-mirar-en-cada-paso-receta-para-humanoides',
   },
   godot: {

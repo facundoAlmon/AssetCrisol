@@ -160,7 +160,8 @@ def main():
                 if paso(env, 'anclas', 'cris'):
                     hay(c, os.path.join('trabajo', 'iso', 'anclas.json'))
                 if paso(env, 'revisar', 'cris'):
-                    hay(c, os.path.join('trabajo', 'revision.png'))
+                    hay(c, os.path.join('trabajo', 'revision.png'), os.path.join('trabajo', 'revision_cerca.png'))
+                    revisar_imagen(os.path.join(c, 'trabajo', 'revision_cerca.png'), 600, 600)
             if paso(env, 'godot', 'cris'):
                 hay(c, os.path.join(g, 'cris_visual.tscn'))
         for obj in sorted(os.listdir(os.path.join(D, 'objetos'))):

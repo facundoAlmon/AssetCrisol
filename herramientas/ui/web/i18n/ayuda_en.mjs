@@ -80,9 +80,9 @@ export default {
     readme: 'anchors-crisol-anclas',
   },
   revisar: {
-    hace: 'Builds a check sheet with the head from the side, the bent elbows, the iso walk from front and back, the key poses and the "inside-out" view: what shows of the inside of the mesh, in magenta.',
+    hace: 'Builds a check sheet with the head from the side, the bent elbows, the iso walk from front and back, the key poses and the "inside-out" view: what shows of the inside of the mesh, in magenta. Also the close-up review: elbows, shoulders, knees, hips and face up close in the poses that bend them most.',
     mirar: 'The last thing to check before using the character. It warns if any pose goes over 3 % inside-out (an open mouth always shows and is not a problem).',
-    mal: 'Large magenta patches: holes or clothes that pass through when animating. Try another mesh or, if they are flipped faces, the normals option in the README.',
+    mal: 'Large magenta patches: holes or clothes that pass through when animating. Up close, elbows that flatten: the preserve volume option or the weights (README). Try another mesh or, if they are flipped faces, the normals option in the README.',
     readme: 'what-to-check-at-each-step-humanoid-recipe',
   },
   godot: {

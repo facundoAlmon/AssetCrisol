@@ -29,7 +29,7 @@ def _patrones(paso, tipo, n):
                 'retrato': [f'{t}/retrato', f'{gd}/{n}_retrato.png', f'{gd}/{n}_frente.png'],
                 'iso': [f'{gd}/iso', 'preview_iso.gif', f'{t}/iso/*/', f'{t}/iso/iso.json'],
                 'anclas': [f'{t}/iso/anclas.json'],
-                'revisar': [f'{t}/reves', f'{t}/revision.png'],
+                'revisar': [f'{t}/reves', f'{t}/revision.png', f'{t}/cerca', f'{t}/revision_cerca.png'],
                 'godot': [f'{gd}/*.tscn', f'{gd}/*.tres', f'{gd}/iso/*.tscn', f'{gd}/iso/*.tres', 'godot/personajes/_comun'],
                 }.get(paso, [])
     if tipo == 'vehiculo':

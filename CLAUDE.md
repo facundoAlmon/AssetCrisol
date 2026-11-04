@@ -107,7 +107,7 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   candidatos con zipfile), `generar_movimiento.py` (venv Kimodo), `articulaciones_pose.py`
   (DWPose), `dibujar_guia.py`, `vehiculo.py`.
 - `4_sprites/`: `armar_tira.py` (`ANIMACIONES`, hoja, retrato), `armar_iso.py`, `armar_objeto.py`, `revisar.py`
-  (`revision.png`), `aseprite.py` (`.json` estilo Aseprite junto a cada hoja), `posproceso.py` (color, nitidez, contorno del estilo), `vitrina.py` (gifs de `docs/vitrina/` desde los
+  (`revision.png`; `revision_cerca.png` con las tomas de `blender_main.control_cerca`, `ZONAS_CERCA`), `aseprite.py` (`.json` estilo Aseprite junto a cada hoja), `posproceso.py` (color, nitidez, contorno del estilo), `vitrina.py` (gifs de `docs/vitrina/` desde los
   ejemplos ya renderizados en datos_dir).
 - `5_godot/`: `exportar_godot.py`, `exportar_objeto.py`, `sprite_personaje.gd`, `sprite_personaje_iso.gd`, `objeto_iso.gd`.
 - `6_escenario/`: `texturas.py`, `repetible.py`, `tema.py`.

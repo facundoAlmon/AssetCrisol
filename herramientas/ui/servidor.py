@@ -156,7 +156,7 @@ def grupos_exportar(pdir, pj, nombre, tipo):
              ('anclas', hay(f'{t}/iso/anclas.json')),
              ('modelo', hay(f'{t}/malla/modelo.glb', f'{t}/animado.glb')),
              ('tiempo_real', hay(f'{t}/tiempo_real/*')),
-             ('previas', hay('preview.gif', 'preview_iso.gif', f'{t}/revision.png')),
+             ('previas', hay('preview.gif', 'preview_iso.gif', f'{t}/revision.png', f'{t}/revision_cerca.png')),
              ('fuente', hay('personaje.json', 'referencia.png', rel(pdir, elegida) if elegida else ''))]
     elif tipo in ('objeto', 'vehiculo'):
         g = [('godot', hay('godot/**/*')),
@@ -206,7 +206,7 @@ def visuales(pdir, pj, nombre, tipo):
         grupo('3d', f'{t}/malla/modelo.glb')
         grupo('iso', 'preview_iso.gif')
         grupo('retrato', f'{gd}/{nombre}_retrato.png', f'{gd}/{nombre}_frente.png')
-        grupo('revision', f'{t}/revision.png')
+        grupo('revision', f'{t}/revision.png', f'{t}/revision_cerca.png')
         grupo('hoja', f'{gd}/{nombre}_sheet.png')
         grupo('guia', f'{t}/guia/guia.png')
     elif tipo == 'vehiculo':

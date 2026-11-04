@@ -127,7 +127,8 @@ Mejoras pedidas (2026-10-28):
 - [x] Polígonos para tiempo real + LODs, conservando UV y pesos: `trabajo/tiempo_real/<n>.glb` (LOD0, para Godot) y
       `<n>_lods.glb` (un esqueleto con `<n>_LOD0..2`; personajes 20/10/5 k triángulos con rig y animaciones, objetos
       10/5/2 k; textura 2048). Falta: vehículos (piezas separadas) y costuras de textura en el LOD más bajo.
-- [ ] Revisión de cerca: lo que en un sprite no se nota (codos, ropa que atraviesa, costuras de textura).
+- [x] Revisión de cerca: lo que en un sprite no se nota (codos, ropa que atraviesa, costuras de textura):
+      `trabajo/revision_cerca.png` del paso `revisar`.
 - [x] Esqueleto compatible en `tiempo_real/`: nombres de Mixamo (Unity Humanoid, Unreal, mapeo automático de Godot) o de
       `SkeletonProfileHumanoid` (`tiempo_real.huesos`), sin los auxiliares del IK (sin dedos ni cara). Falta probarlo
       dentro de Unity y Unreal (no están en esta PC).
