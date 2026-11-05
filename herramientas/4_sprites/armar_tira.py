@@ -56,18 +56,34 @@ def recortar_alfa(im, margen=4):
     return im.crop((b[0] - margen, b[1] - margen, b[2] + margen, b[3] + margen))
 
 
-def recorte_imagen(pdir, caja):
-    """El encuadre del retrato (caja en unidades del modelo, de retrato.json) recortado de la imagen que
-    generó la malla (trabajo/malla/sin_fondo.png). Blender normaliza la malla a lo que se ve en la imagen:
-    pies en z=0, arriba en z=altura, centrada en x; así que el bbox del alfa es esa misma caja."""
-    im = Image.open(os.path.join(pdir, 'trabajo', 'malla', 'sin_fondo.png')).convert('RGBA')
+def caja_imagen(im, caja):
+    """La caja del retrato (en unidades del modelo, de retrato.json) en píxeles de la imagen que generó la malla.
+    Blender normaliza la malla a lo que se ve en la imagen: pies en z=0, arriba en z=altura, centrada en x; así
+    que el bbox del alfa es esa misma caja."""
     bx0, by0, bx1, by1 = im.getchannel('A').point(lambda v: 255 if v > 128 else 0).getbbox()
     s = (by1 - by0) / caja['altura']                       # píxeles por unidad
     cx = (bx0 + bx1) / 2
-    box = [round(cx + caja['x'][0] * s), round(by1 - caja['z'][1] * s),
-           round(cx + caja['x'][1] * s), round(by1 - caja['z'][0] * s)]
+    return [round(cx + caja['x'][0] * s), round(by1 - caja['z'][1] * s),
+            round(cx + caja['x'][1] * s), round(by1 - caja['z'][0] * s)]
+
+
+def recorte_imagen(pdir, caja, fracciones=None):
+    """El encuadre del retrato recortado de trabajo/malla/sin_fondo.png: el de Blender (caja de retrato.json) o,
+    con `fracciones` [x0, y0, x1, y1] (retrato.caja.imagen, del editor de crisol ui), esa parte de la imagen."""
+    im = Image.open(os.path.join(pdir, 'trabajo', 'malla', 'sin_fondo.png')).convert('RGBA')
+    if fracciones:
+        box = [round(fracciones[0] * im.width), round(fracciones[1] * im.height),
+               round(fracciones[2] * im.width), round(fracciones[3] * im.height)]
+    else:
+        box = caja_imagen(im, caja)
     # crop fuera de la imagen deja transparente (con RGBA)
     return im.crop(box).resize((caja['ancho_px'], caja['alto_px']), Image.LANCZOS)
+
+
+def fuente(pj):
+    """De dónde sale el retrato: retrato.fuente, o "modelo" en cuadrúpedos e "imagen" en los demás."""
+    cuadrupedo = pj.get('modelo', {}).get('esqueleto') == 'cuadrupedo'
+    return pj.get('retrato', {}).get('fuente') or ('modelo' if cuadrupedo else 'imagen')
 
 
 def retratos(pdir, nombre, pj, dir_godot, meta):
@@ -76,15 +92,14 @@ def retratos(pdir, nombre, pj, dir_godot, meta):
     calcula Blender; "modelo": el render del modelo 3D (también si falta la imagen o retrato.json). Los cuadrúpedos
     van por defecto con "modelo": su imagen es de tres cuartos y la caja (de frente) caía sobre el lomo."""
     P, sr = pj['_estilo']['posproceso'], pj['sprites']['superresolucion']
-    cuadrupedo = pj.get('modelo', {}).get('esqueleto') == 'cuadrupedo'
     rdir = os.path.join(pdir, 'trabajo', 'retrato')
     if not os.path.exists(os.path.join(rdir, 'retrato.png')):
         return
     caja = os.path.join(rdir, 'retrato.json')
     img = os.path.join(pdir, 'trabajo', 'malla', 'sin_fondo.png')
-    if pj.get('retrato', {}).get('fuente', 'modelo' if cuadrupedo else 'imagen') == 'imagen' and os.path.exists(caja) and os.path.exists(img):
+    if fuente(pj) == 'imagen' and os.path.exists(caja) and os.path.exists(img):
         with open(caja) as f:
-            retrato = recorte_imagen(pdir, json.load(f))
+            retrato = recorte_imagen(pdir, json.load(f), (pj.get('retrato', {}).get('caja') or {}).get('imagen'))
         print('[sprites] retrato recortado de trabajo/malla/sin_fondo.png')
     else:
         retrato = Image.open(os.path.join(rdir, 'retrato.png')).convert('RGBA')

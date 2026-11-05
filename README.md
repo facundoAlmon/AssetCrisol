@@ -1073,6 +1073,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `retrato.ancho_px` | (512) ancho del retrato (alto = 1.25 × ancho) |
 | `retrato.zoom` | (1) más de 1 acerca la cámara: para alas, mochilas o cuellos altos que achican la cabeza |
 | `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render (el valor por defecto en cuadrúpedos: su imagen es de tres cuartos) |
+| `retrato.caja` | (opcional) el encuadre a mano del editor de `crisol ui` (Resultado > Retrato): `{"imagen": [x0, y0, x1, y1], "modelo": [...]}`, fracciones de `sin_fondo.png` o del render de frente (`trabajo/retrato/frente.png`), una por fuente; pisa a `zoom`/`hombros`. `de_imagen` = la elegida sobre la que se hizo (si cambia, `estado` avisa). Con la imagen, `crisol retrato` solo recorta (sin Blender) |
 | `isometrico.*` | (opcional) ver [Iso](#iso-crisol-iso) |
 | `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado máximo de la textura; `huesos`: `"mixamo"` (por defecto), `"godot"` o `"crisol"`; `mapas`: `["normal", "orm"]` (por defecto), `"ao"` suma la oclusión; `false` = no exportarlos (ver 3b) |
 

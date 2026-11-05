@@ -1080,7 +1080,14 @@ def paso_retrato(nombre):
     pdir, pj = cargar(nombre)
     if pj['_objeto']:
         sys.exit('[retrato] los objetos no tienen retrato')
-    blender('retrato', pdir, pj)
+    r = os.path.join(pdir, 'trabajo', 'retrato')
+    glb = os.path.join(pdir, 'trabajo', 'malla', 'modelo.glb')
+    al_dia = all(os.path.exists(os.path.join(r, x)) and os.path.getmtime(os.path.join(r, x)) >= os.path.getmtime(glb)
+                 for x in ('frente.png', 'retrato.png', 'retrato.json'))
+    if armar_tira.fuente(pj) == 'imagen' and (pj.get('retrato', {}).get('caja') or {}).get('imagen') and al_dia:
+        print('[retrato] recorte de la imagen con retrato.caja.imagen: sin Blender')   # el frente ya está
+    else:
+        blender('retrato', pdir, pj)
     dg = os.path.join(dir_godot(pdir), 'personajes', nombre)
     os.makedirs(dg, exist_ok=True)
     mp = os.path.join(dg, f'{nombre}_meta.json')

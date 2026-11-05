@@ -183,6 +183,11 @@ it, wheel or two fingers to zoom, right click (or two fingers) to move the camer
 
 ![Result: portrait](ui/img/en/resultado_retrato.webp)
 
+**Edit the framing** (under the portrait): a box over the whole image, or over the model from the front, that you
+drag and make bigger or smaller from the corner (also with the arrows and + −), with the preview next to it. **Save
+and redo the portrait** redoes it in seconds; **Automatic** goes back to the framing the rig computes. It warns when
+the image crop is so small it will look blurry, and when you later change the chosen image.
+
 **3D game**: the reduced model for a 3D game, in three levels of detail (LOD), with its faces and file size. *Show
 faces* draws it as a wireframe.
 

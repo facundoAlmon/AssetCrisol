@@ -1512,14 +1512,22 @@ def retratos():
     ev.to_mesh_clear()
     ancho_px = rt.get('ancho_px', 512)
     sc.render.resolution_x, sc.render.resolution_y = ancho_px, int(ancho_px * 1.25)
-    # zoom > 1 acerca (la cabeza queda arriba): para lo que agranda el ancho sobre el cuello (alas, mochila, cuello alto)
-    orto = cam.data.ortho_scale = max(arriba - abajo, ancho * 1.25) * 1.06 / rt.get('zoom', 1.0)
-    zc = arriba + 0.03 * orto - orto / 2
-    apuntar(cam, (0, -10, zc), (math.pi / 2, 0, 0))
+    caja = (rt.get('caja') or {}).get('modelo')
+    if caja:   # la del editor de crisol ui: fracciones [x0, y0, x1, y1] de frente.png (ORTHO × ORTHO en (0, CAM_Z))
+        orto = (caja[3] - caja[1]) * ORTHO
+        xc = ((caja[0] + caja[2]) / 2 - 0.5) * ORTHO
+        zc = CAM_Z + (0.5 - (caja[1] + caja[3]) / 2) * ORTHO
+    else:
+        # zoom > 1 acerca (la cabeza queda arriba): para lo que agranda el ancho sobre el cuello (alas, mochila)
+        orto = max(arriba - abajo, ancho * 1.25) * 1.06 / rt.get('zoom', 1.0)
+        xc, zc = 0, arriba + 0.03 * orto - orto / 2
+    cam.data.ortho_scale = orto
+    apuntar(cam, (xc, -10, zc), (math.pi / 2, 0, 0))
     render(os.path.join(d, 'retrato.png'))
     with open(os.path.join(d, 'retrato.json'), 'w') as f:   # ortho_scale = lado mayor (el alto)
-        json.dump({'altura': ALTURA, 'x': [-orto / 2.5, orto / 2.5], 'z': [zc - orto / 2, zc + orto / 2],
-                   'ancho_px': ancho_px, 'alto_px': int(ancho_px * 1.25)}, f)
+        json.dump({'altura': ALTURA, 'x': [xc - orto / 2.5, xc + orto / 2.5], 'z': [zc - orto / 2, zc + orto / 2],
+                   'ancho_px': ancho_px, 'alto_px': int(ancho_px * 1.25),
+                   'frente': {'ortho': ORTHO, 'centro_z': CAM_Z}}, f)   # el encuadre de frente.png, para el editor
 
 
 # poses del control de revés (paso revisar): las que más estiran la malla
@@ -1674,6 +1682,37 @@ if modo == 'construir':
     with open(os.path.join(TRABAJO, 'frames', 'frames.json'), 'w') as f:
         json.dump({'size': size, 'ppu': ppu, 'frames': info}, f)
     print('CONSTRUIR OK', info)
+
+elif modo == 'esqueletos':
+    # para crisol ui (Movimientos): el esqueleto de costado de cada animación procedural que también puede salir de un
+    # clip (metodos.CUADROS), en los cuadros de la hoja y con la forma de metodos.esqueleto (x = adelante, y = arriba,
+    # en el lugar). Lo corre herramientas/3_blender/procedurales.py sobre Cris -> movimientos/procedurales.json
+    import metodos
+    ap = dict(a, metodos={n: 'procedural' for n in metodos.CUADROS})
+    arm.rotation_euler.z = 0   # de frente (-Y): adelante = -y
+    nombres = [b.name for b in arm.data.bones if b.use_deform and not b.name.startswith('shoulder')]
+    huesos = [[2 * i, 2 * i + 1, n.endswith('.L')] for i, n in enumerate(nombres)]
+    out = {}
+    for nombre_anim, fn in animaciones(ap):
+        if nombre_anim not in metodos.CUADROS:
+            continue
+        frames = fn(arm, ap)
+        cuadros = []
+        for f in frames:
+            sc.frame_set(f)
+            raiz = (arm.matrix_world @ arm.pose.bones['root'].head).y
+            fila = []
+            for n in nombres:
+                pb = arm.pose.bones[n]
+                for p in (arm.matrix_world @ pb.head, arm.matrix_world @ pb.tail):
+                    fila += [round(raiz - p.y, 3), round(p.z, 3)]
+            cuadros.append(fila)
+        out[nombre_anim] = {'fps': 12, 'cuadros': len(cuadros), 'huesos': huesos, 'cuadros_xy': cuadros}
+    with open(os.path.join(TRABAJO, 'esqueletos.json'), 'w') as f:
+        json.dump({'_doc': 'Esqueleto de costado de las animaciones procedurales (rig de Cris), para crisol ui > '
+                           'Movimientos. Lo arma herramientas/3_blender/procedurales.py: rehacerlo al cambiar anim.py.',
+                   'huesos': nombres, 'animaciones': out}, f, separators=(',', ':'))
+    print('ESQUELETOS OK', list(out))
 
 elif modo == 'reves':
     control_reves()

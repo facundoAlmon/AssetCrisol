@@ -183,6 +183,11 @@ un punto (la cara, un pie). Sirve para ver un codo o una rodilla desde cualquier
 
 ![Resultado: retrato](ui/img/es/resultado_retrato.webp)
 
+**Editar el encuadre** (debajo del retrato): un cuadro sobre la imagen entera, o sobre el modelo de frente, que se
+arrastra y se agranda o achica desde la esquina (también con las flechas y + −), con la vista previa al lado.
+**Guardar y rehacer el retrato** lo rehace en segundos; **Automático** vuelve al encuadre que calcula el rig. Avisa
+si el recorte de la imagen es tan chico que se va a ver borroso, y si después cambiás la imagen elegida.
+
 **Juego 3D**: el modelo reducido para un juego 3D, en tres niveles de detalle (LOD), con sus caras y su peso. *Ver las
 caras* lo muestra en alambre.
 

@@ -411,6 +411,42 @@ def main():
                  'deshacer corregir: solo las correcciones', rutas)
         pedir(base, 'api/assets/cris/deshacer', 'POST', {'paso': 'corregir'})
 
+        print('editor del retrato')
+        rdir = os.path.join(cfg['datos_dir'], 'personajes', 'cris', 'trabajo', 'retrato')
+        os.makedirs(rdir, exist_ok=True)
+        from PIL import Image
+        Image.new('RGBA', (400, 400)).save(os.path.join(rdir, 'frente.png'))
+        with open(os.path.join(rdir, 'retrato.json'), 'w') as f:
+            json.dump({'altura': 1.85, 'x': [-0.25, 0.25], 'z': [1.2, 1.825], 'ancho_px': 512, 'alto_px': 640,
+                       'frente': {'ortho': 2.5, 'centro_z': 1.0}}, f)
+        c, r = pedir(base, 'api/assets/cris/retrato')
+        mod = (r.get('fuentes') or {}).get('modelo') or {}
+        chequear(c == 200 and r['fuente'] == 'imagen' and r['fuentes']['imagen'] and mod.get('auto') == [0.4, 0.17, 0.6, 0.42],
+                 'retrato: fuentes con su caja automática', r)
+        for malo in ({'fuente': 'x', 'caja': None}, {'fuente': 'imagen', 'caja': [0, 0, 1]},
+                     {'fuente': 'imagen', 'caja': [0.5, 0.5, 0.5, 0.9]}, {'fuente': 'modelo', 'caja': ['a', 0, 1, 1]}):
+            c, _ = pedir(base, 'api/assets/cris/retrato', 'PUT', malo)
+            chequear(c == 400, f'retrato rechazado: {json.dumps(malo)}', str(c))
+        jcris = os.path.join(cfg['datos_dir'], 'personajes', 'cris', 'personaje.json')
+        c, r = pedir(base, 'api/assets/cris/retrato', 'PUT', {'fuente': 'imagen', 'caja': [0.3, 0.05, 0.6, 0.425]})
+        rt = json.load(open(jcris)).get('retrato', {})
+        chequear(c == 200 and rt['fuente'] == 'imagen' and rt['caja'] == {'imagen': [0.3, 0.05, 0.6, 0.425], 'de_imagen': 104}
+                 and r['caja']['imagen'] and not r['vieja'], 'guardar la caja de la imagen (y de qué imagen es)', rt)
+        pedir(base, 'api/assets/cris/elegir', 'POST', {'clave': 'imagen.elegida', 'valor': 'otra.png'})
+        c, d = pedir(base, 'api/assets/cris')
+        sp = next((p for p in d['pasos'] if p['paso'] == 'sprites'), {})
+        c2, r = pedir(base, 'api/assets/cris/retrato')
+        chequear(r.get('vieja') and (sp.get('aviso') or {}).get('id') in ('retrato_caja_vieja', None), 'la caja quedó vieja al cambiar la elegida', sp)
+        pedir(base, 'api/assets/cris/elegir', 'POST', {'clave': 'imagen.elegida', 'valor': '104'})
+        c, r = pedir(base, 'api/assets/cris/retrato', 'PUT', {'fuente': 'modelo', 'caja': [0.4, 0.05, 0.6, 0.3]})
+        c2, r = pedir(base, 'api/assets/cris/retrato', 'PUT', {'fuente': 'imagen', 'caja': None})
+        rt = json.load(open(jcris)).get('retrato', {})
+        chequear(c == 200 and c2 == 200 and rt['caja'] == {'modelo': [0.4, 0.05, 0.6, 0.3]} and rt['fuente'] == 'imagen',
+                 'automático borra solo la caja de esa fuente', rt)
+        c, r = pedir(base, 'api/assets/cris/retrato', 'PUT', {'fuente': 'modelo', 'caja': None})
+        chequear('caja' not in json.load(open(jcris))['retrato'], 'sin cajas, sin retrato.caja')
+        op = json.load(open(jcris)); op['retrato'].pop('fuente'); json.dump(op, open(jcris, 'w'), indent=2)
+
         print('papelera')
         datos = cfg['datos_dir']
         c, t = pedir(base, 'api/assets/martillo/tamano')

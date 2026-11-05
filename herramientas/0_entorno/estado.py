@@ -151,6 +151,19 @@ def _articulaciones(marca, glb, pj):
     return p
 
 
+def _retrato(p, pj):
+    """El encuadre del retrato que se hizo a mano sobre otra imagen (retrato.caja.de_imagen) ya no corresponde."""
+    rt = pj.get('retrato') or {}
+    caja = rt.get('caja') or {}
+    fuente = rt.get('fuente') or ('modelo' if pj.get('modelo', {}).get('esqueleto') == 'cuadrupedo' else 'imagen')
+    elegida = pj.get('imagen', {}).get('elegida')
+    if fuente == 'imagen' and caja.get('imagen') and str(caja.get('de_imagen')) != str(elegida) and 'aviso' not in p:
+        _aviso(p, f'el encuadre del retrato se hizo sobre la imagen {caja.get("de_imagen")} y la elegida es {elegida}: '
+                  'revisarlo (crisol ui > Resultado > Retrato) o borrar retrato.caja.imagen', 'retrato_caja_vieja',
+               de=caja.get('de_imagen'), elegida=elegida)
+    return p
+
+
 def personaje(pdir, pj, nombre):
     t = os.path.join(pdir, 'trabajo')
     g = os.path.join(pdir, 'godot', 'personajes', nombre)
@@ -167,7 +180,7 @@ def personaje(pdir, pj, nombre):
         _paso('guia', os.path.join(t, 'guia', 'guia.png'), [glb], opcional=True, nota=art,
               aviso=('guia_cargadas' if cargadas else 'guia_estimadas', {})),
         _paso('blender', blend, [glb] if cuadrupedo else [glb, marca]),
-        _paso('sprites', meta, [blend]),
+        _retrato(_paso('sprites', meta, [blend]), pj),
         _paso('iso', iso, [glb]),
         _paso('anclas', os.path.join(t, 'iso', 'anclas.json'), [iso]),
         _paso('revisar', os.path.join(t, 'revision.png'), [meta, iso]),

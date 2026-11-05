@@ -170,7 +170,7 @@ Biblioteca (2026-11-05):
       borrar <n> [--ver]` (en `deshacer.py`, junto a renombrar); en el MCP no.
 
 Resultado (2026-11-05):
-- [ ] Editor del retrato en Resultado > Retrato: fuente imagen/modelo y un cuadro 4:5 que se arrastra y se agranda o
+- [x] Editor del retrato en Resultado > Retrato: fuente imagen/modelo y un cuadro 4:5 que se arrastra y se agranda o
       achica sobre la fuente entera, con vista previa del recorte. Guarda `retrato.caja` (fracciones de la fuente, una
       por fuente; Automático la borra). Imagen: recorte directo de `sin_fondo.png`, sin Blender; modelo: la caja pasa
       a la cámara y se rehace el retrato (segundos). Avisa si el recorte se agranda (borroso) y si la caja de imagen

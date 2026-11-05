@@ -18,6 +18,7 @@ import operaciones as op  # noqa: E402
 import deshacer  # noqa: E402 (herramientas/0_entorno: deshacer un paso y renombrar)
 import metodos  # noqa: E402 (herramientas/3_blender: la biblioteca de movimientos y sus candidatos, sin bpy)
 import armar_iso  # noqa: E402 (herramientas/4_sprites: nombre en Godot, fps y loop de cada animación)
+import armar_tira  # noqa: E402 (herramientas/4_sprites: de qué fuente sale el retrato y su caja automática)
 import generar_imagen  # noqa: E402 (herramientas/1_imagen: el prompt armado, para Ajustes)
 from cola import Cola  # noqa: E402
 
@@ -334,6 +335,68 @@ VISTAS_MALLA = [(v, f'comparar/{{c}}/{v}.png') for v in pipeline.VISTAS_COMPARAR
 VISTAS_VEHICULO = [('tarjeta', 'tarjeta_{c}.png')] + [(v, f'revision_{{c}}_{v}.png') for v in pipeline.VISTAS_VEHICULO]
 
 
+def datos_retrato(pdir, pj):
+    """Para el editor del retrato: de qué fuente sale, la caja guardada de cada una (retrato.caja, fracciones
+    [x0, y0, x1, y1] de la fuente) y cada fuente con su imagen, su tamaño y la caja automática (la de Blender)."""
+    from PIL import Image
+    t = os.path.join(pdir, 'trabajo')
+    rt = pj.get('retrato') or {}
+    try:
+        auto = op.leer(os.path.join(t, 'retrato', 'retrato.json'))
+    except (OSError, ValueError):
+        auto = None
+    fuentes = {}
+    for f, ruta in (('imagen', 'trabajo/malla/sin_fondo.png'), ('modelo', 'trabajo/retrato/frente.png')):
+        if not os.path.isfile(os.path.join(pdir, ruta)):
+            fuentes[f] = None
+            continue
+        im = Image.open(os.path.join(pdir, ruta))
+        w, h = im.size
+        caja = None
+        if auto and f == 'imagen':
+            b = armar_tira.caja_imagen(im.convert('RGBA'), auto)
+            caja = [b[0] / w, b[1] / h, b[2] / w, b[3] / h]
+        elif auto and auto.get('frente'):
+            o, cz = auto['frente']['ortho'], auto['frente']['centro_z']
+            caja = [auto['x'][0] / o + 0.5, 0.5 - (auto['z'][1] - cz) / o, auto['x'][1] / o + 0.5, 0.5 - (auto['z'][0] - cz) / o]
+        fuentes[f] = {'ruta': ruta, 'ancho': w, 'alto': h, 'auto': [round(x, 4) for x in caja] if caja else None,
+                      'fecha': os.path.getmtime(os.path.join(pdir, ruta))}
+    caja = rt.get('caja') or {}
+    elegida = (pj.get('imagen') or {}).get('elegida')
+    return {'fuente': armar_tira.fuente(pj), 'caja': {k: caja.get(k) for k in ('imagen', 'modelo')},
+            'ancho_px': rt.get('ancho_px', 512), 'fuentes': fuentes,
+            'vieja': bool(caja.get('imagen')) and str(caja.get('de_imagen')) != str(elegida), 'elegida': elegida}
+
+
+def guardar_retrato(ruta, b):
+    """{fuente: imagen|modelo, caja: [x0, y0, x1, y1] (fracciones de la fuente) o null = automático}: retrato.fuente
+    y retrato.caja.<fuente> (con la de imagen, de qué imagen elegida es)."""
+    fuente, caja = b.get('fuente'), b.get('caja')
+    if fuente not in ('imagen', 'modelo'):
+        raise ValueError('fuente: imagen o modelo')
+    if caja is not None:
+        if not (isinstance(caja, list) and len(caja) == 4 and all(isinstance(x, (int, float)) for x in caja)):
+            raise ValueError('caja: [x0, y0, x1, y1]')
+        caja = [round(min(1.5, max(-0.5, float(x))), 4) for x in caja]
+        if caja[2] - caja[0] < 0.02 or caja[3] - caja[1] < 0.02:
+            raise ValueError('caja: muy chica')
+    cfg = op.leer(ruta)
+    rt = cfg.setdefault('retrato', {})
+    rt['fuente'] = fuente
+    cajas = rt.setdefault('caja', {})
+    if caja is None:
+        cajas.pop(fuente, None)
+        if fuente == 'imagen':
+            cajas.pop('de_imagen', None)
+    else:
+        cajas[fuente] = caja
+        if fuente == 'imagen':
+            cajas['de_imagen'] = (cfg.get('imagen') or {}).get('elegida')
+    if not cajas:
+        rt.pop('caja')
+    op.guardar(ruta, cfg)
+
+
 def datos_candidato(pj, nombre):
     """Cómo se hace un candidato de malla (lo que no pisa lo hereda del principal, como pipeline.candidatos_malla):
     {motor, seed, resolucion, desde, ultratex (su seed, o None)}."""
@@ -564,13 +627,28 @@ def movimientos():
                     usan[a].append(n)
             except ValueError:
                 pass
-    return {'animaciones': list(metodos.CUADROS),
+    orden = list(dict.fromkeys(c for _, c, *_ in armar_tira.ANIMACIONES if c in metodos.CUADROS))
+    orden += [a for a in metodos.CUADROS if a not in orden]
+    proc = procedurales()
+    return {'animaciones': orden, 'procedurales': [a for a in orden if a in proc],
+            'godot': {c: n for n, c, *_ in armar_tira.ANIMACIONES},
             'cuadros': {a: {'cuadros': c, 'loop': l} for a, (c, l) in metodos.CUADROS.items()},
             'biblioteca': [{'animacion': a, 'origen': c['_origen'], 'clip': c['clip'],
                             'recomendado': bool(c.get('recomendado')), 'desde': c.get('desde'), 'hasta': c.get('hasta'),
                             'duracion': c.get('duracion'), 'prompt': c.get('prompt'), 'candidato': c.get('candidato'),
                             'nota': c.get('_nota'), 'usan': usan.get(a, [])} for a, c in bib.items()],
             'candidatos': metodos.candidatos(d)}
+
+
+def procedurales():
+    """{anim: esqueleto} de herramientas/3_blender/movimientos/procedurales.json (procedurales.py), con el fps de la
+    hoja (armar_tira.ANIMACIONES); {} si no está."""
+    try:
+        d = op.leer(os.path.join(RAIZ, 'herramientas', '3_blender', 'movimientos', 'procedurales.json'))
+    except (OSError, ValueError):
+        return {}
+    fps = {c: f for _, c, _, f, *_ in armar_tira.ANIMACIONES}
+    return {a: dict(e, fps=fps.get(a, e.get('fps', 12))) for a, e in d.get('animaciones', {}).items()}
 
 
 class Doctor:
@@ -858,6 +936,13 @@ class Manejador(BaseHTTPRequestHandler):
                 app.cola.renombrar(n, nuevo)
                 app.cambio()
                 return self.json({'nombre': nuevo})
+            if p[2:] == ['retrato'] and m == 'GET':
+                return self.json(datos_retrato(*cargar(n)))
+            if p[2:] == ['retrato'] and m == 'PUT':
+                self.libre(n)
+                guardar_retrato(ruta, self.cuerpo_json())
+                app.cambio()
+                return self.json(datos_retrato(*cargar(n)))
             if p[2:] == ['articulaciones'] and m == 'GET':
                 return self.json(articulaciones_guia(*cargar(n)))
             if p[2:] == ['articulaciones'] and m == 'PUT':
@@ -990,6 +1075,9 @@ class Manejador(BaseHTTPRequestHandler):
         """El clip de costado para animarlo en la página (metodos.esqueleto): ?candidato=<anim>_s<seed>_<i> o
         ?animacion=<anim> (el clip de la biblioteca)."""
         cand, anim = q.get('candidato'), q.get('animacion')
+        if q.get('procedural'):
+            e = procedurales().get(q['procedural'])
+            return self.json(e) if e else self.error(404, 'no hay esqueleto de esa animación procedural')
         if cand:
             if not metodos.CANDIDATO.match(cand):
                 return self.error(400, 'candidato inválido')

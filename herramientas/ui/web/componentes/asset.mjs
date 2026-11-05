@@ -8,6 +8,7 @@ import {
 import { Ajustes } from './ajustes.mjs'
 import { Visor3D } from './visor3d.mjs'
 import { EditorArticulaciones } from './articulaciones.mjs'
+import { EditorRetrato } from './retrato.mjs'
 
 // pasos que no están en la cadena de `crisol estado` pero se pueden correr a mano
 const EXTRA = {
@@ -485,6 +486,8 @@ function Visor({ d }) {
       ? html`<${ReproductorIso} nombre=${d.nombre} meta=${d.iso} version=${v} />`
       : g.id === 'guia' && editando
       ? html`<${EditorArticulaciones} d=${d} cerrar=${() => setEditando(false)} />`
+      : g.id === 'retrato' && editando
+      ? html`<${EditorRetrato} d=${d} cerrar=${() => setEditando(false)} />`
       : g.id === 'animacion' && d.hoja
       ? html`<${ReproductorLateral} nombre=${d.nombre} meta=${d.hoja} version=${v} gif=${urlArchivo(d.nombre, 'preview.gif', v)} key=${v} />`
       : g.id === 'juego3d'
@@ -505,7 +508,9 @@ function Visor({ d }) {
           onClick=${() => setI(k)} title=${x}><img src=${urlMini(d.nombre, x, 160, '', v)} alt=${x} />${nombreArchivo(x) && html`<span>${nombreArchivo(x)}</span>`}</button>`)}</div>`}
         <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>
         ${g.id === 'guia' && html`<button class="boton" style="margin-top:4px" onClick=${() => setEditando(true)}>
-          <${Icono} n="editar" />${t('art.editar')}</button>`}`}
+          <${Icono} n="editar" />${t('art.editar')}</button>`}
+        ${g.id === 'retrato' && html`<button class="boton" style="margin-top:4px" onClick=${() => setEditando(true)}>
+          <${Icono} n="editar" />${t('retrato.editar')}</button>`}`}
   </div>`
 }
 
