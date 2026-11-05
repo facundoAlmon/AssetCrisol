@@ -242,8 +242,8 @@ Resultado (2026-11-05):
       sacarlas (delighting) o compensar con la rugosidad.
 - [ ] Ropa: capas que se atraviesan a los costados (remera bajo un chaleco), la boca de un pantalón ancho al levantar la
       pierna y placas rígidas que se cruzan en golpes (robots).
-- [x] Animación nueva: saludar (mano en alto, de frente), procedural, al final de la hoja. Falta probar un clip de
-      Kimodo (`crisol movimiento saludar`).
+- [x] Animación nueva: saludar (mano en alto, de frente), procedural, al final de la hoja. Clip de Kimodo: hay 3
+      candidatos generados (2026-11-05); falta elegir uno y decidir si pasa a la biblioteca del repo.
 - [x] Vehículos que no son autos: los prompts de `vistas` y la vista de atrás dicen "toy car" (luces traseras,
       alerón) y Qwen convierte una vagoneta en un auto; armarlos desde la descripción del objeto.
 - [ ] Manos: siempre abiertas (el rig no tiene dedos); evaluar un puño por forma o huesos de dedos simples.
