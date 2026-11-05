@@ -32,7 +32,7 @@
       },
       "pixal3d": {
         "motor": "pixal3d",
-        "resolucion": 1536,
+        "resolucion": 1024,
         "seed": 1,
         "caras": 200000
       }

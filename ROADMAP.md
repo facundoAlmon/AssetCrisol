@@ -199,8 +199,9 @@ Errores vistos armando el manual de la UI (2026-11-04):
 - [ ] Kimodo, traducción: muñeca de los golpes, cierre de brazos en torsos anchos, adaptación a chibis.
 - [ ] Articulaciones de muñecos/juguetes (DWPose no los detecta): vistas de Qwen o Make-It-Animatable v2.
 - [ ] Separar la seed de estructura y la de forma también en TRELLIS.2.
-- [ ] Candidato `pixal3d` de los objetos a 1024 en vez de 1536: a 1536 tarda 1-8 min según el volumen (la subida
-      domina); probar en 2-3 objetos si conserva la geometría que lo hace útil (el cofre).
+- [x] Candidato `pixal3d` de los objetos a 1024 en vez de 1536 (2026-11-04, caja de herramientas, martillo y yunque:
+      Pixal3D 100/60/80 s contra 180/70/120 s, calidad pareja; los defectos de una muestra se van con otra seed). Sin
+      probar en el cofre.
 - [ ] Pesos con SkinTokens/Puppeteer, solo si las opciones actuales dejan de alcanzar.
 - [x] Rodilla siempre un poco adelante de la línea cadera-tobillo (con DWPose sobre piernas rectas el IK la doblaba
       para atrás al agacharse).

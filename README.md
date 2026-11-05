@@ -119,7 +119,7 @@ Cada personaje con malla ocupa ~0,5-1 GB en `datos_dir`.
 | `instalar.sh` | lo que tarde en bajar ~135 GB (a 50 MB/s, ≈45 min) + ~10 min de compilar TRELLIS.2 |
 | `imagen` | ≈20 s por seed (Qwen Image Edit o Z-Image Turbo); FLUX.2 Dev ≈3,5 min |
 | `vistas` | ≈1 min (espalda y costados con Qwen) |
-| `malla` | Pixal3D ≈2 min (1 vista) o ≈3 min (4 vistas); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min. Objetos con sus 3 candidatos: ≈10-15 min (el `pixal3d` a 1536 tarda 1-8 min según el volumen: un barril macizo ≈7) |
+| `malla` | Pixal3D ≈2 min (1 vista) o ≈3 min (4 vistas); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min. Objetos con sus 3 candidatos: ≈10-15 min (el `pixal3d`, a 1024, ≈1-2 min de Pixal3D según el volumen; a 1536 tardaba 1-8) |
 | `blender` | ≈1 min (rig, pesos, todas las animaciones) |
 | `iso` / `anclas` | ≈25 s / ≈3 s |
 | `texturas` | ≈5 s por imagen (DreamShaper), ≈15 s (Z-Image) |
@@ -1170,7 +1170,8 @@ crisol blender barril && crisol sprites barril && crisol godot barril
 - `modelo.altura`: alto real en unidades (el personaje de referencia mide 1.85; una caja ≈0.7). `modelo.giro_grados`
   gira la malla sobre Z si sale girada.
 - **Candidatos** (plantilla): TRELLIS.2 a 512 (la principal), `ultratex` (la misma repintada, ~1 min) y `pixal3d`
-  (una vista a 1536, ~3-4 min). Según el objeto gana uno u otro; sacar los que no se quieran para ahorrar GPU.
+  (una vista a 1024, ~2-3 min; a 1536 tarda más, casi el doble en objetos macizos, y no sale mejor: si una muestra trae manchas o una pieza de más,
+  otra `seed`). Según el objeto gana uno u otro; sacar los que no se quieran para ahorrar GPU.
 - **Pixal3D de una vista** deja el objeto en el marco de la cámara (inclinado y girado): `malla` lo endereza en el
   GLB mismo (apoya la base, huella paralela a los ejes, frente = -Y, origen en el centro de la base). El de la cámara
   queda en `pixal3d_camara.glb`; `modelo.alinear: false` lo apaga. TRELLIS.2 los entrega derechos.

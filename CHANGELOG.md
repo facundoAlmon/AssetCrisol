@@ -7,6 +7,10 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ## [Sin publicar]
 
+### Cambiado
+- Objetos nuevos: el candidato `pixal3d` de la plantilla va a 1024 en vez de 1536 (14-44 % menos de Pixal3D,
+  calidad pareja en tres objetos). Los objetos existentes conservan su json.
+
 ### Agregado
 - `retrato.zoom` (1 por defecto): más de 1 acerca el retrato, para alas, mochilas o cuellos altos que agrandan
   el ancho sobre el cuello y dejaban la cabeza chica. También en Ajustes > Sprites de `crisol ui`.

@@ -123,7 +123,7 @@ Each character with a mesh takes ~0.5-1 GB in `datos_dir`.
 | `instalar.sh` | however long ~135 GB take to download (at 50 MB/s, ≈45 min) + ~10 min to compile TRELLIS.2 |
 | `imagen` | ≈20 s per seed (Qwen Image Edit or Z-Image Turbo); FLUX.2 Dev ≈3.5 min |
 | `vistas` | ≈1 min (back and sides with Qwen) |
-| `malla` | Pixal3D ≈2 min (1 view) or ≈3 min (4 views); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min. Props with their 3 candidates: ≈10-15 min (the `pixal3d` one at 1536 takes 1-8 min depending on volume: a solid barrel ≈7) |
+| `malla` | Pixal3D ≈2 min (1 view) or ≈3 min (4 views); TRELLIS.2 ≈3 min; + UltraTex ≈1-6 min. Props with their 3 candidates: ≈10-15 min (the `pixal3d` one, at 1024, ≈1-2 min of Pixal3D depending on volume; at 1536 it took 1-8) |
 | `blender` | ≈1 min (rig, weights, all animations) |
 | `iso` / `anclas` | ≈25 s / ≈3 s |
 | `texturas` | ≈5 s per image (DreamShaper), ≈15 s (Z-Image) |
@@ -1178,7 +1178,8 @@ crisol blender barrel && crisol sprites barrel && crisol godot barrel
 - `modelo.altura`: real height in units (the reference character is 1.85; a crate ≈0.7). `modelo.giro_grados`
   rotates the mesh around Z if it comes out turned.
 - **Candidates** (template): TRELLIS.2 at 512 (the main one), `ultratex` (the same one repainted, ~1 min) and
-  `pixal3d` (one view at 1536, ~3-4 min). Depending on the object one or the other wins; remove the ones you don't
+  `pixal3d` (one view at 1024, ~2-3 min; 1536 takes longer, almost twice in solid props, and is not better: if a sample has specks or an
+  extra piece, another `seed`). Depending on the object one or the other wins; remove the ones you don't
   want to save GPU time.
 - **One-view Pixal3D** leaves the object in the camera's frame (tilted and turned): `malla` straightens it in the GLB
   itself (rests the base, footprint parallel to the axes, front = -Y, origin at the center of the base). The camera
