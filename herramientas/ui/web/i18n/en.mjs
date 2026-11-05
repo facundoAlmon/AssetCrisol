@@ -467,6 +467,8 @@ export default {
   'aj.altura': 'Height (m)',
   'aj.giro': 'Rotation (degrees)',
   'aj.cabeza': 'Head up (degrees)',
+  'aj.retrato_zoom': 'Portrait zoom',
+  'aj.retrato_zoom_ayuda': 'Above 1 moves the camera closer (1.3 to 1.7): for wings, backpacks or tall collars that leave the head small. Then run Portrait.',
   'aj.cabeza_ayuda': 'Negative raises the face. Try 2 or 3 values looking at the idle.',
   'aj.alto_px': 'On-screen height (px)',
   'aj.alto_px_ayuda': 'Empty: derived from the height and the style.',

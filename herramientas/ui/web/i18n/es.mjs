@@ -468,6 +468,8 @@ export default {
   'aj.altura': 'Altura (m)',
   'aj.giro': 'Giro (grados)',
   'aj.cabeza': 'Cabeza arriba (grados)',
+  'aj.retrato_zoom': 'Zoom del retrato',
+  'aj.retrato_zoom_ayuda': 'Más de 1 acerca la cámara (1,3 a 1,7): para alas, mochilas o cuellos altos que dejan la cabeza chica. Después, correr Retrato.',
   'aj.cabeza_ayuda': 'Negativo levanta la cara. Probar 2 o 3 valores mirando el idle.',
   'aj.alto_px': 'Alto en pantalla (px)',
   'aj.alto_px_ayuda': 'Vacío: sale de la altura y del estilo.',

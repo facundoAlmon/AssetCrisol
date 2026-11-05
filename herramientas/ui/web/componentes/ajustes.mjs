@@ -61,6 +61,8 @@ function campos(d, estilos, animaciones) {
       { g: 'sprites', clave: 'isometrico.superresolucion', tipo: 'select', numerico: true, etiqueta: 'aj.superres_iso',
         opciones: [['', t('aj.defecto') + ' (2×)'], ...SUPER] },
       { g: 'sprites', clave: 'resolucion', tipo: 'resolucion' },
+      { g: 'sprites', clave: 'retrato.zoom', tipo: 'numero', paso: 0.05, min: 0.5, max: 3, nulo: true, etiqueta: 'aj.retrato_zoom',
+        ayuda: 'aj.retrato_zoom_ayuda', auto: 1 },
       { g: 'animaciones', clave: 'isometrico.animaciones', tipo: 'animaciones', etiqueta: 'aj.iso_anims', ayuda: 'aj.iso_anims_ayuda', animaciones })
   } else {
     lista.push({ g: 'modelo', clave: 'modelo.giro_grados', tipo: 'numero', paso: 1, etiqueta: 'aj.giro' },
@@ -163,7 +165,7 @@ function Campo({ c, valor, cambiar }) {
   } else if (c.tipo === 'seeds') {
     control = html`<${Seeds} id=${id} valor=${valor} cambiar=${cambiar} />`
   } else {
-    control = html`<${EntradaNumero} id=${id} step=${c.tipo === 'entero' ? 1 : c.paso} valor=${valor} cambiar=${cambiar}
+    control = html`<${EntradaNumero} id=${id} step=${c.tipo === 'entero' ? 1 : c.paso} min=${c.min} max=${c.max} valor=${valor} cambiar=${cambiar}
       vacio=${c.nulo ? null : undefined} placeholder=${c.auto != null ? t('aj.auto', { v: c.auto }) : null} />`
   }
   return html`<label class="campo" for=${id}><span>${etiqueta}</span>${control}${ayuda}</label>`
