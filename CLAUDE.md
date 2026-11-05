@@ -82,9 +82,12 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `trabajo/tema/licencias.json` y `trabajo/licencias.json` (vehículos). Al sumar un modelo, también ahí.
 - `0_entorno/salida.py`: códigos de salida (`falta_elegir` 4, `falta_paso` 5, GPU 3, falta instalar 6: `doctor.revisar_paso`) y `--json` de los pasos (stdout
   solo el JSON; prints y subprocesos a stderr). Los mensajes de los pasos siguen siendo `print`.
-- `0_entorno/gpu.py`: `reservar(cfg, paso)` al empezar cada paso que genera (un paso nuevo de GPU tiene que llamarlo).
+- `0_entorno/gpu.py`: `reservar(cfg, paso)` al empezar cada paso que genera (un paso nuevo de GPU tiene que llamarlo);
+  `resolucion_malla` baja la resolución por defecto de la malla con menos de 16 GB (`vram_gb` de la config la pisa).
 - `0_entorno/estado.py` (`crisol estado [<n>] [--json]`): pasos hechos/viejos (por fecha de la salida contra la del
-  paso previo) y qué falta elegir; al sumar un paso o cambiar dónde escribe, actualizar su cadena.
+  paso previo) y qué falta elegir; al sumar un paso o cambiar dónde escribe, actualizar su cadena. Cada `nota` (la de
+  la terminal) va con un `aviso` `{id, ...datos}` que la UI dice en palabras (`aviso.<id>` de i18n, `comunes.textoAviso`):
+  una nota nueva, con su `aviso` y su texto en es/en.
 - `instalar.sh` (raíz, bash): instalación nativa por niveles. Commits fijados y tabla de modelos (`MODELOS_COMFY`,
   repo → nombre final) arriba: al sumar un modelo o nodo, también ahí (y en `doctor.MODELOS`/`NODOS`). `--plan` lo
   prueba sin instalar; con la config de esta PC reconoce lo instalado y no lo toca.
