@@ -1503,7 +1503,8 @@ def retratos():
     ev.to_mesh_clear()
     ancho_px = rt.get('ancho_px', 512)
     sc.render.resolution_x, sc.render.resolution_y = ancho_px, int(ancho_px * 1.25)
-    orto = cam.data.ortho_scale = max(arriba - abajo, ancho * 1.25) * 1.06
+    # zoom > 1 acerca (la cabeza queda arriba): para lo que agranda el ancho sobre el cuello (alas, mochila, cuello alto)
+    orto = cam.data.ortho_scale = max(arriba - abajo, ancho * 1.25) * 1.06 / rt.get('zoom', 1.0)
     zc = arriba + 0.03 * orto - orto / 2
     apuntar(cam, (0, -10, zc), (math.pi / 2, 0, 0))
     render(os.path.join(d, 'retrato.png'))

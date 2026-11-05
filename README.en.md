@@ -1073,6 +1073,7 @@ The most used keys: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla.mot
 | `retrato.cabeza_grados` | (-5) head tilt in the portrait |
 | `retrato.hombros` | (0.55) how much shows below the neck, relative to the head's height |
 | `retrato.ancho_px` | (512) portrait width (height = 1.25 × width) |
+| `retrato.zoom` | (1) above 1 moves the camera closer: for wings, backpacks or tall collars that shrink the head |
 | `retrato.fuente` | (`"imagen"`) crop of `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (optional) see [Iso](#iso-crisol-iso) |
 | `tiempo_real` | (optional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: faces of each LOD in `trabajo/tiempo_real/` and maximum texture size; `huesos`: `"mixamo"` (default), `"godot"` or `"crisol"`; `mapas`: `["normal", "orm"]` (default), `"ao"` adds occlusion; `false` = don't export them (see 3b) |

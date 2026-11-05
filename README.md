@@ -1065,6 +1065,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `retrato.cabeza_grados` | (-5) inclinación de la cabeza en el retrato |
 | `retrato.hombros` | (0.55) cuánto se ve debajo del cuello, relativo al alto de la cabeza |
 | `retrato.ancho_px` | (512) ancho del retrato (alto = 1.25 × ancho) |
+| `retrato.zoom` | (1) más de 1 acerca la cámara: para alas, mochilas o cuellos altos que achican la cabeza |
 | `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render |
 | `isometrico.*` | (opcional) ver [Iso](#iso-crisol-iso) |
 | `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado máximo de la textura; `huesos`: `"mixamo"` (por defecto), `"godot"` o `"crisol"`; `mapas`: `["normal", "orm"]` (por defecto), `"ao"` suma la oclusión; `false` = no exportarlos (ver 3b) |

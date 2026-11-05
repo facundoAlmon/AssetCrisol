@@ -8,6 +8,8 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Agregado
+- `retrato.zoom` (1 por defecto): más de 1 acerca el retrato, para alas, mochilas o cuellos altos que agrandan
+  el ancho sobre el cuello y dejaban la cabeza chica.
 - Animación `saludar` (`wave`, 7 cuadros): la mano cercana en alto, de lado a lado; al final de la hoja (86-92) y
   en las 8 direcciones del iso. Por ahora procedural (`metodos.CUADROS` ya la acepta para un clip de Kimodo).
 - Malla según la VRAM: con menos de 16 GB (`nvidia-smi`, o `vram_gb` en la config), sin `malla.resolucion` arranca
