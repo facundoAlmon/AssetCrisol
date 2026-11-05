@@ -113,6 +113,11 @@ esa candidata: escribí qué cambiar, en inglés y pocas cosas por vez ("remove 
 dos imágenes nuevas (`edit_1`, `edit_2`, unos 40 segundos) al lado de las otras, con el pedido debajo; la original
 queda. Se elige una como cualquier candidata, y también se puede corregir una corrección.
 
+![Corregir una candidata](ui/img/es/corregir_imagen.webp)
+
+*(En la captura, otra tanda de la misma descripción: las dos de abajo son la 101 sin la funda del muslo, y el pedido
+de la 104 está escrito pero sin mandar.)*
+
 ### Mirar las vistas
 
 **Siguiente: Vistas de costado y espalda** dibuja cómo es el personaje de espalda y de costado (un minuto). La
@@ -141,6 +146,12 @@ Mirá la **cara de cerca**, la **espalda** y si hay **agujeros**. Para la explor
 pero más limpia, sobre todo en la cara. La seed pesa mucho: si ninguno convence, probá dos o tres seeds más antes de
 tocar otra cosa. Al elegir, esa malla pasa a ser la del asset en el momento (no se genera de nuevo): lo que
 sigue es **Articulaciones**.
+
+**Elegí la cara**: con Pixal3D + UltraTex y sin candidatos, la receta *Persona* repinta la textura con tres seeds de
+UltraTex (cada una entre 1 y 6 minutos), porque los ojos cambian mucho de una a otra. **Te toca elegir** muestra la
+cabeza de frente de cada una (en la captura, dos); hasta que elijas, queda la primera.
+
+![Elegí la cara](ui/img/es/elegir_cara.webp)
 
 ### Articulaciones, rig y lo demás
 
@@ -188,6 +199,8 @@ arrastra y se agranda o achica desde la esquina (también con las flechas y + �
 **Guardar y rehacer el retrato** lo rehace en segundos; **Automático** vuelve al encuadre que calcula el rig. Avisa
 si el recorte de la imagen es tan chico que se va a ver borroso, y si después cambiás la imagen elegida.
 
+![El editor del encuadre del retrato](ui/img/es/retrato_editar.webp)
+
 **Juego 3D**: el modelo reducido para un juego 3D, en tres niveles de detalle (LOD), con sus caras y su peso. *Ver las
 caras* lo muestra en alambre.
 
@@ -215,7 +228,7 @@ probar:
 | Agujeros o piezas que faltan | Malla | Otra seed de malla (como candidato, para comparar) |
 | Rodillas que doblan para atrás, brazos que giran raro | Guía | Las articulaciones: revisarlas en la guía y acomodarlas a mano |
 | Codos que se aplastan "de plastilina" | Revisión de cerca | README > [Cuando los pesos fallan](../README.md#cuando-los-pesos-fallan) |
-| Al levantar el brazo, el pantalón o los dedos se estiran como astillas | Revisión (golpe, lanzar, brazos arriba) | Las manos tocaban los muslos en reposo. *Editar el json completo*: `modelo.pesos_zonas`, cajas que mandan el pantalón al muslo y la mano entera a la mano (README > [Cuando los pesos fallan](../README.md#cuando-los-pesos-fallan)) |
+| Al levantar el brazo, el pantalón o los dedos se estiran como astillas | Revisión (golpe, lanzar, brazos arriba) | Las manos tocaban los muslos en reposo. Guía > *Pesos por zonas*: cajas que mandan el pantalón al muslo y la mano entera a la mano (README > [Cuando los pesos fallan](../README.md#cuando-los-pesos-fallan)) |
 | Manchas magenta grandes en la revisión | Revisión | Ropa que se atraviesa o agujeros: otra malla |
 | La cara mira para arriba o para abajo | Isométrico | Ajustes > Modelo > *Cabeza arriba* (negativo levanta la cara) |
 | La ropa parece de plástico lustrado | Todo | El estilo `moderno_juguete` es para juguetes: pasar a `moderno` y rehacer desde Rig |
@@ -230,6 +243,14 @@ y de costado: cada punto tiene que caer en su lugar del cuerpo (hombros, codos, 
 copia al otro. Guardar deja Rig y animaciones para rehacer.
 
 ![El editor de articulaciones](ui/img/es/articulaciones.webp)
+
+**Pesos por zonas** (al lado de *Editar articulaciones*): cajas de colores sobre la guía de frente y de costado, cada
+una con un hueso; todo lo que queda adentro de la caja se mueve entero con ese hueso. Sirve para piezas rígidas que el
+rig reparte mal (un cañón, una funda) y para manos que tocan el cuerpo en reposo: la exploradora lo necesitó porque
+tenía las manos en los bolsillos y, al levantar el brazo, el pantalón se estiraba. Las cajas se arrastran y se
+agrandan desde las esquinas; *Agregar zona* y *Quitar* en la lista. Al guardar ofrece rehacer el rig.
+
+![Pesos por zonas](ui/img/es/zonas.webp)
 
 **Deshacer** (en cada paso, junto a su estado) borra lo que generó ese paso. Antes de hacerlo muestra qué archivos va a
 borrar y cuánto pesan. No toca tus elecciones ni tus ajustes.
@@ -311,12 +332,16 @@ entero (caminar, correr, morir) y pierde en golpes; se elige por animación en A
 
 **Movimientos** lista las animaciones en el orden de la hoja, con su método por defecto, si tienen clip y cuántas
 variantes hay sin pasar. Al abrir una, arriba está lo de **ahora**: la procedural (con el esqueleto de Cris, en los
-cuadros de la hoja) al lado del clip de la biblioteca, para compararlas. Abajo:
+cuadros de la hoja) al lado del clip de la biblioteca, para compararlas:
+
+![Una animación: la procedural y el clip de la biblioteca](ui/img/es/movimientos_animacion.webp)
+
+Abajo:
 
 1. **Generar**: la frase, la duración y cuántas variantes. Corre en el procesador, no en la placa.
-2. **Mirar**: cada variante con un esqueleto animado (así se ve un clip de la biblioteca):
+2. **Mirar**: cada variante con un esqueleto animado (acá, con *Borrar* abierto en la primera):
 
-   ![Un clip de movimiento](ui/img/es/movimientos_clip.webp)
+   ![Las variantes de una generación](ui/img/es/movimientos_variantes.webp)
 
 3. **Recortar**: marcá un instante con *Desde acá* y *Hasta acá*. Para caminar o correr, un ciclo: de un apoyo de un pie
    al siguiente apoyo del mismo pie.
@@ -361,6 +386,10 @@ un juego sigue con el nombre viejo.
 Papelera, el botón aparece cuando hay algo). Ahí se **restaura** tal cual estaba o se borra para siempre, de a uno o
 todo junto. Lo que ya hayas copiado a un juego no cambia.
 
+![Borrar un asset](ui/img/es/borrar.webp)
+
+![La papelera](ui/img/es/papelera.webp)
+
 ## 9. Licencias en dos minutos
 
 El código de AssetCrisol es libre (GPL-3.0), pero **cada modelo de IA tiene su licencia**, y algunos no permiten uso
@@ -387,4 +416,7 @@ python3 tests/capturas_ui.py                             # todas, en es y en; --
 ```
 
 Las del capítulo 1 (`--lista` las marca como momentos) muestran a la exploradora en un punto del camino (antes de elegir
-la imagen, con la malla corriendo): se sacan con `--solo` cuando llega a ese punto.
+la imagen, con la malla corriendo): se sacan con `--solo` cuando llega a ese punto. También son momentos las que
+necesitan datos armados para la foto y sacados después: `aventurera` (una copia de la exploradora sin elegir, con una
+corrección de la 101 y, eligiendo la imagen, `malla.ultratex.seeds`), variantes de `golpe` en
+`<datos>/movimientos/candidatos/` y algo en la papelera.

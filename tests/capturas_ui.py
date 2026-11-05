@@ -21,7 +21,8 @@ CELULAR = (390, 844)
 
 # Cada captura: nombre (archivo <nombre>.webp: un tercio de un PNG, y 256 colores manchaban las caras), ruta (el hash de la UI), pasos antes de capturar y cómo.
 #   pasos: ('clic', rol, clave)   clic en el elemento con ese rol y el texto de la clave de i18n (o 'txt:literal');
-#                                 el texto puede venir precedido del número del paso ("6 3D animado")
+#                                 el texto puede venir precedido del número del paso ("6 3D animado") y seguido
+#                                 de una cuenta ("Pesos por zonas (2)")
 #          ('visor', clave)       clic en la pestaña del visor de Resultado (no en el botón del paso que se llama
 #                                 igual: «Retrato» en la cadena corre `crisol retrato`)
 #          ('texto', clave)       clic en el primer elemento con ese texto
@@ -32,8 +33,10 @@ CELULAR = (390, 844)
 #   recorte: selector CSS de lo que se captura, o ('seccion', clave) = la <section> con ese título (sin él, la
 #            ventana; las barras fijas de guardar/bajar quedan en su lugar, no encima)
 #   pagina: True = la ventana se estira al alto de la página (full_page deja el lateral y las barras fijas a mitad)
+#   alto: sin recorte, solo los primeros `alto` px de la ventana
 #   tema: 'light' | 'dark'; tam: (ancho, alto)
-#   momento: True = muestra un punto del capítulo 1 que ya pasó (la exploradora antes de elegir...): solo con --solo
+#   momento: True = muestra un punto del capítulo 1 que ya pasó (la exploradora antes de elegir...), o datos que se
+#            arman solo para la captura (docs/ui.md > *Rehacer las capturas*): solo con --solo
 VER_3D = ('esperar', 3000)   # el visor 3D carga three.js y el glb
 PANEL = 'section.panel:has(> .pestanas)'   # el panel de Resultado / Ajustes / Archivos, sin la cadena de pasos
 CAPTURAS = [
@@ -49,19 +52,29 @@ CAPTURAS = [
         ('llenar', 'input.entrada.mono', 'aventurera')]),
     dict(nombre='elegir_imagen', ruta='#/a/exploradora', pagina=True, momento=True),
     dict(nombre='cola', ruta='#/cola', momento=True),
+    # aventurera: copia de la exploradora sin elegir, con una corrección de la 101 (y una con caras de UltraTex)
+    dict(nombre='corregir_imagen', ruta='#/a/aventurera', recorte=('seccion', 'decidir.titulo'), momento=True, pasos=[
+        ('js', "document.querySelectorAll('.opcion')[3].querySelector('button[aria-expanded]').click()"),
+        ('llenar', 'form.corregir textarea', 'remove the hanging compass')]),
     dict(nombre='elegir_vistas', ruta='#/a/exploradora', momento=True),
     dict(nombre='elegir_malla', ruta='#/a/exploradora', pagina=True, momento=True),
+    dict(nombre='elegir_cara', ruta='#/a/aventurera', recorte=('seccion', 'decidir.titulo'), momento=True),
     # 2. ver el resultado (Cris)
     dict(nombre='asset', ruta='#/a/cris'),   # la página de un asset: la cadena de pasos y el resultado
     dict(nombre='resultado_iso', ruta='#/a/cris', recorte=PANEL),
     dict(nombre='resultado_animado', ruta='#/a/cris', recorte=PANEL, pasos=[('visor', 'visor.animado'), VER_3D]),
     dict(nombre='resultado_animacion', ruta='#/a/cris', recorte=PANEL, pasos=[('visor', 'visor.animacion')]),
     dict(nombre='resultado_retrato', ruta='#/a/cris', recorte=PANEL, pasos=[('visor', 'visor.retrato')]),
+    dict(nombre='retrato_editar', ruta='#/a/cris', recorte=PANEL,
+         pasos=[('visor', 'visor.retrato'), ('clic', 'button', 'retrato.editar'), ('esperar', 1500)]),
     dict(nombre='resultado_juego3d', ruta='#/a/cris', recorte=PANEL, pasos=[('visor', 'visor.juego3d'), VER_3D]),
     dict(nombre='resultado_revision', ruta='#/a/cris', recorte=PANEL, pasos=[('visor', 'visor.revision')]),
     dict(nombre='resultado_guia', ruta='#/a/cris', recorte=PANEL, pasos=[('visor', 'visor.guia')]),
     dict(nombre='articulaciones', ruta='#/a/cris', recorte=PANEL,
          pasos=[('visor', 'visor.guia'), ('clic', 'button', 'art.editar'), ('esperar', 1000)]),
+    # la exploradora tiene modelo.pesos_zonas (las manos en los bolsillos): solo se abre el editor, no se guarda
+    dict(nombre='zonas', ruta='#/a/exploradora', recorte=PANEL,
+         pasos=[('visor', 'visor.guia'), ('clic', 'button', 'zonas.boton'), ('esperar', 1500)]),
     # 3. cuando algo sale mal
     dict(nombre='paso_mas', ruta='#/a/cris', recorte='ol.cadena > li:first-child', pasos=[('clic', 'button', 'ayuda.mas')]),
     # Deshacer solo abre la confirmación (qué borra y cuánto pesa): Borrar no se toca
@@ -76,12 +89,18 @@ CAPTURAS = [
     dict(nombre='escenario', ruta='#/a/taller'),
     # 6. movimientos
     dict(nombre='movimientos', ruta='#/movimientos'),
-    dict(nombre='movimientos_clip', ruta='#/movimientos', recorte='.clips > :first-child'),
+    dict(nombre='movimientos_animacion', ruta='#/movimientos/golpe', recorte='section.panel:has(.clips.dos)'),
+    # variantes de golpe sin pasar (movimientos/candidatos de datos_dir) con Borrar abierto, sin confirmar
+    dict(nombre='movimientos_variantes', ruta='#/movimientos/golpe', recorte='.clip.generacion', momento=True, tam=(1400, 1800),
+         pasos=[('js', "document.querySelector('.variante button.peligro').click()")]),
     # 7. llevarlo al juego
     dict(nombre='exportar', ruta='#/a/cris/archivos', recorte=('seccion', 'exp.titulo')),
     # 8. cola y biblioteca
     dict(nombre='biblioteca_seleccionar', ruta='#/', pasos=[('clic', 'button', 'bib.seleccionar')]),
     dict(nombre='cola_historial', ruta='#/cola', pagina=True),
+    # Borrar solo abre la confirmación (cuánto ocupa): «A la papelera» no se toca
+    dict(nombre='borrar', ruta='#/a/cris', alto=330, pasos=[('clic', 'button', 'borrar.boton'), ('esperar', 800)]),
+    dict(nombre='papelera', ruta='#/papelera', alto=420, momento=True),   # con algo en la papelera
 ]
 
 
@@ -144,7 +163,7 @@ def capturar(pw, url, salida, idioma, capturas):
                 pagina.wait_for_timeout(1500)
                 for p in c.get('pasos', ()):
                     if p[0] == 'clic':
-                        nombre = re.compile(r'^\s*(\d+\s*)?' + re.escape(texto(t, p[2])) + r'\s*$')
+                        nombre = re.compile(r'^\s*(\d+\s*)?' + re.escape(texto(t, p[2])) + r'\s*(\(\d+\))?\s*$')   # «Pesos por zonas (2)»
                         pagina.get_by_role(p[1], name=nombre).first.click()
                     elif p[0] == 'visor':
                         nombre = re.compile(r'^\s*(\d+\s*)?' + re.escape(texto(t, p[1])) + r'\s*$')
@@ -177,7 +196,8 @@ def capturar(pw, url, salida, idioma, capturas):
                         alto_pagina = pagina.evaluate('document.documentElement.scrollHeight')
                         pagina.set_viewport_size({'width': ancho, 'height': alto_pagina})
                         pagina.wait_for_timeout(500)
-                    pagina.screenshot(path=destino)
+                    pagina.screenshot(path=destino, clip={'x': 0, 'y': 0, 'width': ancho, 'height': c['alto']}
+                                      if c.get('alto') else None)
                 from PIL import Image
                 Image.open(destino).convert('RGB').save(destino[:-4] + '.webp', quality=88, method=6)
                 os.remove(destino)

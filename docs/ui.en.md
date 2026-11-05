@@ -114,6 +114,11 @@ on that candidate: write what to change, in English and a few things at a time (
 eyes"). Two new images come out (`edit_1`, `edit_2`, about 40 seconds) next to the others, with the request under them;
 the original stays. Pick one like any candidate; a fix can be fixed again too.
 
+![Fixing a candidate](ui/img/en/corregir_imagen.webp)
+
+*(In the screenshot, another batch from the same description: the two at the bottom are 101 without the thigh holster,
+and the request for 104 is typed but not sent.)*
+
 ### Check the views
 
 **Next: Side and back views** draws the character from the back and the sides (about a minute). The mesh uses
@@ -141,6 +146,12 @@ Look at the **face up close**, the **back** and any **holes**. For the explorer 
 cleaner, above all in the face. The seed matters a lot: if none convinces you, try two or three more seeds before
 touching anything else. Once you pick, that mesh becomes the asset's right away (nothing is generated again): next
 comes **Joints**.
+
+**Choose the face**: with Pixal3D + UltraTex and no candidates, the *Person* recipe repaints the texture with three
+UltraTex seeds (1 to 6 minutes each), because the eyes change a lot from one to the next. **Your call** shows the head
+from the front for each one (two in the screenshot); until you pick, the first one stays.
+
+![Choose the face](ui/img/en/elegir_cara.webp)
 
 ### Joints, rig and the rest
 
@@ -188,6 +199,8 @@ drag and make bigger or smaller from the corner (also with the arrows and + −)
 and redo the portrait** redoes it in seconds; **Automatic** goes back to the framing the rig computes. It warns when
 the image crop is so small it will look blurry, and when you later change the chosen image.
 
+![The portrait framing editor](ui/img/en/retrato_editar.webp)
+
 **3D game**: the reduced model for a 3D game, in three levels of detail (LOD), with its faces and file size. *Show
 faces* draws it as a wireframe.
 
@@ -215,7 +228,7 @@ says what to look at and what to try:
 | Holes or missing pieces | Mesh | Another mesh seed (as a candidate, to compare) |
 | Knees bending backwards, arms twisting | Guide | The joints: check them in the guide and move them by hand |
 | Elbows squashing like putty | Close-up review | README > [When weights fail](../README.en.md#when-weights-fail) |
-| Raising the arm, the trousers or the fingers stretch like shards | Review (punch, throw, arms up) | The hands touched the thighs at rest. *Edit the full json*: `modelo.pesos_zonas`, boxes that send the trousers to the thigh and the whole hand to the hand (README > [When weights fail](../README.en.md#when-weights-fail)) |
+| Raising the arm, the trousers or the fingers stretch like shards | Review (punch, throw, arms up) | The hands touched the thighs at rest. Guide > *Weight zones*: boxes that send the trousers to the thigh and the whole hand to the hand (README > [When weights fail](../README.en.md#when-weights-fail)) |
 | Large magenta patches in the review | Review | Clothes going through each other or holes: another mesh |
 | The face looks up or down | Isometric | Settings > Model > *Head up* (negative raises the face) |
 | Clothes look like polished plastic | Everything | The `moderno_juguete` style is for toys: switch to `moderno` and redo from Rig |
@@ -230,6 +243,14 @@ front and the side: each point has to land in its place on the body (shoulders, 
 to the other. Saving leaves Rig and animations to redo.
 
 ![The joint editor](ui/img/en/articulaciones.webp)
+
+**Weight zones** (next to *Edit joints*): colored boxes over the front and side guide, each one with a bone; whatever
+falls inside a box moves as a whole with that bone. It is for rigid pieces the rig weighs badly (a cannon, a holster)
+and for hands that touch the body at rest: the explorer needed it because her hands were in her pockets and, when she
+raised an arm, the trousers stretched. Drag the boxes and resize them from the corners; *Add zone* and *Remove* in the
+list. Saving offers to redo the rig.
+
+![Weight zones](ui/img/en/zonas.webp)
 
 **Undo** (in each step, next to its state) deletes what that step made. Before doing it, it shows which files it will
 delete and how much they weigh. It does not touch your choices or your settings.
@@ -311,12 +332,16 @@ dying) and loses on punches; it is chosen per animation in Settings > Animations
 
 **Motions** lists the animations in sheet order, with their default method, whether they have a clip and how many
 variants are waiting. Open one and the top shows what is used **now**: the procedural one (with Cris's skeleton, on the
-sheet frames) next to the library clip, to compare them. Below:
+sheet frames) next to the library clip, to compare them:
+
+![An animation: the procedural one and the library clip](ui/img/en/movimientos_animacion.webp)
+
+Below:
 
 1. **Generate**: the sentence, the length and how many variants. It runs on the processor, not the graphics card.
-2. **Look**: each variant with an animated skeleton (this is how a library clip looks):
+2. **Look**: each variant with an animated skeleton (here, with *Delete* open on the first one):
 
-   ![A motion clip](ui/img/en/movimientos_clip.webp)
+   ![The variants of a run](ui/img/en/movimientos_variantes.webp)
 
 3. **Trim**: mark a moment with *From here* and *To here*. For walking or running, one cycle: from one foot landing to
    the next landing of the same foot.
@@ -360,6 +385,10 @@ game keeps the old name.
 **trash** (Library > Trash, the button shows up when there is something in it). From there you **restore** it as it
 was or delete it forever, one by one or all at once. Whatever you already copied into a game does not change.
 
+![Deleting an asset](ui/img/en/borrar.webp)
+
+![The trash](ui/img/en/papelera.webp)
+
 ## 9. Licenses in two minutes
 
 AssetCrisol's code is free software (GPL-3.0), but **each AI model has its own license**, and some do not allow
@@ -386,4 +415,7 @@ python3 tests/capturas_ui.py                             # all of them, es and e
 ```
 
 The chapter 1 ones (`--lista` marks them as moments) show the explorer at a point along the way (before picking the
-image, with the mesh running): take them with `--solo` when she gets there.
+image, with the mesh running): take them with `--solo` when she gets there. Also moments are the ones that need data
+set up for the picture and removed afterwards: `aventurera` (a copy of the explorer with nothing picked, with a fix of
+101 and, once the image is picked, `malla.ultratex.seeds`), `golpe` variants in `<data>/movimientos/candidatos/` and
+something in the trash.
