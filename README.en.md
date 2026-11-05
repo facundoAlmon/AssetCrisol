@@ -92,7 +92,7 @@ texture) are always made by a person looking at a candidates sheet.
 
 | | |
 |---|---|
-| GPU | With less than 16 GB the mesh step does not fit; TRELLIS.2 officially asks for 24 GB and fits in 16 with `low_vram`. The CUDA **12.x** toolkit (not 13) is needed to build TRELLIS.2's extensions. RTX 50 cards (Blackwell) are untested: TRELLIS.2's torch 2.6 does not support them. With a driver older than 580, `instalar.sh` uses the CUDA 12.6 torch for ComfyUI. |
+| GPU | With less than 16 GB the mesh step starts at a lower resolution (TRELLIS.2 512, Pixal3D 1024; untested on such a card) and may still not fit; TRELLIS.2 officially asks for 24 GB and fits in 16 with `low_vram`. The CUDA **12.x** toolkit (not 13) is needed to build TRELLIS.2's extensions. RTX 50 cards (Blackwell) are untested: TRELLIS.2's torch 2.6 does not support them. With a driver older than 580, `instalar.sh` uses the CUDA 12.6 torch for ComfyUI. |
 | RAM | Kimodo uses ~16 GB on CPU. |
 | Disk | See *Disk per level* below. Tools and model caches should go to a disk with room (`instalar.sh --destino`, `env_modelos` in the config). |
 | Python | system `python3` with **Pillow** (for `pipeline.py`). Each tool brings its own environment. |
@@ -198,6 +198,7 @@ missing, how to fix it and which steps are disabled. `crisol --help` lists the s
 | `kimodo_dir` | Kimodo folder (with `venv/bin/python`); only for `crisol movimiento` |
 | `env_modelos` | environment variables for the model caches (`HF_HOME`, `U2NET_HOME`...) |
 | `blender`, `godot` | executables |
+| `vram_gb` | (optional) the VRAM to assume instead of what `nvidia-smi` reports: below 16 GB, a mesh without `malla.resolucion` starts lower |
 | `modelos_imagen` | file names of the image models inside `ComfyUI/models`: Qwen Image Edit (`qwen_*`), Z-Image Turbo (`zimage_unet`, `zimage_clip`, `zimage_vae`; when set, it is the default engine without a reference) and FLUX.2 Dev (`flux_*`). See `config.ejemplo.json` |
 
 Instead of `config.json` in the repo you can use another file via `ASSETCRISOL_CONFIG=/path/config.json` (handy to

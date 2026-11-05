@@ -88,7 +88,7 @@ malla, qué textura) las toma siempre la persona mirando una hoja de candidatos.
 
 | | |
 |---|---|
-| GPU | Con menos de 16 GB la malla no entra; TRELLIS.2 pide 24 GB oficialmente y entra en 16 con `low_vram`. El toolkit de CUDA **12.x** (no 13) hace falta para compilar las extensiones de TRELLIS.2. Las RTX 50 (Blackwell) no están probadas: el torch 2.6 de TRELLIS.2 no las soporta. Con un driver anterior al 580, `instalar.sh` usa el torch de CUDA 12.6 para ComfyUI. |
+| GPU | Con menos de 16 GB la malla arranca a menor resolución (TRELLIS.2 512, Pixal3D 1024; sin probar en una placa así) y puede no entrar igual; TRELLIS.2 pide 24 GB oficialmente y entra en 16 con `low_vram`. El toolkit de CUDA **12.x** (no 13) hace falta para compilar las extensiones de TRELLIS.2. Las RTX 50 (Blackwell) no están probadas: el torch 2.6 de TRELLIS.2 no las soporta. Con un driver anterior al 580, `instalar.sh` usa el torch de CUDA 12.6 para ComfyUI. |
 | RAM | Kimodo usa ~16 GB en CPU. |
 | Disco | Ver *Disco por nivel* abajo. Conviene que las herramientas y las cachés de modelos vayan a un disco con lugar (`instalar.sh --destino`, `env_modelos` en la config). |
 | Python | `python3` del sistema con **Pillow** (para `pipeline.py`). Cada herramienta trae su propio entorno. |
@@ -192,6 +192,7 @@ arreglarlo y qué pasos quedan deshabilitados. `crisol --help` lista los pasos.
 | `kimodo_dir` | carpeta de Kimodo (con `venv/bin/python`); solo para `crisol movimiento` |
 | `env_modelos` | variables de entorno para las cachés de modelos (`HF_HOME`, `U2NET_HOME`...) |
 | `blender`, `godot` | ejecutables |
+| `vram_gb` | (opcional) la VRAM a suponer en vez de la que dice `nvidia-smi`: con menos de 16 GB, la malla sin `malla.resolucion` arranca más abajo |
 | `modelos_imagen` | nombres de archivo de los modelos de imagen dentro de `ComfyUI/models`: Qwen Image Edit (`qwen_*`), Z-Image Turbo (`zimage_unet`, `zimage_clip`, `zimage_vae`; si están, es el motor sin referencia por defecto) y FLUX.2 Dev (`flux_*`). Ver `config.ejemplo.json` |
 
 En vez de `config.json` en el repo se puede usar otro archivo con la variable `ASSETCRISOL_CONFIG=/ruta/config.json`

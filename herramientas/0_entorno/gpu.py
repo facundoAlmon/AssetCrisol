@@ -149,3 +149,45 @@ def reservar(cfg, paso, esperar=True, cada=15):
                   f'--sin-esperar sale con código {GPU_OCUPADA})', flush=True)
             anterior = motivo
         time.sleep(cada)
+
+
+# ---------- según la VRAM ----------
+# Los valores por defecto de la malla están medidos en 16 GB. Con menos, se arranca más abajo en vez de esperar el OOM
+# (TRELLIS.2 lo reintenta a menor resolución, pero cada intento cuesta minutos; Pixal3D no reintenta). Lo que el json
+# fija (malla.resolucion) se respeta siempre. `vram_gb` en config.json pisa lo que dice nvidia-smi (para probar).
+VRAM_REFERENCIA = 15.5   # GB: una placa de 16 GB reporta ~15,6-16
+_vram = []
+
+
+def vram_gb(cfg):
+    """VRAM total de la primera GPU en GB (config `vram_gb` o nvidia-smi), o None si no se sabe."""
+    if cfg.get('vram_gb'):
+        return float(cfg['vram_gb'])
+    if not _vram:
+        try:
+            r = subprocess.run(['nvidia-smi', '--query-gpu=memory.total', '--format=csv,noheader,nounits'],
+                               capture_output=True, text=True, timeout=15)
+            _vram.append(int(r.stdout.split()[0]) / 1024)
+        except (OSError, subprocess.TimeoutExpired, ValueError, IndexError):
+            _vram.append(None)
+    return _vram[0]
+
+
+def poca_vram(cfg):
+    g = vram_gb(cfg)
+    return g is not None and g < VRAM_REFERENCIA
+
+
+def resolucion_malla(cfg, m, motor, objeto):
+    """malla.resolucion si está; si no, la de 16 GB (TRELLIS.2: 1024, objetos macizos 512; Pixal3D: 1536) o, con
+    menos VRAM, una más baja (TRELLIS.2 512; Pixal3D 1024: a 512 falla). Avisa cuando baja."""
+    if m.get('resolucion'):
+        return m['resolucion']
+    normal = 1536 if motor == 'pixal3d' else 512 if objeto else 1024
+    if not poca_vram(cfg):
+        return normal
+    baja = 1024 if motor == 'pixal3d' else 512
+    if baja < normal:
+        print(f'[malla] {vram_gb(cfg):.0f} GB de VRAM: resolución {baja} (con 16 GB, {normal}); malla.resolucion la '
+              'fija', flush=True)
+    return baja

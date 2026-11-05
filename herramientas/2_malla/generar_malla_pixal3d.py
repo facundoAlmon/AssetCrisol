@@ -258,11 +258,13 @@ def generar(cfg, nombre, pdir, pj, img, out):
             normalizadas[v] = f'{nombre}_pixal3d_{v}_norm.png'
             shutil.copy(r, os.path.join(cfg['comfyui_dir'], 'input', normalizadas[v]))
     prefijo = f'gp_{nombre}_pixal3d'
-    w = workflow(entradas, m['seed'], m.get('resolucion', 1536), m['caras'], m.get('textura_px', 4096), prefijo,
+    import gpu   # 0_entorno: en el sys.path del pipeline
+    reso = gpu.resolucion_malla(cfg, m, 'pixal3d', pj['_objeto'])
+    w = workflow(entradas, m['seed'], reso, m['caras'], m.get('textura_px', 4096), prefijo,
                  multi, m.get('seed_estructura'), normalizadas)
     with open(os.path.join(out, 'pixal3d_api.json'), 'w') as f:
         json.dump(w, f, indent=1)
-    print(f'[malla] Pixal3D {"4 vistas" if multi else "1 vista"} a {m.get("resolucion", 1536)} '
+    print(f'[malla] Pixal3D {"4 vistas" if multi else "1 vista"} a {reso} '
           f'(seed {m["seed"]}, ~2-3 min)...', flush=True)
     t = time.time()
     salidas = correr(cfg, w)

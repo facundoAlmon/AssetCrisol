@@ -558,7 +558,8 @@ def generar_malla(pdir, pj, nombre):
     elif m.get('motor', 'trellis2') == 'trellis2':
         cwd = CFG['trellis2_dir']
         log = os.path.join(out, 'trellis2.log')
-        reso = m.get('resolucion', 512 if pj['_objeto'] else 1024)  # objetos macizos: 1024 no entra en 16 GB
+        import gpu
+        reso = gpu.resolucion_malla(CFG, m, 'trellis2', pj['_objeto'])  # objetos macizos: 1024 no entra en 16 GB
         cmd = [os.path.join(cwd, 'venv', 'bin', 'python'), os.path.join(H, '2_malla', 'generar_malla_trellis.py'),
                img, out, str(m['caras']), str(reso), str(m['seed']), str(m.get('textura_px', 2048)),
                str(m.get('alfa_min', 0)), '1',

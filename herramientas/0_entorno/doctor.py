@@ -100,7 +100,8 @@ def sistema(R):
         nombre, mem, driver = [x.strip() for x in out.splitlines()[0].split(',')]
         gb = int(mem) / 1024
         R.tiene['gpu'] = R.anotar(G, 'GPU NVIDIA', OK if gb >= 15.5 else AVISO, f'{nombre}, {gb:.0f} GB, driver {driver}',
-                                  '' if gb >= 15.5 else 'con menos de 16 GB la malla puede no entrar')
+                                  '' if gb >= 15.5 else 'con menos de 16 GB la malla arranca a menor resolución '
+                                  '(TRELLIS.2 512, Pixal3D 1024) y puede no entrar igual; FLUX.2 Dev no entra')
     try:
         with open('/proc/meminfo') as f:
             kb = int(re.search(r'MemTotal:\s+(\d+)', f.read()).group(1))

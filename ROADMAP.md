@@ -164,7 +164,8 @@ Errores vistos armando el manual de la UI (2026-11-04):
 - [x] Test de humo sin generación (`tests/humo.py`): `blender` → `sprites` → `iso` → `revisar` → `godot` de Cris, la caja,
       `tema` del bosque y el taller, e instancia las escenas en un proyecto Godot vacío (~3 min).
 - [x] Errores claros cuando falta una herramienta o un modelo, en vez de un traceback.
-- [ ] Ajustes según la VRAM detectada (hoy el pipeline asume 16 GB).
+- [x] Ajustes según la VRAM detectada: la resolución de la malla (`gpu.resolucion_malla`, `vram_gb`). Falta probarlo en
+      una placa de 12 GB.
 
 ## 7. Documentación, landing y lanzamiento
 - [x] Vitrina de los ejemplos (`docs/vitrina/`, imágenes con `herramientas/4_sprites/vitrina.py`), para la landing.

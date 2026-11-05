@@ -7,6 +7,10 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ## [Sin publicar]
 
+### Agregado
+- Malla según la VRAM: con menos de 16 GB (`nvidia-smi`, o `vram_gb` en la config), sin `malla.resolucion` arranca
+  a 512 en TRELLIS.2 y a 1024 en Pixal3D en vez de esperar el OOM; `doctor` lo avisa. Sin probar en una placa así.
+
 ### Arreglado
 - `instalar.sh --plan` con todo instalado ya no avisa que faltan ~135 GB ni que va a completar `config.json`: dice
   qué cambiaría de la config (o que está completa) y lista los pesos que DWPose y rembg bajan en el primer uso.
