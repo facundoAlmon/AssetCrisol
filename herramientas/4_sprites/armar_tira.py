@@ -29,6 +29,7 @@ ANIMACIONES = [
     ('throw', 'lanzar', range(6), 14, False, None),
     ('arms_up', 'brazos_arriba', range(6), 10, False, None),
     ('charge', 'cargar', range(6), 10, True, None),
+    ('wave', 'saludar', range(7), 10, False, None),
 ]
 
 

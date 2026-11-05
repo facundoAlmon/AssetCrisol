@@ -798,6 +798,7 @@ los frames laterales y el retrato. Todas las animaciones son **en el lugar** (el
 | `lanzar` | `throw` | 6 | lanza algo adelante con la mano de atrás |
 | `brazos_arriba` | `arms_up` | 6 | los dos brazos arriba en V (festejo, conjuro) |
 | `cargar` | `charge` | 6 | carga energía en loop, agachado |
+| `saludar` | `wave` | 7 | saluda con la mano en alto |
 
 <details>
 <summary><b>Qué hace Blender, paso por paso</b></summary>
@@ -1144,7 +1145,7 @@ crisol blender firulais && crisol sprites firulais && crisol iso firulais
 - **Animaciones** (procedurales, sin Kimodo): `idle`, `walk` (paso: trasera, delantera, trasera, delantera), `jump`,
   `idle_loop`, `run` (galope), `punch` (una mordida), `hurt` y `die` (cae de costado). Mismos nombres y cuadros que
   las del humanoide: la hoja conserva los índices 0-12 y saltea las que no tiene (rodar, patada, agacharse,
-  defender, lanzar, brazos arriba, cargar). `animacion.zancada_patas` y `animacion.levantar_pata` (fracción del alto
+  defender, lanzar, brazos arriba, cargar, saludar). `animacion.zancada_patas` y `animacion.levantar_pata` (fracción del alto
   del hombro) ajustan el paso.
 - El encuadre sale del largo del cuerpo, no solo del alto. `modelo.altura` = del piso a lo más alto (cabeza u orejas).
 - Patas pegadas entre sí o a la panza se funden en la malla y no hay pesos que lo arreglen: regenerar la imagen.
@@ -1322,9 +1323,9 @@ padre) y llamar `visual.set_frame(frame, mirando_izquierda)`. Colisión recomend
 animaciones nuevas se agregan **siempre al final** (`armar_tira.ANIMACIONES`); las celdas van seguidas, así que
 cambiar los cuadros de una corre los índices de las siguientes (buscar por nombre con `frame_de` o el meta):
 
-| frame | 0 | 1-8 | 9 | 10 | 11 | 12 | 13-20 | 21-32 | 33-40 | 41-47 | 48-55 | 56 | 57 | 58 | 59-61 | 62-67 | 68-73 | 74-79 | 80-85 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| anim | idle | walk | despegue | subida | cima | caída | idle_loop | run | roll | punch | kick | crouch | block | land | hurt | die | throw | arms_up | charge |
+| frame | 0 | 1-8 | 9 | 10 | 11 | 12 | 13-20 | 21-32 | 33-40 | 41-47 | 48-55 | 56 | 57 | 58 | 59-61 | 62-67 | 68-73 | 74-79 | 80-85 | 86-92 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| anim | idle | walk | despegue | subida | cima | caída | idle_loop | run | roll | punch | kick | crouch | block | land | hurt | die | throw | arms_up | charge | wave |
 
 </details>
 

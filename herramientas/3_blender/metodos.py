@@ -14,7 +14,8 @@ METODOS = ('procedural', 'kimodo')
 # cuadros y loop de cada animación que puede salir de un clip (los de anim.py: cambiarlos corre los índices de la hoja)
 CUADROS = {'caminar': (8, True), 'respirar': (8, True), 'correr': (12, True), 'rodar': (8, False),
            'golpe': (7, False), 'patada': (8, False), 'herido': (3, False), 'morir': (6, False),
-           'lanzar': (6, False), 'brazos_arriba': (6, False), 'cargar': (6, True)}
+           'lanzar': (6, False), 'brazos_arriba': (6, False), 'cargar': (6, True),
+           'saludar': (7, False)}
 CANDIDATO = re.compile(r'^([a-z_]+)_s(-?\d+)_(\d+)$')   # movimientos/candidatos/<anim>_s<seed>_<muestra>.npz
 
 

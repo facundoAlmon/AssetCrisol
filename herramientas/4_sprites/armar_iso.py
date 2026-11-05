@@ -10,7 +10,8 @@ import aseprite, posproceso
 # carpeta de Blender -> nombre en Godot (el salto isométrico usa las 8 poses: incluye el aterrizaje)
 NOMBRES = {'idle': 'idle', 'caminar': 'walk', 'saltar': 'jump', 'respirar': 'idle_loop', 'correr': 'run',
            'rodar': 'roll', 'golpe': 'punch', 'patada': 'kick', 'agacharse': 'crouch', 'defender': 'block',
-           'herido': 'hurt', 'morir': 'die', 'lanzar': 'throw', 'brazos_arriba': 'arms_up', 'cargar': 'charge'}
+           'herido': 'hurt', 'morir': 'die', 'lanzar': 'throw', 'brazos_arriba': 'arms_up', 'cargar': 'charge',
+           'saludar': 'wave'}
 
 
 def _ritmo(carpeta):

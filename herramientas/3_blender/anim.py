@@ -642,8 +642,24 @@ def cargar(arm, a, n=6):
     return _poses(arm, a, 'Charge', poses, ciclo=True)
 
 
+def saludar(arm, a):
+    """Saluda con la mano cercana (R) en alto, para que se lea de frente y de costado: sube el brazo adelante y
+    arriba con el codo doblado y la mano abierta, la mueve de lado a lado dos veces (el brazo se abre y se cierra en
+    el plano del frente y la muñeca acompaña) y empieza a bajarla. 7 cuadros; el otro brazo queda suelto."""
+    cuerpo = dict(hips=(0.01, 0.0), chest=(-3, 0, 0), head=-3, brazo_L=(4, 4), antebrazo_L=-15)
+    arriba = dict(cuerpo, brazo_R=(-165, 48), antebrazo_R=-20, hombro_R=(0, 10), mano_R=0, puno_R=0)
+    afuera = dict(arriba, brazo_R=(-160, 64), antebrazo_R=-15, mano_R=-15)
+    adentro = dict(arriba, brazo_R=(-168, 36), antebrazo_R=-35, mano_R=15)
+    poses = [
+        dict(cuerpo, brazo_R=(-100, 40), antebrazo_R=-45, hombro_R=(0, 5), puno_R=0.2),   # sube
+        arriba, afuera, adentro, afuera, adentro,
+        dict(cuerpo, brazo_R=(-25, 12), antebrazo_R=-45, puno_R=0.3),                    # baja
+    ]
+    return _poses(arm, a, 'Wave', poses)
+
+
 # nombre (= carpeta de frames), función. El orden de la tira lo define armar_tira.ANIMACIONES.
 TODAS = [('idle', idle), ('caminar', caminar), ('saltar', saltar), ('respirar', respirar), ('correr', correr),
          ('rodar', rodar), ('golpe', golpe), ('patada', patada), ('agacharse', agacharse),
          ('defender', defender), ('herido', herido), ('morir', morir),
-         ('lanzar', lanzar), ('brazos_arriba', brazos_arriba), ('cargar', cargar)]
+         ('lanzar', lanzar), ('brazos_arriba', brazos_arriba), ('cargar', cargar), ('saludar', saludar)]

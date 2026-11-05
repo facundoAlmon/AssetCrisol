@@ -809,6 +809,7 @@ renders the side-view frames and the portrait. All animations are **in place** (
 | `lanzar` | `throw` | 6 | throws something forward with the back hand |
 | `brazos_arriba` | `arms_up` | 6 | both arms up in a V (cheer, spell) |
 | `cargar` | `charge` | 6 | charges energy in a loop, crouched |
+| `saludar` | `wave` | 7 | waves with the hand up |
 
 <details>
 <summary><b>What Blender does, step by step</b></summary>
@@ -1151,7 +1152,7 @@ crisol blender rex && crisol sprites rex && crisol iso rex
   neck, head and the four feet.
 - **Animations** (procedural, no Kimodo): `idle`, `walk` (lateral sequence), `jump`, `idle_loop`, `run` (gallop),
   `punch` (a bite), `hurt` and `die` (falls on its side). Same names and frame counts as the humanoid ones: the sheet
-  keeps indices 0-12 and skips the ones it doesn't have (roll, kick, crouch, block, throw, arms up, charge).
+  keeps indices 0-12 and skips the ones it doesn't have (roll, kick, crouch, block, throw, arms up, charge, wave).
   `animacion.zancada_patas` and `animacion.levantar_pata` (fraction of shoulder height) tune the stride.
 - Framing comes from the body length, not only the height. `modelo.altura` = floor to the highest point.
 - Legs touching each other or the belly fuse in the mesh and no weights fix that: regenerate the image.
@@ -1332,9 +1333,9 @@ Index = row × 13 + column, same as `Sprite2D.frame` with `hframes`/`vframes`; r
 animations are **always appended at the end** (`armar_tira.ANIMACIONES`); cells are contiguous, so changing one
 animation's frames shifts the indices of the following ones (look them up by name with `frame_de` or the meta):
 
-| frame | 0 | 1-8 | 9 | 10 | 11 | 12 | 13-20 | 21-32 | 33-40 | 41-47 | 48-55 | 56 | 57 | 58 | 59-61 | 62-67 | 68-73 | 74-79 | 80-85 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| anim | idle | walk | take-off | rise | apex | fall | idle_loop | run | roll | punch | kick | crouch | block | land | hurt | die | throw | arms_up | charge |
+| frame | 0 | 1-8 | 9 | 10 | 11 | 12 | 13-20 | 21-32 | 33-40 | 41-47 | 48-55 | 56 | 57 | 58 | 59-61 | 62-67 | 68-73 | 74-79 | 80-85 | 86-92 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| anim | idle | walk | take-off | rise | apex | fall | idle_loop | run | roll | punch | kick | crouch | block | land | hurt | die | throw | arms_up | charge | wave |
 
 </details>
 
