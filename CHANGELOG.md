@@ -12,6 +12,11 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   calidad pareja en tres objetos). Los objetos existentes conservan su json.
 
 ### Agregado
+- Corregir una imagen candidata: `crisol corregir <n> --desde <seed|edit_k> --pedido "..."` (y *Corregir* en cada
+  candidata de `crisol ui`, y la herramienta `corregir` del MCP) pasa el pedido a Qwen Edit sobre esa imagen ("Keep
+  this exact image… Only make these changes…") y saca 2 candidatas nuevas `edit_<k>` (`cand_edit_<k>.png`), que se
+  eligen como las otras (`imagen.elegida: "edit_<k>"`) y se pueden encadenar. No pisa las originales; el pedido y de
+  dónde salió cada una quedan en `trabajo/imagen/correcciones.json`. Reemplaza la receta a mano de `base_<seed>.png`.
 - Papelera: `crisol borrar <n>` (y el tacho junto al nombre en `crisol ui`) mueve el asset a
   `<datos_dir>/.papelera/<carpeta>/<n>_<fecha>/`; `crisol papelera` la lista, `--restaurar <id>` lo devuelve y
   `--vaciar [<ids>]` borra para siempre. En la UI, Biblioteca > Papelera. No con pasos del asset en la cola.

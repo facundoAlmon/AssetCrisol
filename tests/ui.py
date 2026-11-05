@@ -386,6 +386,31 @@ def main():
         c, _ = pedir(base, 'api/assets/caja_dos/renombrar', 'POST', {'nuevo': 'caja'})
         chequear(c == 200, 'renombrar de vuelta a caja')
 
+        print('corregir imagen')
+        img_dir = os.path.join(cfg['datos_dir'], 'personajes', 'cris', 'trabajo', 'imagen')
+        for malo in ({'desde': '999', 'pedido': 'green eyes'}, {'desde': '104', 'pedido': '  '},
+                     {'desde': '../x', 'pedido': 'x'}, {'desde': '104', 'pedido': 'x' * 601}):
+            c, _ = pedir(base, 'api/cola', 'POST', {'paso': 'corregir', 'nombre': 'cris', **malo})
+            chequear(c == 400, f'corregir rechazado: {json.dumps(malo)[:60]}', str(c))
+        shutil.copy(os.path.join(img_dir, 'cand_104.png'), os.path.join(img_dir, 'cand_edit_2.png'))
+        shutil.copy(os.path.join(img_dir, 'cand_104.png'), os.path.join(img_dir, 'cand_edit_10.png'))
+        with open(os.path.join(img_dir, 'correcciones.json'), 'w') as f:
+            json.dump({'edit_2': {'desde': 104, 'pedido': 'green eyes'}, 'edit_10': {'desde': 'edit_2', 'pedido': 'a scarf'}}, f)
+        c, d = pedir(base, 'api/assets/cris')
+        ops = next((e['opciones'] for e in d.get('elecciones', []) if e['clave'] == 'imagen.elegida'), [])
+        chequear([o['valor'] for o in ops] == ['104', 'edit_2', 'edit_10'] and ops[2].get('correccion') ==
+                 {'desde': 'edit_2', 'pedido': 'a scarf'} and 'correccion' not in ops[0],
+                 'las correcciones son opciones de la imagen, en orden y con su pedido', ops)
+        c, r = pedir(base, 'api/assets/cris/elegir', 'POST', {'clave': 'imagen.elegida', 'valor': 'edit_2'})
+        c2, d = pedir(base, 'api/assets/cris')
+        chequear(c == 200 and r['valor'] == 'edit_2' and d['json']['imagen']['elegida'] == 'edit_2', 'elegir una corrección')
+        pedir(base, 'api/assets/cris/elegir', 'POST', {'clave': 'imagen.elegida', 'valor': '104'})
+        c, v = pedir(base, 'api/assets/cris/deshacer?paso=corregir')
+        rutas = sorted(r for r, _ in v.get('borraria', [])) if c == 200 else []
+        chequear(rutas == ['trabajo/imagen/cand_edit_10.png', 'trabajo/imagen/cand_edit_2.png', 'trabajo/imagen/correcciones.json'],
+                 'deshacer corregir: solo las correcciones', rutas)
+        pedir(base, 'api/assets/cris/deshacer', 'POST', {'paso': 'corregir'})
+
         print('papelera')
         datos = cfg['datos_dir']
         c, t = pedir(base, 'api/assets/martillo/tamano')

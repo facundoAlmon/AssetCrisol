@@ -10,6 +10,8 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
                                     la receta del tipo (plantilla/recetas: humanoide, chibi, robot, juguete,
                                     objeto, vegetacion, vehiculo, escenario); --objeto/--vehiculo/--escenario = atajos
   imagen   <n>                      candidatas con ComfyUI (una por seed) -> elegir en personaje.json
+  corregir <n> --desde <seed|edit_k> --pedido "..."   corrige una candidata con Qwen Edit (el pedido en inglés):
+                                    2 candidatas nuevas edit_<k> (cand_edit_<k>.png), que se eligen como las otras
   vistas   <n>                      (Pixal3D 4 vistas) espalda y costados con Qwen -> trabajo/imagen/vistas.png,
                                     para revisarlas antes de la malla (la malla las reusa; borrar una para rehacerla)
   malla    <n>                      imagen elegida -> modelo.glb texturizado (Pixal3D / TRELLIS.2)
@@ -403,6 +405,21 @@ def liberar_vram_comfyui():
         print('[malla] VRAM de ComfyUI liberada')
     except Exception:
         pass
+
+
+def paso_corregir(nombre, desde, pedido):
+    import generar_imagen
+    pdir, pj = cargar(nombre)
+    if pj['_escenario']:
+        salida.salir(salida.USO, '[corregir] es para personajes y objetos (en escenarios, otra seed de la textura)')
+    if desde is None:
+        salida.salir(salida.USO, '[corregir] falta --desde <seed|edit_k> (la candidata a corregir)')
+    if not (pedido or '').strip():
+        salida.salir(salida.USO, '[corregir] falta --pedido "..." (qué cambiar, en inglés)')
+    if not os.path.isfile(os.path.join(pdir, 'trabajo', 'imagen', f'cand_{desde}.png')):
+        salida.salir(salida.USO, f'[corregir] no existe la candidata {desde} (trabajo/imagen/cand_{desde}.png)')
+    reservar_gpu('corregir')
+    generar_imagen.corregir(CFG, nombre, pj, desde, pedido)
 
 
 def paso_vistas(nombre):
@@ -1095,7 +1112,7 @@ def paso_godot(nombre, instalar=None):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('paso', choices=['nuevo', 'imagen', 'vistas', 'revisar', 'rehacer', 'malla', 'ultratex', 'guia', 'articulaciones', 'blender', 'sprites', 'retrato',
+    ap.add_argument('paso', choices=['nuevo', 'imagen', 'corregir', 'vistas', 'revisar', 'rehacer', 'malla', 'ultratex', 'guia', 'articulaciones', 'blender', 'sprites', 'retrato',
                                      'iso', 'anclas', 'godot', 'todo', 'comparar', 'texturas', 'tema', 'metodo', 'movimiento', 'clip', 'estado',
                                      'deshacer', 'renombrar', 'borrar', 'papelera'])
     ap.add_argument('personaje', nargs='?', help='personaje, objeto o escenario (en `movimiento`, la animación)')
@@ -1105,7 +1122,7 @@ def main():
     ap.add_argument('--seed', type=int, default=1, help='paso movimiento')
     ap.add_argument('--muestras', type=int, default=3, help='paso movimiento: variantes de la semilla')
     ap.add_argument('--candidato', help='paso clip: <anim>_s<seed>_<i> de movimientos/candidatos (lo pasa a la biblioteca)')
-    ap.add_argument('--desde', help='paso clip: segundo del clip donde empieza la animación ("" lo borra)')
+    ap.add_argument('--desde', help='paso clip: segundo del clip donde empieza la animación ("" lo borra); paso corregir: la candidata (seed o edit_<k>)')
     ap.add_argument('--hasta', help='paso clip: segundo donde termina ("" lo borra)')
     ap.add_argument('--recomendado', choices=['si', 'no'], help='paso clip: si = método por defecto de esa animación')
     ap.add_argument('--quitar', action='store_true', help='paso clip: sacarlo de la biblioteca propia')
@@ -1120,6 +1137,7 @@ def main():
     ap.add_argument('--paso', dest='deshacer_paso', metavar='PASO', help='paso deshacer: cuál')
     ap.add_argument('--ver', action='store_true', help='paso deshacer: solo listar lo que borraría')
     ap.add_argument('--nuevo', help='paso renombrar: el nombre nuevo')
+    ap.add_argument('--pedido', help='paso corregir: qué cambiar (en inglés)')
     ap.add_argument('--restaurar', metavar='ID', help='paso papelera: <carpeta>/<n>_<fecha> (de `crisol papelera`)')
     ap.add_argument('--vaciar', nargs='?', const='', metavar='IDS', help='paso papelera: borrar para siempre (todo o esos ids)')
     ap.add_argument('--borrar', metavar='CANDIDATO', help='paso movimiento: <anim>_s<seed>[_<i>] (candidatos a borrar)')
@@ -1197,7 +1215,7 @@ def revisar_instalacion(a):
 
 def revisar_previos(paso, nombre):
     """La salida del paso anterior que `paso` lee: si no está, sale con salida.FALTA_PASO nombrando qué correr."""
-    if paso in ('nuevo', 'movimiento', 'clip', 'rehacer', 'estado', 'imagen', 'texturas', 'tema', 'metodo', 'todo', 'malla',
+    if paso in ('nuevo', 'movimiento', 'clip', 'rehacer', 'estado', 'imagen', 'corregir', 'texturas', 'tema', 'metodo', 'todo', 'malla',
                 'vistas', 'comparar', 'ultratex'):
         return   # sin entrada de un paso anterior, o ya lo revisan ellos (imagen elegida, modelo.glb, vistas)
     pdir, pj = cargar(nombre)
@@ -1239,6 +1257,8 @@ def ejecutar(a):
         paso_tema(a.personaje)
     elif a.paso == 'imagen':
         paso_imagen(a.personaje)
+    elif a.paso == 'corregir':
+        paso_corregir(a.personaje, a.desde, a.pedido)
     elif a.paso == 'vistas':
         paso_vistas(a.personaje)
     elif a.paso == 'rehacer':

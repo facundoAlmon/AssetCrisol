@@ -157,7 +157,7 @@ Movimientos, segunda vuelta (2026-11-04):
       clip` copia el `.npz` a la biblioteca. También en la CLI (`crisol movimiento --borrar <anim>_s<seed>[_<i>]`).
 
 Imagen (2026-11-04):
-- [ ] Corregir una imagen candidata: pedido en texto ("más corpulento", "ojos verdes", "una mancha en el lomo") → Qwen
+- [x] Corregir una imagen candidata: pedido en texto ("más corpulento", "ojos verdes", "una mancha en el lomo") → Qwen
       Edit sobre esa imagen, con el prompt "Keep this exact image… Only make these changes…" armado solo. Las
       correcciones son candidatas nuevas (`edit_<k>`, se pueden encadenar, se eligen por nombre con `imagen.elegida`)
       que guardan de qué imagen salieron y el pedido; no pisan las originales ni tocan `descripcion`/`referencia`.

@@ -141,14 +141,26 @@ def correr(nombre: str, paso: str, esperar_s: int = 50) -> list:
     más que `esperar_s`, sigue en segundo plano: usar `esperar` con el id del trabajo."""
     if paso not in PASOS:
         return [f'paso desconocido: {paso} (hay: {", ".join(PASOS)})']
+    return _lanzar([paso, nombre], paso, nombre, esperar_s)
+
+
+def _lanzar(args, paso, nombre, esperar_s):
     for tid, t in TRABAJOS.items():
         if t['nombre'] == nombre and t['proc'].poll() is None:
             return [f'{nombre} ya tiene un trabajo corriendo ({tid}: {t["paso"]}): `esperar` antes']
     tid = f't{next(_ids)}'
     log = os.path.join(tempfile.gettempdir(), f'crisol_mcp_{os.getpid()}_{tid}_{paso}_{nombre}')
-    proc = op.lanzar([paso, nombre], log)
+    proc = op.lanzar(args, log)
     TRABAJOS[tid] = {'proc': proc, 'paso': paso, 'nombre': nombre, 'inicio': time.time(), 'log': log + '.log'}
     return esperar_trabajo(tid, esperar_s)
+
+
+@app.tool()
+def corregir(nombre: str, desde: str, pedido: str, esperar_s: int = 60) -> list:
+    """Corrige una imagen candidata con lo que pidió la persona (`pedido`, en inglés: "make him bulkier", "green
+    eyes"): Qwen Edit sobre la candidata `desde` (su seed o edit_<k>) saca 2 candidatas nuevas (edit_<k>, ~40 s) sin
+    tocar las otras. Mostrarle la hoja que devuelve: la que le guste se elige con `elegir` imagen.elegida = edit_<k>."""
+    return _lanzar(['corregir', nombre, '--desde', str(desde), '--pedido', pedido], 'corregir', nombre, esperar_s)
 
 
 @app.tool()

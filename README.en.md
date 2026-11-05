@@ -430,6 +430,7 @@ crisol nuevo bandit --referencia ~/bandit_sketch.png
 #   edit <datos_dir>/personajes/bandit/personaje.json -> estilo and imagen.descripcion (in English: who it is)
 crisol imagen bandit           # candidates (~20 s each with a reference) -> trabajo/imagen/candidatos.png
 #   pick one: personaje.json -> imagen.elegida = <seed>
+#   (or fix one: crisol corregir bandit --desde <seed> --pedido "green eyes" -> edit_1, edit_2)
 crisol vistas bandit           # back and side views with Qwen -> trabajo/imagen/vistas.png (look at them)
 crisol malla bandit            # Pixal3D 4 views + UltraTex (~6 min) -> look at trabajo/malla/ultratex_vistas.png
 crisol articulaciones bandit   # joints with DWPose -> trabajo/guia/guia.png (check them)
@@ -498,14 +499,12 @@ The template already has these values; this is what to look at and what to chang
    room around it. Plain background.
 2. **Image** (4 seeds; with a reference Qwen Edit, ~20 s each; without one Z-Image Turbo, ~20 s each): pick the
    style's prompt first (see above). **Without a reference**, Z-Image gives a quick first idea but tends to add loose
-   pieces (holsters, straps, pockets) and looser clothes: pick one, copy it as `base_<seed>.png`, set it as
-   `referencia` and run it through Qwen with an editing `imagen.prompt` ("Keep this exact character unchanged ...
-   Only make these changes: remove ..., make the trousers fitted ..., symmetrical A-pose ..."). The json must then
-   have only `prompt`: if `imagen.descripcion` is still there, the style builds the prompt and `prompt` is ignored
-   (move it, e.g., to `_descripcion`). In `descripcion`, remove anything that changes the reference's pose ("arms down, not on the
-   hips"). Pick the one with the right **proportions** (sometimes the head comes out too big). **Squinting eyes**
-   from a smile: don't change the seed, edit the chosen image: copy it as `base_<seed>.png`, set it as `referencia`
-   and write a `prompt` like "Keep this exact image unchanged ... Only change the eyes: open the eyes wider ...".
+   pieces (holsters, straps, pockets) and looser clothes: **fix it** (`crisol corregir <n> --desde <seed> --pedido
+   "remove the belt pouches, make the trousers fitted"`, or *Fix* on the candidate in `crisol ui`): Qwen Edit makes 2
+   new candidates (`edit_<k>`) and leaves the original alone. In `descripcion`, remove anything that changes the
+   reference's pose ("arms down, not on the hips"). Pick the one with the right **proportions** (sometimes the head
+   comes out too big). **Squinting eyes** from a smile: don't change the seed, fix the chosen one (`--pedido "open
+   the eyes wider"`).
 3. **Views** (`crisol vistas`): the back must not repeat what is on the chest, and `left`/`right` face their own
    edge of the image. Delete a bad one (`trabajo/imagen/vista_<v>.png`) and re-run.
 4. **Mesh**: look at `ultratex_vistas.png` and `ultratex_espalda.png`. Without `malla.ultratex.espalda`, UltraTex invents
@@ -629,14 +628,19 @@ Generates one image per seed in `imagen.seeds`:
   - `"flux2"`: FLUX.2 Dev, ~3.5 min per seed and fills the 16 GB; non-commercial license.
 
   Z-Image is great for the first idea, but it tends to add loose pieces (holsters, straps, pockets) and looser
-  clothes, which later get in the way of the mesh and the rig. Recipe for a new character without a reference: pick a
-  candidate, copy it as `base_<seed>.png`, set it as `imagen.referencia` and regenerate with Qwen and an editing
-  `imagen.prompt` ("Keep this exact character unchanged ... Only make these changes: remove ..., make the trousers
-  fitted ..., symmetrical A-pose ..."). Careful: if the json has `imagen.descripcion`, the style builds the prompt
-  and `imagen.prompt` is ignored; for the edit keep only `prompt` (e.g. move the description to `_descripcion`).
+  clothes, which later get in the way of the mesh and the rig: that is what `crisol corregir` is for (below).
 
 Look at `trabajo/imagen/candidatos.png` and put the winning seed in `imagen.elegida`. You can also put the name of
 your own file inside the character's folder (`"elegida": "my_render.png"`) and skip this step.
+
+**Fixing a candidate** (`crisol corregir <n> --desde <seed|edit_k> --pedido "..."`, or *Fix* on the candidate's card
+in `crisol ui`): Qwen Edit redraws it with "Keep this exact image ... Only make these changes: <request>" and makes
+**2 new candidates**, `cand_edit_<k>.png` (~40 s). It does not overwrite the originals or touch
+`descripcion`/`referencia`; which candidate each one came from and the request are kept in
+`trabajo/imagen/correcciones.json`, and they are added to `candidatos.png`. They are chosen like the others
+(`"elegida": "edit_3"`) and can be chained (`--desde edit_3`). Keep the request in English and short, a few things at
+a time ("make him bulkier", "green eyes", "a dark patch on the back"). It also works with `imagen.referencia`, and
+replaces the old recipe of copying the chosen one as `base_<seed>.png`.
 
 <details>
 <summary><b>How the prompt is built</b></summary>

@@ -15,7 +15,9 @@ def _patrones(paso, tipo, n):
     t, gd, go = 'trabajo', f'godot/personajes/{n}', f'godot/objetos/{n}'
     blend = [f'{t}/{n}.blend', f'{t}/{n}.blend1']
     comun = {
-        'imagen': [f'{t}/imagen/cand_*.png', f'{t}/imagen/candidatos.png', f'{t}/imagen/prompt.txt', f'{t}/imagen/wf_s*.json'],
+        'imagen': [f'{t}/imagen/cand_*.png', f'{t}/imagen/candidatos.png', f'{t}/imagen/prompt.txt', f'{t}/imagen/wf_s*.json',
+                   f'{t}/imagen/correcciones.json', f'{t}/imagen/wf_edit_*.json'],
+        'corregir': [f'{t}/imagen/cand_edit_*.png', f'{t}/imagen/correcciones.json', f'{t}/imagen/wf_edit_*.json'],
         'vistas': [f'{t}/imagen/vista_*.png', f'{t}/imagen/vistas.png', f'{t}/imagen/wf_vista_*.json'],
         'malla': [f'{t}/malla', f'{t}/malla_*', f'{t}/comparar', f'{t}/candidatos.png'],
         'ultratex': [f'{t}/malla/ultratex_*.png'],   # + la malla del motor de vuelta (deshacer)
@@ -47,7 +49,7 @@ def _patrones(paso, tipo, n):
     return {'texturas': [f'{t}/texturas'], 'tema': [f'{t}/tema', 'preview.png']}.get(paso, [])
 
 
-PASOS = ('imagen', 'vistas', 'malla', 'ultratex', 'articulaciones', 'guia', 'blender', 'sprites', 'retrato', 'iso',
+PASOS = ('imagen', 'corregir', 'vistas', 'malla', 'ultratex', 'articulaciones', 'guia', 'blender', 'sprites', 'retrato', 'iso',
          'anclas', 'revisar', 'godot', 'comparar', 'texturas', 'tema')
 
 

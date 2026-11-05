@@ -3,8 +3,10 @@
 #  - Sin referencia: Z-Image Turbo (por defecto: segundos, Apache-2.0) o FLUX.2 Dev (`imagen.motor: "flux2"`: ~3 min,
 #    licencia no comercial) generan desde el prompt.
 # Una imagen por seed -> personajes/<n>/trabajo/imagen/cand_<seed>.png + candidatos.png (hoja de contacto).
+# `crisol corregir`: Qwen Edit sobre una candidata con un pedido en texto -> cand_edit_<k>.png (candidatas nuevas, que
+# se eligen como las otras: imagen.elegida = "edit_<k>"); de qué salió cada una y el pedido, en correcciones.json.
 # Se llama desde pipeline.py (python3 del sistema; usa el CLI `comfy` del venv de ComfyUI).
-import glob, json, os, shutil, subprocess, sys, time, urllib.parse, urllib.request
+import glob, json, os, re, shutil, subprocess, sys, time, urllib.parse, urllib.request
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 
@@ -185,16 +187,97 @@ def main(cfg, nombre, pj):
         shutil.copy(ult, dst)
         hechas.append((seed, dst))
 
+    hoja_candidatos(out_dir, [(f'seed {s}', p) for s, p in hechas] + correcciones_hechas(out_dir))
+    print('[imagen] listo:', os.path.join(out_dir, 'candidatos.png'))
+    print('[imagen] elegí una y poné su seed en personaje.json > imagen.elegida')
+
+
+def hoja_candidatos(out_dir, items):
+    """candidatos.png: las candidatas en fila, cada una con su etiqueta. items = [(etiqueta, ruta)]."""
     from PIL import Image, ImageDraw
     h = 600
-    ims = [Image.open(p).convert('RGB') for _, p in hechas]
+    ims = [Image.open(p).convert('RGB') for _, p in items]
     ims = [i.resize((int(i.width * h / i.height), h)) for i in ims]
     hoja = Image.new('RGB', (sum(i.width for i in ims), h), 'white')
     x = 0
-    for (seed, _), im in zip(hechas, ims):
+    for (etiqueta, _), im in zip(items, ims):
         hoja.paste(im, (x, 0))
-        ImageDraw.Draw(hoja).text((x + 10, 10), f'seed {seed}', fill=(0, 0, 0))
+        ImageDraw.Draw(hoja).text((x + 10, 10), etiqueta, fill=(0, 0, 0))
         x += im.width
     hoja.save(os.path.join(out_dir, 'candidatos.png'))
-    print('[imagen] listo:', os.path.join(out_dir, 'candidatos.png'))
-    print('[imagen] elegí una y poné su seed en personaje.json > imagen.elegida')
+
+
+EDIT = re.compile(r'^edit_(\d+)$')
+DESDE = re.compile(r'^(-?\d+|edit_\d+)$')
+
+
+def leer_correcciones(out_dir):
+    """{edit_<k>: {desde, pedido, seed, fecha}} de trabajo/imagen/correcciones.json."""
+    try:
+        with open(os.path.join(out_dir, 'correcciones.json')) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
+def correcciones_hechas(out_dir):
+    """[(etiqueta, ruta)] de las cand_edit_<k>.png que existen, en orden."""
+    info = leer_correcciones(out_dir)
+    out = []
+    for r in glob.glob(os.path.join(out_dir, 'cand_edit_*.png')):
+        n = os.path.basename(r)[5:-4]
+        if EDIT.match(n):
+            out.append((int(n[5:]), f"{n} (de {info.get(n, {}).get('desde', '?')})", r))
+    return [(e, r) for _, e, r in sorted(out)]
+
+
+def prompt_correccion(pj, pedido):
+    que = 'object' if pj.get('_objeto') else ('animal' if pj.get('modelo', {}).get('esqueleto') == 'cuadrupedo'
+                                             else 'character')
+    pedido = pedido.strip().rstrip('.')
+    return (f'Keep this exact image: the same {que}, design, pose, framing, proportions, art style, lighting and plain '
+            f'background. Only make these changes: {pedido}. Do not change anything else.')
+
+
+def corregir(cfg, nombre, pj, desde, pedido, cuantas=2):
+    """Qwen Edit sobre cand_<desde>.png con el pedido: `cuantas` candidatas nuevas cand_edit_<k>.png (k sigue al
+    último), anotadas en correcciones.json. No toca las originales ni el json del asset."""
+    out_dir = os.path.join(pj['_dir'], 'trabajo', 'imagen')
+    desde = str(desde)
+    if not DESDE.match(desde):
+        sys.exit(f'[corregir] --desde {desde!r}: la seed de una candidata o edit_<k>')
+    src = os.path.join(out_dir, f'cand_{desde}.png')
+    if not os.path.isfile(src):
+        sys.exit(f'[corregir] no existe la candidata {desde} (trabajo/imagen/cand_{desde}.png)')
+    if not (pedido or '').strip():
+        sys.exit('[corregir] falta --pedido (qué cambiar, en inglés: "make him bulkier", "green eyes")')
+    prompt = prompt_correccion(pj, pedido)
+    print(f'[corregir] {desde} -> {cuantas} candidata(s) con Qwen Edit; prompt:\n  {prompt}')
+    asegurar_servidor(cfg, out_dir)
+    info = leer_correcciones(out_dir)
+    hechos = [int(m[1]) for m in (EDIT.match(os.path.basename(r)[5:-4])
+                                  for r in glob.glob(os.path.join(out_dir, 'cand_edit_*.png'))) if m]
+    k = max(hechos + [int(x[5:]) for x in info if EDIT.match(x)] + [0]) + 1
+    salida_comfy = os.path.join(cfg['comfyui_dir'], 'output')
+    nuevas = []
+    for i in range(cuantas):
+        n, seed = f'edit_{k + i}', k + i
+        prefijo = f'gp_{nombre}_{n}'
+        wf = os.path.join(out_dir, f'wf_{n}.json')
+        print(f'[corregir] {n} (seed {seed})...')
+        armar_workflow(cfg, nombre, pj, seed, wf, prefijo, ref=src, prompt=prompt)
+        comfy_run(cfg, wf)
+        ult = max(glob.glob(os.path.join(salida_comfy, prefijo + '_*.png')), key=os.path.getmtime)
+        shutil.copy(ult, os.path.join(out_dir, f'cand_{n}.png'))
+        info[n] = {'desde': int(desde) if desde.lstrip('-').isdigit() else desde, 'pedido': pedido.strip(),
+                   'seed': seed, 'fecha': time.strftime('%Y-%m-%d %H:%M')}
+        with open(os.path.join(out_dir, 'correcciones.json'), 'w') as f:
+            json.dump(info, f, indent=1, ensure_ascii=False)
+            f.write('\n')
+        nuevas.append(n)
+    originales = sorted((r for r in glob.glob(os.path.join(out_dir, 'cand_*.png'))
+                         if not EDIT.match(os.path.basename(r)[5:-4])),
+                        key=lambda r: (not os.path.basename(r)[5:-4].lstrip('-').isdigit(), os.path.basename(r)))
+    hoja_candidatos(out_dir, [(f'seed {os.path.basename(r)[5:-4]}', r) for r in originales] + correcciones_hechas(out_dir))
+    print(f'[corregir] listo: {", ".join(nuevas)} (en trabajo/imagen/candidatos.png); para usar una: '
+          f'imagen.elegida = "{nuevas[0]}"')

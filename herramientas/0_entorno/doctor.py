@@ -288,7 +288,7 @@ PASOS = [
     ('imagen (con referencia)', [['comfyui', 'modelos_qwen']], 'Qwen Image Edit'),
     ('imagen (sin referencia)', [['comfyui', 'modelos_zimage'], ['comfyui', 'modelos_flux2', 'nodo_gguf']],
      'Z-Image Turbo, o FLUX.2 Dev + ComfyUI-GGUF'),
-    ('vistas', [['comfyui', 'modelos_qwen']], 'Qwen Image Edit'),
+    ('vistas, corregir', [['comfyui', 'modelos_qwen']], 'Qwen Image Edit'),
     ('malla (TRELLIS.2)', [['trellis2', 'blender']], 'TRELLIS.2 con sus pesos'),
     ('malla (Pixal3D)', [['comfyui', 'pixal3d_nodos', 'modelos_pixal3d', 'blender']], 'nodos y modelos de Pixal3D'),
     ('ultratex', [['comfyui', 'nodo_ultratex', 'modelos_ultratex', 'blender']], 'ComfyUI-UltraTex + FLUX.2 Klein'),
@@ -305,7 +305,7 @@ PASOS = [
     ('mcp', [['uv']], 'uv (pone el SDK de MCP)'),
 ]
 # sin estos, la receta recomendada no anda: el resto son opcionales (avisan pero no hacen fallar a doctor)
-OBLIGATORIOS = {'nuevo, metodo, clip', 'imagen (con referencia)', 'vistas', 'malla (TRELLIS.2)',
+OBLIGATORIOS = {'nuevo, metodo, clip', 'imagen (con referencia)', 'vistas, corregir', 'malla (TRELLIS.2)',
                 'guia, blender, retrato, iso, anclas, revisar, comparar, rehacer', 'sprites, godot'}
 
 
@@ -363,7 +363,7 @@ def _necesita(paso, pj, cfg):
         return {'comfyui', 'nodo_dwpose', 'blender'}
     if paso == 'ultratex':
         return {'comfyui', 'nodo_ultratex', 'modelos_ultratex', 'blender'}
-    if paso == 'vistas':
+    if paso in ('vistas', 'corregir'):
         return {'comfyui', 'modelos_qwen'}
     if paso == 'movimiento':
         return {'kimodo'}

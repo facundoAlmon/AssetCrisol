@@ -367,6 +367,10 @@ def opciones_decidir(pdir, pj, d):
     de opcion_malla."""
     t = os.path.join(pdir, 'trabajo')
     clave, ops = d['clave'], []
+    correcciones = generar_imagen.leer_correcciones(os.path.join(t, 'imagen')) if clave == 'imagen.elegida' else {}
+    if clave == 'imagen.elegida':   # las originales por seed y después las correcciones en orden (edit_2 antes que edit_10)
+        d['opciones'] = sorted(d['opciones'], key=lambda o: (str(o).startswith('edit_'),
+                               int(str(o).rsplit('_', 1)[-1]) if str(o).lstrip('-').replace('edit_', '').isdigit() else 0, str(o)))
     for o in d['opciones']:
         img = None
         if clave == 'malla.elegida':
@@ -374,6 +378,10 @@ def opciones_decidir(pdir, pj, d):
             continue
         if clave == 'imagen.elegida':
             img = existe(t, 'imagen', f'cand_{o}.png') and f'trabajo/imagen/cand_{o}.png'
+            c = correcciones.get(str(o))
+            if c:
+                ops.append({'valor': o, 'imagen': img, 'correccion': {'desde': c.get('desde'), 'pedido': c.get('pedido')}})
+                continue
         elif clave.startswith('texturas.'):
             k = clave.split('.')[1]
             img = existe(t, 'texturas', k, f'cand_{o}.png') and f'trabajo/texturas/{k}/cand_{o}.png'
@@ -1223,6 +1231,15 @@ class Manejador(BaseHTTPRequestHandler):
             args = ['movimiento', anim, '--prompt', str(b['prompt']), '--duracion', str(float(b.get('duracion', 4))),
                     '--seed', str(int(b.get('seed', 1))), '--muestras', str(int(b.get('muestras', 3)))]
             n = anim
+        elif paso == 'corregir':
+            pdir, pj = cargar(n)
+            tipo = est.estado(pdir, pj, n)['tipo']
+            desde, pedido = str(b.get('desde', '')), str(b.get('pedido', '')).strip()
+            if not generar_imagen.DESDE.match(desde) or not os.path.isfile(os.path.join(pdir, 'trabajo', 'imagen', f'cand_{desde}.png')):
+                raise ValueError(f'corregir: no hay candidata {desde}')
+            if not pedido or len(pedido) > 600:
+                raise ValueError('corregir: el pedido (qué cambiar), hasta 600 letras')
+            args, variante, unidades = ['corregir', n, '--desde', desde, '--pedido', pedido], 'qwen', 2
         elif paso in PASOS_ASSET:
             pdir, pj = cargar(n)
             tipo = est.estado(pdir, pj, n)['tipo']

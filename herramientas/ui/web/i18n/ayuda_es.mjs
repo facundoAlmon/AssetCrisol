@@ -4,7 +4,7 @@ export default {
   imagen: {
     hace: 'Genera una imagen candidata por cada seed. Con referencia, Qwen Image Edit la redibuja en el estilo y conserva el diseño; sin referencia, Z-Image Turbo (o FLUX.2) la inventa desde la descripción. Unos 20 s por seed.',
     mirar: 'Elegí la de proporciones correctas (a veces salen cabezonas), cuerpo entero, brazos separados del cuerpo y piernas un poco abiertas: lo que se toca en la imagen se funde en la malla. Sin piezas sueltas (correas, cartucheras) ni texto.',
-    mal: 'Probá otras seeds (Ajustes > Imagen) antes de cambiar la descripción. Si la idea está bien pero tiene detalles feos, usala de referencia y pasala de nuevo por Qwen pidiendo solo esos cambios. Ojos achinados: editar solo los ojos, no cambiar de seed. Si todas traen algo que no pediste (una prenda, un material, un color), viene del estilo: sacalo en Ajustes > Prompt del estilo, no con un "no ..." en la descripción.',
+    mal: 'Probá otras seeds (Ajustes > Imagen) antes de cambiar la descripción. Si la idea está bien pero tiene detalles feos, usá «Corregir» en esa candidata: escribís qué cambiar y salen 2 nuevas sin perder la original. Ojos achinados: corregir solo los ojos, no cambiar de seed. Si todas traen algo que no pediste (una prenda, un material, un color), viene del estilo: sacalo en Ajustes > Prompt del estilo, no con un "no ..." en la descripción.',
     readme: '1-imagen-crisol-imagen',
   },
   vistas: {

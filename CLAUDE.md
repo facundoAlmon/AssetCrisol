@@ -9,7 +9,7 @@ comentarios y docs en español. Todo corre local: no proponer servicios pagos ni
 
 ## Reglas
 
-- **Una generación por vez en la GPU** (aunque la otra sea de otra sesión u otro programa). `imagen`, `vistas`,
+- **Una generación por vez en la GPU** (aunque la otra sea de otra sesión u otro programa). `imagen`, `corregir`, `vistas`,
   `malla`, `ultratex`, `articulaciones` y `texturas` ya esperan solos (`herramientas/0_entorno/gpu.py`: candado entre
   `crisol`, cola de ComfyUI, procesos CUDA ajenos); con `--sin-esperar` salen con 3. Lanzarlos en background y esperar
   la notificación. `tests/humo.py` y Blender no pasan por esa cola: antes, `curl -s 127.0.0.1:8188/queue`
@@ -27,6 +27,7 @@ comentarios y docs en español. Todo corre local: no proponer servicios pagos ni
 ## Correr
 
 ```bash
+crisol corregir <n> --desde <seed|edit_k> --pedido "..."   # Qwen Edit sobre una candidata -> 2 candidatas edit_<k>
 crisol <nuevo|imagen|vistas|malla|ultratex|guia|articulaciones|blender|sprites|retrato|iso|anclas|revisar|godot|todo> <n> [--referencia img] [--objeto|--vehiculo] [--instalar <proyecto>]
 crisol nuevo <n> --receta <humanoide|chibi|robot|juguete|cuadrupedo|objeto|vegetacion|vehiculo|escenario> [--descripcion "..."]
 crisol estado [<n>] [--json]                        # qué está hecho, qué quedó viejo, qué falta elegir
@@ -69,8 +70,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `moderno_juguete` solo para juguetes de plástico (en una persona la ropa sale lustrada: pasar a `moderno` y
   rehacer el render).
 - Humanoides nuevos: README > *Qué mirar en cada paso (receta para humanoides)* (Pixal3D 4 vistas + UltraTex). Sin
-  referencia: Z-Image para la idea → la elegida como `base_<seed>.png` de `referencia` → Qwen con un `imagen.prompt`
-  de edición (sin `descripcion`) que saque piezas sueltas y ajuste la ropa.
+  referencia: Z-Image para la idea → `crisol corregir <n> --desde <seed> --pedido "..."` (Qwen Edit, 2 candidatas
+  `edit_<k>`, `trabajo/imagen/correcciones.json`) que saque piezas sueltas y ajuste la ropa.
 
 ## Mapa del código
 
@@ -205,7 +206,7 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
 - Vistas de Qwen: pueden copiar a la espalda lo del pecho o salir con el costado espejado: mirar `vista_*.png`.
 - UltraTex solo mira `sin_fondo.png`: sin `espalda` inventa la espalda copiando el pecho. **Los ojos dependen de
   `malla.ultratex.seed`**: mirar la cara de cerca. Mientras corre, `modelo.glb` es la malla del motor (no evaluar una `guia`).
-  Ojos achinados en la imagen elegida → editarla con Qwen ("only change the eyes") como `base_<seed>.png`.
+  Ojos achinados en la imagen elegida → `crisol corregir` ("open the eyes wider"), no otra seed.
 - Cuadrúpedos: con Pixal3D (aun enderezada por `cuadrupedo.apoyar`) las patas casi no se mueven y se ve la capa de
   adentro → TRELLIS.2 (la receta; `malla` y `estado` avisan). Con una foto de referencia, Qwen copia la pose de la cabeza:
   si mira a la cámara, la malla queda con la cara de costado en todas las animaciones (`ENCUADRE_CUADRUPEDO`).

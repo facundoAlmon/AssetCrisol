@@ -275,7 +275,11 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 .opcion { border: 1px solid var(--linea); border-radius: var(--r); overflow: hidden; background: var(--superficie-2); display: flex; flex-direction: column; }
 .opcion .arte { aspect-ratio: 1; display: grid; place-items: center; cursor: zoom-in; border: 0; padding: 0; width: 100%; }
 .opcion .arte img { width: 100%; height: 100%; object-fit: contain; }
-.opcion footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; }
+.opcion footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; }
+.opcion .correccion { padding: 8px 10px 0; color: var(--texto-2); overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.corregir { display: grid; gap: 8px; padding: 0 10px 10px; }
+.corregir textarea { resize: vertical; min-height: 56px; }
 .hoja-decidir { border-radius: var(--r); overflow: hidden; margin-bottom: 14px; cursor: zoom-in; border: 0; padding: 0; width: 100%; display: block; }
 .hoja-decidir img { width: 100%; display: block; }
 .botones-opcion { display: flex; flex-wrap: wrap; gap: 8px; }

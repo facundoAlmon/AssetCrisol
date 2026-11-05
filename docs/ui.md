@@ -108,6 +108,11 @@ Qué buscar en la imagen, porque se arrastra hasta el final:
 Si ninguna convence, probá otras seeds (Ajustes > Imagen > Seeds) antes de cambiar la descripción. La elección se
 puede cambiar después con **Cambiar la elección**, en el paso.
 
+Si una casi está pero tiene un detalle que no va (una funda, los ojos achinados, otro color de pelo), **Corregir** en
+esa candidata: escribí qué cambiar, en inglés y pocas cosas por vez ("remove the thigh holster", "green eyes"). Salen
+dos imágenes nuevas (`edit_1`, `edit_2`, unos 40 segundos) al lado de las otras, con el pedido debajo; la original
+queda. Se elige una como cualquier candidata, y también se puede corregir una corrección.
+
 ### Mirar las vistas
 
 **Siguiente: Vistas de costado y espalda** dibuja cómo es el personaje de espalda y de costado (un minuto). La

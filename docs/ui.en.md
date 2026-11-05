@@ -109,6 +109,11 @@ What to look for, because it carries all the way to the end:
 If none convinces you, try other seeds (Settings > Image > Seeds) before changing the description. The choice can be
 changed later with **Change the choice**, in the step.
 
+If one is almost there but has a detail that doesn't work (a holster, squinting eyes, another hair color), use **Fix**
+on that candidate: write what to change, in English and a few things at a time ("remove the thigh holster", "green
+eyes"). Two new images come out (`edit_1`, `edit_2`, about 40 seconds) next to the others, with the request under them;
+the original stays. Pick one like any candidate; a fix can be fixed again too.
+
 ### Check the views
 
 **Next: Side and back views** draws the character from the back and the sides (about a minute). The mesh uses

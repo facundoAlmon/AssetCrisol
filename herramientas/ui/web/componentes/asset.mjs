@@ -154,8 +154,34 @@ function useElegir(d, dec, recargar, listo) {
   return { guardando, elegir }
 }
 
+// corregir una imagen candidata: el pedido en texto -> `crisol corregir` (2 candidatas nuevas edit_<k> con Qwen Edit)
+function Corregir({ d, desde, cerrar }) {
+  const g = useGlobal()
+  const [pedido, setPedido] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const deshabilitado = g.doctor?.deshabilitados?.corregir
+  const enviar = async () => {
+    setEnviando(true)
+    try {
+      await encolar({ paso: 'corregir', nombre: d.nombre, desde, pedido })
+      cerrar()
+    } catch (e) { setEnviando(false) }
+  }
+  return html`<form class="corregir" onSubmit=${e => { e.preventDefault(); pedido.trim() && enviar() }}>
+    <label class="campo"><span>${t('corregir.pedido', { v: desde })}</span>
+      <textarea class="entrada" lang="en" rows="2" maxlength="600" autofocus placeholder=${t('corregir.ejemplo')}
+        value=${pedido} onInput=${e => setPedido(e.target.value)} />
+      <small>${deshabilitado ? t('corregir.falta', { f: deshabilitado.join(', ') }) : t('corregir.ayuda')}</small></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="boton chico primario" type="submit" disabled=${!pedido.trim() || enviando || !!deshabilitado}>${t('corregir.enviar')}</button>
+      <button class="boton chico fantasma" type="button" onClick=${cerrar}>${t('ren.cancelar')}</button></div>
+  </form>`
+}
+
 function Decision({ d, dec, recargar, listo }) {
   const { guardando, elegir } = useElegir(d, dec, recargar, listo)
+  const [corrigiendo, setCorrigiendo] = useState(null)   // la candidata con el pedido abierto
+  const esImagen = dec.clave === 'imagen.elegida'
   const textura = dec.clave.startsWith('texturas.') ? dec.clave.split('.')[1] : null
   const [mosaico, setMosaico] = useState(false)
   const titulo = textura ? t('decidir.textura', { k: textura }) : t('decidir.' + dec.clave)
@@ -175,11 +201,19 @@ function Decision({ d, dec, recargar, listo }) {
               style=${mosaico ? { backgroundImage: `url(${urlMini(d.nombre, o.imagen, 300)})`, backgroundSize: '50%' } : null}>
             ${!mosaico && o.imagen && html`<img src=${urlMini(d.nombre, o.imagen, 520)} alt="" loading="lazy" />`}
           </button>
+          ${o.correccion && html`<p class="chico correccion" title=${o.correccion.pedido}>
+            ${t('corregir.de', { d: o.correccion.desde })}: <i lang="en">${o.correccion.pedido}</i></p>`}
           <footer><span class="mono">${o.valor}</span>
+            <span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:end;margin-left:auto">
+            ${esImagen && o.imagen && html`<button class="boton chico fantasma" aria-expanded=${corrigiendo === o.valor}
+              onClick=${() => setCorrigiendo(corrigiendo === o.valor ? null : o.valor)} title=${t('corregir.titulo')}>${t('corregir.boton')}</button>`}
             ${esActual(o)
               ? html`<${Chip} clase="hecho">${t('decidir.actual')}<//>`
               : html`<button class="boton chico primario" disabled=${guardando !== null} onClick=${() => elegir(o.valor)}>${t('decidir.elegir')}</button>`}
-          </footer></article>`)}</div>`
+            </span>
+          </footer>
+          ${corrigiendo === o.valor && html`<${Corregir} d=${d} desde=${o.valor} cerrar=${() => setCorrigiendo(null)} />`}
+          </article>`)}</div>`
       : html`${dec.mirar && html`<button class="hoja-decidir damero" onClick=${() => verGrande(urlArchivo(d.nombre, dec.mirar), t('decidir.hoja'))}>
             <img src=${urlMini(d.nombre, dec.mirar, 1400)} alt=${t('decidir.hoja')} /></button>`}
           <div class="botones-opcion">${dec.opciones.map(o => esActual(o)
