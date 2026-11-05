@@ -140,7 +140,7 @@ Errores vistos armando el manual de la UI (2026-11-04):
       generar de nuevo (minutos) y solo copia el elegido. Ahora `operaciones.elegir` lo copia al elegir.
 - [ ] Pesos por zonas desde la UI: dibujar las cajas de `modelo.pesos_zonas` sobre la guía (hoy solo el json). Lo
       necesitó la exploradora del manual (manos que tocan los bolsillos del pantalón).
-- [ ] El estado de cada paso usa el lenguaje de la terminal ("imagen.elegida = 777 no existe, pero la malla ya está",
+- [x] El estado de cada paso usa el lenguaje de la terminal ("imagen.elegida = 777 no existe, pero la malla ya está",
       "sin trabajo/imagen/vistas.png"): pasarlo a palabras para quien no conoce el json (los ejemplos lo muestran).
       En inglés, ese detalle y la descripción de los estilos (en Nuevo) salen en español. Los ejemplos dicen "4 candidata(s)
       en trabajo/imagen/candidatos.png" aunque ese archivo no viene.

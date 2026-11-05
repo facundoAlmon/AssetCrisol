@@ -100,7 +100,7 @@ export function Nuevo() {
           <button class="eleccion" aria-pressed=${estilo === ''} onClick=${() => setEstilo('')}>
             <b>${t('nuevo.estilo_receta')}</b><p>${cat.estilos.defecto}</p></button>
           ${cat.estilos.estilos.map(e => html`<button class="eleccion" key=${e.id} aria-pressed=${estilo === e.id} onClick=${() => setEstilo(e.id)} title=${e.doc}>
-            <b>${e.id}</b><p>${e.doc}</p></button>`)}
+            <b>${e.id}</b><p>${t('estilodoc.' + e.id) === 'estilodoc.' + e.id ? e.doc : t('estilodoc.' + e.id)}</p></button>`)}
         </div>
       </section>
       <section class="panel" style="display:grid;gap:16px">

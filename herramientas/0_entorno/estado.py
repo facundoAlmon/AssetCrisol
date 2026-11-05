@@ -7,24 +7,35 @@ def _fecha(ruta):
     return os.path.getmtime(ruta) if ruta and os.path.exists(ruta) else None
 
 
-def _paso(nombre, salida, entradas=(), aplica=True, opcional=False, nota=None):
+def _aviso(d, nota, id_, **datos):
+    """La nota del paso para la terminal y, para la UI, `aviso` = {id, ...datos}: la UI lo dice en palabras (i18n
+    `aviso.<id>`) en vez de mostrar rutas y claves del json."""
+    d['nota'] = nota
+    d['aviso'] = dict(id=id_, **datos)
+    return d
+
+
+def _paso(nombre, salida, entradas=(), aplica=True, opcional=False, nota=None, aviso=None):
     """Un paso de la cadena: hecho si existe `salida`, viejo si alguna entrada es más nueva. `salida` y `entradas`
-    son rutas absolutas (o None)."""
+    son rutas absolutas (o None). `aviso` = (id, {datos}) acompaña a `nota` (ver _aviso)."""
     if not aplica:
         return {'paso': nombre, 'estado': 'no_aplica'}
     t = _fecha(salida)
     if t is None:
         e = 'opcional' if opcional else 'falta'
     else:
-        nuevas = [os.path.basename(r) for r in entradas if r and (_fecha(r) or 0) > t + 1]
+        rutas = [r for r in entradas if r and (_fecha(r) or 0) > t + 1]
+        nuevas = [os.path.basename(r) for r in rutas]
         e = 'viejo' if nuevas else 'hecho'
     d = {'paso': nombre, 'estado': e, 'archivo': salida}
     if opcional:
         d['opcional'] = True
     if e == 'viejo':
-        d['nota'] = f'anterior a {", ".join(nuevas)}'
+        _aviso(d, f'anterior a {", ".join(nuevas)}', 'viejo', _rutas=rutas)   # estado() pasa rutas a pasos
     elif nota:
         d['nota'] = nota
+        if aviso:
+            d['aviso'] = dict(id=aviso[0], **aviso[1])
     return d
 
 
@@ -63,39 +74,49 @@ def _cadena_malla(pdir, pj, decidir):
     cands = sorted(glob.glob(os.path.join(t, 'imagen', 'cand_*.png')))
     elegida = pj.get('imagen', {}).get('elegida')
     pasos = [_paso('imagen', img or (cands[-1] if cands else None),
-                   nota=f'{len(cands)} candidata(s) en trabajo/imagen/candidatos.png' if cands else None)]
+                   nota=f'{len(cands)} candidata(s) en trabajo/imagen/candidatos.png' if cands else None,
+                   aviso=('candidatas', {'n': len(cands)}) if elegida is None else
+                   ('imagen_elegida', {'elegida': elegida}))]
     if elegida is None:
         if cands:
             decidir.append({'clave': 'imagen.elegida', 'mirar': os.path.join(t, 'imagen', 'candidatos.png'),
                             'opciones': [os.path.basename(c)[5:-4] for c in cands]})
     elif img is None:
-        pasos[0] = {'paso': 'imagen', 'estado': 'falta', 'nota': f'imagen.elegida = {elegida!r} no existe'}
+        pasos[0] = _aviso({'paso': 'imagen', 'estado': 'falta'}, f'imagen.elegida = {elegida!r} no existe',
+                          'imagen_no_existe', elegida=elegida)
         if os.path.exists(os.path.join(t, 'malla', 'modelo.glb')):   # p. ej. los ejemplos: traen la malla sola
-            pasos[0].update(estado='hecho', nota=pasos[0]['nota'] + ', pero la malla ya está')
+            _aviso(pasos[0], pasos[0]['nota'] + ', pero la malla ya está', 'imagen_sin_archivo', elegida=elegida)
+            pasos[0]['estado'] = 'hecho'
     m = pj.get('malla', {})
     vistas = bool(pj.get('vehiculo')) or (m.get('motor') == 'pixal3d' and m.get('vistas'))
     pasos.append(_paso('vistas', os.path.join(t, 'imagen', 'vistas.png'), [img], aplica=vistas))
     glb = os.path.join(t, 'malla', 'modelo.glb')
     if pasos[-1]['estado'] == 'falta' and glb_hecho(glb, img):   # la malla ya salió (con vistas sueltas o sin la hoja)
-        pasos[-1].update(estado='hecho', nota='sin trabajo/imagen/vistas.png, pero la malla ya está')
+        _aviso(pasos[-1], 'sin trabajo/imagen/vistas.png, pero la malla ya está', 'vistas_sin_hoja')
+        pasos[-1]['estado'] = 'hecho'
     ent = [img] + ([os.path.join(t, 'imagen', 'vistas.png')] if vistas else [])
     if m.get('candidatos'):
         nombres = [m.get('motor', 'trellis2')] + list(m['candidatos'])
         hechos = [n for n in nombres if os.path.exists(os.path.join(t, f'malla_{n}', 'modelo.glb'))]
         p = _paso('malla', glb, ent, nota=f'candidatos hechos: {", ".join(hechos) or "ninguno"} de {", ".join(nombres)}'
-                                            f'; elegida: {m.get("elegida", nombres[0])}')
+                                            f'; elegida: {m.get("elegida", nombres[0])}',
+                  aviso=('candidatos', {'hechos': len(hechos), 'total': len(nombres),
+                                        'elegida': m.get('elegida', nombres[0])}))
         pasos.append(p)
         elegida = m.get('elegida', nombres[0])
         actual = _en_trabajo(t, nombres) if p['estado'] == 'hecho' else None
         if actual not in (None, elegida):
-            p.update(estado='viejo', nota=f'trabajo/malla es {actual}, no la elegida ({elegida}): `malla` la '
-                                          'copia (los generados no se rehacen)')
+            _aviso(p, f'trabajo/malla es {actual}, no la elegida ({elegida}): `malla` la copia (los generados no se '
+                      'rehacen)', 'malla_otra' if elegida in hechos else 'malla_sin_generar', actual=actual,
+                   elegida=elegida)
+            p['estado'] = 'viejo'
         if 'elegida' not in m and hechos:
             hoja = os.path.join(t, 'revision.png' if pj.get('vehiculo') else 'candidatos.png')
             decidir.append({'clave': 'malla.elegida', 'mirar': hoja, 'opciones': nombres,
-                            'nota': f'sin elegir queda {nombres[0]}'})
+                            'nota': f'sin elegir queda {nombres[0]}', 'aviso': {'id': 'sin_elegir', 'n': nombres[0]}})
     else:
-        pasos.append(_paso('malla', glb, ent, nota='con UltraTex' if m.get('ultratex') else None))
+        pasos.append(_paso('malla', glb, ent, nota='con UltraTex' if m.get('ultratex') else None,
+                           aviso=('ultratex', {})))
     return pasos, glb
 
 
@@ -103,7 +124,7 @@ def _articulaciones(marca, glb, pj):
     """Hecho si corrió (trabajo/guia/articulaciones.json, aunque DWPose no haya podido) o si están cargadas a mano."""
     p = _paso('articulaciones', marca, [glb])
     if p['estado'] == 'falta' and pj['modelo'].get('articulaciones'):
-        return dict(p, estado='hecho', nota="ya están en modelo.articulaciones")
+        return _aviso(dict(p, estado='hecho'), 'ya están en modelo.articulaciones', 'art_cargadas')
     if p['estado'] == 'hecho':
         try:
             with open(marca) as f:
@@ -111,12 +132,14 @@ def _articulaciones(marca, glb, pj):
         except (OSError, ValueError):
             m = {}
         if m.get('motivo'):
-            quedan = 'las de antes' if pj['modelo'].get('articulaciones') else 'estimadas por rebanadas'
-            p['nota'] = f'DWPose no pudo ({m["motivo"]}): quedan {quedan}; revisar la guía'
+            antes = bool(pj['modelo'].get('articulaciones'))
+            quedan = 'las de antes' if antes else 'estimadas por rebanadas'
+            _aviso(p, f'DWPose no pudo ({m["motivo"]}): quedan {quedan}; revisar la guía',
+                   'dwpose_no_antes' if antes else 'dwpose_no', motivo=m['motivo'])
         elif m.get('fuente') == 'a mano':
-            p['nota'] = 'a mano (editor de crisol ui)'
+            _aviso(p, 'a mano (editor de crisol ui)', 'art_mano')
         else:
-            p['nota'] = 'DWPose'
+            _aviso(p, 'DWPose', 'art_dwpose')
     return p
 
 
@@ -127,12 +150,14 @@ def personaje(pdir, pj, nombre):
     pasos, glb = _cadena_malla(pdir, pj, decidir)
     blend = os.path.join(t, f'{nombre}.blend')
     meta, iso = os.path.join(g, f'{nombre}_meta.json'), os.path.join(g, 'iso', f'{nombre}_iso_meta.json')
-    art = 'cargadas en modelo.articulaciones' if pj['modelo'].get('articulaciones') else 'estimadas (sin modelo.articulaciones)'
+    cargadas = bool(pj['modelo'].get('articulaciones'))
+    art = 'cargadas en modelo.articulaciones' if cargadas else 'estimadas (sin modelo.articulaciones)'
     marca = os.path.join(t, 'guia', 'articulaciones.json')
     cuadrupedo = pj['modelo'].get('esqueleto') == 'cuadrupedo'   # DWPose es para humanoides: sin ese paso
     pasos += [] if cuadrupedo else [_articulaciones(marca, glb, pj)]
     pasos += [
-        _paso('guia', os.path.join(t, 'guia', 'guia.png'), [glb], opcional=True, nota=art),
+        _paso('guia', os.path.join(t, 'guia', 'guia.png'), [glb], opcional=True, nota=art,
+              aviso=('guia_cargadas' if cargadas else 'guia_estimadas', {})),
         _paso('blender', blend, [glb] if cuadrupedo else [glb, marca]),
         _paso('sprites', meta, [blend]),
         _paso('iso', iso, [glb]),
@@ -148,8 +173,9 @@ def objeto(pdir, pj, nombre):
     decidir = []
     pasos, glb = _cadena_malla(pdir, pj, decidir)
     if pj.get('vehiculo'):
-        pasos.append(_paso('blender', os.path.join(t, 'vehiculo.glb'), [glb],
-                           nota='mirar trabajo/revision.png'))
+        vglb = os.path.join(t, 'vehiculo.glb')
+        pasos.append(_paso('blender', vglb, [glb], nota='mirar trabajo/revision.png' if os.path.exists(vglb) else None,
+                           aviso=('mirar_revision', {})))
         return pasos, decidir
     blend = os.path.join(t, f'{nombre}.blend')
     g = os.path.join(pdir, 'godot', 'objetos', nombre)
@@ -172,7 +198,8 @@ def escenario(pdir, esc, nombre):
             decidir.append({'clave': f'texturas.{clave}.elegida', 'mirar': hoja, 'opciones': tx.get('seeds', [])})
     ultima = max(todas, key=os.path.getmtime) if todas else None
     if faltan:
-        p = {'paso': 'texturas', 'estado': 'falta', 'nota': f'sin candidatas: {", ".join(faltan)}'}
+        p = _aviso({'paso': 'texturas', 'estado': 'falta'}, f'sin candidatas: {", ".join(faltan)}', 'texturas_faltan',
+                   claves=', '.join(faltan))
     else:
         p = _paso('texturas', ultima)
     return [p, _paso('tema', os.path.join(t, 'tema', 'tema.json'), [ultima])], decidir
@@ -186,6 +213,11 @@ def estado(pdir, pj, nombre):
         tipo, (pasos, decidir) = 'vehiculo' if pj.get('vehiculo') else 'objeto', objeto(pdir, pj, nombre)
     else:
         tipo, (pasos, decidir) = 'personaje', personaje(pdir, pj, nombre)
+    de_archivo = {p.get('archivo'): p['paso'] for p in pasos if p.get('archivo')}
+    for p in pasos:   # el aviso de un paso viejo nombra los pasos (no los archivos) que cambiaron después
+        rutas = p.get('aviso', {}).pop('_rutas', None)
+        if rutas is not None:
+            p['aviso']['pasos'] = [de_archivo.get(r, os.path.basename(r)) for r in rutas]
     siguiente = None
     for p in pasos:
         if p['estado'] in ('falta', 'viejo') and not p.get('opcional'):

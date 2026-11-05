@@ -8,6 +8,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Arreglado
+- UI: el estado de cada paso y de cada elección se dice en palabras ("se hizo antes del último cambio en Malla 3D",
+  "la malla ya está hecha") en vez de rutas y claves del json; en inglés también, y la descripción de los estilos en
+  *Nuevo* (salían en español). `crisol estado --json` suma `aviso` (`{id, ...datos}`) junto a cada `nota`.
 - Elegir un candidato de malla (UI o MCP) lo copia a `trabajo/malla` en el momento: Malla 3D quedaba
   "desactualizado" y el botón decía *Siguiente: Malla 3D*, como si fuera a generar de nuevo.
 - README: enlace al sitio web y al manual arriba; "Empezá acá" y el badge de Godot no saltaban (anclas con tilde en

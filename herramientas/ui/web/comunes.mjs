@@ -52,6 +52,16 @@ export function t(clave, vars) {
 }
 // en objetos y vehículos, `blender` no arma un rig: renderiza las vistas (o arma el vehículo)
 export const nombrePaso = (p, tipo) => t(p === 'blender' && tipo && tipo !== 'personaje' ? 'paso.blender_' + tipo : 'paso.' + p)
+// la nota de un paso o de una elección en palabras: `aviso` ({id, ...datos}, de estado.py) con su texto de i18n
+// (`aviso.<id>`); sin aviso o sin texto para ese id, la nota tal cual (la de la terminal)
+export function textoAviso(x, tipo) {
+  const a = x?.aviso
+  if (!a || es['aviso.' + a.id] == null) return x?.nota || ''
+  const vars = { ...a }
+  if (a.pasos) vars.pasos = a.pasos.map(p => es['paso.' + p] ? nombrePaso(p, tipo) : p).join(', ')
+  if (a.id === 'candidatas' && a.n === 1) return t('aviso.candidatas_una')
+  return t('aviso.' + a.id, vars)
+}
 // la ayuda extendida (i18n/ayuda_<idioma>.mjs): {hace, mirar, mal, readme (ancla)} o undefined, y su sección del README
 export function ayudaPaso(p, tipo) {
   const A = idioma === 'en' ? ayudaEn : ayudaEs

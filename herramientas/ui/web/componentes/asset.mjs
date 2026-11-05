@@ -3,7 +3,7 @@
 import {
   html, useState, useEffect, useRef, useGlobal, api, t, urlArchivo, urlMini, Icono, Chip, Cargando, Error, verGrande,
   trabajosDe, encolar, nombrePaso, docPaso, ayudaPaso, urlReadme, aviso, duracion, Colada, transcurrido, Plegable,
-  idiomaActual,
+  idiomaActual, textoAviso,
 } from '../comunes.mjs'
 import { Ajustes } from './ajustes.mjs'
 import { Visor3D } from './visor3d.mjs'
@@ -115,7 +115,7 @@ function Cadena({ d, cola, doctor, cambiar }) {
             <div class="doc-paso">${docPaso(p.paso, d.tipo)}
               ${ayudaPaso(p.paso, d.tipo) && html` <button class="mas-ayuda" aria-expanded=${ayuda === p.paso}
                 onClick=${() => setAyuda(ayuda === p.paso ? null : p.paso)}>${t(ayuda === p.paso ? 'ayuda.menos' : 'ayuda.mas')}</button>`}</div>
-            <div class="nota">${t('estado.' + p.estado)}${p.nota ? ': ' + p.nota : ''}
+            <div class="nota">${t('estado.' + p.estado)}${textoAviso(p, d.tipo) ? ': ' + textoAviso(p, d.tipo) : ''}
               ${(p.estado === 'hecho' || p.estado === 'viejo') && !enMarcha && html` <button class="mas-ayuda deshacer-paso"
                 aria-expanded=${deshaciendo === p.paso} onClick=${() => setDeshaciendo(deshaciendo === p.paso ? null : p.paso)}>${t('desh.boton')}</button>`}</div>
             ${corriendo?.paso === p.paso && html`<div style="margin-top:8px"><${Colada} tr=${corriendo} cola=${cola} /></div>`}
@@ -164,7 +164,7 @@ function Decision({ d, dec, recargar, listo }) {
   return html`<div style="display:grid;gap:12px">
     <header style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
       <h3>${titulo}</h3>
-      ${dec.nota && html`<span class="tenue chico">${dec.nota}</span>`}
+      ${textoAviso(dec) && html`<span class="tenue chico">${textoAviso(dec)}</span>`}
       ${textura && conImagen.length > 0 && html`<label class="casilla chico" style="margin-left:auto">
         <input type="checkbox" checked=${mosaico} onChange=${e => setMosaico(e.target.checked)} />${t('decidir.mosaico')}</label>`}
     </header>
@@ -241,7 +241,7 @@ function DecisionMalla({ d, dec, recargar, listo }) {
   return html`<div style="display:grid;gap:12px">
     <header style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
       <h3>${t('decidir.malla.elegida')}</h3>
-      ${dec.nota && html`<span class="tenue chico">${dec.nota}</span>`}
+      ${textoAviso(dec) && html`<span class="tenue chico">${textoAviso(dec)}</span>`}
       ${con3d.length > 1 && html`<button class="boton chico" style="margin-left:auto"
         onClick=${() => setEn3d(en3d.length ? [] : con3d.slice(0, 3).map(o => o.valor))}><${Icono} n="cubo" />
         ${t(en3d.length ? 'decidir.cerrar_3d' : 'decidir.comparar_3d')}</button>`}
