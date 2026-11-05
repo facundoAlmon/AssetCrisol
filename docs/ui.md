@@ -309,7 +309,9 @@ entero (caminar, correr, morir) y pierde en golpes; se elige por animación en A
 
 ![Movimientos](ui/img/es/movimientos.webp)
 
-En **Movimientos**:
+**Movimientos** lista las animaciones en el orden de la hoja, con su método por defecto, si tienen clip y cuántas
+variantes hay sin pasar. Al abrir una, arriba está lo de **ahora**: la procedural (con el esqueleto de Cris, en los
+cuadros de la hoja) al lado del clip de la biblioteca, para compararlas. Abajo:
 
 1. **Generar**: la frase, la duración y cuántas variantes. Corre en el procesador, no en la placa.
 2. **Mirar**: cada variante con un esqueleto animado (así se ve un clip de la biblioteca):
@@ -319,7 +321,8 @@ En **Movimientos**:
 3. **Recortar**: marcá un instante con *Desde acá* y *Hasta acá*. Para caminar o correr, un ciclo: de un apoyo de un pie
    al siguiente apoyo del mismo pie.
 4. **Pasar a la biblioteca** como una animación (caminar, correr...). Dice qué personajes la usan; después, en cada
-   uno, rehacer Rig, Isométrico y Anclas.
+   uno, rehacer Rig, Isométrico y Anclas. Las variantes que no sirven se **borran** (de a una o la generación entera);
+   lo que ya pasaste a la biblioteca es una copia y no cambia.
 
 ## 7. Llevarlo al juego
 

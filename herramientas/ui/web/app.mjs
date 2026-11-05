@@ -91,7 +91,7 @@ function App() {
   else if (ruta.startsWith('/nuevo')) pantalla = html`<${Nuevo} />`
   else if (ruta.startsWith('/cola')) pantalla = html`<${Cola} />`
   else if (ruta.startsWith('/instalacion')) pantalla = html`<${Instalacion} />`
-  else if (ruta.startsWith('/movimientos')) pantalla = html`<${Movimientos} />`
+  else if (ruta.startsWith('/movimientos')) pantalla = html`<${Movimientos} anim=${ruta.split('/')[2] || null} />`
   else if (ruta.startsWith('/papelera')) pantalla = html`<${Papelera} />`
   else pantalla = html`<${Biblioteca} />`
   return html`<${Marco} ruta=${ruta}>${pantalla}<//>`

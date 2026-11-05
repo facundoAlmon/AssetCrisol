@@ -309,7 +309,9 @@ dying) and loses on punches; it is chosen per animation in Settings > Animations
 
 ![Motions](ui/img/en/movimientos.webp)
 
-In **Motions**:
+**Motions** lists the animations in sheet order, with their default method, whether they have a clip and how many
+variants are waiting. Open one and the top shows what is used **now**: the procedural one (with Cris's skeleton, on the
+sheet frames) next to the library clip, to compare them. Below:
 
 1. **Generate**: the sentence, the length and how many variants. It runs on the processor, not the graphics card.
 2. **Look**: each variant with an animated skeleton (this is how a library clip looks):
@@ -319,7 +321,8 @@ In **Motions**:
 3. **Trim**: mark a moment with *From here* and *To here*. For walking or running, one cycle: from one foot landing to
    the next landing of the same foot.
 4. **Send to the library** as an animation (walk, run...). It says which characters use it; then, in each one, redo
-   Rig, Isometric and Anchors.
+   Rig, Isometric and Anchors. Variants that don't work are **deleted** (one at a time or the whole run); what you
+   already sent to the library is a copy and does not change.
 
 ## 7. Taking it to your game
 

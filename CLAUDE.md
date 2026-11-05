@@ -151,8 +151,10 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `componentes/retrato.mjs`: el editor del encuadre del retrato (`servidor.datos_retrato`/`guardar_retrato` →
   `retrato.caja.<fuente>`; `blender_main.retratos` y `armar_tira.recorte_imagen` la usan; con la imagen,
   `crisol retrato` no abre Blender).
-  `componentes/movimientos.mjs`: el esqueleto animado de cada clip sale de `api/movimientos/esqueleto`
-  (`metodos.esqueleto`, sin numpy); Resultado > Animación es `ReproductorLateral` (`servidor.hoja_meta`).
+  `componentes/movimientos.mjs` (listado por animación → `#/movimientos/<anim>`): el esqueleto animado de cada clip sale
+  de `api/movimientos/esqueleto` (`metodos.esqueleto`, sin numpy); el de las procedurales, de
+  `3_blender/movimientos/procedurales.json` (`python3 herramientas/3_blender/procedurales.py`, modo `esqueletos` de
+  Blender sobre Cris: rehacerlo al tocar `anim.py`); Resultado > Animación es `ReproductorLateral` (`servidor.hoja_meta`).
   `componentes/candidatos.mjs` edita `malla.candidatos` con el formato de `pipeline.candidatos_malla` (lo que un
   candidato no pisa lo hereda del principal: solo escribe las claves que cambian) y nunca `malla.elegida`.
   Probar con `python3 tests/ui.py` (sin GPU) y mirar capturas (claro/oscuro, 390 px) antes de dar un cambio por bueno.

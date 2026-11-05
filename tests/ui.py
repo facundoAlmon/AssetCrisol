@@ -205,6 +205,14 @@ def probar_movimientos(base, datos):
     chequear(c == 200 and e.get('cuadros') == 90 and len(e.get('cuadros_xy', [])) == 90 and len(e.get('huesos', [])) == 21
              and len(e['cuadros_xy'][0]) == 2 * (1 + max(max(h[0], h[1]) for h in e['huesos'])), 'esqueleto animable de un candidato',
              {k: v for k, v in e.items() if k != 'cuadros_xy'} if c == 200 else e)
+    chequear(d.get('animaciones', [])[:3] == ['caminar', 'respirar', 'correr'] and d.get('godot', {}).get('caminar') == 'walk',
+             'animaciones en el orden de la hoja, con su nombre en Godot', d.get('animaciones'))
+    c, e = pedir(base, 'api/movimientos/esqueleto?procedural=golpe')
+    chequear(c == 200 and e.get('cuadros') == 7 and e.get('fps') == 14 and len(e['cuadros_xy'][0]) == 4 * len(e['huesos'])
+             and 'golpe' in d.get('procedurales', []), 'esqueleto de una procedural (cuadros y fps de la hoja)',
+             {k: v for k, v in e.items() if k != 'cuadros_xy'} if c == 200 else e)
+    c, _ = pedir(base, 'api/movimientos/esqueleto?procedural=nada')
+    chequear(c == 404, 'procedural que no está: 404')
     c, e = pedir(base, 'api/movimientos/esqueleto?animacion=caminar')
     chequear(c == 200 and e.get('cuadros', 0) > 0, 'esqueleto del clip de la biblioteca')
     c, _ = pedir(base, 'api/movimientos/esqueleto?candidato=../../x')

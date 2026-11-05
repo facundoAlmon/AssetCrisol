@@ -11,6 +11,13 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 - Objetos nuevos: el candidato `pixal3d` de la plantilla va a 1024 en vez de 1536 (14-44 % menos de Pixal3D,
   calidad pareja en tres objetos). Los objetos existentes conservan su json.
 
+### Cambiado
+- `crisol ui` > Movimientos: un listado por animación (en el orden de la hoja, con su método por defecto, clip y
+  variantes sin pasar) y el detalle de cada una: la procedural al lado del clip de la biblioteca, generar con esa
+  animación ya elegida, sus variantes (que ahora se pueden borrar) y qué personajes la usan. El esqueleto de las
+  procedurales sale de `herramientas/3_blender/movimientos/procedurales.json` (lo arma
+  `herramientas/3_blender/procedurales.py` con el rig de Cris: rehacerlo al cambiar `anim.py`).
+
 ### Agregado
 - Editor del retrato en `crisol ui` (Resultado > Retrato > *Editar el encuadre*): un cuadro 4:5 sobre la imagen sin
   fondo o sobre el render de frente del modelo, que se arrastra y se agranda, con vista previa. Guarda
@@ -27,7 +34,7 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   `<datos_dir>/.papelera/<carpeta>/<n>_<fecha>/`; `crisol papelera` la lista, `--restaurar <id>` lo devuelve y
   `--vaciar [<ids>]` borra para siempre. En la UI, Biblioteca > Papelera. No con pasos del asset en la cola.
 - `crisol movimiento --borrar <anim>_s<seed>[_<i>]`: borra candidatos de Kimodo (una muestra, o la generación entera
-  con su hoja de esqueletos); los clips de la biblioteca son copias y no cambian.
+  con su hoja de esqueletos); los clips de la biblioteca son copias y no cambian. También en la UI (Movimientos).
 - Cuadrúpedos con Pixal3D de una vista: `malla` los endereza sobre las cuatro patas (`cuadrupedo.apoyar`) y
   `blender` no les saca las capas escondidas; antes salían inclinados como la cámara y sin ningún vértice con peso.
   `modelo.alinear` (enderezar la malla de Pixal3D de una vista) vale ahora también en personajes: por defecto sí en

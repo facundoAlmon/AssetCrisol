@@ -146,13 +146,13 @@ Errores vistos armando el manual de la UI (2026-11-04):
       en trabajo/imagen/candidatos.png" aunque ese archivo no viene.
 
 Movimientos, segunda vuelta (2026-11-04):
-- [ ] Listado/detalle por animación (en el orden de la hoja): en el detalle, lo actual (procedural y clip de la
+- [x] Listado/detalle por animación (en el orden de la hoja): en el detalle, lo actual (procedural y clip de la
       biblioteca), generar con esa animación ya elegida, sus candidatos y los personajes que la usan. Hoy hay que bajar
       mucho y se mezclan las animaciones.
-- [ ] Vista previa de las procedurales: esqueleto del rig base por animación (Blender una vez → json versionado, mismo
+- [x] Vista previa de las procedurales: esqueleto del rig base por animación (Blender una vez → json versionado, mismo
       formato que `metodos.esqueleto`) para compararlas con los clips de Kimodo. Editarlas desde la UI no: son código
       (`anim.py`); para otro movimiento, Kimodo.
-- [ ] Borrar candidatos de Kimodo (una variante o la generación entera: `.npz` + hoja de esqueletos), con confirmación.
+- [x] Borrar candidatos de Kimodo (una variante o la generación entera: `.npz` + hoja de esqueletos), con confirmación.
       Hoy solo se quitan clips de la biblioteca y los candidatos se acumulan. Sin riesgo para los personajes: `crisol
       clip` copia el `.npz` a la biblioteca. También en la CLI (`crisol movimiento --borrar <anim>_s<seed>[_<i>]`).
 

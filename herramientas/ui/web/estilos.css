@@ -454,6 +454,16 @@ textarea.entrada { min-height: 96px; resize: vertical; line-height: 1.45; }
 
 /* ---------- movimientos (Kimodo): candidatos y biblioteca ---------- */
 .clips { display: grid; gap: 12px; }
+.clips.dos { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); align-items: start; }
+.lista-anim { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lista-anim a { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 14px; color: inherit;
+  text-decoration: none; border: 1px solid var(--linea); border-radius: var(--r); background: var(--superficie); }
+.lista-anim a:hover { border-color: var(--brasa); }
+.lista-anim a:focus-visible { outline: 2px solid var(--brasa); outline-offset: 2px; }
+.lista-anim a > svg { width: 18px; height: 18px; transform: rotate(180deg); margin-left: auto; color: var(--texto-3); }
+.nombre-anim { display: grid; gap: 2px; min-width: 120px; }
+.chips-anim { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.confirmar-borrar { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .clip { min-width: 0; display: grid; gap: 10px; padding: 12px; border: 1px solid var(--linea); border-radius: var(--r); background: var(--superficie-2); }
 .clip > header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .clip > p { margin: 0; }
