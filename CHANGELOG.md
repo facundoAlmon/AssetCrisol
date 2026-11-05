@@ -7,6 +7,10 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 
 ## [Sin publicar]
 
+### Arreglado
+- README: enlace al sitio web y al manual arriba; "Empezá acá" y el badge de Godot no saltaban (anclas con tilde en
+  el bloque centrado: ahora `#empezar` y `#guia-de-godot`); el badge de Blender apuntaba a una sección que no existe.
+
 ## [0.4.0] - 2026-11-04
 
 La primera versión para usar sin ser parte del proyecto: un manual de la UI con capturas, la landing en GitHub Pages,

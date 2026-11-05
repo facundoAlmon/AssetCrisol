@@ -108,8 +108,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   candidatos con zipfile), `generar_movimiento.py` (venv Kimodo), `articulaciones_pose.py`
   (DWPose), `dibujar_guia.py`, `vehiculo.py`.
 - `4_sprites/`: `armar_tira.py` (`ANIMACIONES`, hoja, retrato), `armar_iso.py`, `armar_objeto.py`, `revisar.py`
-  (`revision.png`; `revision_cerca.png` con las tomas de `blender_main.control_cerca`, `ZONAS_CERCA`), `aseprite.py` (`.json` estilo Aseprite junto a cada hoja), `posproceso.py` (color, nitidez, contorno del estilo), `vitrina.py` (gifs de `docs/vitrina/` desde los
-  ejemplos ya renderizados en datos_dir).
+  (`revision.png`; `revision_cerca.png` con las tomas de `blender_main.control_cerca`, `ZONAS_CERCA`), `aseprite.py` (`.json` estilo Aseprite junto a cada hoja), `posproceso.py` (color, nitidez, contorno del estilo), `vitrina.py` (gifs de `docs/vitrina/` y `proceso_1..5.jpg`
+  de la landing, desde los ejemplos ya renderizados en datos_dir).
 - `5_godot/`: `exportar_godot.py`, `exportar_objeto.py`, `sprite_personaje.gd`, `sprite_personaje_iso.gd`, `objeto_iso.gd`.
 - `6_escenario/`: `texturas.py`, `repetible.py`, `tema.py`.
 - `mcp/servidor.py` (`crisol mcp`, con `uv run` y el SDK fijado en `pipeline.MCP_SDK`): herramientas MCP sobre
@@ -151,6 +151,13 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   Manual: `docs/ui.md` + `docs/ui.en.md`; sus capturas (`docs/ui/img/{es,en}/*.webp`) las saca `tests/capturas_ui.py`
   (Playwright + Chrome, sobre una UI con datos aparte; las capturas solo miran: corta si la cola cambia). Al cambiar
   una pantalla del manual, rehacer su captura (`--solo`).
+- `docs/index.html`: la landing (GitHub Pages desde `main` `/docs`, con `.nojekyll`; https://facundoalmon.github.io/AssetCrisol/).
+  Bilingüe en una página (`lang` + botón); los `.md` se enlazan en GitHub, no relativos. Usa `docs/vitrina/img/`
+  (`vitrina.py`, `demo_godot.webp`, `ui_recorrido.mp4`) y `docs/ui/img/`. Mirarla en escritorio y a 390 px (sin
+  scroll horizontal) antes de pushear: un push a `main` la publica.
+- `demo/`: proyecto Godot 4.4+ (Cris en su taller iso: `taller.gd`, `cris.gd`, `detalle.gdshader`). `preparar.sh`
+  renderiza los ejemplos y los instala con `godot --instalar` en `demo/`; esos assets no se versionan (`.gitignore` y
+  `.dockerignore`). Probarla headless con un `-s` que la cargue y mueva a Cris.
 - `estilos/*.json` (base `animacion3d`), `plantilla/{personaje,objeto,escenario}.json`, `ejemplos/`.
 - `plantilla/recetas/*.json` (`crisol nuevo --receta`): `_base` (qué plantilla pisan), `_doc`, `_agregar_descripcion`,
   `_borrar`. Lo que se aprenda de un tipo de asset (un gotcha con arreglo por json) va a su receta y a la tabla del README.
@@ -235,6 +242,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
 - Escenarios: detalle **relativo al promedio en lineal** (se multiplica color × detalle × 2); detalle fino = ruido
   desde la cámara iso (`contraste` 0,5, formas grandes). Para sacar texturas de una imagen: IP-Adapter, no Qwen-Edit.
 - Comparar RGBA canal por canal: `getbbox()` de una diferencia RGBA solo mira el alfa.
+- README: un enlace a un título con tilde dentro de un bloque HTML (la fila centrada de arriba) no salta en GitHub
+  (lo codifica `%C3%A1`): poner `<a name="ascii"></a>` antes del título y enlazar ahí (`#empezar`, `#guia-de-godot`).
 - VRAM 16 GB: ComfyUI con Qwen ~12 GB; `paso_malla` hace `POST /free`. Cachés de modelos en `env_modelos`, no `~/.cache`.
 
 ### Instalación y Docker
@@ -263,3 +272,7 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   comfyui,trellis,blender,config`, ~20 min) y una `malla` de TRELLIS.2 con esa config.
 - Docker: `docker build -t assetcrisol:prueba .` y correr `doctor`, `blender`/`sprites` y una `malla` con UltraTex
   montando los modelos de la PC en `/modelos/comfyui`, `/modelos/hf`, `/modelos/u2net` y `/modelos/dwpose`.
+- **Publicar una versión** (solo cuando el usuario lo pide): `CHANGELOG` *Sin publicar* → `[x.y.z] - fecha` con un
+  párrafo que nombre la imagen; commit `Versión x.y.z: CHANGELOG`; tag anotado `vx.y.z`; push con el tag;
+  `docker/publicar.sh x.y.z` (árbol limpio; construye acá y sube `:x.y.z` y `:latest` a GHCR, ~25 min); `gh release
+  create vx.y.z --title x.y.z --notes-file <notas>` (`--latest`; las alfas iban con `--prerelease`).

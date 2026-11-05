@@ -1,7 +1,8 @@
 # Roadmap
 
-AssetCrisol está en construcción: el motor funciona y está probado con decenas de personajes y objetos, y la v0.1 es el
-trabajo de convertirlo en algo que cualquiera pueda instalar y usar. Acá se marca qué está hecho y qué falta.
+AssetCrisol está en desarrollo (0.x): el motor funciona y está probado con decenas de personajes y objetos, y la 0.4.0
+(2026-11-04) es la primera versión pensada para que cualquiera la instale y la use. Acá se marca qué está hecho y qué
+falta.
 
 **Objetivo:** que cualquiera con Linux + NVIDIA de 16 GB pueda generar assets visuales para juegos 2D, 2.5D y 3D
 (personajes animados, objetos, vehículos, escenarios) de punta a punta, a partir de una imagen o una descripción.
@@ -20,7 +21,9 @@ Dos tipos de usuario, los dos de primera:
 - Plataforma soportada: Linux + NVIDIA 16 GB+. Otras: sin soporte por ahora, PRs bienvenidos.
 - Sin telemetría. Versionado semántico + CHANGELOG.
 
-**Orden de trabajo:** base → instalación → CLI para agentes → UI → salida 3D y otros motores → docs, landing y v0.1.
+**Orden de trabajo:** base → instalación → CLI para agentes → UI → salida 3D y otros motores → docs, landing y
+lanzamiento (0.4.0). Lo que sigue: cerrar lo pendiente de la fase 7 (difusión, video con un agente, instalación desde
+cero) y las mejoras del motor.
 
 ## 1. Base del repo
 - [x] Licencia GPL-3.0 (coherente con Blender: los scripts que importan `bpy` se consideran GPL).
@@ -163,14 +166,15 @@ Errores vistos armando el manual de la UI (2026-11-04):
 - [x] Errores claros cuando falta una herramienta o un modelo, en vez de un traceback.
 - [ ] Ajustes según la VRAM detectada (hoy el pipeline asume 16 GB).
 
-## 7. Documentación, landing y v0.1
+## 7. Documentación, landing y lanzamiento
 - [x] Vitrina de los ejemplos (`docs/vitrina/`, imágenes con `herramientas/4_sprites/vitrina.py`), para la landing.
 - [x] Landing en GitHub Pages: qué hace, galería antes/después, requisitos, "empezá acá" para personas y agentes.
       https://facundoalmon.github.io/AssetCrisol/ (`docs/index.html`, bilingüe; Pages desde `main` `/docs`).
 - [x] Manual de `crisol ui` (`docs/ui.md`, `docs/ui.en.md`) con capturas que se rehacen con `tests/capturas_ui.py`
       (Playwright sobre el Chrome instalado; es/en, claro/oscuro, celular).
 - [ ] Docs bilingües: instalación, primer asset, recetas por tipo, referencia de `personaje.json` y estilos,
-      problemas conocidos, preguntas sobre licencias.
+      problemas conocidos, preguntas sobre licencias. Hoy todo está en el README (es/en), el manual de la UI y
+      `docs/licencias.md`; falta decidir si se pasa a páginas aparte (en el sitio) o queda así.
 - [x] Demo en Godot: `demo/` (Cris caminando por el taller iso entre sus objetos; `preparar.sh` instala los ejemplos).
 - [x] Video corto de la UI (`docs/vitrina/img/ui_recorrido.mp4`, en la landing): grabado con el screencast de Chrome.
 - [ ] Video corto con un agente (Claude Code eligiendo con la persona): se graba después del lanzamiento; la landing
@@ -184,7 +188,7 @@ Errores vistos armando el manual de la UI (2026-11-04):
 - [x] CONTRIBUTING, plantillas de issues (con `crisol doctor --json`), CHANGELOG. Issues en español o inglés.
 - [x] Primera versión para usar: `v0.4.0` (2026-11-04; las anteriores eran alfas), con su imagen Docker.
 - [ ] Post de lanzamiento (es/en) y difusión (Reddit, Show HN, itch.io, comunidades de gamedev, Discords de ComfyUI
-      y Godot); después, un devlog por versión.
+      y Godot); después, un devlog por versión. Los borradores están escritos (fuera del repo); falta publicarlos.
 
 ## Mejoras del motor (en paralelo)
 - [x] UltraTex con las vistas de costado (`malla.ultratex.costados`, opcional).
