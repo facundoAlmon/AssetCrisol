@@ -8,6 +8,8 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Arreglado
+- `instalar.sh --plan` con todo instalado ya no avisa que faltan ~135 GB ni que va a completar `config.json`: dice
+  qué cambiaría de la config (o que está completa) y lista los pesos que DWPose y rembg bajan en el primer uso.
 - UI: el estado de cada paso y de cada elección se dice en palabras ("se hizo antes del último cambio en Malla 3D",
   "la malla ya está hecha") en vez de rutas y claves del json; en inglés también, y la descripción de los estilos en
   *Nuevo* (salían en español). `crisol estado --json` suma `aviso` (`{id, ...datos}`) junto a cada `nota`.

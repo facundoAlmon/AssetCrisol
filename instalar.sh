@@ -199,7 +199,10 @@ existe=$DESTINO; while [ ! -d "$existe" ]; do existe=$(dirname "$existe"); done 
 LIBRE=$(df -BG --output=avail "$existe" | tail -1 | tr -dc 0-9)
 NECESITA=$([ $NIVEL = completo ] && echo 135 || echo 90); [ $FLUX2 = 1 ] && NECESITA=$((NECESITA + 42))
 [ $KIMODO = 1 ] && NECESITA=$((NECESITA + 20))
-if [ -n "$LIBRE" ] && [ "$LIBRE" -lt "$NECESITA" ]; then
+if [ -d "$COMFY" ] && [ -d "$TRELLIS" ] && [ -x "$BLENDER" ]; then
+  # ya instalado: lo que falte (un nodo, un modelo) se lista abajo; los ~$NECESITA GB son de una instalación nueva
+  ok "$DESTINO (${LIBRE:-?} GB libres; ComfyUI, TRELLIS.2 y Blender ya están)"
+elif [ -n "$LIBRE" ] && [ "$LIBRE" -lt "$NECESITA" ]; then
   aviso "$DESTINO tiene $LIBRE GB libres; una instalación nueva usa ~$NECESITA GB (otro disco: --destino)"
 else ok "$DESTINO (${LIBRE:-?} GB libres)"; fi
 
@@ -326,6 +329,19 @@ if toca modelos; then
     hf download "$repo" $archivos >/dev/null
     ok "pesos $repo"
   done <<< "$PESOS_TRELLIS"
+  # estos no los baja este script: los bajan DWPose (comfyui_controlnet_aux) y rembg la primera vez que corren
+  titulo "Pesos que se bajan solos en el primer uso"
+  primer_uso() {   # primer_uso <archivo> <descripción>
+    if [ -f "$1" ]; then ok "$2"; else info "$2: se baja la primera vez que se usa"; fi
+  }
+  if incluye completo; then
+    ck=$COMFY/custom_nodes/comfyui_controlnet_aux/ckpts
+    primer_uso "$ck/yzd-v/DWPose/yolox_l.onnx" "DWPose yolox_l.onnx (~200 MB, paso articulaciones)"
+    primer_uso "$ck/hr16/DWPose-TorchScript-BatchSize5/dw-ll_ucoco_384_bs5.torchscript.pt" \
+      "DWPose dw-ll_ucoco_384_bs5.torchscript.pt (~130 MB, paso articulaciones)"
+  fi
+  primer_uso "$U2NET_DIR/u2net.onnx" "rembg u2net.onnx en $U2NET_DIR (~170 MB, malla con TRELLIS.2)"
+  primer_uso "$U2NET_DIR/birefnet-general.onnx" "rembg birefnet-general.onnx (~1 GB, solo con malla.fondo: birefnet-general)"
 fi
 
 # --- 5. TRELLIS.2 --------------------------------------------------------------------------------------------------
@@ -425,13 +441,12 @@ fi
 # --- 8. config.json ------------------------------------------------------------------------------------------------
 if toca config; then
   titulo "Config ($CONFIG)"
-  if [ $PLAN = 1 ]; then info "[plan] completar en config.json las rutas vacías o de ejemplo"
-  else
-    # completa solo lo que falta o sigue con /ruta/a...: lo que el usuario ya puso no se pisa
-    python3 - "$CONFIG" "$RAIZ/config.ejemplo.json" "$COMFY" "$TRELLIS" "$BLENDER" "$HF_HOME_DIR" "$U2NET_DIR" "$FLUX2" \
-      "$([ -x "$KIMODO_DIR/venv/bin/python" ] && echo "$KIMODO_DIR")" <<'EOF'
+  # completa solo lo que falta o sigue con /ruta/a...: lo que el usuario ya puso no se pisa. Con --plan, solo dice
+  # qué cambiaría
+  python3 - "$CONFIG" "$RAIZ/config.ejemplo.json" "$COMFY" "$TRELLIS" "$BLENDER" "$HF_HOME_DIR" "$U2NET_DIR" "$FLUX2" \
+    "$([ -x "$KIMODO_DIR/venv/bin/python" ] && echo "$KIMODO_DIR")" "$PLAN" <<'EOF'
 import json, os, sys
-ruta, ejemplo, comfy, trellis, blender, hf, u2net, flux2, kimodo = sys.argv[1:]
+ruta, ejemplo, comfy, trellis, blender, hf, u2net, flux2, kimodo, plan = sys.argv[1:]
 cfg = json.load(open(ruta if os.path.exists(ruta) else ejemplo))
 vacio = lambda v: not v or (isinstance(v, str) and v.startswith('/ruta/a'))
 cambios = []
@@ -463,11 +478,13 @@ if flux2 == '1':   # los nombres de los archivos que baja este script (el ejempl
                                            'text_encoders' if k == 'flux_clip' else 'vae', mi.get(k, ''))):
             mi[k] = v
             cambios.append(f'modelos_imagen.{k} = {v}')
+if plan == '1':
+    print('\n'.join('  [plan] config.json: ' + c for c in cambios) or '  ✔ config.json ya está completa: sin cambios')
+    sys.exit()
 json.dump(cfg, open(ruta, 'w'), ensure_ascii=False, indent=2)
 open(ruta, 'a').write('\n')
 print('\n'.join('  ✔ ' + c for c in cambios) or '  ✔ sin cambios')
 EOF
-  fi
 fi
 
 # --- 9. doctor ------------------------------------------------------------------------------------------------------

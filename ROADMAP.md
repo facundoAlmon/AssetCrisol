@@ -182,7 +182,7 @@ Errores vistos armando el manual de la UI (2026-11-04):
 - [ ] Prueba en limpio: instalar desde cero (Docker y nativo) siguiendo solo la doc, una vez una persona y otra un
       agente sin contexto. Hecha la primera parte con un agente (2026-11-04, sobre esta instalación: plan, doctor,
       ejemplos, demo, manual): 13 hallazgos de docs, arreglados salvo estos:
-  - [ ] `instalar.sh --plan` con todo instalado avisa que el destino no tiene lugar para ~135 GB y que va a completar
+  - [x] `instalar.sh --plan` con todo instalado avisa que el destino no tiene lugar para ~135 GB y que va a completar
         rutas de config.json, aunque no va a instalar ni cambiar nada; no lista los modelos de DWPose ni rembg.
   - [ ] Falta la instalación desde cero de verdad (Docker y nativo, en otra PC o un disco vacío).
 - [x] CONTRIBUTING, plantillas de issues (con `crisol doctor --json`), CHANGELOG. Issues en español o inglés.
