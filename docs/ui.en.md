@@ -254,7 +254,8 @@ from the main one). *Generate the missing ones* only runs the new ones.
 
 ![Settings: mesh](ui/img/en/ajustes_malla.webp)
 
-**Model**: the height in meters (the scale of everything) and the tilt of the head.
+**Model**: the height in meters (the scale of everything), the tilt of the head and *Straighten the single-view Pixal3D mesh*
+(on for props and quadrupeds: it comes out tilted like the camera).
 
 ![Settings: model](ui/img/en/ajustes_modelo.webp)
 
@@ -287,7 +288,7 @@ They all follow the same idea (create, run the steps, choose, look at the result
 - **Chibi, Robot, Toy**: people with another recipe (big heads, rigid plates that do not bend, plastic shine). The
   chain is a person's.
 - **Quadruped** (dog, cat, horse): its own skeleton with four legs and a tail, and 8 animations. Joints are estimated
-  from the mesh.
+  from the mesh. Mesh with TRELLIS.2: with Pixal3D it animates badly.
 - **Plant**: trees and bushes with foliage in masses, no loose leaves.
 
 ## 6. Motions (Kimodo)

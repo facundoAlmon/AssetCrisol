@@ -117,6 +117,14 @@ def _cadena_malla(pdir, pj, decidir):
     else:
         pasos.append(_paso('malla', glb, ent, nota='con UltraTex' if m.get('ultratex') else None,
                            aviso=('ultratex', {})))
+    if pj.get('modelo', {}).get('esqueleto') == 'cuadrupedo':   # Pixal3D anima mal los cuadrúpedos: TRELLIS.2
+        principal = m.get('motor', 'trellis2')   # el principal es el candidato que se llama como su motor
+        elegida = m.get('elegida', principal)
+        motor = principal if elegida == principal else (m.get('candidatos') or {}).get(elegida, {}).get('motor', principal)
+        p = pasos[-1]
+        if motor == 'pixal3d' and p.get('aviso', {}).get('id') in (None, 'ultratex', 'candidatos'):
+            _aviso(p, 'Pixal3D anima mal los cuadrúpedos (patas quietas, capas de adentro): usar TRELLIS.2',
+                   'pixal3d_cuadrupedo')
     return pasos, glb
 
 

@@ -205,6 +205,10 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
 - UltraTex solo mira `sin_fondo.png`: sin `espalda` inventa la espalda copiando el pecho. **Los ojos dependen de
   `malla.ultratex.seed`**: mirar la cara de cerca. Mientras corre, `modelo.glb` es la malla del motor (no evaluar una `guia`).
   Ojos achinados en la imagen elegida → editarla con Qwen ("only change the eyes") como `base_<seed>.png`.
+- Cuadrúpedos: con Pixal3D (aun enderezada por `cuadrupedo.apoyar`) las patas casi no se mueven y se ve la capa de
+  adentro → TRELLIS.2 (la receta; `malla` y `estado` avisan). Con una foto de referencia, Qwen copia la pose de la cabeza:
+  si mira a la cámara, la malla queda con la cara de costado en todas las animaciones (`ENCUADRE_CUADRUPEDO`).
+  `sacar_interior` borra media malla en Pixal3D de una vista (apagado ahí; la causa no está clara).
 - Vegetación: hojas sueltas → cáscaras con agujeros; pedir masas lisas de follaje ("no individual leaves, solid
   silhouette"), `malla.fondo` `birefnet-general`, TRELLIS.2 a 512.
 - Reducir caras de un GLB (p. ej. para versionar un ejemplo): soldar (`remove_doubles`) antes del Decimate; sin eso

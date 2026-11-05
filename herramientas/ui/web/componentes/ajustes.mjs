@@ -50,6 +50,12 @@ function campos(d, estilos, animaciones) {
       { g: 'malla', clave: 'malla.ultratex.costados', tipo: 'bool', etiqueta: 'aj.costados' })
   }
   lista.push({ g: 'modelo', clave: 'modelo.altura', tipo: 'numero', paso: 0.01, etiqueta: 'aj.altura' })
+  // Pixal3D de una vista deja el modelo inclinado como la cámara de la imagen: por defecto se endereza en objetos y
+  // cuadrúpedos (imagen de tres cuartos desde arriba), no en humanoides (de frente ya sale derecho); pipeline.alinear_pixal3d
+  if (d.tipo === 'personaje' || d.tipo === 'objeto') {
+    lista.push({ g: 'modelo', clave: 'modelo.alinear', tipo: 'bool', etiqueta: 'aj.alinear', ayuda: 'aj.alinear_ayuda',
+      defecto: d.tipo === 'objeto' || leer(j, 'modelo.esqueleto') === 'cuadrupedo' })
+  }
   const e = d.escala || {}
   if (d.tipo === 'personaje') {
     lista.push({ g: 'modelo', clave: 'animacion.cabeza_arriba_grados', tipo: 'numero', paso: 1, etiqueta: 'aj.cabeza', ayuda: 'aj.cabeza_ayuda' },
@@ -119,8 +125,9 @@ function Campo({ c, valor, cambiar }) {
   const etiqueta = c.crudo ? c.etiqueta : t(c.etiqueta)
   const ayuda = c.ayuda && html`<small>${t(c.ayuda)}</small>`
   const id = 'aj-' + c.clave.replaceAll('.', '-')
-  if (c.tipo === 'bool') {
-    return html`<label class="casilla"><input type="checkbox" checked=${!!valor} onChange=${e => cambiar(e.target.checked)} />${etiqueta}</label>`
+  if (c.tipo === 'bool') {   // defecto: lo que vale sin la clave en el json
+    const casilla = html`<label class="casilla"><input type="checkbox" checked=${!!(valor ?? c.defecto)} onChange=${e => cambiar(e.target.checked)} />${etiqueta}</label>`
+    return ayuda ? html`<div class="campo">${casilla}${ayuda}</div>` : casilla
   }
   if (c.tipo === 'juego3d_activo') {   // tiempo_real: false = apagado; prenderlo deja lo que tenía (o el por defecto)
     return html`<div class="campo"><label class="casilla"><input type="checkbox" checked=${c.activo}

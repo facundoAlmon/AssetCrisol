@@ -547,12 +547,15 @@ def generar_malla(pdir, pj, nombre):
     out = os.path.join(pdir, 'trabajo', 'malla')
     os.makedirs(out, exist_ok=True)
     if m.get('motor') == 'pixal3d':  # en ComfyUI (no hay log aparte: lo de ComfyUI queda en su consola)
+        if pj['modelo'].get('esqueleto') == 'cuadrupedo':
+            print(AVISO_PIXAL3D_CUADRUPEDO, flush=True)
         import generar_malla_pixal3d
         generar_malla_pixal3d.generar(CFG, nombre, pdir, pj, img, out)
         cmd = None
-        if pj['_objeto'] and not pj.get('vehiculo') and not m.get('vistas') and pj['modelo'].get('alinear', True):
-            # de una vista sale en el marco de la cámara (el cofre: 21° inclinado, 56° girado): se endereza el GLB
-            # mismo, que es lo que copia el juego; el de la cámara queda en pixal3d_camara.glb
+        if not pj.get('vehiculo') and not m.get('vistas') and alinear_pixal3d(pj):
+            # de una vista sale en el marco de la cámara (el cofre: 21° inclinado, 56° girado; un gato de tres cuartos
+            # desde arriba, cruzado y con las patas de atrás en el aire): se endereza el GLB mismo, que es lo que copia
+            # el juego; el de la cámara queda en pixal3d_camara.glb
             shutil.copy(os.path.join(out, 'modelo.glb'), os.path.join(out, 'pixal3d_camara.glb'))
             blender('alinear', pdir, pj)
     elif m.get('motor', 'trellis2') == 'trellis2':
@@ -581,6 +584,19 @@ def generar_malla(pdir, pj, nombre):
     if m.get('ultratex'):
         retexturizar_ultratex(pdir, pj, nombre)
     print('[malla] listo:', os.path.join(out, 'modelo.glb'))
+
+
+# dos gatos (2026-11): con Pixal3D las patas casi no se movían y al animar se veía la capa de adentro; los mismos
+# gatos con TRELLIS.2 animan bien
+AVISO_PIXAL3D_CUADRUPEDO = ('[malla] aviso: Pixal3D no se recomienda en cuadrúpedos: la malla anima mal (patas que casi '
+                            'no se mueven, capas de adentro que se ven). Usar TRELLIS.2 (malla.motor "trellis2", el de '
+                            'la receta cuadrupedo)')
+
+
+def alinear_pixal3d(pj):
+    """modelo.alinear: enderezar la malla de Pixal3D de una vista. Por defecto sí en objetos y cuadrúpedos (su imagen
+    es de tres cuartos desde arriba) y no en humanoides (de frente a nivel ya sale derecho)."""
+    return pj['modelo'].get('alinear', pj['_objeto'] or pj['modelo'].get('esqueleto') == 'cuadrupedo')
 
 
 def retexturizar_ultratex(pdir, pj, nombre):

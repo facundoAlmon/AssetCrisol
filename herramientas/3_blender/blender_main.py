@@ -8,7 +8,7 @@
 # retrato:   solo el retrato/frente de construir (sin frames ni .blend)
 # reves:     rig + poses con las caras de atrás en magenta -> trabajo/reves/ (lo usa el paso revisar)
 # iso:       igual que construir pero renderiza las animaciones en 8 direcciones con cámara isométrica -> trabajo/iso/
-# alinear:   objeto de Pixal3D de una vista: endereza modelo.glb en el lugar (lo llama el paso malla)
+# alinear:   objeto o cuadrúpedo de Pixal3D de una vista: endereza modelo.glb en el lugar (lo llama el paso malla)
 # limpia:    solo importa (soldar, sacar interior) y exporta trabajo/malla/limpia.glb (para re-texturizar)
 # anclas:    las mismas animaciones y direcciones que iso, sin renderizar: posición y giro de algunos huesos
 #            por cuadro (para colgarle cosas al sprite en el juego: espada en la mano, casco...) -> trabajo/iso/anclas.json
@@ -189,7 +189,12 @@ def importar():
     normales = bool(PJ.get('vehiculo') or PJ['modelo'].get('normales'))
     if normales:
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-    if PJ['malla'].get('sacar_interior', True):
+    # cuadrúpedo de Pixal3D de una vista: sacar_interior le borraba la mitad de las caras (la piel de afuera incluida)
+    # y el bone heat no le daba peso a ningún vértice; sin sacarlo pesa y anima bien (el gato de 2026-11)
+    # (enderezada: el paso malla deja pixal3d_camara.glb al lado, aunque sea un candidato y el motor del json otro)
+    pixal3d_1 = os.path.exists(os.path.join(os.path.dirname(GLB), 'pixal3d_camara.glb')) or (
+        PJ['malla'].get('motor') == 'pixal3d' and not PJ['malla'].get('vistas'))
+    if PJ['malla'].get('sacar_interior', not (CUADRUPEDO and pixal3d_1)):
         sacar_interior(bm, 10 if modo == 'objeto' or PJ.get('vehiculo') else 100,   # los mismos mínimos que el paso malla
                        dos_lados=normales)
     if PJ['modelo'].get('alisar_cara'):
@@ -1222,7 +1227,7 @@ elif modo == 'limpia':
     print('LIMPIA OK')
 
 elif modo == 'alinear':
-    # paso malla, objeto de Pixal3D de una vista: modelo.glb (en el marco de la cámara) -> apoyado, derecho y de frente,
+    # paso malla, objeto o cuadrúpedo de Pixal3D de una vista: modelo.glb (en el marco de la cámara) -> apoyado, derecho y de frente,
     # con su textura; así el juego puede usar modelo.glb tal cual
     for o in list(bpy.data.objects):
         bpy.data.objects.remove(o, do_unlink=True)
@@ -1231,7 +1236,11 @@ elif modo == 'alinear':
     bpy.ops.object.select_all(action='DESELECT')
     mesh.select_set(True); bpy.context.view_layer.objects.active = mesh
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-    alinear_objeto(mesh)
+    if CUADRUPEDO:   # parado sobre las cuatro patas; hacia dónde mira lo pone cuadrupedo.orientar al importar
+        cuadrupedo.apoyar(mesh)
+        cuadrupedo.orientar(mesh)
+    else:
+        alinear_objeto(mesh)
     vs = [v.co for v in mesh.data.vertices]
     base = Vector(((min(v.x for v in vs) + max(v.x for v in vs)) / 2, (min(v.y for v in vs) + max(v.y for v in vs)) / 2,
                    min(v.z for v in vs)))

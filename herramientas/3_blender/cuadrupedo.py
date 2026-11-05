@@ -66,6 +66,44 @@ def orientar(mesh):
     print(f'[cuadrupedo] orientado: giro de {math.degrees(ang) % 360:.0f}° en Z (cabeza hacia -Y)')
 
 
+def apoyar(mesh):
+    """Pixal3D de una vista deja el animal en el marco de la cámara: inclinado como la imagen de tres cuartos desde
+    arriba (la cámara mira hacia +Y; la imagen está derecha, así que solo cabecea alrededor de X, sin rolido). Lo
+    para sobre las cuatro patas: de los planos de apoyo girados 0-60° alrededor de X, el de contactos más repartidos
+    (cuatro patas: un área; una pata: un punto); después se ajusta un plano a esos contactos, sin rolido. Probar
+    todas las direcciones de abajo acostaba de costado a una gata gorda (dos patas y la panza); el criterio de los
+    objetos (la cara de abajo más grande) tomaba el costado de la panza. El giro en Z lo pone `orientar`."""
+    V = _vertices(mesh)
+    V = V - V.mean(axis=0)
+    if len(V) > 20000:
+        V = V[np.random.default_rng(0).choice(len(V), 20000, replace=False)]
+    tam = float(np.ptp(V, axis=0).max())
+
+    def contactos(d, eps=0.03):
+        h = V @ d
+        return V[h > h.max() - eps * tam]
+
+    def reparto(P):
+        if len(P) < 3:
+            return 0.0
+        ev = np.linalg.eigvalsh(np.cov((P - P.mean(axis=0)).T))   # las dos mayores: el área de la huella de contacto
+        return float(np.sqrt(max(ev[1], 0) * max(ev[2], 0)))
+
+    angulos = np.radians(np.arange(-60, 60.5, 0.5))
+    D = np.stack([np.zeros_like(angulos), np.sin(angulos), -np.cos(angulos)], 1)
+    d = max(D, key=lambda d: reparto(contactos(d)))
+    P = contactos(d)
+    n = np.linalg.eigh(np.cov((P - P.mean(axis=0)).T))[1][:, 0]   # normal del plano de los contactos
+    n[0] = 0.0                                                     # sin rolido
+    n /= np.linalg.norm(n)
+    if n @ d < 0:
+        n = -n
+    abajo = Vector(n.tolist())
+    mesh.data.transform(abajo.rotation_difference(Vector((0, 0, -1))).to_matrix().to_4x4())
+    print(f'[cuadrupedo] apoyado en las patas: estaba inclinado {math.degrees(abajo.angle(Vector((0, 0, -1)))):.1f}° '
+          f'({len(P)} puntos de contacto)')
+
+
 def medidas(mesh, altura):
     """Lo que se mide de la malla (ya normalizada: pies en 0, centrada, cabeza hacia -Y): patas, panza, lomo,
     hocico y cola. Todo en unidades del modelo."""

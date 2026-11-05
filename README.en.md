@@ -1074,7 +1074,7 @@ The most used keys: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla.mot
 | `retrato.hombros` | (0.55) how much shows below the neck, relative to the head's height |
 | `retrato.ancho_px` | (512) portrait width (height = 1.25 × width) |
 | `retrato.zoom` | (1) above 1 moves the camera closer: for wings, backpacks or tall collars that shrink the head |
-| `retrato.fuente` | (`"imagen"`) crop of `sin_fondo.png`; `"modelo"` = render |
+| `retrato.fuente` | (`"imagen"`) crop of `sin_fondo.png`; `"modelo"` = render (the default for quadrupeds: their image is three-quarter) |
 | `isometrico.*` | (optional) see [Iso](#iso-crisol-iso) |
 | `tiempo_real` | (optional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: faces of each LOD in `trabajo/tiempo_real/` and maximum texture size; `huesos`: `"mixamo"` (default), `"godot"` or `"crisol"`; `mapas`: `["normal", "orm"]` (default), `"ao"` adds occlusion; `false` = don't export them (see 3b) |
 
@@ -1157,6 +1157,15 @@ crisol blender rex && crisol sprites rex && crisol iso rex
   `animacion.zancada_patas` and `animacion.levantar_pata` (fraction of shoulder height) tune the stride.
 - Framing comes from the body length, not only the height. `modelo.altura` = floor to the highest point.
 - Legs touching each other or the belly fuse in the mesh and no weights fix that: regenerate the image.
+- **Pixal3D is not recommended for quadrupeds**: even straightened, the mesh animates badly (the legs barely move and
+  the inner layer shows through when animating); the same animal with TRELLIS.2 animates fine. `malla` warns about it,
+  and so do `crisol estado` (and the UI) when the chosen mesh is a Pixal3D one. If it is used anyway with one view
+  (`malla.motor: "pixal3d"` without `vistas`, main or candidate): Pixal3D leaves the
+  animal in the camera frame, rotated and tilted like the three-quarter image from above (hind legs in the air and no
+  vertex with weight). `malla` stands it on its four legs (`modelo.alinear`, on by default for quadrupeds and props,
+  off for humanoids; also in `crisol ui` Settings > Model) and keeps the camera one in `pixal3d_camara.glb`.
+  `blender` doesn't remove its hidden layers (`malla.sacar_interior` false by default): it deleted half the faces and
+  bone heat failed.
 
 ## Props
 

@@ -12,6 +12,17 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   calidad pareja en tres objetos). Los objetos existentes conservan su json.
 
 ### Agregado
+- Cuadrúpedos con Pixal3D de una vista: `malla` los endereza sobre las cuatro patas (`cuadrupedo.apoyar`) y
+  `blender` no les saca las capas escondidas; antes salían inclinados como la cámara y sin ningún vértice con peso.
+  `modelo.alinear` (enderezar la malla de Pixal3D de una vista) vale ahora también en personajes: por defecto sí en
+  objetos y cuadrúpedos, no en humanoides; casilla en Ajustes > Modelo de `crisol ui`.
+- Cuadrúpedos: aviso de que Pixal3D no se recomienda (aun enderezada, la malla anima mal: patas que casi no se
+  mueven, la capa de adentro que se ve; con TRELLIS.2 el mismo animal anima bien). Lo dicen `malla`, `crisol estado`
+  y la UI cuando la malla elegida es de Pixal3D, el README y la receta.
+- Cuadrúpedos: el encuadre de la imagen pide la cabeza girada como el cuerpo (con "head up looking forward" y una
+  foto de referencia, Qwen dejaba al animal mirando a la cámara y la malla con la cara de costado en todas las
+  animaciones), y el retrato sale del render del modelo (`retrato.fuente: "modelo"` por defecto): el recorte de la
+  imagen de tres cuartos caía sobre el lomo.
 - `retrato.zoom` (1 por defecto): más de 1 acerca el retrato, para alas, mochilas o cuellos altos que agrandan
   el ancho sobre el cuello y dejaban la cabeza chica. También en Ajustes > Sprites de `crisol ui`.
 - Animación `saludar` (`wave`, 7 cuadros): la mano cercana en alto, de lado a lado; al final de la hoja (86-92) y

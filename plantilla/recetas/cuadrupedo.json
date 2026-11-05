@@ -1,6 +1,6 @@
 {
   "_base": "personaje",
-  "_doc": "Animal de cuatro patas (perro, gato, caballo, vaca, zorro...): esqueleto propio (modelo.esqueleto \"cuadrupedo\": cuatro patas con IK, cuello, cabeza y cola) y 8 animaciones procedurales (idle, caminar, saltar, respirar, correr = galope, golpe = mordida, herido, morir); sin rodar, patada ni los de brazos, y sin Kimodo. La imagen sale de tres cuartos y de costado; la malla con TRELLIS.2 + UltraTex (Pixal3D de 4 vistas supone un humanoide de frente). Sin DWPose: blender estima las articulaciones de la malla (las patas, la panza, el hocico y la cola) y gira el animal para que mire adelante; revisarlas con `crisol guia` y, si hace falta, moverlas en crisol ui > Guía > Editar articulaciones. Patas juntas o pegadas a la panza se funden en la malla: regenerar la imagen. modelo.altura = del piso a lo más alto (la cabeza o las orejas).",
+  "_doc": "Animal de cuatro patas (perro, gato, caballo, vaca, zorro...): esqueleto propio (modelo.esqueleto \"cuadrupedo\": cuatro patas con IK, cuello, cabeza y cola) y 8 animaciones procedurales (idle, caminar, saltar, respirar, correr = galope, golpe = mordida, herido, morir); sin rodar, patada ni los de brazos, y sin Kimodo. La imagen sale de tres cuartos y de costado; la malla con TRELLIS.2 + UltraTex (no Pixal3D: de 4 vistas supone un humanoide de frente y de una vista la malla anima mal). Sin DWPose: blender estima las articulaciones de la malla (las patas, la panza, el hocico y la cola) y gira el animal para que mire adelante; revisarlas con `crisol guia` y, si hace falta, moverlas en crisol ui > Guía > Editar articulaciones. Patas juntas o pegadas a la panza se funden en la malla: regenerar la imagen. modelo.altura = del piso a lo más alto (la cabeza o las orejas).",
   "_agregar_descripcion": ", a four-legged animal with clearly separated legs",
   "_borrar": ["animacion.zancada", "animacion.levantar_pie", "animacion.balanceo_brazos_grados", "malla.vistas"],
   "malla": {
@@ -12,7 +12,7 @@
       "giro": 45,
       "espalda": false
     },
-    "_doc": "Cuadrúpedos: TRELLIS.2 (resolucion 1024; si no entra en la GPU, 512) repintado con UltraTex desde la imagen de tres cuartos. Probar 2-3 seeds (malla.candidatos) antes de tocar otra cosa: la seed pesa mucho."
+    "_doc": "Cuadrúpedos: TRELLIS.2 (resolucion 1024; si no entra en la GPU, 512) repintado con UltraTex desde la imagen de tres cuartos. Probar 2-3 seeds (malla.candidatos) antes de tocar otra cosa: la seed pesa mucho. No usar Pixal3D, ni como candidato: las patas casi no se mueven y al animar se ve la capa de adentro."
   },
   "modelo": {
     "esqueleto": "cuadrupedo",

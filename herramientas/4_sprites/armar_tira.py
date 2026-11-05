@@ -73,14 +73,16 @@ def recorte_imagen(pdir, caja):
 def retratos(pdir, nombre, pj, dir_godot, meta):
     """Selector de personajes y diálogos: retrato (cabeza y hombros) y cuerpo entero de frente.
     retrato.fuente = "imagen" (por defecto): recorte de la imagen que generó la malla, con el encuadre que
-    calcula Blender; "modelo": el render del modelo 3D (también si falta la imagen o retrato.json)."""
+    calcula Blender; "modelo": el render del modelo 3D (también si falta la imagen o retrato.json). Los cuadrúpedos
+    van por defecto con "modelo": su imagen es de tres cuartos y la caja (de frente) caía sobre el lomo."""
     P, sr = pj['_estilo']['posproceso'], pj['sprites']['superresolucion']
+    cuadrupedo = pj.get('modelo', {}).get('esqueleto') == 'cuadrupedo'
     rdir = os.path.join(pdir, 'trabajo', 'retrato')
     if not os.path.exists(os.path.join(rdir, 'retrato.png')):
         return
     caja = os.path.join(rdir, 'retrato.json')
     img = os.path.join(pdir, 'trabajo', 'malla', 'sin_fondo.png')
-    if pj.get('retrato', {}).get('fuente', 'imagen') == 'imagen' and os.path.exists(caja) and os.path.exists(img):
+    if pj.get('retrato', {}).get('fuente', 'modelo' if cuadrupedo else 'imagen') == 'imagen' and os.path.exists(caja) and os.path.exists(img):
         with open(caja) as f:
             retrato = recorte_imagen(pdir, json.load(f))
         print('[sprites] retrato recortado de trabajo/malla/sin_fondo.png')

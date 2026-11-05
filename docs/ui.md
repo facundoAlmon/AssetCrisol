@@ -254,7 +254,8 @@ del principal). *Generar los que faltan* corre solo los nuevos.
 
 ![Ajustes: malla](ui/img/es/ajustes_malla.webp)
 
-**Modelo**: la altura en metros (la escala de todo) y la inclinación de la cabeza.
+**Modelo**: la altura en metros (la escala de todo), la inclinación de la cabeza y *Enderezar la malla de Pixal3D de una vista*
+(prendida en objetos y cuadrúpedos: sale inclinada como la cámara).
 
 ![Ajustes: modelo](ui/img/es/ajustes_modelo.webp)
 
@@ -287,7 +288,7 @@ Todos siguen la misma idea (crear, correr los pasos, elegir, mirar el resultado)
 - **Chibi, Robot, Juguete**: personas con otra receta (cabezones, placas rígidas que no se deforman, brillo de
   plástico). La cadena es la de una persona.
 - **Cuadrúpedo** (perro, gato, caballo): su propio esqueleto con cuatro patas y cola, y 8 animaciones. Las
-  articulaciones se estiman de la malla.
+  articulaciones se estiman de la malla. La malla, con TRELLIS.2: con Pixal3D anima mal.
 - **Planta**: árboles y arbustos con el follaje en masas, sin hojas sueltas.
 
 ## 6. Movimientos (Kimodo)

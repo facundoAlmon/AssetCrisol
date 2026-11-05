@@ -1066,7 +1066,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `retrato.hombros` | (0.55) cuánto se ve debajo del cuello, relativo al alto de la cabeza |
 | `retrato.ancho_px` | (512) ancho del retrato (alto = 1.25 × ancho) |
 | `retrato.zoom` | (1) más de 1 acerca la cámara: para alas, mochilas o cuellos altos que achican la cabeza |
-| `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render |
+| `retrato.fuente` | (`"imagen"`) recorte de `sin_fondo.png`; `"modelo"` = render (el valor por defecto en cuadrúpedos: su imagen es de tres cuartos) |
 | `isometrico.*` | (opcional) ver [Iso](#iso-crisol-iso) |
 | `tiempo_real` | (opcional) `{"lods": [20000, 10000, 5000], "textura_px": 2048}`: caras de cada LOD de `trabajo/tiempo_real/` y lado máximo de la textura; `huesos`: `"mixamo"` (por defecto), `"godot"` o `"crisol"`; `mapas`: `["normal", "orm"]` (por defecto), `"ao"` suma la oclusión; `false` = no exportarlos (ver 3b) |
 
@@ -1150,6 +1150,15 @@ crisol blender firulais && crisol sprites firulais && crisol iso firulais
   del hombro) ajustan el paso.
 - El encuadre sale del largo del cuerpo, no solo del alto. `modelo.altura` = del piso a lo más alto (cabeza u orejas).
 - Patas pegadas entre sí o a la panza se funden en la malla y no hay pesos que lo arreglen: regenerar la imagen.
+- **Pixal3D no se recomienda en cuadrúpedos**: aun enderezada, la malla anima mal (las patas casi no se mueven y al
+  animar se ve la capa de adentro); el mismo animal con TRELLIS.2 anima bien. `malla` lo avisa y `crisol estado` (y
+  la UI) también, si la malla elegida es de Pixal3D. Si igual se usa de una vista (`malla.motor: "pixal3d"` sin
+  `vistas`, como principal o candidato): Pixal3D deja el
+  animal en el marco de la cámara, girado e inclinado como la imagen de tres cuartos desde arriba (las patas de atrás
+  en el aire y ningún vértice con peso). `malla` lo para sobre las cuatro patas (`modelo.alinear`, por defecto sí en
+  cuadrúpedos y objetos, no en humanoides; también en Ajustes > Modelo de `crisol ui`) y deja el de la cámara en
+  `pixal3d_camara.glb`. `blender` no le saca las capas escondidas (`malla.sacar_interior` en false por defecto):
+  le borraba la mitad de las caras y el bone heat fallaba.
 
 ## Objetos
 

@@ -63,10 +63,14 @@ ENCUADRE_PERSONAJE = ('Full body, front view, symmetrical, standing straight in 
                       'visible gap between them, feet pointing forward')
 ENCUADRE_OBJETO = 'Single object, three-quarter view from slightly above, whole object visible, centered, no text'
 # cuadrúpedos (modelo.esqueleto = "cuadrupedo"): de tres cuartos y de costado (de frente se tapa el cuerpo), las cuatro
-# patas derechas y separadas (patas juntas se funden en la malla) y la cola a la vista
+# patas derechas y separadas (patas juntas se funden en la malla) y la cola a la vista. La cabeza en línea con el
+# cuerpo: con "looking forward" el animal giraba la cabeza hacia la cámara y la malla quedaba con la cara de costado
+# (el rig la lleva en línea con el lomo: miraba de lado en todas las animaciones y direcciones del iso)
 ENCUADRE_CUADRUPEDO = ('Full body, three-quarter side view from slightly above, the whole animal standing still on all '
                        'four legs, legs straight and apart with a visible gap between each leg, the tail visible and '
-                       'away from the legs, head up looking forward, centered, no text')
+                       'away from the legs, the head turned the same way as the body and seen from the same three-quarter '
+                       'angle, the animal looking off toward the side of the image it walks to, eyes not looking at '
+                       'the viewer, centered, no text')
 
 
 def componer_prompt(pj):
