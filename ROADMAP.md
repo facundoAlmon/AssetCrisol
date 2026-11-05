@@ -145,6 +145,37 @@ Errores vistos armando el manual de la UI (2026-11-04):
       En inglés, ese detalle y la descripción de los estilos (en Nuevo) salen en español. Los ejemplos dicen "4 candidata(s)
       en trabajo/imagen/candidatos.png" aunque ese archivo no viene.
 
+Movimientos, segunda vuelta (2026-11-04):
+- [ ] Listado/detalle por animación (en el orden de la hoja): en el detalle, lo actual (procedural y clip de la
+      biblioteca), generar con esa animación ya elegida, sus candidatos y los personajes que la usan. Hoy hay que bajar
+      mucho y se mezclan las animaciones.
+- [ ] Vista previa de las procedurales: esqueleto del rig base por animación (Blender una vez → json versionado, mismo
+      formato que `metodos.esqueleto`) para compararlas con los clips de Kimodo. Editarlas desde la UI no: son código
+      (`anim.py`); para otro movimiento, Kimodo.
+- [ ] Borrar candidatos de Kimodo (una variante o la generación entera: `.npz` + hoja de esqueletos), con confirmación.
+      Hoy solo se quitan clips de la biblioteca y los candidatos se acumulan. Sin riesgo para los personajes: `crisol
+      clip` copia el `.npz` a la biblioteca. También en la CLI (`crisol movimiento --borrar <anim>_s<seed>[_<i>]`).
+
+Imagen (2026-11-04):
+- [ ] Corregir una imagen candidata: pedido en texto ("más corpulento", "ojos verdes", "una mancha en el lomo") → Qwen
+      Edit sobre esa imagen, con el prompt "Keep this exact image… Only make these changes…" armado solo. Las
+      correcciones son candidatas nuevas (`edit_<k>`, se pueden encadenar, se eligen por nombre con `imagen.elegida`)
+      que guardan de qué imagen salieron y el pedido; no pisan las originales ni tocan `descripcion`/`referencia`.
+      También en la CLI y el MCP (`crisol corregir <n> --desde <seed|edit_k> --pedido "..."`). Reemplaza la receta a
+      mano del README (`base_<seed>.png` + `imagen.prompt` de edición).
+
+Biblioteca (2026-11-05):
+- [ ] Borrar un asset: a una papelera (`<datos_dir>/.papelera/<tipo>/<n>_<fecha>/`), con Restaurar y Vaciar en la UI;
+      confirmación con lo que ocupa. No si tiene pasos en la cola; lo instalado en un juego no se toca. CLI `crisol
+      borrar <n> [--ver]` (en `deshacer.py`, junto a renombrar); en el MCP no.
+
+Resultado (2026-11-05):
+- [ ] Editor del retrato en Resultado > Retrato: fuente imagen/modelo y un cuadro 4:5 que se arrastra y se agranda o
+      achica sobre la fuente entera, con vista previa del recorte. Guarda `retrato.caja` (fracciones de la fuente, una
+      por fuente; Automático la borra). Imagen: recorte directo de `sin_fondo.png`, sin Blender; modelo: la caja pasa
+      a la cámara y se rehace el retrato (segundos). Avisa si el recorte se agranda (borroso) y si la caja de imagen
+      quedó vieja porque cambió la elegida (`estado`). Mismo patrón que el editor de articulaciones.
+
 ## 5. Salida 3D y otros motores
 - [x] Personaje como GLB con rig y animaciones (las mismas de los sprites): `trabajo/animado.glb`, también en el visor
       3D de `crisol ui`.
