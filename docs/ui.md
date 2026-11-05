@@ -344,6 +344,10 @@ revisión), por ejemplo después de cambiar una animación.
 **Cambiar el nombre**: el lápiz junto al nombre del asset. Cambia la carpeta y sus archivos; lo que ya hayas copiado a
 un juego sigue con el nombre viejo.
 
+**Borrar**: el tacho junto al nombre. Dice cuánto ocupa y, al confirmar, el asset va a la **papelera** (Biblioteca >
+Papelera, el botón aparece cuando hay algo). Ahí se **restaura** tal cual estaba o se borra para siempre, de a uno o
+todo junto. Lo que ya hayas copiado a un juego no cambia.
+
 ## 9. Licencias en dos minutos
 
 El código de AssetCrisol es libre (GPL-3.0), pero **cada modelo de IA tiene su licencia**, y algunos no permiten uso

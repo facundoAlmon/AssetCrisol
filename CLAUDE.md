@@ -32,6 +32,7 @@ crisol nuevo <n> --receta <humanoide|chibi|robot|juguete|cuadrupedo|objeto|veget
 crisol estado [<n>] [--json]                        # qué está hecho, qué quedó viejo, qué falta elegir
 crisol deshacer <n> --paso <p> [--ver]              # borra lo que generó un paso (--ver: solo lo lista)
 crisol renombrar <n> --nuevo <m>                    # carpeta, godot/ y .blend; lo instalado en un juego no cambia
+crisol borrar <n> [--ver]; crisol papelera [--restaurar id] [--vaciar [ids]]   # <datos_dir>/.papelera/
 crisol comparar <n>                                 # trabajo/candidatos.png de malla.candidatos
 crisol <nuevo --escenario|texturas|tema> <n>
 crisol rehacer <n1,n2,...|todos>                    # blender..revisar en lote
@@ -119,7 +120,7 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `crisol <paso> --json`; `elegir` solo con lo que dijo la persona. Al sumar un paso, también a su `PASOS`. Los pasos
   corren con el python que lanzó `crisol mcp` (`CRISOL_PYTHON`): desde un `uv run` no tiene Pillow (probarlo con
   `/usr/bin/python3 crisol mcp`).
-- `0_entorno/deshacer.py` (`crisol deshacer <n> --paso p [--ver]`, `crisol renombrar <n> --nuevo m`; la UI lo usa
+- `0_entorno/deshacer.py` (`crisol deshacer <n> --paso p [--ver]`, `crisol renombrar <n> --nuevo m`, `crisol borrar`/`papelera`: `<datos_dir>/.papelera/`; la UI lo usa
   directo): qué deja cada paso por tipo (`_patrones`: al cambiar dónde escribe un paso, también ahí); nunca toca el json
   salvo `articulaciones` (vuelve a las previas); `ultratex` repone `modelo_motor.glb`. Renombrar cambia el nombre solo
   como tramo de ruta o nombre de archivo con extensión (las claves de los metas pueden llamarse como un asset).

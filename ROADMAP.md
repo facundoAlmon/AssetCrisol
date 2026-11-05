@@ -165,7 +165,7 @@ Imagen (2026-11-04):
       mano del README (`base_<seed>.png` + `imagen.prompt` de edición).
 
 Biblioteca (2026-11-05):
-- [ ] Borrar un asset: a una papelera (`<datos_dir>/.papelera/<tipo>/<n>_<fecha>/`), con Restaurar y Vaciar en la UI;
+- [x] Borrar un asset: a una papelera (`<datos_dir>/.papelera/<tipo>/<n>_<fecha>/`), con Restaurar y Vaciar en la UI;
       confirmación con lo que ocupa. No si tiene pasos en la cola; lo instalado en un juego no se toca. CLI `crisol
       borrar <n> [--ver]` (en `deshacer.py`, junto a renombrar); en el MCP no.
 

@@ -2,7 +2,7 @@
 // tipo y nombre; selección de personajes para rehacerlos en lote.
 import {
   html, useState, useEffect, useMemo, useGlobal, api, t, urlMini, Icono, Chip, Cargando, Error, trabajosDe, encolar,
-  nombrePaso,
+  nombrePaso, tamano, aviso,
 } from '../comunes.mjs'
 
 const TIPOS = ['todos', 'personaje', 'objeto', 'vehiculo', 'escenario']
@@ -59,6 +59,8 @@ export function Biblioteca() {
     .filter(a => !buscar || a.nombre.includes(buscar.toLowerCase()))
     .sort((x, y) => (y.modificado || 0) - (x.modificado || 0)), [d, tipo, buscar])
   const hay = useMemo(() => new Set((d?.assets || []).map(a => a.tipo)), [d])
+  const [papelera, setPapelera] = useState(null)
+  useEffect(() => { api('papelera').then(setPapelera, () => setPapelera(null)) }, [g.versionAssets])
 
   if (error) return html`<${Error} error=${error} reintentar=${cargar} />`
   if (!d) return html`<${Cargando} />`
@@ -75,6 +77,7 @@ export function Biblioteca() {
               <button class="boton primario" disabled=${!sel.size} onClick=${rehacer} title=${t('bib.rehacer_ayuda')}>
                 <${Icono} n="rehacer" />${t('bib.rehacer_sel', { n: sel.size })}</button>`
           : html`${hay.has('personaje') && html`<button class="boton" onClick=${() => setSel(new Set())}>${t('bib.seleccionar')}</button>`}
+              ${papelera?.length > 0 && html`<a class="boton" href="#/papelera"><${Icono} n="papelera" />${t('papelera.boton', { n: papelera.length })}</a>`}
               <a class="boton primario" href="#/nuevo"><${Icono} n="nuevo" />${t('bib.nuevo')}</a>`}
       </div>
     </header>
@@ -96,4 +99,62 @@ export function Biblioteca() {
                 <p class="chico" style="color:var(--error)">${a.error}</p></div></div>`
             : html`<${Tarjeta} key=${a.nombre} a=${a} cola=${g.cola} seleccionando=${!!sel} seleccionado=${sel?.has(a.nombre)}
                 alternar=${() => { const s = new Set(sel); s.has(a.nombre) ? s.delete(a.nombre) : s.add(a.nombre); setSel(s) }} />`)}</div>`}`
+}
+
+// Papelera: los assets borrados (<datos_dir>/.papelera/<carpeta>/<n>_<fecha>/), con Restaurar y Borrar para siempre
+export function Papelera() {
+  const g = useGlobal()
+  const [lista, setLista] = useState(null)
+  const [error, setError] = useState(null)
+  const [confirmar, setConfirmar] = useState(null)   // null, 'todo' o un id
+  const [haciendo, setHaciendo] = useState(false)
+  const cargar = () => api('papelera').then(x => { setLista(x); setError(null) }, e => setError(e.message))
+  useEffect(() => { cargar() }, [g.versionAssets])
+  if (error) return html`<${Error} error=${error} reintentar=${cargar} />`
+  if (!lista) return html`<${Cargando} />`
+  const restaurar = async e => {
+    setHaciendo(true)
+    try {
+      const r = await api('papelera/restaurar', { metodo: 'POST', cuerpo: { id: e.id } })
+      aviso(t('papelera.restaurado', { n: r.nombre }), '', { href: '#/a/' + encodeURIComponent(r.nombre), texto: t('papelera.abrir') })
+      await cargar()
+    } catch (x) { aviso(x.message, 'error') }
+    setHaciendo(false)
+  }
+  const vaciar = async () => {
+    setHaciendo(true)
+    try {
+      const r = await api('papelera', { metodo: 'DELETE', cuerpo: confirmar === 'todo' ? {} : { ids: [confirmar] } })
+      aviso(t('papelera.vaciada', { n: r.borrados.length, t: tamano(r.bytes) }))
+      setConfirmar(null)
+      await cargar()
+    } catch (x) { aviso(x.message, 'error') }
+    setHaciendo(false)
+  }
+  const total = lista.reduce((s, e) => s + e.bytes, 0)
+  const pregunta = (texto) => html`<div class="aviso" role="alertdialog"><${Icono} n="alerta" />
+    <div style="flex:1;display:grid;gap:8px"><b>${texto}</b><p class="chico">${t('papelera.no_vuelve')}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="boton chico peligro" disabled=${haciendo} onClick=${vaciar}>${t('papelera.si')}</button>
+        <button class="boton chico fantasma" onClick=${() => setConfirmar(null)}>${t('desh.no')}</button></div></div></div>`
+  return html`
+    <a class="migas" href="#/"><${Icono} n="atras" />${t('nav.biblioteca')}</a>
+    <header class="encabezado">
+      <h1>${t('papelera.titulo')}</h1>
+      <div class="acciones">${lista.length > 0 && html`<button class="boton peligro" disabled=${haciendo}
+        onClick=${() => setConfirmar('todo')}><${Icono} n="papelera" />${t('papelera.vaciar', { t: tamano(total) })}</button>`}</div>
+    </header>
+    <p class="tenue" style="margin-bottom:16px">${t('papelera.ayuda')}</p>
+    ${confirmar === 'todo' && pregunta(t('papelera.vaciar_q', { n: lista.length, t: tamano(total) }))}
+    ${lista.length === 0 ? html`<p class="vacio">${t('papelera.vacia')}</p>` : html`<ul class="lista-papelera">
+      ${lista.map(e => html`<li key=${e.id}>
+        <div class="info-papelera"><b class="mono">${e.nombre}</b>
+          <span class="tenue chico">${t('tipo.' + (e.carpeta === 'personajes' ? 'personaje' : e.carpeta === 'objetos' ? 'objeto' : 'escenario'))}${
+            ' · '}${t('papelera.borrado', { f: new Date(e.borrado * 1000).toLocaleString() })} · ${tamano(e.bytes)}</span></div>
+        <div class="acciones-papelera">
+          <button class="boton chico" disabled=${haciendo} onClick=${() => restaurar(e)}><${Icono} n="rehacer" />${t('papelera.restaurar')}</button>
+          <button class="boton chico fantasma peligro" disabled=${haciendo} onClick=${() => setConfirmar(e.id)}>${t('papelera.borrar')}</button>
+        </div>
+        ${confirmar === e.id && html`<div style="flex-basis:100%">${pregunta(t('papelera.borrar_q', { n: e.nombre, t: tamano(e.bytes) }))}</div>`}
+      </li>`)}</ul>`}`
 }

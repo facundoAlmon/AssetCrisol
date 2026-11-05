@@ -245,6 +245,16 @@ def probar_movimientos(base, datos):
         e = {x['animacion']: x for x in d.get('biblioteca', [])}.get(anim, {}) if c == 200 else {}
         chequear(e.get('origen') == 'repo', f'quitar {anim}: vuelve el del repo', json.dumps(e))
     chequear(not os.path.exists(os.path.join(propia, 'correr.npz')), 'quitar borra el .npz propio')
+    shutil.copy(os.path.join(repo, 'correr.npz'), os.path.join(cand, 'correr_s3_2.npz'))
+    c, d = pedir(base, 'api/movimientos/borrar', 'POST', {'candidato': 'correr_s3_0'})
+    chequear(c == 200 and {x['id'] for x in d['candidatos']} == {'correr_s3_1', 'correr_s3_2'} and
+             os.path.isfile(os.path.join(cand, 'correr_s3.png')), 'borrar una muestra: la hoja queda')
+    for malo in ('../x_s1_0', 'correr_s9', 'correr'):
+        c, _ = pedir(base, 'api/movimientos/borrar', 'POST', {'candidato': malo})
+        chequear(c == 400, f'borrar candidato rechazado: {malo}')
+    c, d = pedir(base, 'api/movimientos/borrar', 'POST', {'candidato': 'correr_s3'})
+    chequear(c == 200 and d['candidatos'] == [] and not os.listdir(cand), 'borrar la generación entera, con la hoja',
+             os.listdir(cand))
 
 
 def probar_articulaciones(base, datos):
@@ -375,6 +385,34 @@ def main():
         chequear(c == 400, 'renombrar con un nombre inválido: 400', r)
         c, _ = pedir(base, 'api/assets/caja_dos/renombrar', 'POST', {'nuevo': 'caja'})
         chequear(c == 200, 'renombrar de vuelta a caja')
+
+        print('papelera')
+        datos = cfg['datos_dir']
+        c, t = pedir(base, 'api/assets/martillo/tamano')
+        chequear(c == 200 and t.get('bytes', 0) > 0, 'tamaño del asset para confirmar', t)
+        c, _ = pedir(base, 'api/assets/martillo', 'DELETE', origen=False)
+        chequear(c == 403, 'borrar sin Origin: 403')
+        c, r = pedir(base, 'api/assets/martillo', 'DELETE')
+        c2, _ = pedir(base, 'api/assets/martillo')
+        c3, pap = pedir(base, 'api/papelera')
+        chequear(c == 200 and c2 == 400 and not os.path.exists(os.path.join(datos, 'objetos', 'martillo')) and
+                 [e['nombre'] for e in pap] == ['martillo'] and pap[0]['id'] == r.get('id') and pap[0]['bytes'] == t['bytes'],
+                 'borrar: a la papelera', f'{c} {r} {c2} {pap}')
+        c, _ = pedir(base, 'api/papelera/restaurar', 'POST', {'id': '../../personajes/cris'})
+        chequear(c == 400, 'restaurar algo que no está en la papelera: 400')
+        c, _ = pedir(base, 'api/papelera', 'DELETE', {'ids': ['objetos/../../personajes/cris_20260101-000000']})
+        chequear(c == 400 and os.path.isdir(os.path.join(datos, 'personajes', 'cris')), 'vaciar con un id raro: 400')
+        c, r = pedir(base, 'api/papelera/restaurar', 'POST', {'id': pap[0]['id']})
+        chequear(c == 200 and r.get('nombre') == 'martillo' and os.path.isfile(os.path.join(datos, 'objetos', 'martillo', 'objeto.json')),
+                 'restaurar', r)
+        pedir(base, 'api/assets/martillo', 'DELETE')
+        shutil.copytree(os.path.join(RAIZ, 'ejemplos', 'objetos', 'martillo'), os.path.join(datos, 'objetos', 'martillo'))
+        c, pap = pedir(base, 'api/papelera')
+        c, r = pedir(base, 'api/papelera/restaurar', 'POST', {'id': pap[0]['id']})
+        chequear(c == 400 and 'ya existe' in str(r), 'restaurar sobre un asset con el mismo nombre: no', r)
+        c, r = pedir(base, 'api/papelera', 'DELETE', {})
+        c2, pap = pedir(base, 'api/papelera')
+        chequear(c == 200 and len(r['borrados']) == 1 and pap == [], 'vaciar la papelera', r)
 
         print('editor de articulaciones')
         probar_articulaciones(base, cfg['datos_dir'])

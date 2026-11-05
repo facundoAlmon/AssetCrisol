@@ -3,7 +3,7 @@
 import {
   html, useState, useEffect, useRef, useGlobal, api, t, urlArchivo, urlMini, Icono, Chip, Cargando, Error, verGrande,
   trabajosDe, encolar, nombrePaso, docPaso, ayudaPaso, urlReadme, aviso, duracion, Colada, transcurrido, Plegable,
-  idiomaActual, textoAviso,
+  idiomaActual, textoAviso, tamano,
 } from '../comunes.mjs'
 import { Ajustes } from './ajustes.mjs'
 import { Visor3D } from './visor3d.mjs'
@@ -477,7 +477,6 @@ function Visor({ d }) {
 
 // ---------- exportar: elegir grupos de archivos y bajarlos en un zip ----------
 const NO_MARCADOS = ['fuente', 'previas', 'modelo']   // de entrada, lo que va al juego
-const tamano = b => b < 1e6 ? `${Math.max(1, Math.round(b / 1e3))} kB` : `${(b / 1e6).toFixed(b < 1e7 ? 1 : 0)} MB`
 
 function Exportar({ d }) {
   const [grupos, setGrupos] = useState(null)
@@ -580,12 +579,40 @@ function Renombrar({ d, cerrar }) {
   </form>`
 }
 
+// borrar el asset: a la papelera (<datos_dir>/.papelera/), de donde se restaura desde la Biblioteca
+function Borrar({ d, cerrar }) {
+  const [bytes, setBytes] = useState(null)
+  const [haciendo, setHaciendo] = useState(false)
+  const url = `assets/${encodeURIComponent(d.nombre)}`
+  useEffect(() => { api(url + '/tamano').then(r => setBytes(r.bytes), e => { aviso(e.message, 'error'); cerrar() }) }, [])
+  const confirmar = async () => {
+    setHaciendo(true)
+    try {
+      await api(url, { metodo: 'DELETE' })
+      aviso(t('borrar.hecho', { n: d.nombre }), '', { href: '#/papelera', texto: t('papelera.titulo') })
+      location.hash = '#/'
+    } catch (e) { aviso(e.message, 'error'); setHaciendo(false) }
+  }
+  return html`<div class="aviso borrar-asset" role="alertdialog" aria-label=${t('borrar.boton')}>
+    <${Icono} n="papelera" />
+    <div style="flex:1;display:grid;gap:8px">
+      <b>${bytes === null ? t('comun.cargando') : t('borrar.titulo', { n: d.nombre, t: tamano(bytes) })}</b>
+      <p class="chico">${t('borrar.nota')}</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="boton chico peligro" disabled=${haciendo || bytes === null} onClick=${confirmar}>${t('borrar.si')}</button>
+        <button class="boton chico fantasma" onClick=${cerrar}>${t('desh.no')}</button>
+      </div>
+    </div>
+  </div>`
+}
+
 // ---------- pantalla ----------
 export function Asset({ nombre, pestana }) {
   const g = useGlobal()
   const { d, error, cargar } = useDetalle(nombre)
   const [cambiando, setCambiando] = useState(null)
   const [renombrando, setRenombrando] = useState(false)
+  const [borrando, setBorrando] = useState(false)
   if (error) return html`<a class="migas" href="#/"><${Icono} n="atras" />${t('nav.biblioteca')}</a><${Error} error=${error} reintentar=${cargar} />`
   if (!d) return html`<${Cargando} />`
   const { corriendo } = trabajosDe(g.cola, d.nombre)
@@ -597,7 +624,9 @@ export function Asset({ nombre, pestana }) {
       <div class="asset-titulo">${renombrando
           ? html`<${Renombrar} d=${d} cerrar=${() => setRenombrando(false)} />`
           : html`<h1>${d.nombre}</h1><button class="icono-boton" title=${t('ren.boton')} aria-label=${t('ren.boton')}
-              disabled=${!!corriendo || trabajosDe(g.cola, d.nombre).pendientes.length > 0} onClick=${() => setRenombrando(true)}><${Icono} n="editar" /></button>`}
+              disabled=${!!corriendo || trabajosDe(g.cola, d.nombre).pendientes.length > 0} onClick=${() => setRenombrando(true)}><${Icono} n="editar" /></button>
+            <button class="icono-boton" title=${t('borrar.boton')} aria-label=${t('borrar.boton')}
+              disabled=${!!corriendo || trabajosDe(g.cola, d.nombre).pendientes.length > 0} onClick=${() => setBorrando(true)}><${Icono} n="papelera" /></button>`}
         <${Chip}>${t('tipo.' + d.tipo)}<//><${Chip}>${d.estilo}<//>
         ${d.licencias && !d.licencias.comercial && html`<${Chip} clase="fallo">${t('asset.no_comercial')}<//>`}
       </div>
@@ -612,6 +641,7 @@ export function Asset({ nombre, pestana }) {
               : html`<${Chip} clase="hecho">${t('asset.completo')}<//>`}
       </div>
     </header>
+    ${borrando && html`<${Borrar} d=${d} cerrar=${() => setBorrando(false)} />`}
     <${Decidir} d=${d} recargar=${cargar} cambiando=${cambiando} setCambiando=${setCambiando} />
     <${Mirar} d=${d} cola=${g.cola} />
     <div class="dos-columnas">

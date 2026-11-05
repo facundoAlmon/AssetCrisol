@@ -167,6 +167,8 @@ export async function encolar(cuerpo) {
 }
 
 // ---------- tiempo ----------
+export const tamano = b => b < 1e6 ? `${Math.max(1, Math.round(b / 1e3))} kB` : `${(b / 1e6).toFixed(b < 1e7 ? 1 : 0)} MB`
+
 export function duracion(seg) {
   seg = Math.max(0, Math.round(seg))
   if (seg < 60) return t('comun.segundos', { n: seg })
@@ -214,6 +216,7 @@ const P = {
   subir: 'M12 16V4M7 9l5-5 5 5M4 20h16',
   bajar: 'M12 4v12M7 11l5 5 5-5M4 20h16',
   editar: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4',
+  papelera: 'M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13M10 11v6M14 11v6',
   punto: 'M12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2z',
   cubo: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
   centrar: 'M12 3v4M12 17v4M3 12h4M17 12h4M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',

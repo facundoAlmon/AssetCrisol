@@ -377,8 +377,10 @@ crisol ui --host 0.0.0.0     # also from another PC or a phone on the same netwo
 - **Undo** a step (in the chain, next to its state): shows what it will delete and how much it weighs before
   confirming; it does not touch the json or the choices (Repaint texture goes back to the engine mesh and Detect
   joints to the previous ones). **Rename** (the pencil next to the name): folder, `godot/` and the `.blend`; whatever
-  is already installed in a game keeps the old name. From the terminal: `crisol deshacer <n> --paso <p> [--ver]` and
-  `crisol renombrar <n> --nuevo <m>`.
+  is already installed in a game keeps the old name. **Delete** (the bin next to the name): the asset goes to the
+  **trash** (`<datos_dir>/.papelera/`), where it can be restored or deleted forever (Library > Trash). From the
+  terminal: `crisol deshacer <n> --paso <p> [--ver]`, `crisol renombrar <n> --nuevo <m>`, `crisol borrar <n> [--ver]`
+  and `crisol papelera [--restaurar <id>] [--vaciar [<ids>]]`.
 - **Export** (Files and logs tab): check what to download (the Godot folder, the side and iso sheets, the portrait,
   the anchors, the 3D model, the 3D game one, the previews or the source files) and get it as a zip, also from another PC or a phone.
 - **Settings** without json: style, description, seeds, height, head angle, iso animations and the method of each
@@ -958,6 +960,7 @@ crisol clip correr --candidato correr_s1_2 --desde 0.4   # sample 2 becomes the 
 crisol clip correr --recomendado si                      # default method for correr (otherwise only with `metodo`)
 crisol clip golpe --hasta 1.1                            # changes the window of a repo clip ("" clears desde/hasta)
 crisol clip correr --quitar                              # back to the repo one (if any)
+crisol movimiento --borrar correr_s1_0                   # deletes one sample (correr_s1: the whole run and its sheet)
 ```
 `clip` copies the `.npz` to `<datos_dir>/movimientos/<anim>.npz` and records it in `<datos_dir>/movimientos/biblioteca.json`
 (clip, recomendado, desde/hasta, prompt, seed, sample): the repo library is not touched. Your own entry with a clip

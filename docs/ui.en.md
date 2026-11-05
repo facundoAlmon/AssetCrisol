@@ -343,6 +343,10 @@ for example after changing an animation.
 **Rename**: the pencil next to the asset name. It renames the folder and its files; whatever you already copied into a
 game keeps the old name.
 
+**Delete**: the bin next to the name. It tells how much space the asset takes and, once confirmed, moves it to the
+**trash** (Library > Trash, the button shows up when there is something in it). From there you **restore** it as it
+was or delete it forever, one by one or all at once. Whatever you already copied into a game does not change.
+
 ## 9. Licenses in two minutes
 
 AssetCrisol's code is free software (GPL-3.0), but **each AI model has its own license**, and some do not allow

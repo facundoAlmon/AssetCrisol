@@ -12,6 +12,11 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   calidad pareja en tres objetos). Los objetos existentes conservan su json.
 
 ### Agregado
+- Papelera: `crisol borrar <n>` (y el tacho junto al nombre en `crisol ui`) mueve el asset a
+  `<datos_dir>/.papelera/<carpeta>/<n>_<fecha>/`; `crisol papelera` la lista, `--restaurar <id>` lo devuelve y
+  `--vaciar [<ids>]` borra para siempre. En la UI, Biblioteca > Papelera. No con pasos del asset en la cola.
+- `crisol movimiento --borrar <anim>_s<seed>[_<i>]`: borra candidatos de Kimodo (una muestra, o la generación entera
+  con su hoja de esqueletos); los clips de la biblioteca son copias y no cambian.
 - Cuadrúpedos con Pixal3D de una vista: `malla` los endereza sobre las cuatro patas (`cuadrupedo.apoyar`) y
   `blender` no les saca las capas escondidas; antes salían inclinados como la cámara y sin ningún vértice con peso.
   `modelo.alinear` (enderezar la malla de Pixal3D de una vista) vale ahora también en personajes: por defecto sí en

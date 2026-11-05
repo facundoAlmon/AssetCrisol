@@ -15,3 +15,5 @@ CLAUDE.local.md
 .claude/settings.local.json
 # cola e historial de crisol ui, si datos_dir es esta carpeta
 /.crisol_ui/
+# papelera de crisol borrar, si datos_dir es esta carpeta
+/.papelera/

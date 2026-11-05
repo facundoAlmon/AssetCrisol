@@ -29,6 +29,8 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
                                     personaje.json > animacion.metodos); después rehacer blender/iso/anclas
   movimiento <anim> --prompt "..." [--duracion s] [--seed n] [--muestras k]  clips candidatos con Kimodo
                                     (CPU, ~2,5 min) -> <datos_dir>/movimientos/candidatos/
+  movimiento --borrar <anim>_s<seed>[_<i>]   borra candidatos (una muestra o la generación entera, con su hoja);
+                                    los clips ya pasados a la biblioteca son copias y no cambian
   clip     [<anim> --candidato <anim>_s<seed>_<i> [--desde s] [--hasta s] [--recomendado si|no] [--quitar]]
                                     biblioteca de movimientos (sin <anim>: la lista y los candidatos): pasa un
                                     candidato a <datos_dir>/movimientos/ (biblioteca.json + <anim>.npz), cambia su
@@ -45,6 +47,8 @@ Los personajes, objetos y escenarios viven en `datos_dir` de la config (por defe
                                     las elecciones; ultratex vuelve a la malla del motor, articulaciones a las de antes
   renombrar <n> --nuevo m           cambia el nombre del asset (carpeta, godot/ y el .blend); lo instalado en un
                                     juego no se toca
+  borrar   <n> [--ver]              mueve el asset a la papelera (<datos_dir>/.papelera/); --ver: solo dice cuánto ocupa
+  papelera [--restaurar id] [--vaciar [id,...]]   lista la papelera, restaura un asset o la vacía (para siempre)
   estado   [<n>] [--json]           qué pasos están hechos, cuáles quedaron viejos y qué falta elegir (sin <n>: todos)
   doctor   [--json]                 revisa la instalación: qué falta, cómo arreglarlo y qué pasos quedan deshabilitados
   mcp                               servidor MCP por stdio para agentes (crear, estado, correr, ver, elegir...; con uv)
@@ -205,6 +209,42 @@ def paso_renombrar(nombre, nuevo):
         salida.salir(salida.USO, f'[renombrar] {e}')
     print(f'[renombrar] {nombre} -> {nuevo} ({destino}). Lo que ya esté instalado en un juego sigue con el nombre '
           'viejo: reinstalarlo')
+
+
+def paso_borrar(nombre, ver=False):
+    import deshacer
+    pdir, _ = cargar(nombre)
+    b = deshacer.tamano(pdir)
+    if ver:
+        print(f'[borrar] {nombre} ocupa {b / 1e6:.1f} MB ({pdir}); `crisol borrar {nombre}` lo pasa a la papelera')
+        return
+    pid = deshacer.ocupado(nombre)
+    if pid:
+        salida.salir(salida.ERROR, f'[borrar] hay un crisol con {nombre} corriendo (pid {pid}): esperar a que termine')
+    id_ = deshacer.a_papelera(DATOS, pdir)
+    print(f'[borrar] {nombre} ({b / 1e6:.1f} MB) en la papelera como {id_}: `crisol papelera --restaurar {id_}` lo '
+          'devuelve y `crisol papelera --vaciar` la vacía. Lo instalado en un juego no cambia')
+
+
+def paso_papelera(restaurar=None, vaciar=None):
+    import deshacer
+    try:
+        if restaurar:
+            destino = deshacer.restaurar(DATOS, restaurar)
+            print(f'[papelera] restaurado en {destino}')
+            return
+        if vaciar is not None:
+            ids = [x for x in vaciar.split(',') if x] or None
+            borrados = deshacer.vaciar(DATOS, ids)
+            print(f'[papelera] borré para siempre {len(borrados)} '
+                  f'({sum(b for _, b in borrados) / 1e6:.1f} MB)' + ''.join(f'\n  {i}' for i, _ in borrados))
+            return
+    except ValueError as e:
+        salida.salir(salida.USO, f'[papelera] {e}')
+    lista = deshacer.papelera(DATOS)
+    print(f'[papelera] {len(lista)} en {os.path.join(DATOS, deshacer.PAPELERA)} '
+          f'({sum(e["bytes"] for e in lista) / 1e6:.1f} MB)' + ''.join(
+              f"\n  {e['id']:44s} {e['bytes'] / 1e6:8.1f} MB" for e in lista))
 
 
 def paso_estado(nombre, como_json=False):
@@ -863,6 +903,18 @@ def paso_movimiento(anim_, prompt, duracion, seed, muestras):
           '[--desde s --hasta s] [--recomendado si]')
 
 
+def paso_borrar_movimiento(cual):
+    """Borra candidatos de `crisol movimiento`: <anim>_s<seed>_<i> (una muestra; la hoja queda si hay otras de esa
+    generación) o <anim>_s<seed> (todas las muestras y la hoja). La biblioteca tiene su copia: no cambia."""
+    import metodos
+    d = os.path.join(DATOS, 'movimientos', 'candidatos')
+    try:
+        borrados = metodos.borrar_candidatos(d, cual.removesuffix('.npz'))
+    except ValueError as e:
+        salida.salir(salida.USO, f'[movimiento] {e}')
+    print(f'[movimiento] borré {len(borrados)}: {", ".join(borrados)}')
+
+
 def _segundos(v, opcion):
     """--desde/--hasta: None (no cambiar), '' (borrar) o segundos."""
     if v is None or v == '':
@@ -1045,7 +1097,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('paso', choices=['nuevo', 'imagen', 'vistas', 'revisar', 'rehacer', 'malla', 'ultratex', 'guia', 'articulaciones', 'blender', 'sprites', 'retrato',
                                      'iso', 'anclas', 'godot', 'todo', 'comparar', 'texturas', 'tema', 'metodo', 'movimiento', 'clip', 'estado',
-                                     'deshacer', 'renombrar'])
+                                     'deshacer', 'renombrar', 'borrar', 'papelera'])
     ap.add_argument('personaje', nargs='?', help='personaje, objeto o escenario (en `movimiento`, la animación)')
     ap.add_argument('cambios', nargs='*', help='paso metodo: anim=kimodo|procedural')
     ap.add_argument('--prompt', help='paso movimiento: descripción del movimiento (en inglés)')
@@ -1068,6 +1120,9 @@ def main():
     ap.add_argument('--paso', dest='deshacer_paso', metavar='PASO', help='paso deshacer: cuál')
     ap.add_argument('--ver', action='store_true', help='paso deshacer: solo listar lo que borraría')
     ap.add_argument('--nuevo', help='paso renombrar: el nombre nuevo')
+    ap.add_argument('--restaurar', metavar='ID', help='paso papelera: <carpeta>/<n>_<fecha> (de `crisol papelera`)')
+    ap.add_argument('--vaciar', nargs='?', const='', metavar='IDS', help='paso papelera: borrar para siempre (todo o esos ids)')
+    ap.add_argument('--borrar', metavar='CANDIDATO', help='paso movimiento: <anim>_s<seed>[_<i>] (candidatos a borrar)')
     ap.add_argument('--instalar', metavar='PROYECTO_GODOT', help='copiar el resultado a este proyecto Godot')
     ap.add_argument('--json', action='store_true',
                     help='salida en JSON por stdout (lo demás va a stderr): ok, código, archivos escritos, qué mirar y '
@@ -1083,13 +1138,13 @@ def main():
     ESPERAR_GPU = not a.sin_esperar
     if a.paso == 'estado':
         return paso_estado(a.personaje, a.json)
-    if not a.personaje and a.paso != 'clip':
+    if not a.personaje and a.paso not in ('clip', 'papelera') and not (a.paso == 'movimiento' and a.borrar):
         ap.error(f'{a.paso}: falta el nombre')
     if a.paso in ('texturas', 'tema'):
         con_numpy()   # se relanza con otro python: antes de redirigir la salida
     if a.json:
         estado_de = None
-        if a.paso not in ('movimiento', 'clip', 'rehacer'):
+        if a.paso not in ('movimiento', 'clip', 'rehacer', 'borrar', 'papelera'):
             import estado
             n_despues = a.nuevo if a.paso == 'renombrar' else a.personaje
 
@@ -1114,6 +1169,8 @@ def main():
 
 def carpetas_del_paso(a):
     """Dónde escribe el paso (para listar los archivos que dejó con --json)."""
+    if a.paso in ('borrar', 'papelera'):
+        return []
     if a.paso == 'movimiento':
         return [os.path.join(DATOS, 'movimientos', 'candidatos')]
     if a.paso == 'clip':
@@ -1164,6 +1221,12 @@ def ejecutar(a):
     if a.paso in ('deshacer', 'renombrar'):
         return paso_deshacer(a.personaje, a.deshacer_paso, a.ver) if a.paso == 'deshacer' else \
             paso_renombrar(a.personaje, a.nuevo)
+    if a.paso == 'borrar':
+        return paso_borrar(a.personaje, a.ver)
+    if a.paso == 'papelera':
+        return paso_papelera(a.restaurar, a.vaciar)
+    if a.paso == 'movimiento' and a.borrar:
+        return paso_borrar_movimiento(a.borrar)
     if a.paso not in ('nuevo', 'movimiento', 'clip') and es_escenario != (a.paso in PASOS_ESCENARIO):
         salida.salir(salida.USO, f'{a.paso}: es un paso de {"personajes y objetos" if es_escenario else "escenarios"}')
     revisar_instalacion(a)

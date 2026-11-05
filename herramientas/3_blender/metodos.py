@@ -156,6 +156,31 @@ def esqueleto(ruta):
             'cuadros_xy': cuadros}
 
 
+GENERACION = re.compile(r'^([a-z_]+)_s(-?\d+)$')   # <anim>_s<seed>: todas sus muestras y la hoja
+
+
+def borrar_candidatos(carpeta, cual):
+    """Borra una muestra (<anim>_s<seed>_<i>.npz; la hoja <anim>_s<seed>.png queda mientras haya otra muestra de esa
+    generación: la fila de cada una es su número) o la generación entera (<anim>_s<seed>: muestras y hoja).
+    Devuelve los archivos borrados. Los clips de la biblioteca son copias: no se tocan."""
+    m, g = CANDIDATO.match(cual), GENERACION.match(cual)
+    if not m and not g:
+        raise ValueError(f'{cual}: <anim>_s<seed>_<muestra> o <anim>_s<seed>')
+    anim, seed = (m or g)[1], (m or g)[2]
+    pref = f'{anim}_s{seed}_'
+    muestras = [a for a in os.listdir(carpeta) if a.startswith(pref) and a.endswith('.npz')
+                and CANDIDATO.match(a[:-4]) and CANDIDATO.match(a[:-4])[1] == anim] if os.path.isdir(carpeta) else []
+    borrar = [f'{cual}.npz'] if m else muestras
+    if not borrar or not all(os.path.isfile(os.path.join(carpeta, a)) for a in borrar):
+        raise ValueError(f'no hay candidatos {cual} en {carpeta}')
+    hoja = f'{anim}_s{seed}.png'
+    if set(muestras) <= set(borrar) and os.path.isfile(os.path.join(carpeta, hoja)):
+        borrar.append(hoja)
+    for a in borrar:
+        os.remove(os.path.join(carpeta, a))
+    return sorted(borrar)
+
+
 def candidatos(carpeta):
     """Los clips de `crisol movimiento` en `carpeta` (movimientos/candidatos), los más nuevos primero:
     [{id, animacion, seed, muestra, hoja, modificado, cuadros, fps, duracion, prompt}]."""

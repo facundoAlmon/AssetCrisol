@@ -495,6 +495,13 @@ h2 .num-paso { margin-right: 8px; }
 .deshacer-paso { color: var(--texto-2); font-weight: 500; margin-left: 4px; }
 .renombrar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; min-width: 0; }
 .renombrar .campo { min-width: min(100%, 260px); }
+.borrar-asset { margin-bottom: 20px; }
+.lista-papelera { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.lista-papelera li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 14px;
+  border: 1px solid var(--linea); border-radius: var(--r); background: var(--superficie); }
+.info-papelera { display: grid; gap: 2px; flex: 1; min-width: min(100%, 220px); }
+.info-papelera b { word-break: break-word; }
+.acciones-papelera { display: flex; gap: 8px; flex-wrap: wrap; }
 .cadena .deshacer li { display: list-item; padding: 0; border: 0; }
 
 /* editor de articulaciones: los renders de la guía con los huesos encima (colores fijos: van sobre el render) */

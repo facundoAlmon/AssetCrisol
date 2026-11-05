@@ -3,7 +3,9 @@
 # Deshacer nunca toca el json del asset ni lo que puso la persona (referencia.png, base_*.png, las elecciones); dos
 # pasos se deshacen en serio en vez de solo borrar: `ultratex` vuelve a poner la malla del motor y `articulaciones`
 # vuelve a las de antes (modelo._articulaciones_previas, o ninguna: las estimadas).
-import glob, json, os, re, shutil
+# También la papelera (`crisol borrar <n>`, `crisol papelera`): borrar un asset lo mueve a
+# <datos_dir>/.papelera/<carpeta>/<n>_<fecha>/, de donde se restaura o se vacía.
+import glob, json, os, re, shutil, time
 
 NOMBRE = re.compile(r'^[a-z0-9][a-z0-9_]{0,47}$')
 
@@ -173,6 +175,80 @@ def ocupado(nombre):
         except OSError:
             continue
         if any(c.endswith('pipeline.py') or c.endswith('/crisol') for c in cmd) and \
-                any(nombre in c.split(',') for c in cmd[2:]) and not {'estado', 'renombrar', 'deshacer'} & set(cmd):
+                any(nombre in c.split(',') for c in cmd[2:]) and not {'estado', 'renombrar', 'deshacer', 'borrar', 'papelera'} & set(cmd):
             return int(d)
     return None
+
+
+# ---------- papelera ----------
+
+PAPELERA = '.papelera'
+EN_PAPELERA = re.compile(r'^(personajes|objetos|escenarios)/([a-z0-9][a-z0-9_]{0,47})_(\d{8}-\d{6})$')
+
+
+def tamano(ruta):
+    return sum(os.path.getsize(os.path.join(a, f)) for a, _, fs in os.walk(ruta) for f in fs
+               if not os.path.islink(os.path.join(a, f)))
+
+
+def a_papelera(datos, pdir):
+    """Mueve la carpeta del asset a <datos>/.papelera/<carpeta>/<n>_<fecha>/. Devuelve el id (<carpeta>/<n>_<fecha>).
+    Lo instalado en un juego no se toca: es una copia."""
+    carpeta, nombre = os.path.basename(os.path.dirname(pdir)), os.path.basename(pdir)
+    destino_dir = os.path.join(datos, PAPELERA, carpeta)
+    os.makedirs(destino_dir, exist_ok=True)
+    fecha = time.strftime('%Y%m%d-%H%M%S')
+    while os.path.exists(os.path.join(destino_dir, f'{nombre}_{fecha}')):   # dos borrados en el mismo segundo
+        time.sleep(1)
+        fecha = time.strftime('%Y%m%d-%H%M%S')
+    os.rename(pdir, os.path.join(destino_dir, f'{nombre}_{fecha}'))
+    return f'{carpeta}/{nombre}_{fecha}'
+
+
+def papelera(datos):
+    """Lo que hay en la papelera, lo último borrado primero: [{id, carpeta, nombre, borrado (epoch), bytes}]."""
+    out = []
+    raiz = os.path.join(datos, PAPELERA)
+    for carpeta in ('personajes', 'objetos', 'escenarios'):
+        d = os.path.join(raiz, carpeta)
+        for x in sorted(os.listdir(d)) if os.path.isdir(d) else []:
+            m = EN_PAPELERA.match(f'{carpeta}/{x}')
+            if not m or not os.path.isdir(os.path.join(d, x)):
+                continue
+            out.append({'id': f'{carpeta}/{x}', 'carpeta': carpeta, 'nombre': m[2],
+                        'borrado': time.mktime(time.strptime(m[3], '%Y%m%d-%H%M%S')),
+                        'bytes': tamano(os.path.join(d, x))})
+    return sorted(out, key=lambda e: -e['borrado'])
+
+
+def _de_papelera(datos, id_):
+    m = EN_PAPELERA.match(id_ or '')
+    ruta = os.path.join(datos, PAPELERA, id_) if m else None
+    if not ruta or not os.path.isdir(ruta):
+        raise ValueError(f'no está en la papelera: {id_}')
+    return m, ruta
+
+
+def restaurar(datos, id_):
+    """Vuelve a poner el asset donde estaba. Si ya hay otro con ese nombre (en cualquier carpeta), no."""
+    m, ruta = _de_papelera(datos, id_)
+    nombre = m[2]
+    for carpeta in ('personajes', 'objetos', 'escenarios'):
+        if os.path.exists(os.path.join(datos, carpeta, nombre)):
+            raise ValueError(f'ya existe {carpeta}/{nombre}: renombrar ese antes de restaurar')
+    destino = os.path.join(datos, m[1], nombre)
+    os.makedirs(os.path.dirname(destino), exist_ok=True)
+    os.rename(ruta, destino)
+    return destino
+
+
+def vaciar(datos, ids=None):
+    """Borra para siempre lo de la papelera (todo, o esos ids). Devuelve [(id, bytes)]."""
+    lista = papelera(datos) if ids is None else [{'id': i} for i in ids]
+    out = []
+    for e in lista:
+        _, ruta = _de_papelera(datos, e['id'])
+        b = tamano(ruta)
+        shutil.rmtree(ruta)
+        out.append((e['id'], b))
+    return out

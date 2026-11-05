@@ -367,8 +367,10 @@ crisol ui --host 0.0.0.0     # también desde otra PC o el celular en la misma r
 - **Deshacer** un paso (en la cadena, junto a su estado): muestra qué va a borrar y cuánto pesa antes de confirmar;
   no toca el json ni las elecciones (Repintar textura vuelve a la malla del motor y Detectar articulaciones a las de
   antes). **Cambiar el nombre** (el lápiz junto al nombre): carpeta, `godot/` y el `.blend`; lo que ya esté
-  instalado en un juego sigue con el nombre viejo. En la terminal: `crisol deshacer <n> --paso <p> [--ver]` y
-  `crisol renombrar <n> --nuevo <m>`.
+  instalado en un juego sigue con el nombre viejo. **Borrar** (el tacho junto al nombre): el asset va a la
+  **papelera** (`<datos_dir>/.papelera/`), de donde se restaura o se borra para siempre (Biblioteca > Papelera). En
+  la terminal: `crisol deshacer <n> --paso <p> [--ver]`, `crisol renombrar <n> --nuevo <m>`, `crisol borrar <n>
+  [--ver]` y `crisol papelera [--restaurar <id>] [--vaciar [<ids>]]`.
 - **Exportar** (pestaña Archivos y logs): marcar qué bajar (la carpeta de Godot, las hojas de costado e iso, el
   retrato, las anclas, el modelo 3D, el de juego 3D, las vistas previas o los archivos de origen) y bajarlo en un zip, también desde
   otra PC o el celular.
@@ -949,6 +951,7 @@ crisol clip correr --candidato correr_s1_2 --desde 0.4   # la muestra 2 pasa a s
 crisol clip correr --recomendado si                      # método por defecto de correr (si no, solo con `metodo`)
 crisol clip golpe --hasta 1.1                            # cambia la ventana de uno del repo (desde/hasta "" la borra)
 crisol clip correr --quitar                              # vuelve el del repo (si hay)
+crisol movimiento --borrar correr_s1_0                   # borra una muestra (correr_s1: la generación con su hoja)
 ```
 `clip` copia el `.npz` a `<datos_dir>/movimientos/<anim>.npz` y lo anota en `<datos_dir>/movimientos/biblioteca.json`
 (clip, recomendado, desde/hasta, prompt, seed, muestra): no toca la del repo. Una entrada propia con clip reemplaza a la

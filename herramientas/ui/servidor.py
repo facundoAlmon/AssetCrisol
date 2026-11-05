@@ -836,6 +836,13 @@ class Manejador(BaseHTTPRequestHandler):
                 borrados, extra = deshacer.deshacer(pdir, est.estado(pdir, pj, n)['tipo'], n, self.cuerpo_json().get('paso', ''))
                 app.cambio()
                 return self.json({'borrados': borrados, 'extra': extra})
+            if len(p) == 2 and m == 'DELETE':   # a la papelera
+                self.libre(n)
+                id_ = deshacer.a_papelera(pipeline.DATOS, cargar(n)[0])
+                app.cambio()
+                return self.json({'id': id_})
+            if p[2:] == ['tamano'] and m == 'GET':   # para confirmar el borrado
+                return self.json({'bytes': deshacer.tamano(cargar(n)[0])})
             if p[2:] == ['renombrar'] and m == 'POST':
                 self.libre(n)
                 nuevo = self.cuerpo_json().get('nuevo', '')
@@ -856,6 +863,15 @@ class Manejador(BaseHTTPRequestHandler):
                 return self.json(grupos_exportar(pdir, pj, n, est.estado(pdir, pj, n)['tipo']))
             if p[2:] == ['zip'] and m == 'GET':   # ?grupos=a,b (los de exportar)
                 return self.zip(n, [x for x in q.get('grupos', '').split(',') if x])
+        if p == ['papelera'] and m == 'GET':
+            return self.json(deshacer.papelera(pipeline.DATOS))
+        if p == ['papelera', 'restaurar'] and m == 'POST':
+            destino = deshacer.restaurar(pipeline.DATOS, self.cuerpo_json().get('id'))
+            app.cambio()
+            return self.json({'nombre': os.path.basename(destino)})
+        if p == ['papelera'] and m == 'DELETE':   # {ids: [...]} o sin ids: todo
+            borrados = deshacer.vaciar(pipeline.DATOS, (self.cuerpo_json() or {}).get('ids'))
+            return self.json({'borrados': [i for i, _ in borrados], 'bytes': sum(b for _, b in borrados)})
         if p == ['cola'] and m == 'GET':
             return self.json(app.cola.foto())
         if p == ['cola'] and m == 'POST':
@@ -876,6 +892,11 @@ class Manejador(BaseHTTPRequestHandler):
             return self.json(movimientos())
         if p == ['movimientos', 'clip'] and m == 'POST':
             return self.clip(self.cuerpo_json())
+        if p == ['movimientos', 'borrar'] and m == 'POST':   # {candidato: <anim>_s<seed>[_<i>]}
+            metodos.borrar_candidatos(os.path.join(pipeline.DATOS, 'movimientos', 'candidatos'),
+                                      str(self.cuerpo_json().get('candidato', '')))
+            app.cambio()
+            return self.json(movimientos())
         if p == ['movimientos', 'esqueleto'] and m == 'GET':
             return self.esqueleto_movimiento(q)
         if p == ['recetas']:

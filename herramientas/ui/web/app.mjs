@@ -4,7 +4,7 @@ import {
   html, render, useEffect, useGlobal, useRuta, t, Icono, Crisol, Colada, Lightbox, Avisos, conectar, cargarDoctor,
   leerPref, guardarPref, idiomaActual, cambiarIdioma, nombrePaso,
 } from './comunes.mjs'
-import { Biblioteca } from './componentes/biblioteca.mjs'
+import { Biblioteca, Papelera } from './componentes/biblioteca.mjs'
 import { Asset } from './componentes/asset.mjs'
 import { Nuevo } from './componentes/nuevo.mjs'
 import { Cola } from './componentes/cola.mjs'
@@ -20,7 +20,7 @@ const NAV = [
 ]
 
 function actual(ruta, destino) {
-  return destino === '/' ? (ruta === '/' || ruta.startsWith('/a/')) : ruta.startsWith(destino)
+  return destino === '/' ? (ruta === '/' || ruta.startsWith('/a/') || ruta.startsWith('/papelera')) : ruta.startsWith(destino)
 }
 
 function Preferencias() {
@@ -92,6 +92,7 @@ function App() {
   else if (ruta.startsWith('/cola')) pantalla = html`<${Cola} />`
   else if (ruta.startsWith('/instalacion')) pantalla = html`<${Instalacion} />`
   else if (ruta.startsWith('/movimientos')) pantalla = html`<${Movimientos} />`
+  else if (ruta.startsWith('/papelera')) pantalla = html`<${Papelera} />`
   else pantalla = html`<${Biblioteca} />`
   return html`<${Marco} ruta=${ruta}>${pantalla}<//>`
 }
