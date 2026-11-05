@@ -258,7 +258,7 @@ del principal). *Generar los que faltan* corre solo los nuevos.
 
 ![Ajustes: modelo](ui/img/es/ajustes_modelo.webp)
 
-**Sprites**: el alto en pantalla, la baldosa iso y la calidad de cada hoja, con el tamaño que va a tener en el juego.
+**Sprites**: el alto en pantalla, la baldosa iso y la calidad de cada hoja, con el tamaño que va a tener en el juego, y el zoom del retrato (para cuando alas o una mochila dejan la cabeza chica).
 
 ![Ajustes: sprites](ui/img/es/ajustes_sprites.webp)
 

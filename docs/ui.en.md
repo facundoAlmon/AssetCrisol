@@ -258,7 +258,7 @@ from the main one). *Generate the missing ones* only runs the new ones.
 
 ![Settings: model](ui/img/en/ajustes_modelo.webp)
 
-**Sprites**: on-screen height, iso tile and the quality of each sheet, with the size it will have in the game.
+**Sprites**: on-screen height, iso tile and the quality of each sheet, with the size it will have in the game, and the portrait zoom (for when wings or a backpack leave the head small).
 
 ![Settings: sprites](ui/img/en/ajustes_sprites.webp)
 
