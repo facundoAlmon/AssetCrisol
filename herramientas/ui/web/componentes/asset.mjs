@@ -9,6 +9,7 @@ import { Ajustes } from './ajustes.mjs'
 import { Visor3D } from './visor3d.mjs'
 import { EditorArticulaciones } from './articulaciones.mjs'
 import { EditorRetrato } from './retrato.mjs'
+import { EditorZonas } from './zonas.mjs'
 
 // pasos que no están en la cadena de `crisol estado` pero se pueden correr a mano
 const EXTRA = {
@@ -484,6 +485,8 @@ function Visor({ d }) {
       onClick=${() => { setGid(x.id); setI(0); setEditando(false) }}>${x.n ? html`<span class="num-paso">${x.n}</span>` : ''}${etiqueta(x.id)}</button>`)}</div>
     ${g.id === 'iso_reproductor'
       ? html`<${ReproductorIso} nombre=${d.nombre} meta=${d.iso} version=${v} />`
+      : g.id === 'guia' && editando === 'zonas'
+      ? html`<${EditorZonas} d=${d} cerrar=${() => setEditando(false)} />`
       : g.id === 'guia' && editando
       ? html`<${EditorArticulaciones} d=${d} cerrar=${() => setEditando(false)} />`
       : g.id === 'retrato' && editando
@@ -507,8 +510,10 @@ function Visor({ d }) {
         ${g.archivos.length > 1 && html`<div class="tira">${g.archivos.map((x, k) => html`<button class=${'damero' + (nombreArchivo(x) ? ' con-nombre' : '')} aria-pressed=${k === i}
           onClick=${() => setI(k)} title=${x}><img src=${urlMini(d.nombre, x, 160, '', v)} alt=${x} />${nombreArchivo(x) && html`<span>${nombreArchivo(x)}</span>`}</button>`)}</div>`}
         <p class="mono tenue" style="margin-top:8px;overflow-wrap:anywhere">${archivo}</p>
-        ${g.id === 'guia' && html`<button class="boton" style="margin-top:4px" onClick=${() => setEditando(true)}>
-          <${Icono} n="editar" />${t('art.editar')}</button>`}
+        ${g.id === 'guia' && html`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <button class="boton" onClick=${() => setEditando(true)}><${Icono} n="editar" />${t('art.editar')}</button>
+          <button class="boton" onClick=${() => setEditando('zonas')} title=${t('zonas.boton_ayuda')}>
+            <${Icono} n="cubo" />${t('zonas.boton')}${d.json?.modelo?.pesos_zonas?.length ? ` (${d.json.modelo.pesos_zonas.length})` : ''}</button></div>`}
         ${g.id === 'retrato' && html`<button class="boton" style="margin-top:4px" onClick=${() => setEditando(true)}>
           <${Icono} n="editar" />${t('retrato.editar')}</button>`}`}
   </div>`

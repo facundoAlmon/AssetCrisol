@@ -914,7 +914,9 @@ caminata.
 - `modelo.pesos_rigidos: true`: cada vértice entero en su hueso dominante. Robots de bloques (antebrazo que se dobla
   en C).
 - `modelo.pesos_zonas`: `[{"min": [x,y,z], "max": [x,y,z], "hueso": "hips"}]`, cajas (coordenadas de `guia.png`)
-  cuyos vértices van enteros a un hueso: piezas rígidas cerca de la mano que el bone heat le da al antebrazo.
+  cuyos vértices van enteros a un hueso: piezas rígidas cerca de la mano que el bone heat le da al antebrazo. En
+  `crisol ui` se dibujan sobre la guía (Resultado > Guía > *Pesos por zonas*: frente y costado, con el hueso de cada
+  caja); después, rehacer el rig.
 - `modelo.piezas_por_distancia: true`: todas las piezas menos la más grande toman pesos por distancia aunque tengan un
   hueso adentro (una cola en la misma pieza que el pantalón).
 - `modelo.pesos_estanca` (lado del vóxel, p. ej. 0.008): bone heat sobre una copia estanca por vóxeles.

@@ -148,6 +148,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   `componentes/articulaciones.mjs` es el editor de articulaciones (sobre `trabajo/guia/{frente,costado}.png` con la
   cámara de `guia.json`; `servidor.guardar_articulaciones` escribe `modelo.articulaciones` + `_articulaciones_previas`,
   redibuja `guia.png` con `dibujar_guia` y marca `articulaciones.json` con `fuente: "a mano"`).
+  `componentes/zonas.mjs`: el editor de `modelo.pesos_zonas` sobre la guía (`servidor.zonas_guia`/`guardar_zonas`,
+  misma cámara que el de articulaciones).
   `componentes/retrato.mjs`: el editor del encuadre del retrato (`servidor.datos_retrato`/`guardar_retrato` →
   `retrato.caja.<fuente>`; `blender_main.retratos` y `armar_tira.recorte_imagen` la usan; con la imagen,
   `crisol retrato` no abre Blender).

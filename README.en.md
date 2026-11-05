@@ -924,7 +924,9 @@ Diagnosis: a render colored by dominant bone, at rest and in poses (`throw`, `ar
   how short the blend is.
 - `modelo.pesos_rigidos: true`: each vertex fully on its dominant bone. Blocky robots (a forearm that bends into a C).
 - `modelo.pesos_zonas`: `[{"min": [x,y,z], "max": [x,y,z], "hueso": "hips"}]`, boxes (coordinates from `guia.png`)
-  whose vertices go fully to one bone: rigid pieces near the hand that bone heat gives to the forearm.
+  whose vertices go fully to one bone: rigid pieces near the hand that bone heat gives to the forearm. In
+  `crisol ui` you draw them over the guide (Result > Guide > *Weight zones*: front and side, with each box's bone);
+  then redo the rig.
 - `modelo.piezas_por_distancia: true`: every piece except the largest takes weights by distance even if it has a bone
   inside (a tail in the same piece as the trousers).
 - `modelo.pesos_estanca` (voxel size, e.g. 0.008): bone heat on a watertight voxel copy.

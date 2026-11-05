@@ -302,11 +302,31 @@ def probar_articulaciones(base, datos):
     chequear(c == 400, 'una coordenada que no es número: 400')
     c, _ = pedir(base, 'api/assets/caja/articulaciones')
     chequear(c == 400, 'un objeto no tiene editor: 400')
+    probar_zonas(base, datos)
     c, r = pedir(base, 'api/assets/cris/deshacer', 'POST', {'paso': 'articulaciones'})
     with open(os.path.join(pdir, 'personaje.json')) as f:
         m = json.load(f)['modelo']
     chequear(c == 200 and m['articulaciones'] == J, 'deshacer articulaciones vuelve a las de antes', f'{c} {r}')
     shutil.rmtree(gdir)
+
+
+def probar_zonas(base, datos):
+    """El editor de pesos por zonas (modelo.pesos_zonas) sobre la guía."""
+    print('pesos por zonas')
+    c, z = pedir(base, 'api/assets/cris/pesos_zonas')
+    chequear(c == 200 and z['zonas'] == [] and 'hand.L' in z['huesos'] and 'hand.R' in z['huesos'] and
+             not any('pole' in h or '_ik' in h or h == 'root' for h in z['huesos']), 'zonas: guía y huesos con lado', z.get('huesos'))
+    for malo in ({'zonas': 'x'}, {'zonas': [{'min': [0, 0, 1], 'max': [0.1, 0.1, 0.9], 'hueso': 'hips'}]},
+                 {'zonas': [{'min': [0, 0, 0], 'max': [1, 1, 1], 'hueso': '../x'}]}, {'zonas': [{'min': [0, 0], 'max': [1, 1, 1], 'hueso': 'hips'}]}):
+        c, _ = pedir(base, 'api/assets/cris/pesos_zonas', 'PUT', malo)
+        chequear(c == 400, f'zonas rechazadas: {json.dumps(malo)[:70]}', str(c))
+    zona = {'min': [0.2, -0.1, 0.8], 'max': [0.35, 0.1, 0.95], 'hueso': 'hand.L'}
+    c, z = pedir(base, 'api/assets/cris/pesos_zonas', 'PUT', {'zonas': [zona]})
+    jcris = os.path.join(datos, 'personajes', 'cris', 'personaje.json')
+    chequear(c == 200 and z['zonas'] == [zona] and json.load(open(jcris))['modelo']['pesos_zonas'] == [zona],
+             'guardar zonas en modelo.pesos_zonas', z.get('zonas'))
+    c, z = pedir(base, 'api/assets/cris/pesos_zonas', 'PUT', {'zonas': []})
+    chequear(c == 200 and 'pesos_zonas' not in json.load(open(jcris))['modelo'], 'sin zonas, sin la clave')
 
 
 def probar_ocupado(tmp):
@@ -539,6 +559,7 @@ def main():
 
         print('editor de articulaciones')
         probar_articulaciones(base, cfg['datos_dir'])
+
 
         print('3D animado')
         t = os.path.join(cfg['datos_dir'], 'personajes', 'cris', 'trabajo')

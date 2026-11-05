@@ -17,6 +17,9 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   `herramientas/3_blender/procedurales.py` con el rig de Cris: rehacerlo al cambiar `anim.py`).
 
 ### Agregado
+- Pesos por zonas desde `crisol ui` (Resultado > Guía > *Pesos por zonas*): las cajas de `modelo.pesos_zonas` se
+  dibujan y se arrastran sobre los renders de frente y de costado de la guía, con el hueso de cada una; al guardar
+  ofrece rehacer el rig.
 - Candidatos de cara de UltraTex: con `malla.ultratex.seeds` (las recetas `humanoide` y `chibi` traen `[1, 2, 3]`),
   `malla` repinta con cada seed (`trabajo/malla/ultratex_s<seed>.glb`) y arma `caras.png` con la cabeza de frente de
   cada una (Blender, modo `cara`). La persona elige con `malla.ultratex.elegida` (también en *Te toca elegir* de

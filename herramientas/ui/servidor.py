@@ -301,6 +301,44 @@ def articulaciones_guia(pdir, pj):
             'version': round(os.path.getmtime(os.path.join(gdir, 'frente.png')))}
 
 
+def zonas_guia(pdir, pj):
+    """Para el editor de pesos por zonas: la cámara de la guía (como articulaciones_guia), modelo.pesos_zonas y los
+    huesos que pueden recibir una zona (los que deforman, con su lado: hand.L / hand.R)."""
+    g = articulaciones_guia(pdir, pj)
+    huesos = []
+    for n in g['articulaciones']:
+        if n == 'root' or 'pole' in n or '_ik' in n:
+            continue
+        huesos += [n[:-2] + '.L', n[:-2] + '.R'] if n.endswith('.S') else [n]
+    return {k: g[k] for k in ('px', 'ortho', 'centro_z', 'frente', 'costado', 'version')} | {
+        'zonas': pj['modelo'].get('pesos_zonas') or [], 'huesos': list(dict.fromkeys(huesos)),
+        'articulaciones': g['articulaciones']}
+
+
+def guardar_zonas(ruta, zonas):
+    """modelo.pesos_zonas = [{min, max, hueso}] (cajas en coordenadas del modelo, como las articulaciones); [] la
+    saca. Hay que rehacer `blender` para que se apliquen."""
+    if not isinstance(zonas, list) or len(zonas) > 40:
+        raise ValueError('zonas: una lista (hasta 40)')
+    limpias = []
+    for z in zonas:
+        try:
+            lo, hi = [round(float(x), 4) for x in z['min']], [round(float(x), 4) for x in z['max']]
+        except (KeyError, TypeError, ValueError):
+            raise ValueError('cada zona: {min: [x, y, z], max: [x, y, z], hueso}') from None
+        if len(lo) != 3 or len(hi) != 3 or any(a >= b for a, b in zip(lo, hi)) or any(abs(v) > 50 for v in lo + hi):
+            raise ValueError('cada zona: min menor que max en x, y y z')
+        if not isinstance(z.get('hueso'), str) or not re.fullmatch(r'[a-z_]+(\.[LR])?', z['hueso']):
+            raise ValueError('cada zona: el nombre de un hueso (hand.L, hips...)')
+        limpias.append({'min': lo, 'max': hi, 'hueso': z['hueso']})
+    cfg = op.leer(ruta)
+    if limpias:
+        cfg.setdefault('modelo', {})['pesos_zonas'] = limpias
+    else:
+        cfg.get('modelo', {}).pop('pesos_zonas', None)
+    op.guardar(ruta, cfg)
+
+
 def guardar_articulaciones(pdir, pj, ruta, nuevas):
     """Las del editor a modelo.articulaciones (las de antes quedan en _articulaciones_previas: `deshacer
     articulaciones` vuelve a ellas), guia.png redibujada sin Blender y la marca del paso como hechas a mano (blender
@@ -943,6 +981,13 @@ class Manejador(BaseHTTPRequestHandler):
                 app.cola.renombrar(n, nuevo)
                 app.cambio()
                 return self.json({'nombre': nuevo})
+            if p[2:] == ['pesos_zonas'] and m == 'GET':
+                return self.json(zonas_guia(*cargar(n)))
+            if p[2:] == ['pesos_zonas'] and m == 'PUT':
+                self.libre(n)
+                guardar_zonas(ruta, self.cuerpo_json().get('zonas'))
+                app.cambio()
+                return self.json(zonas_guia(*cargar(n)))
             if p[2:] == ['retrato'] and m == 'GET':
                 return self.json(datos_retrato(*cargar(n)))
             if p[2:] == ['retrato'] and m == 'PUT':
