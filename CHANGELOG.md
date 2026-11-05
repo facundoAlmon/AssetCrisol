@@ -10,8 +10,6 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ### Cambiado
 - Objetos nuevos: el candidato `pixal3d` de la plantilla va a 1024 en vez de 1536 (14-44 % menos de Pixal3D,
   calidad pareja en tres objetos). Los objetos existentes conservan su json.
-
-### Cambiado
 - `crisol ui` > Movimientos: un listado por animación (en el orden de la hoja, con su método por defecto, clip y
   variantes sin pasar) y el detalle de cada una: la procedural al lado del clip de la biblioteca, generar con esa
   animación ya elegida, sus variantes (que ahora se pueden borrar) y qué personajes la usan. El esqueleto de las
@@ -62,6 +60,8 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   a 512 en TRELLIS.2 y a 1024 en Pixal3D en vez de esperar el OOM; `doctor` lo avisa. Sin probar en una placa así.
 
 ### Arreglado
+- Renombrar, deshacer o borrar un asset decía "hay un crisol con <n> corriendo" si corría un paso de un asset con el
+  mismo nombre en otro `datos_dir` (otra config): ahora solo cuentan los `crisol` con la misma config.
 - `instalar.sh --plan` con todo instalado ya no avisa que faltan ~135 GB ni que va a completar `config.json`: dice
   qué cambiaría de la config (o que está completa) y lista los pesos que DWPose y rembg bajan en el primer uso.
 - UI: el estado de cada paso y de cada elección se dice en palabras ("se hizo antes del último cambio en Malla 3D",

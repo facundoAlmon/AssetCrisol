@@ -167,8 +167,27 @@ def renombrar(pdir, nombre, nuevo):
     return destino
 
 
+def _config_de(pid, cmd):
+    """La config (ruta real) con que corre el `crisol` del proceso `pid`: su ASSETCRISOL_CONFIG o el config.json junto
+    a su pipeline.py / crisol. None si no se puede leer su entorno (otro usuario): cuenta como la misma."""
+    try:
+        with open(f'/proc/{pid}/environ', 'rb') as f:
+            env = dict(x.split(b'=', 1) for x in f.read().split(b'\0') if b'=' in x)
+        cwd = os.readlink(f'/proc/{pid}/cwd')
+    except OSError:
+        return None
+    ruta = env.get(b'ASSETCRISOL_CONFIG', b'').decode(errors='replace')
+    if not ruta:
+        script = next(c for c in cmd if c.endswith('pipeline.py') or c.endswith('/crisol') or c == 'crisol')
+        ruta = os.path.join(os.path.dirname(script), 'config.json')
+    return os.path.realpath(os.path.join(cwd, ruta))
+
+
 def ocupado(nombre):
-    """PID de un `crisol` que esté corriendo un paso de este asset (no se puede renombrar ni deshacer), o None."""
+    """PID de un `crisol` que esté corriendo un paso de este asset (no se puede renombrar, deshacer ni borrar), o None.
+    Solo los que usan la misma config que este proceso: otro datos_dir puede tener un asset con el mismo nombre."""
+    raiz = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    propia = os.path.realpath(os.environ.get('ASSETCRISOL_CONFIG') or os.path.join(raiz, 'config.json'))
     for d in os.listdir('/proc'):
         if not d.isdigit() or int(d) == os.getpid():
             continue
@@ -179,7 +198,9 @@ def ocupado(nombre):
             continue
         if any(c.endswith('pipeline.py') or c.endswith('/crisol') for c in cmd) and \
                 any(nombre in c.split(',') for c in cmd[2:]) and not {'estado', 'renombrar', 'deshacer', 'borrar', 'papelera'} & set(cmd):
-            return int(d)
+            otra = _config_de(d, cmd)
+            if otra is None or otra == propia:
+                return int(d)
     return None
 
 

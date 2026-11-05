@@ -309,6 +309,27 @@ def probar_articulaciones(base, datos):
     shutil.rmtree(gdir)
 
 
+def probar_ocupado(tmp):
+    """deshacer.ocupado: un `crisol` con otra config (otro datos_dir) no ocupa un asset del mismo nombre."""
+    print('ocupado')
+    sys.path.insert(0, os.path.join(RAIZ, 'herramientas', '0_entorno'))
+    import deshacer
+    falso = os.path.join(tmp, 'falso_ocupado')
+    os.makedirs(falso, exist_ok=True)
+    with open(os.path.join(falso, 'pipeline.py'), 'w') as f:
+        f.write('import time\ntime.sleep(30)\n')
+    propia = os.environ.get('ASSETCRISOL_CONFIG') or os.path.join(RAIZ, 'config.json')
+    for config, espera in ((os.path.join(tmp, 'otra_config.json'), False), (propia, True)):
+        p = subprocess.Popen([sys.executable, os.path.join(falso, 'pipeline.py'), 'blender', 'zz_ocupado'],
+                             env=dict(os.environ, ASSETCRISOL_CONFIG=config))
+        try:
+            time.sleep(0.3)
+            pid = deshacer.ocupado('zz_ocupado')
+            chequear((pid == p.pid) == espera, f'ocupado con {"la misma" if espera else "otra"} config: {"sí" if espera else "no"}', pid)
+        finally:
+            p.kill(); p.wait()
+
+
 def main():
     tmp = tempfile.mkdtemp(prefix='crisol_ui_')
     srv = None
@@ -485,6 +506,8 @@ def main():
         c, r = pedir(base, 'api/assets/cris/retrato', 'PUT', {'fuente': 'modelo', 'caja': None})
         chequear('caja' not in json.load(open(jcris))['retrato'], 'sin cajas, sin retrato.caja')
         op = json.load(open(jcris)); op['retrato'].pop('fuente'); json.dump(op, open(jcris, 'w'), indent=2)
+
+        probar_ocupado(tmp)
 
         print('papelera')
         datos = cfg['datos_dir']
