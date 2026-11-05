@@ -475,9 +475,12 @@ crisol imagen pirata
 > con código 3 en vez de esperar. ComfyUI cargado con la cola vacía no molesta: `malla` le pide que libere la VRAM.
 
 > [!TIP]
-> **Mirá la cara de cerca** en `ultratex_vistas.png`: los ojos dependen mucho de `malla.ultratex.seed` (pueden salir
-> estrábicos o con delineado grueso). Si no convencen, `crisol ultratex <n>` con otra seed rehace solo la
-> textura (≈6 min, sin rehacer la forma).
+> **Mirá la cara de cerca**: los ojos dependen mucho de la seed de UltraTex (pueden salir estrábicos o con delineado
+> grueso). Las recetas `humanoide` y `chibi` traen `malla.ultratex.seeds: [1, 2, 3]`: `malla` repinta con las tres
+> (cada una 1-6 min) y deja `trabajo/malla/caras.png`, la cabeza de frente de cada una; elegí con
+> `malla.ultratex.elegida` (o en *Te toca elegir* de `crisol ui`), que copia ese repintado a `modelo.glb` sin volver a
+> generar. Sin `seeds`, una sola (`malla.ultratex.seed`); `crisol ultratex <n>` rehace la textura (todas las seeds)
+> sin rehacer la forma.
 
 ### Qué mirar en cada paso (receta para humanoides)
 
@@ -1043,7 +1046,7 @@ Las claves más usadas: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla
 | `malla.caras / resolucion / textura_px / seed` | calidad del motor (ver paso 2) |
 | `malla.vistas` | (`pixal3d`) `true` = modelo de 4 vistas con espalda y costados de Qwen |
 | `malla.seed_estructura` | (`pixal3d`, opcional) seed de la estructura gruesa |
-| `malla.ultratex` | `true` o `{"seed", "resolucion", "giro", "espalda", "costados", "denoise_espalda"}` |
+| `malla.ultratex` | `true` o `{"seed", "resolucion", "giro", "espalda", "costados", "denoise_espalda"}`; `"seeds": [1, 2, 3]` = candidatos de cara (`trabajo/malla/ultratex_s<seed>.glb`, `caras.png`; `cara_alto`, 0.34 = qué parte del alto entra en la foto) y `"elegida"`: la de la persona (sin elegir, la primera). Con `malla.candidatos` se usa una sola seed |
 | `malla.fondo` | (opcional) modelo de rembg: `u2net` o `birefnet-general` |
 | `malla.alfa_min` | (opcional) alfa mínimo de la imagen para TRELLIS.2 |
 | `malla.margen` | (opcional) margen del recorte para TRELLIS.2 (1.1) |
@@ -1227,6 +1230,11 @@ crisol blender <n>    # -> trabajo/revision.png (una fila por candidato) + vehic
 # elegir malla.elegida mirando revision.png y volver a correr blender (segundos)
 ```
 
+**Otros vehículos** (una vagoneta, un carro, un bote): la receta supone un auto, pero si `imagen.descripcion` no nombra
+uno (car, truck, van, bus...) las vistas de Qwen nombran el vehículo con lo primero de la descripción ("a wooden mine
+wagon with iron wheels" → "wooden mine wagon") y no piden luces traseras ni alerón (con "toy car" Qwen lo convertía en
+un auto). Sacá de la descripción lo que sea de auto (la receta agrega "glossy paint").
+
 **Salida** `trabajo/vehiculo.glb` (y `vehiculo_<candidato>.glb`): nodos `carroceria` (materiales `pintura`, `oscuro`,
 `pasarrueda`), `rueda_di`, `rueda_dd`, `rueda_ti`, `rueda_td` (d/t = delantera/trasera, i/d = izquierda/derecha), cada
 rueda con el origen en su eje; trompa en +Z del glTF.
@@ -1385,7 +1393,7 @@ las de un `TileMapLayer` isométrico; el personaje de 1.85 mide ≈145 px). Para
 | Se llena el disco del sistema | las cachés de Hugging Face y uv van por defecto a `~/.cache` → `env_modelos` en la config |
 | La cara mira hacia abajo (o al cielo) en los sprites | `animacion.cabeza_arriba_grados` (negativo = levantar la cara) |
 | Ojos como agujeros grises | ver `modelo.ojos` (3b) |
-| Ojos estrábicos o con delineado grueso | `crisol ultratex <n>` con otra `malla.ultratex.seed` |
+| Ojos estrábicos o con delineado grueso | otra de `caras.png` (`malla.ultratex.elegida`) o más `malla.ultratex.seeds` y `crisol ultratex <n>` |
 | El personaje "flota" o se hunde en Godot | el offset sale de la última fila opaca del frame quieto; si hay algo debajo de los pies (capa, cola), ajustar `position.y` del Sprite en el `.tscn` |
 | Personaje muy oscuro | TRELLIS.2 pinta la textura más oscura que la imagen; con colores oscuros de por sí no alcanza la compensación del render → aclarar la textura de `modelo.glb` (curva gamma ~0,6) antes de `blender`, o repintar con UltraTex |
 | La espalda repite lo del pecho | UltraTex o Qwen copiaron el frente → `malla.ultratex.espalda: true` y revisar `vista_back.png` |

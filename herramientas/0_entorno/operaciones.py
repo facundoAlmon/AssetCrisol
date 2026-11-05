@@ -68,8 +68,9 @@ def poner(cfg, clave, valor):
 
 
 def clave_de_eleccion(clave):
-    """Las elecciones de la persona: imagen.elegida, malla.elegida, texturas.<clave>.elegida."""
-    return clave in ('imagen.elegida', 'malla.elegida') or \
+    """Las elecciones de la persona: imagen.elegida, malla.elegida, malla.ultratex.elegida (la cara de UltraTex),
+    texturas.<clave>.elegida."""
+    return clave in ('imagen.elegida', 'malla.elegida', 'malla.ultratex.elegida') or \
         (clave.startswith('texturas.') and clave.endswith('.elegida') and clave.count('.') == 2)
 
 
@@ -98,7 +99,7 @@ def elegir(ruta, clave, valor):
     Con malla.elegida, si ese candidato ya está generado, lo copia a trabajo/malla en el momento (lo mismo que hacía
     después `crisol malla`, que tardaba en arrancar por la cola de GPU y parecía que iba a generar de nuevo)."""
     if not clave_de_eleccion(clave):
-        raise ValueError('clave: imagen.elegida, malla.elegida o texturas.<clave>.elegida')
+        raise ValueError('clave: imagen.elegida, malla.elegida, malla.ultratex.elegida o texturas.<clave>.elegida')
     v = int(valor) if isinstance(valor, str) and valor.lstrip('-').isdigit() else valor
     cfg = leer(ruta)
     poner(cfg, clave, v)
@@ -107,6 +108,12 @@ def elegir(ruta, clave, valor):
         t = os.path.join(os.path.dirname(ruta), 'trabajo')
         if os.path.exists(os.path.join(t, f'malla_{v}', 'modelo.glb')) and _candidato_en_trabajo(t) != str(v):
             copiar_candidato(t, str(v))
+    if clave == 'malla.ultratex.elegida':   # el repintado de esa seed pasa a ser trabajo/malla/modelo.glb
+        m = os.path.join(os.path.dirname(ruta), 'trabajo', 'malla')
+        if os.path.exists(os.path.join(m, f'ultratex_s{v}.glb')):
+            shutil.copy(os.path.join(m, f'ultratex_s{v}.glb'), os.path.join(m, 'modelo.glb'))
+            if os.path.exists(os.path.join(m, f'ultratex_vistas_s{v}.png')):
+                shutil.copy(os.path.join(m, f'ultratex_vistas_s{v}.png'), os.path.join(m, 'ultratex_vistas.png'))
     return v
 
 

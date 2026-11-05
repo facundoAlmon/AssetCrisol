@@ -1269,6 +1269,21 @@ elif modo == 'comparar':
             render(os.path.join(out, f'{dn}.png'))
     print('COMPARAR OK')
 
+elif modo == 'cara':
+    # candidatos de cara de UltraTex (malla.ultratex.seeds): la cabeza de frente, a nivel y de cerca, con las luces del
+    # estilo, de la malla `_glb` tal como la importa `blender` -> PJ['_cara'] (pipeline arma trabajo/malla/caras.png).
+    # El tercio de arriba del alto: la cara entera en humanoides y hasta los ojos en un chibi
+    sc, cam = preparar_escena()
+    col, mesh = importar()
+    zs = [(mesh.matrix_world @ v.co).z for v in mesh.data.vertices]
+    arriba = max(zs)
+    orto = PJ['malla'].get('ultratex', {}).get('cara_alto', 0.34) * (arriba - min(zs))
+    cam.data.ortho_scale = orto
+    sc.render.resolution_x = sc.render.resolution_y = 768
+    apuntar(cam, (0, -10, arriba - orto / 2 + 0.02 * orto), (math.pi / 2, 0, 0))
+    render(PJ['_cara'])
+    print('CARA OK')
+
 elif modo == 'objeto':
     # objeto estático (caja, mesa, tronco...): sin rig. Una vista lateral a nivel (juego de costado) y N vistas
     # isométricas girando el objeto de a 360/N grados, con sombra de contacto opcional (Cycles, shadow catcher).

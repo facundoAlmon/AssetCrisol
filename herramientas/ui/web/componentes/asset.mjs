@@ -92,7 +92,7 @@ function Deshacer({ d, paso, cerrar }) {
 const numeros = d => Object.fromEntries(d.pasos.filter(p => p.estado !== 'no_aplica').map((p, i) => [p.paso, i + 1]))
 
 // qué elección cambia cada paso de la cadena (un paso puede tener varias: texturas)
-const ELIGE = { imagen: c => c === 'imagen.elegida', malla: c => c === 'malla.elegida', texturas: c => c.startsWith('texturas.') }
+const ELIGE = { imagen: c => c === 'imagen.elegida', malla: c => c === 'malla.elegida' || c === 'malla.ultratex.elegida', texturas: c => c.startsWith('texturas.') }
 
 function Cadena({ d, cola, doctor, cambiar }) {
   const { corriendo, pendientes } = trabajosDe(cola, d.nombre)

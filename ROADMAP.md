@@ -236,7 +236,7 @@ Resultado (2026-11-05):
 - [ ] Pesos con SkinTokens/Puppeteer, solo si las opciones actuales dejan de alcanzar.
 - [x] Rodilla siempre un poco adelante de la línea cadera-tobillo (con DWPose sobre piernas rectas el IK la doblaba
       para atrás al agacharse).
-- [ ] Candidatos de UltraTex: la cara (ojos estrábicos, delineado) cambia mucho con `malla.ultratex.seed`; generar 2-3 seeds
+- [x] Candidatos de UltraTex: la cara (ojos estrábicos, delineado) cambia mucho con `malla.ultratex.seed`; generar 2-3 seeds
       y armar una hoja de caras de cerca para elegir, como los candidatos de malla.
 - [ ] Brillos pintados: UltraTex hornea en la textura las luces de sus vistas (ropa que parece lustrada); probar a
       sacarlas (delighting) o compensar con la rugosidad.
@@ -244,7 +244,7 @@ Resultado (2026-11-05):
       pierna y placas rígidas que se cruzan en golpes (robots).
 - [x] Animación nueva: saludar (mano en alto, de frente), procedural, al final de la hoja. Falta probar un clip de
       Kimodo (`crisol movimiento saludar`).
-- [ ] Vehículos que no son autos: los prompts de `vistas` y la vista de atrás dicen "toy car" (luces traseras,
+- [x] Vehículos que no son autos: los prompts de `vistas` y la vista de atrás dicen "toy car" (luces traseras,
       alerón) y Qwen convierte una vagoneta en un auto; armarlos desde la descripción del objeto.
 - [ ] Manos: siempre abiertas (el rig no tiene dedos); evaluar un puño por forma o huesos de dedos simples.
 - [ ] Opciones dudosas: `modelo.simetria` y `render.oscuro_brillante` (probadas sin uso claro): documentar o sacar.

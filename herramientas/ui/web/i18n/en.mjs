@@ -264,6 +264,7 @@ export default {
   'decidir.titulo': 'Your call',
   'decidir.imagen.elegida': 'Choose the image that goes to 3D',
   'decidir.malla.elegida': 'Choose the mesh',
+  'decidir.malla.ultratex.elegida': 'Choose the face (the eyes change with the UltraTex seed)',
   'decidir.textura': 'Choose the {k} texture',
   'decidir.ayuda': 'Look at each option up close. Nothing is chosen for you: the next step waits for your choice.',
   'decidir.cambiar': 'Change the choice',

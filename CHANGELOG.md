@@ -19,6 +19,14 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
   `herramientas/3_blender/procedurales.py` con el rig de Cris: rehacerlo al cambiar `anim.py`).
 
 ### Agregado
+- Candidatos de cara de UltraTex: con `malla.ultratex.seeds` (las recetas `humanoide` y `chibi` traen `[1, 2, 3]`),
+  `malla` repinta con cada seed (`trabajo/malla/ultratex_s<seed>.glb`) y arma `caras.png` con la cabeza de frente de
+  cada una (Blender, modo `cara`). La persona elige con `malla.ultratex.elegida` (también en *Te toca elegir* de
+  `crisol ui` y con `elegir` del MCP), que copia ese repintado a `modelo.glb` sin generar de nuevo. Suma 1-6 min por
+  seed a la malla de los personajes nuevos; los existentes conservan su json.
+- Vehículos que no son autos: si `imagen.descripcion` no nombra un auto, las vistas de Qwen nombran el vehículo con la
+  descripción y no piden luces traseras ni alerón (una vagoneta salía convertida en auto). Los autos siguen con los
+  prompts de antes. La receta `vehiculo` dice "whole vehicle visible" en vez de "whole car visible".
 - Editor del retrato en `crisol ui` (Resultado > Retrato > *Editar el encuadre*): un cuadro 4:5 sobre la imagen sin
   fondo o sobre el render de frente del modelo, que se arrastra y se agranda, con vista previa. Guarda
   `retrato.caja.<fuente>` (fracciones de la fuente; *Automático* la borra) y rehace el retrato: con la imagen solo

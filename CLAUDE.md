@@ -15,8 +15,8 @@ comentarios y docs en español. Todo corre local: no proponer servicios pagos ni
   la notificación. `tests/humo.py` y Blender no pasan por esa cola: antes, `curl -s 127.0.0.1:8188/queue`
   (`queue_running`/`queue_pending` vacías) y `nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv`
   (un python de TRELLIS.2 = malla en curso). No cuentan ComfyUI con la cola vacía ni Godot/Blender abiertos.
-- **No elegir por el usuario** `imagen.elegida`, `malla.elegida` ni `texturas.<clave>.elegida`: mostrarle la hoja
-  (`trabajo/imagen/candidatos.png`, `trabajo/candidatos.png`, `revision.png`) y preguntar.
+- **No elegir por el usuario** `imagen.elegida`, `malla.elegida`, `malla.ultratex.elegida` ni `texturas.<clave>.elegida`: mostrarle la hoja
+  (`trabajo/imagen/candidatos.png`, `trabajo/candidatos.png`, `trabajo/malla/caras.png`, `revision.png`) y preguntar.
 - **Mirar antes de dar por bueno** un resultado visual (frames del GIF con PIL). En humanoides nuevos, mostrar
   `trabajo/imagen/vistas.png` antes de la malla y `trabajo/revision.png` antes de darlo por terminado.
 - No versionar datos generados (`personajes/`, `objetos/`, `escenarios/`, `movimientos/` de `datos_dir`) ni
@@ -210,7 +210,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   autos en tres cuartos desde arriba salen astillados (TRELLIS.2 anda mejor). Cara derecha: `cabeza_arriba_grados` 0.
 - Vistas de Qwen: pueden copiar a la espalda lo del pecho o salir con el costado espejado: mirar `vista_*.png`.
 - UltraTex solo mira `sin_fondo.png`: sin `espalda` inventa la espalda copiando el pecho. **Los ojos dependen de
-  `malla.ultratex.seed`**: mirar la cara de cerca. Mientras corre, `modelo.glb` es la malla del motor (no evaluar una `guia`).
+  la seed de UltraTex**: con `malla.ultratex.seeds` (humanoide/chibi) `malla` deja `trabajo/malla/caras.png` y la
+  persona elige `malla.ultratex.elegida` (`pipeline.caras_ultratex`, Blender modo `cara`). Mientras corre, `modelo.glb` es la malla del motor (no evaluar una `guia`).
   Ojos achinados en la imagen elegida → `crisol corregir` ("open the eyes wider"), no otra seed.
 - Cuadrúpedos: con Pixal3D (aun enderezada por `cuadrupedo.apoyar`) las patas casi no se mueven y se ve la capa de
   adentro → TRELLIS.2 (la receta; `malla` y `estado` avisan). Con una foto de referencia, Qwen copia la pose de la cabeza:
@@ -220,8 +221,8 @@ crisol ui [--puerto 8190] [--host 0.0.0.0 [--token t]] [--no-abrir]   # UI web l
   silhouette"), `malla.fondo` `birefnet-general`, TRELLIS.2 a 512.
 - Reducir caras de un GLB (p. ej. para versionar un ejemplo): soldar (`remove_doubles`) antes del Decimate; sin eso
   se abren las costuras UV y `sacar_interior` borra media malla. Comparar el `preview.png` antes y después.
-- Vehículos: la receta supone un auto (los prompts de `vistas` dicen "toy car"): una vagoneta sale auto; otros
-  vehículos, como objeto común. Malla desde la cola en tres cuartos (`malla.vista: "atras"`). Buscar agujeros con Workbench +
+- Vehículos: los prompts de `vistas` dicen "toy car" solo si `imagen.descripcion` nombra un auto
+  (`generar_malla_pixal3d.nombre_vehiculo`); si no, el vehículo con su nombre de la descripción. Malla desde la cola en tres cuartos (`malla.vista: "atras"`). Buscar agujeros con Workbench +
   `show_backface_culling` y fondo verde.
 
 ### Rig, pesos y animación

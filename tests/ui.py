@@ -419,6 +419,37 @@ def main():
                  'deshacer corregir: solo las correcciones', rutas)
         pedir(base, 'api/assets/cris/deshacer', 'POST', {'paso': 'corregir'})
 
+        print('candidatos de cara de UltraTex')
+        jcris = os.path.join(cfg['datos_dir'], 'personajes', 'cris', 'personaje.json')
+        mdir = os.path.join(cfg['datos_dir'], 'personajes', 'cris', 'trabajo', 'malla')
+        crudo = json.load(open(jcris))
+        crudo['malla']['ultratex']['seeds'] = [1, 2]
+        json.dump(crudo, open(jcris, 'w'), indent=2)
+        from PIL import Image
+        for sd in (1, 2):
+            with open(os.path.join(mdir, f'ultratex_s{sd}.glb'), 'wb') as f:
+                f.write(b'glTF' + bytes([sd]))
+            Image.new('RGB', (64, 64), 'white').save(os.path.join(mdir, f'cara_s{sd}.png'))
+        c, d = pedir(base, 'api/assets/cris')
+        dec = next((x for x in d.get('decidir', []) if x['clave'] == 'malla.ultratex.elegida'), None)
+        chequear(dec and [o['valor'] for o in dec['opciones']] == ['1', '2'] and dec['opciones'][1]['imagen'] == 'trabajo/malla/cara_s2.png',
+                 'te toca elegir la cara, con la foto de cada seed', dec)
+        glb_antes = open(os.path.join(mdir, 'modelo.glb'), 'rb').read()
+        c, r = pedir(base, 'api/assets/cris/elegir', 'POST', {'clave': 'malla.ultratex.elegida', 'valor': '2'})
+        c2, d = pedir(base, 'api/assets/cris')
+        chequear(c == 200 and r['valor'] == 2 and open(os.path.join(mdir, 'modelo.glb'), 'rb').read() == b'glTF\x02' and
+                 not any(x['clave'] == 'malla.ultratex.elegida' for x in d.get('decidir', [])),
+                 'elegir la cara copia ese repintado a modelo.glb', r)
+        c, v = pedir(base, 'api/assets/cris/deshacer?paso=ultratex')
+        rutas = sorted(r for r, _ in v.get('borraria', [])) if c == 200 else []
+        chequear({'trabajo/malla/ultratex_s1.glb', 'trabajo/malla/cara_s2.png'} <= set(rutas), 'deshacer ultratex borra los candidatos de cara', rutas)
+        with open(os.path.join(mdir, 'modelo.glb'), 'wb') as f:
+            f.write(glb_antes)
+        for sd in (1, 2):
+            os.remove(os.path.join(mdir, f'ultratex_s{sd}.glb')); os.remove(os.path.join(mdir, f'cara_s{sd}.png'))
+        crudo = json.load(open(jcris)); crudo['malla']['ultratex'].pop('seeds'); crudo['malla']['ultratex'].pop('elegida')
+        json.dump(crudo, open(jcris, 'w'), indent=2)
+
         print('editor del retrato')
         rdir = os.path.join(cfg['datos_dir'], 'personajes', 'cris', 'trabajo', 'retrato')
         os.makedirs(rdir, exist_ok=True)

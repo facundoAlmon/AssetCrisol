@@ -487,9 +487,12 @@ crisol imagen pirate
 > to free the VRAM.
 
 > [!TIP]
-> **Look at the face up close** in `ultratex_vistas.png`: the eyes depend a lot on `malla.ultratex.seed` (they can
-> come out cross-eyed or with a heavy outline). If they don't convince you, `crisol ultratex <n>` with another
-> seed redoes only the texture (~6 min, without redoing the shape).
+> **Look at the face up close**: the eyes depend a lot on the UltraTex seed (they can come out cross-eyed or with a
+> heavy outline). The `humanoide` and `chibi` recipes come with `malla.ultratex.seeds: [1, 2, 3]`: `malla` repaints
+> with all three (1-6 min each) and leaves `trabajo/malla/caras.png`, the head from the front for each; pick with
+> `malla.ultratex.elegida` (or in *Your call* in `crisol ui`), which copies that repaint to `modelo.glb` without
+> generating again. Without `seeds`, a single one (`malla.ultratex.seed`); `crisol ultratex <n>` redoes the texture
+> (every seed) without redoing the shape.
 
 ### What to check at each step (humanoid recipe)
 
@@ -1052,7 +1055,7 @@ The most used keys: `estilo`, `imagen.descripcion`, `imagen.elegida`, `malla.mot
 | `malla.caras / resolucion / textura_px / seed` | engine quality (see step 2) |
 | `malla.vistas` | (`pixal3d`) `true` = 4-view model with Qwen's back and sides |
 | `malla.seed_estructura` | (`pixal3d`, optional) seed for the coarse structure |
-| `malla.ultratex` | `true` or `{"seed", "resolucion", "giro", "espalda", "costados", "denoise_espalda"}` |
+| `malla.ultratex` | `true` or `{"seed", "resolucion", "giro", "espalda", "costados", "denoise_espalda"}`; `"seeds": [1, 2, 3]` = face candidates (`trabajo/malla/ultratex_s<seed>.glb`, `caras.png`; `cara_alto`, 0.34 = how much of the height goes into the shot) and `"elegida"`: the person's pick (unpicked, the first). With `malla.candidatos` a single seed is used |
 | `malla.fondo` | (optional) rembg model: `u2net` or `birefnet-general` |
 | `malla.alfa_min` | (optional) minimum image alpha for TRELLIS.2 |
 | `malla.margen` | (optional) crop margin for TRELLIS.2 (1.1) |
@@ -1237,6 +1240,11 @@ crisol blender <n>    # -> trabajo/revision.png (one row per candidate) + vehicu
 # set malla.elegida looking at revision.png and run blender again (seconds)
 ```
 
+**Other vehicles** (a mine wagon, a cart, a boat): the recipe assumes a car, but if `imagen.descripcion` doesn't name one
+(car, truck, van, bus...) the Qwen views name the vehicle with the start of the description ("a wooden mine wagon with
+iron wheels" → "wooden mine wagon") and don't ask for tail lights or a wing (with "toy car" Qwen turned it into a car).
+Remove anything car-like from the description (the recipe adds "glossy paint").
+
 **Output** `trabajo/vehiculo.glb` (and `vehiculo_<candidate>.glb`): nodes `carroceria` (body; materials `pintura`,
 `oscuro`, `pasarrueda` = wheel arch), `rueda_di`, `rueda_dd`, `rueda_ti`, `rueda_td` (wheels: d/t = front/rear,
 i/d = left/right), each wheel with its origin on its axle; nose towards +Z in glTF.
@@ -1396,7 +1404,7 @@ isometric `TileMapLayer`; the 1.85 character is ≈145 px tall). To attach thing
 | The system disk fills up | Hugging Face and uv caches go to `~/.cache` by default → `env_modelos` in the config |
 | The face looks down (or at the sky) in the sprites | `animacion.cabeza_arriba_grados` (negative = raise the face) |
 | Eyes like gray holes | see `modelo.ojos` (3b) |
-| Cross-eyed eyes or a heavy outline | `crisol ultratex <n>` with another `malla.ultratex.seed` |
+| Cross-eyed eyes or a heavy outline | another one from `caras.png` (`malla.ultratex.elegida`) or more `malla.ultratex.seeds` and `crisol ultratex <n>` |
 | The character "floats" or sinks in Godot | the offset comes from the last opaque row of the idle frame; if there's something below the feet (a cape, a tail), adjust the Sprite's `position.y` in the `.tscn` |
 | Character too dark | TRELLIS.2 paints the texture darker than the image; with colors that are dark to begin with the render compensation isn't enough → lighten the `modelo.glb` texture (gamma curve ~0.6) before `blender`, or repaint with UltraTex |
 | The back repeats the chest | UltraTex or Qwen copied the front → `malla.ultratex.espalda: true` and check `vista_back.png` |

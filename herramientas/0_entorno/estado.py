@@ -117,6 +117,13 @@ def _cadena_malla(pdir, pj, decidir):
     else:
         pasos.append(_paso('malla', glb, ent, nota='con UltraTex' if m.get('ultratex') else None,
                            aviso=('ultratex', {})))
+        ut = m.get('ultratex') if isinstance(m.get('ultratex'), dict) else {}
+        seeds = [str(s) for s in ut.get('seeds') or []]
+        hechas = [s for s in seeds if os.path.exists(os.path.join(t, 'malla', f'ultratex_s{s}.glb'))]
+        if len(seeds) > 1 and len(hechas) > 1 and 'elegida' not in ut:   # candidatos de cara (pipeline.caras_ultratex)
+            decidir.append({'clave': 'malla.ultratex.elegida', 'mirar': os.path.join(t, 'malla', 'caras.png'),
+                            'opciones': hechas, 'nota': f'sin elegir queda la seed {hechas[0]}',
+                            'aviso': {'id': 'sin_elegir', 'n': hechas[0]}})
     if pj.get('modelo', {}).get('esqueleto') == 'cuadrupedo':   # Pixal3D anima mal los cuadrúpedos: TRELLIS.2
         principal = m.get('motor', 'trellis2')   # el principal es el candidato que se llama como su motor
         elegida = m.get('elegida', principal)

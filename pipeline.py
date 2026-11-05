@@ -65,7 +65,7 @@ escenarios (nuevo <n> --escenario -> escenarios/<n>/):
 
 <n> se busca en personajes/, objetos/ y escenarios/ de datos_dir.
 """
-import argparse, json, os, shutil, subprocess, sys, time, urllib.request
+import argparse, glob, json, os, shutil, subprocess, sys, time, urllib.request
 
 RAIZ = os.path.dirname(os.path.abspath(__file__))
 H = os.path.join(RAIZ, 'herramientas')
@@ -638,6 +638,7 @@ def generar_malla(pdir, pj, nombre):
     motor = os.path.join(out, 'modelo_motor.glb')
     if os.path.exists(motor):  # era la de la malla anterior
         os.remove(motor)
+    borrar_caras_ultratex(out)   # los repintados de la malla anterior
     if m.get('ultratex'):
         retexturizar_ultratex(pdir, pj, nombre)
     print('[malla] listo:', os.path.join(out, 'modelo.glb'))
@@ -683,9 +684,16 @@ def retexturizar_ultratex(pdir, pj, nombre):
             if not os.path.exists(r):
                 salida.falta_paso(f'[ultratex] costados: falta trabajo/imagen/{os.path.basename(r)} (crisol vistas, con '
                          f'malla.vistas)')
-    ut.retexturizar(CFG, nombre, os.path.join(out, 'limpia.glb'), os.path.join(out, 'sin_fondo.png'), modelo,
-                    op.get('seed', 1), op.get('resolucion', 1024), pj['malla'].get('textura_px', 4096),
-                    op.get('giro', 0), espalda, op.get('denoise_espalda', 0.6), costados)
+    seeds = seeds_ultratex(pj)
+    if len(seeds) > 1:
+        caras_ultratex(pdir, pj, nombre, seeds, lambda s, glb: ut.retexturizar(
+            CFG, nombre, os.path.join(out, 'limpia.glb'), os.path.join(out, 'sin_fondo.png'), glb, s,
+            op.get('resolucion', 1024), pj['malla'].get('textura_px', 4096), op.get('giro', 0), espalda,
+            op.get('denoise_espalda', 0.6), costados))
+    else:
+        ut.retexturizar(CFG, nombre, os.path.join(out, 'limpia.glb'), os.path.join(out, 'sin_fondo.png'), modelo,
+                        seeds[0], op.get('resolucion', 1024), pj['malla'].get('textura_px', 4096),
+                        op.get('giro', 0), espalda, op.get('denoise_espalda', 0.6), costados)
     if espalda:
         print('[ultratex] mirar trabajo/malla/ultratex_espalda.png (inventada | la de Qwen encajada)')
     if costados:
@@ -694,12 +702,71 @@ def retexturizar_ultratex(pdir, pj, nombre):
     print('[ultratex] mirar trabajo/malla/ultratex_vistas.png; la malla del motor quedó en modelo_motor.glb')
 
 
+def seeds_ultratex(pj):
+    """Las seeds de UltraTex: malla.ultratex.seeds (candidatos de cara, para elegir con malla.ultratex.elegida) o
+    [malla.ultratex.seed]. Con malla.candidatos, una sola (la elección de cara es de trabajo/malla)."""
+    op = pj['malla'].get('ultratex')
+    op = op if isinstance(op, dict) else {}
+    seeds = [int(s) for s in op.get('seeds') or []] if not pj['malla'].get('candidatos') else []
+    return list(dict.fromkeys(seeds)) or [op.get('seed', 1)]
+
+
+def borrar_caras_ultratex(out):
+    for pat in ('ultratex_s*.glb', 'ultratex_vistas_s*.png', 'cara_s*.png', 'caras.png'):
+        for r in glob.glob(os.path.join(out, pat)):
+            os.remove(r)
+
+
+def caras_ultratex(pdir, pj, nombre, seeds, pintar):
+    """Candidatos de cara: un repintado por seed (trabajo/malla/ultratex_s<seed>.glb; los que ya están no se rehacen),
+    la cara de cerca de cada uno (cara_s<seed>.png, Blender) y la hoja caras.png. modelo.glb = el elegido
+    (malla.ultratex.elegida, o la primera seed hasta que la persona elija)."""
+    from PIL import Image, ImageDraw
+    out = os.path.join(pdir, 'trabajo', 'malla')
+    for s in seeds:
+        glb = os.path.join(out, f'ultratex_s{s}.glb')
+        if os.path.exists(glb):
+            print(f'[ultratex] seed {s}: ya está (`crisol ultratex` los rehace todos)')
+            continue
+        print(f'[ultratex] seed {s} ({seeds.index(s) + 1} de {len(seeds)})', flush=True)
+        pintar(s, glb)
+        if os.path.exists(os.path.join(out, 'ultratex_vistas.png')):
+            shutil.copy(os.path.join(out, 'ultratex_vistas.png'), os.path.join(out, f'ultratex_vistas_s{s}.png'))
+        pjc = json.loads(json.dumps(pj))
+        pjc['_glb'], pjc['_cara'] = glb, os.path.join(out, f'cara_s{s}.png')
+        blender('cara', pdir, pjc)
+    caras = [(s, Image.open(os.path.join(out, f'cara_s{s}.png')).convert('RGBA')) for s in seeds]
+    lado = 420
+    hoja = Image.new('RGB', (lado * len(caras), lado), (120, 120, 120))
+    for i, (s, im) in enumerate(caras):
+        im = im.resize((lado, lado), Image.LANCZOS)
+        hoja.paste(im, (i * lado, 0), im)
+        ImageDraw.Draw(hoja).text((i * lado + 8, 6), f'seed {s}', fill='white')
+    hoja.save(os.path.join(out, 'caras.png'))
+    op = pj['malla']['ultratex']
+    elegida = op.get('elegida', seeds[0])
+    if elegida not in seeds:
+        print(f'[ultratex] malla.ultratex.elegida = {elegida} no está en seeds: queda {seeds[0]}')
+        elegida = seeds[0]
+    usar_cara_ultratex(out, elegida)
+    print(f'[ultratex] mirar trabajo/malla/caras.png (los ojos cambian con la seed) y elegir con malla.ultratex.elegida'
+          f'; modelo.glb = seed {elegida}' + ('' if 'elegida' in op else ' hasta que elijas'))
+
+
+def usar_cara_ultratex(out, seed):
+    shutil.copy(os.path.join(out, f'ultratex_s{seed}.glb'), os.path.join(out, 'modelo.glb'))
+    v = os.path.join(out, f'ultratex_vistas_s{seed}.png')
+    if os.path.exists(v):
+        shutil.copy(v, os.path.join(out, 'ultratex_vistas.png'))
+
+
 def paso_ultratex(nombre):
     pdir, pj = cargar(nombre)
     if not os.path.exists(os.path.join(pdir, 'trabajo', 'malla', 'modelo.glb')):
         salida.falta_paso('[ultratex] falta trabajo/malla/modelo.glb: correr antes `malla`')
     reservar_gpu('ultratex')
     liberar_vram_comfyui()
+    borrar_caras_ultratex(os.path.join(pdir, 'trabajo', 'malla'))   # pintar de nuevo: todas las seeds
     retexturizar_ultratex(pdir, pj, nombre)
 
 

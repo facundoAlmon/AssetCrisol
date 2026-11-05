@@ -4,7 +4,7 @@
 # Con malla.vistas = true usa el modelo de 4 vistas: espalda y costados salen de la imagen elegida con Qwen Edit
 # (trabajo/imagen/vista_<v>.png; borrar una para rehacerla).
 # Salida: trabajo/malla/sin_fondo.png (BiRefNet) y modelo.glb (solo color base).
-import glob, json, os, shutil, struct, sys, time, urllib.request, uuid
+import glob, json, os, re, shutil, struct, sys, time, urllib.request, uuid
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '1_imagen'))
 import generar_imagen  # noqa: E402
@@ -47,6 +47,42 @@ PROMPT_ATRAS = ('Show this exact same toy car from behind: a three-quarter rear 
                 'grey background, no shadow on the floor.')
 
 
+# vehículos que no son autos (una vagoneta, un barco, un carro, una nave): con "toy car", luces traseras y alerón,
+# Qwen los convertía en un auto. Se nombran con lo que dice imagen.descripcion y sin las partes de un auto
+VISTAS_OTRO = {
+    'front': 'exactly from the front: an exact front view, the front of the {v} points straight at the camera, '
+             'perfectly symmetric, not three-quarter',
+    'back': 'exactly from behind: an exact rear view rotated 180 degrees, we see the back of the {v}, the front is not '
+            'visible, perfectly symmetric, not three-quarter',
+    'left': "exactly from its left side: an exact side profile view, the {v}'s left side is closest to the camera and "
+            'its front points to the left edge of the image, not three-quarter',
+    'right': "exactly from its right side: an exact side profile view, the {v}'s right side is closest to the camera "
+             'and its front points to the right edge of the image, not three-quarter',
+}
+AUTO = re.compile(r'\b(cars?|hatchbacks?|sedans?|coupes?|convertibles?|suvs?|jeeps?|pickups?|trucks?|lorry|lorries|'
+                  r'vans?|minivans?|buses|bus|taxis?|limousines?|limos?|roadsters?|racecars?|hot ?rods?|muscle car)\b', re.I)
+
+
+def nombre_vehiculo(pj):
+    """(es_auto, nombre): si la descripción es de un auto (los prompts de siempre, "toy car") y cómo nombrar el
+    vehículo en los prompts (lo primero de imagen.descripcion, sin el artículo: "wooden mine cart")."""
+    d = ((pj.get('imagen') or {}).get('descripcion') or (pj.get('imagen') or {}).get('_descripcion') or '').strip()
+    if not d or AUTO.search(d.split(':')[0].split(',')[0]) or (not re.search(r'[:,]', d) and AUTO.search(d)):
+        return True, 'toy car'
+    n = re.split(r'[:,.;(]| with | that | made of ', d)[0].strip()
+    n = re.sub(r'^(an?|the)\s+', '', n, flags=re.I)
+    return False, ' '.join(n.split()[:8]) or 'vehicle'
+
+
+def prompt_atras(pj):
+    auto, n = nombre_vehiculo(pj)
+    if auto:
+        return PROMPT_ATRAS
+    return (f'Show this exact same {n} from behind: a three-quarter rear view from above, we see the back and the top '
+            f'of the {n} and its left side. Keep exactly the same design, colors, materials and proportions, the whole '
+            f'{n} visible, plain light grey background, no shadow on the floor.')
+
+
 def vistas_de(pj):
     if pj.get('vehiculo'):
         return {'atras': PROMPT_ATRAS} if pj['malla'].get('vista') == 'atras' else VISTAS_VEHICULO
@@ -55,8 +91,13 @@ def vistas_de(pj):
 
 def prompt_vista(v, pj=None):
     if v == 'atras':
-        return PROMPT_ATRAS
+        return prompt_atras(pj or {})
     if pj and pj.get('vehiculo'):
+        auto, n = nombre_vehiculo(pj)
+        if not auto:
+            return (f'Show this exact same {n} {VISTAS_OTRO[v].format(v=n)}. Keep exactly the same design, colors, '
+                    f'materials and proportions, the whole {n} visible, same scale. Low horizontal camera at mid '
+                    'height, not from above. Plain light grey background, no shadow on the floor.')
         return (f'Show this exact same toy car {VISTAS_VEHICULO[v]}. Keep exactly the same design, colors, '
                 'materials, proportions and wheels, the whole car visible, same scale. Low horizontal camera at the '
                 'height of the headlights, not from above: the roof is barely visible. Plain light grey background, '

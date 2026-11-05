@@ -265,6 +265,7 @@ export default {
   'decidir.titulo': 'Te toca elegir',
   'decidir.imagen.elegida': 'Elegí la imagen que va a pasar a 3D',
   'decidir.malla.elegida': 'Elegí la malla',
+  'decidir.malla.ultratex.elegida': 'Elegí la cara (los ojos cambian con la seed de UltraTex)',
   'decidir.textura': 'Elegí la textura de {k}',
   'decidir.ayuda': 'Mirá cada opción de cerca. Nada se elige solo: el siguiente paso espera tu elección.',
   'decidir.cambiar': 'Cambiar la elección',

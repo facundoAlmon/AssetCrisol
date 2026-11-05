@@ -439,6 +439,8 @@ def opciones_decidir(pdir, pj, d):
         if clave == 'malla.elegida':
             ops.append(opcion_malla(pdir, pj, o))
             continue
+        if clave == 'malla.ultratex.elegida':
+            img = existe(t, 'malla', f'cara_s{o}.png') and f'trabajo/malla/cara_s{o}.png'
         if clave == 'imagen.elegida':
             img = existe(t, 'imagen', f'cand_{o}.png') and f'trabajo/imagen/cand_{o}.png'
             c = correcciones.get(str(o))
@@ -469,6 +471,11 @@ def elecciones(pdir, pj, tipo):
             out.append({'clave': 'imagen.elegida', 'actual': (pj.get('imagen') or {}).get('elegida'), 'opciones': seeds,
                         'mirar': 'trabajo/imagen/candidatos.png'})
         m = pj.get('malla') or {}
+        ut = m.get('ultratex') if isinstance(m.get('ultratex'), dict) else {}
+        caras = [str(s) for s in ut.get('seeds') or [] if os.path.isfile(os.path.join(t, 'malla', f'ultratex_s{s}.glb'))]
+        if len(caras) > 1:
+            out.append({'clave': 'malla.ultratex.elegida', 'actual': ut.get('elegida', int(caras[0])), 'opciones': caras,
+                        'mirar': 'trabajo/malla/caras.png'})
         if m.get('candidatos'):
             nombres = [m.get('motor', 'trellis2')] + list(m['candidatos'])
             out.append({'clave': 'malla.elegida', 'actual': m.get('elegida'), 'opciones': nombres,
@@ -1225,6 +1232,8 @@ class Manejador(BaseHTTPRequestHandler):
 
         def elecciones(cfg):
             r = {k: (cfg.get(k) or {}).get('elegida') for k in ('imagen', 'malla')}
+            ut = (cfg.get('malla') or {}).get('ultratex')
+            r['ultratex'] = ut.get('elegida') if isinstance(ut, dict) else None
             r.update({f't.{k}': (v or {}).get('elegida') for k, v in (cfg.get('texturas') or {}).items()})
             return r
         if elecciones(viejo) != elecciones(nuevo):

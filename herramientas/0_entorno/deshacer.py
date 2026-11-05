@@ -20,7 +20,8 @@ def _patrones(paso, tipo, n):
         'corregir': [f'{t}/imagen/cand_edit_*.png', f'{t}/imagen/correcciones.json', f'{t}/imagen/wf_edit_*.json'],
         'vistas': [f'{t}/imagen/vista_*.png', f'{t}/imagen/vistas.png', f'{t}/imagen/wf_vista_*.json'],
         'malla': [f'{t}/malla', f'{t}/malla_*', f'{t}/comparar', f'{t}/candidatos.png'],
-        'ultratex': [f'{t}/malla/ultratex_*.png'],   # + la malla del motor de vuelta (deshacer)
+        'ultratex': [f'{t}/malla/ultratex_*.png', f'{t}/malla/ultratex_s*.glb', f'{t}/malla/cara_s*.png',
+                     f'{t}/malla/caras.png'],   # + la malla del motor de vuelta (deshacer)
         'comparar': [f'{t}/comparar', f'{t}/candidatos.png'],
     }
     if tipo == 'personaje':
