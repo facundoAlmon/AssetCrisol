@@ -8,6 +8,8 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Arreglado
+- Elegir un candidato de malla (UI o MCP) lo copia a `trabajo/malla` en el momento: Malla 3D quedaba
+  "desactualizado" y el botón decía *Siguiente: Malla 3D*, como si fuera a generar de nuevo.
 - README: enlace al sitio web y al manual arriba; "Empezá acá" y el badge de Godot no saltaban (anclas con tilde en
   el bloque centrado: ahora `#empezar` y `#guia-de-godot`); el badge de Blender apuntaba a una sección que no existe.
 
@@ -210,7 +212,8 @@ está en `ghcr.io/facundoalmon/assetcrisol:0.1.0-alpha.1`.
 - Hojas con `.json` estilo Aseprite para otros motores; `render.emisivo`; vitrina de los ejemplos.
 - `tests/humo.py`: test de humo sin generación (~3 min).
 
-[Sin publicar]: https://github.com/facundoAlmon/AssetCrisol/compare/v0.3.0-alpha.1...main
+[Sin publicar]: https://github.com/facundoAlmon/AssetCrisol/compare/v0.4.0...main
+[0.4.0]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.4.0
 [0.3.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.3.0-alpha.1
 [0.2.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.2.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/facundoAlmon/AssetCrisol/releases/tag/v0.1.0-alpha.1

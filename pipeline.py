@@ -450,15 +450,9 @@ def candidatos_malla(pj):
 
 
 def copiar_candidato(t, n):
-    """trabajo/malla_<n> → trabajo/malla, anotado en trabajo/malla/candidato.txt (estado.py lo compara con
-    malla.elegida). Con la fecha de ahora: copytree deja la del candidato y los pasos siguientes no quedaban viejos."""
-    actual = os.path.join(t, 'malla')
-    shutil.rmtree(actual, ignore_errors=True)
-    shutil.copytree(os.path.join(t, f'malla_{n}'), actual)
-    for f in os.listdir(actual):
-        os.utime(os.path.join(actual, f))
-    with open(os.path.join(actual, 'candidato.txt'), 'w') as f:
-        f.write(n + '\n')
+    """trabajo/malla_<n> → trabajo/malla (operaciones.copiar_candidato: elegir en la UI o el MCP también lo copia)."""
+    import operaciones
+    operaciones.copiar_candidato(t, n)
 
 
 def paso_malla(nombre):

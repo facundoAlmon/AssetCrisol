@@ -2,7 +2,7 @@
 # a la UI web (herramientas/ui): correr un paso y leer su JSON, lanzarlo en segundo plano a archivos, encontrar el json
 # de un asset, anotar lo que eligió la persona y ajustar valores. Solo stdlib: lo importan el python del sistema y el
 # de `uv run` del MCP.
-import json, os, subprocess, sys
+import json, os, shutil, subprocess, sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PIPELINE = os.path.join(RAIZ, 'pipeline.py')
@@ -73,14 +73,40 @@ def clave_de_eleccion(clave):
         (clave.startswith('texturas.') and clave.endswith('.elegida') and clave.count('.') == 2)
 
 
+def copiar_candidato(t, n):
+    """trabajo/malla_<n> → trabajo/malla, anotado en trabajo/malla/candidato.txt (estado.py lo compara con
+    malla.elegida). Con la fecha de ahora: copytree deja la del candidato y los pasos siguientes no quedaban viejos."""
+    actual = os.path.join(t, 'malla')
+    shutil.rmtree(actual, ignore_errors=True)
+    shutil.copytree(os.path.join(t, f'malla_{n}'), actual)
+    for f in os.listdir(actual):
+        os.utime(os.path.join(actual, f))
+    with open(os.path.join(actual, 'candidato.txt'), 'w') as f:
+        f.write(n + '\n')
+
+
+def _candidato_en_trabajo(t):
+    try:
+        with open(os.path.join(t, 'malla', 'candidato.txt')) as f:
+            return f.read().strip() or None
+    except OSError:
+        return None
+
+
 def elegir(ruta, clave, valor):
-    """Anota lo que ELIGIÓ LA PERSONA en el json de `ruta`. Devuelve el valor guardado (una seed queda como int)."""
+    """Anota lo que ELIGIÓ LA PERSONA en el json de `ruta`. Devuelve el valor guardado (una seed queda como int).
+    Con malla.elegida, si ese candidato ya está generado, lo copia a trabajo/malla en el momento (lo mismo que hacía
+    después `crisol malla`, que tardaba en arrancar por la cola de GPU y parecía que iba a generar de nuevo)."""
     if not clave_de_eleccion(clave):
         raise ValueError('clave: imagen.elegida, malla.elegida o texturas.<clave>.elegida')
     v = int(valor) if isinstance(valor, str) and valor.lstrip('-').isdigit() else valor
     cfg = leer(ruta)
     poner(cfg, clave, v)
     guardar(ruta, cfg)
+    if clave == 'malla.elegida':
+        t = os.path.join(os.path.dirname(ruta), 'trabajo')
+        if os.path.exists(os.path.join(t, f'malla_{v}', 'modelo.glb')) and _candidato_en_trabajo(t) != str(v):
+            copiar_candidato(t, str(v))
     return v
 
 

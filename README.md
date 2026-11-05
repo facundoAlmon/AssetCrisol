@@ -733,7 +733,8 @@ cada candidato pisa claves de `malla`, y `desde: "<otro>"` reusa la malla de ese
 ya tiene `modelo.glb` no se rehace) y deja el elegido en `trabajo/malla`; en personajes y objetos arma
 `trabajo/candidatos.png` (`crisol comparar <n>` la rehace): una fila por candidato, vista con la cámara iso
 desde cinco ángulos (cada vista también sola en `trabajo/comparar/<c>/<vista>.png`, para las tarjetas de `crisol
-ui`; "(elegida)" marca solo la de `malla.elegida`). Para cambiar de elegida, editar `malla.elegida` y correr `malla` de nuevo (copia, no genera).
+ui`; "(elegida)" marca solo la de `malla.elegida`). Para cambiar de elegida, editar `malla.elegida` y correr `malla` de nuevo (copia, no genera); elegir desde
+`crisol ui` o el MCP ya la copia en el momento.
 Los candidatos heredan `caras`: Pixal3D con 5000 sale astillado.
 
 </details>

@@ -136,8 +136,8 @@ Errores vistos armando el manual de la UI (2026-11-04):
 - [x] Con las candidatas de imagen a la vista, Resultado decía "Corré el primer paso".
 - [x] "Mirá esto antes de seguir" repetía en miniatura las candidatas de *Te toca elegir*, y las hojas anchas (vistas)
       quedaban ilegibles en un cuadrado de 120 px.
-- [ ] Elegir un candidato de malla deja Malla 3D "desactualizado" y el botón dice *Siguiente: Malla 3D*: parece que va a
-      generar de nuevo (minutos) y solo copia el elegido. Copiarlo al elegir, o que el botón lo diga.
+- [x] Elegir un candidato de malla deja Malla 3D "desactualizado" y el botón dice *Siguiente: Malla 3D*: parece que va a
+      generar de nuevo (minutos) y solo copia el elegido. Ahora `operaciones.elegir` lo copia al elegir.
 - [ ] Pesos por zonas desde la UI: dibujar las cajas de `modelo.pesos_zonas` sobre la guía (hoy solo el json). Lo
       necesitó la exploradora del manual (manos que tocan los bolsillos del pantalón).
 - [ ] El estado de cada paso usa el lenguaje de la terminal ("imagen.elegida = 777 no existe, pero la malla ya está",

@@ -134,7 +134,8 @@ girarlo:
 
 Mirá la **cara de cerca**, la **espalda** y si hay **agujeros**. Para la exploradora elegimos **trellis2**: más oscura,
 pero más limpia, sobre todo en la cara. La seed pesa mucho: si ninguno convence, probá dos o tres seeds más antes de
-tocar otra cosa.
+tocar otra cosa. Al elegir, esa malla pasa a ser la del asset en el momento (no se genera de nuevo): lo que
+sigue es **Articulaciones**.
 
 ### Articulaciones, rig y lo demás
 

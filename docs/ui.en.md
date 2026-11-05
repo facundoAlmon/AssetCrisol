@@ -134,7 +134,8 @@ When they are done, **Your call** shows a card per candidate, all from the same 
 
 Look at the **face up close**, the **back** and any **holes**. For the explorer we picked **trellis2**: darker, but
 cleaner, above all in the face. The seed matters a lot: if none convinces you, try two or three more seeds before
-touching anything else.
+touching anything else. Once you pick, that mesh becomes the asset's right away (nothing is generated again): next
+comes **Joints**.
 
 ### Joints, rig and the rest
 

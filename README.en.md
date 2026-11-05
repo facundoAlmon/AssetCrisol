@@ -747,7 +747,7 @@ for characters and props it builds `trabajo/candidatos.png` (`crisol comparar <n
 candidate, seen with the iso camera from five angles (each view is also saved alone in
 `trabajo/comparar/<c>/<view>.png`, for the `crisol ui` cards; "(elegida)" marks only the one in `malla.elegida`). To
 switch, edit `malla.elegida` and run `malla` again (it
-copies, it doesn't generate). Candidates inherit `caras`: Pixal3D with 5000 comes out splintered.
+copies, it doesn't generate); picking from `crisol ui` or the MCP already copies it right away. Candidates inherit `caras`: Pixal3D with 5000 comes out splintered.
 
 </details>
 
