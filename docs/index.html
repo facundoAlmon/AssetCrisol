@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AssetCrisol</title>
-<meta name="description" content="De una imagen o una descripción a personajes animados, objetos, vehículos y escenarios para juegos 2D y 3D. En tu PC, con IA open source. / From one image to game assets, on your PC, with open-source AI.">
+<meta name="description" content="De una imagen o una descripción a personajes animados, animales de cuatro patas, objetos, vehículos y escenarios para juegos 2D y 3D. En tu PC, con IA open source. / From one image to game assets, on your PC, with open-source AI.">
 <meta property="og:title" content="AssetCrisol">
 <meta property="og:description" content="De una imagen a assets de juego 2D y 3D, en tu PC, con IA open source.">
 <meta property="og:image" content="https://facundoalmon.github.io/AssetCrisol/vitrina/img/taller.gif">
@@ -81,7 +81,7 @@
   .nota { color: var(--suave); font-size: .92rem; margin-top: 14px; }
 
   /* tipos */
-  .tipos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  .tipos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
   .tipo { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 12px;
           display: flex; flex-direction: column; gap: 10px; }
   .tipo .arte { background: var(--panel-2); border-radius: 6px; display: grid; place-items: center; height: 190px;
@@ -152,11 +152,11 @@
         <span lang="en">From one image to <em>game assets</em>, on your PC</span>
       </h1>
       <p class="bajada">
-        <span lang="es">AssetCrisol convierte un boceto, una foto o una descripción en personajes animados, objetos,
-          vehículos y escenarios listos para juegos 2D, 2.5D y 3D. Con IA open source que corre en tu placa de video:
+        <span lang="es">AssetCrisol convierte un boceto, una foto o una descripción en personajes animados, animales
+          de cuatro patas, objetos, vehículos y escenarios listos para juegos 2D, 2.5D y 3D. Con IA open source que corre en tu placa de video:
           sin cuentas, sin nube, sin pagar por imagen.</span>
-        <span lang="en">AssetCrisol turns a sketch, a photo or a description into animated characters, props, vehicles
-          and scenery ready for 2D, 2.5D and 3D games. With open-source AI running on your graphics card: no accounts,
+        <span lang="en">AssetCrisol turns a sketch, a photo or a description into animated characters, four-legged
+          animals, props, vehicles and scenery ready for 2D, 2.5D and 3D games. With open-source AI running on your graphics card: no accounts,
           no cloud, no pay-per-image.</span>
       </p>
       <div class="botones">
@@ -230,10 +230,16 @@
     <div class="tipos">
       <div class="tipo"><div class="arte"><img src="vitrina/img/cris_acciones.gif" width="300" height="300" loading="lazy" alt="Cris: caminar, correr, golpe, patada, salto / Cris: walk, run, punch, kick, jump"></div>
         <h3><span lang="es">Personajes</span><span lang="en">Characters</span></h3>
-        <p><span lang="es">Personas, chibis, robots, juguetes y cuadrúpedos. 15 animaciones (8 en cuadrúpedos), de costado
-          y en isométrico, con retrato y anclas para colgarles equipo.</span>
-          <span lang="en">People, chibis, robots, toys and quadrupeds. 15 animations (8 for quadrupeds), side and
-          isometric, with a portrait and anchors to hang gear on.</span></p></div>
+        <p><span lang="es">Personas, chibis, robots y juguetes. 15 animaciones de costado y en isométrico, con retrato y
+          anclas para colgarles equipo.</span>
+          <span lang="en">People, chibis, robots and toys. 15 animations, side and isometric, with a portrait and
+          anchors to hang gear on.</span></p></div>
+      <div class="tipo"><div class="arte"><img src="vitrina/img/gato_acciones.gif" width="300" height="300" loading="lazy" alt="Gato gris: reposo, paso, galope, mordida, salto, herido y morir / Grey cat: idle, walk, gallop, bite, jump, hurt and die"></div>
+        <h3><span lang="es">Cuadrúpedos</span><span lang="en">Quadrupeds</span></h3>
+        <p><span lang="es">Perros, gatos, caballos: su propio esqueleto de cuatro patas y 8 animaciones (paso, galope,
+          salto, mordida, morir...) con las mismas hojas de costado e isométricas.</span>
+          <span lang="en">Dogs, cats, horses: their own four-legged skeleton and 8 animations (walk, gallop, jump, bite,
+          die...) with the same side and isometric sheets.</span></p></div>
       <div class="tipo"><div class="arte"><img src="vitrina/img/horno.gif" loading="lazy" alt="Horno girando / Rotating furnace"></div>
         <h3><span lang="es">Objetos</span><span lang="en">Props</span></h3>
         <p><span lang="es">Cajas, muebles, herramientas, plantas. Vistas isométricas con su huella de colisión, o el

@@ -8,6 +8,7 @@ cualquier versión puede cambiar el formato de `personaje.json` o de las hojas (
 ## [Sin publicar]
 
 ### Cambiado
+- La landing y la galería muestran los cuadrúpedos en su propia tarjeta (el gato gris de la receta `cuadrupedo`, `gato_acciones.gif` de `vitrina.py`).
 - Objetos nuevos: el candidato `pixal3d` de la plantilla va a 1024 en vez de 1536 (14-44 % menos de Pixal3D,
   calidad pareja en tres objetos). Los objetos existentes conservan su json.
 - `crisol ui` > Movimientos: un listado por animación (en el orden de la hoja, con su método por defecto, clip y

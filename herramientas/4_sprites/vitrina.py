@@ -7,7 +7,7 @@ uso: python3 herramientas/4_sprites/vitrina.py [--salida carpeta]
 Antes: copiar los ejemplos a datos_dir y correr `blender` + `sprites` (+ `iso` de cris) de cada uno y `tema` de los
 escenarios (`tests/humo.py --dejar` deja todo hecho en una carpeta temporal: ASSETCRISOL_CONFIG=<esa>/config.json).
 
-Salida: proceso_1..5.jpg (Cris paso a paso: idea, imagen, vistas, modelo, articulaciones), cris_acciones.gif (acciones mirando al sudoeste), cris_paseo.gif (camina por el piso), cris_direcciones.gif
+Salida: proceso_1..5.jpg (Cris paso a paso: idea, imagen, vistas, modelo, articulaciones), cris_acciones.gif (acciones mirando al sudoeste), cris_paseo.gif (camina por el piso), cris_direcciones.gif, gato_acciones.gif (el cuadrúpedo)
 (las 8 direcciones), taller.gif (Cris entre sus objetos, a la misma escala), <objeto>.gif (gira en sus 4 direcciones),
 <vehiculo>.jpg (tres cuartos de la revisión de `blender`) y <escenario>.png (las texturas elegidas, repetidas).
 """
@@ -18,6 +18,8 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 OBJETOS = ('horno', 'yunque', 'crisol', 'caja_herramientas', 'martillo')   # orden en taller.gif (de izquierda a derecha)
 ESCENARIOS = ('taller', 'bosque')
 VEHICULOS = ('camioneta',)
+CUADRUPEDOS = (('a_grey_cat', 'gato_acciones.gif', 1.0),)   # (asset, gif, escala): el gato de la receta cuadrupedo
+SEQ_CUADRUPEDO = (('idle_loop', 1), ('walk', 2), ('run', 3), ('punch', 1), ('jump', 1), ('hurt', 1), ('die', 1))
 FONDO = (46, 52, 60)
 S = 0.5                     # escala de salida: la de los sprites en el juego (render a 2×)
 
@@ -38,9 +40,10 @@ def guardar_gif(cuadros, ruta, ms):
 class Cris:
     """Cuadros iso de un personaje (hojas de `iso`: filas = direcciones, columnas = cuadros)."""
 
-    def __init__(self, d):
-        self.dir = os.path.join(d, 'personajes', 'cris', 'godot', 'personajes', 'cris', 'iso')
-        with open(os.path.join(self.dir, 'cris_iso_meta.json')) as f:
+    def __init__(self, d, n='cris', s=S):
+        self.s = s                  # escala de salida (un gato de 0,8 m se agranda para que se vea)
+        self.dir = os.path.join(d, 'personajes', n, 'godot', 'personajes', n, 'iso')
+        with open(os.path.join(self.dir, f'{n}_iso_meta.json')) as f:
             self.m = json.load(f)
         self.W, self.H = self.m['frame_width'], self.m['frame_height']
         self.pies = (-self.m['offset'][0], -self.m['offset'][1])
@@ -56,11 +59,11 @@ class Cris:
         f %= self.anim(a)['frames']
         i = self.m['direcciones'].index(d)
         c = self.hojas[a].crop((f * self.W, i * self.H, (f + 1) * self.W, (i + 1) * self.H))
-        return c.resize((round(self.W * S), round(self.H * S)), Image.LANCZOS)
+        return c.resize((round(self.W * self.s), round(self.H * self.s)), Image.LANCZOS)
 
     def pegar(self, im, a, d, f, x, y):
-        sombra(im, x, y, 34, 11)
-        im.alpha_composite(self.cuadro(a, d, f), (round(x - self.pies[0] * S), round(y - self.pies[1] * S)))
+        sombra(im, x, y, 34 * self.s / S, 11 * self.s / S)
+        im.alpha_composite(self.cuadro(a, d, f), (round(x - self.pies[0] * self.s), round(y - self.pies[1] * self.s)))
 
 
 def sombra(im, x, y, rx, ry):
@@ -100,13 +103,14 @@ def baldosas(im, cris, cx, cy, n, lado_m):
             pts = []
             for a, b in ((i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1)):
                 wx, wy = (a - b) * lado_m / math.sqrt(2), (a + b) * lado_m / math.sqrt(2)
-                pts.append((cx + wx * cris.ppm * S, cy - wy * cris.ppm * S / 2))
+                pts.append((cx + wx * cris.ppm * cris.s, cy - wy * cris.ppm * cris.s / 2))
             d.polygon(pts, fill=(92, 104, 96) if (i + j) % 2 else (82, 94, 86), outline=(110, 124, 112))
 
 
-def acciones(cris, out):
-    seq = [('idle_loop', 1), ('walk', 2), ('run', 2), ('punch', 1), ('kick', 1), ('jump', 1), ('roll', 1),
-           ('arms_up', 1), ('idle_loop', 1)]
+def acciones(cris, out, seq=(('idle_loop', 1), ('walk', 2), ('run', 2), ('punch', 1), ('kick', 1), ('jump', 1),
+                              ('roll', 1), ('arms_up', 1), ('idle_loop', 1)), nombres=None):
+    """Las acciones de un personaje mirando al sudoeste; nombres: el texto de cada una (cuadrúpedos: punch = mordida)."""
+    nombres = nombres or {}
     W, H = 300, 300
     cx, cy = W / 2, H * 0.78
     cuadros, dur = [], []
@@ -115,10 +119,10 @@ def acciones(cris, out):
             im = Image.new('RGBA', (W, H), FONDO + (255,))
             baldosas(im, cris, cx, cy, 1, 1.0)
             cris.pegar(im, a, 'sw', f, cx, cy)
-            ImageDraw.Draw(im).text((10, H - 18), a, fill=(200, 205, 210))
+            ImageDraw.Draw(im).text((10, H - 18), nombres.get(a, a), fill=(200, 205, 210))
             cuadros.append(im)
             dur.append(round(1000 / cris.anim(a)['fps']))
-        if a == 'arms_up':   # que se vea el final
+        if a in ('arms_up', 'die'):   # que se vea el final
             cuadros += [cuadros[-1]] * 4
             dur += [100] * 4
     q = [c.convert('RGB').quantize(colors=255, method=Image.MEDIANCUT, dither=Image.NONE) for c in cuadros]
@@ -304,6 +308,8 @@ def main():
     cris = Cris(d)
     proceso(d, salida)
     acciones(cris, os.path.join(salida, 'cris_acciones.gif'))
+    for n, archivo, esc in CUADRUPEDOS:
+        acciones(Cris(d, n, esc), os.path.join(salida, archivo), SEQ_CUADRUPEDO, {'punch': 'bite'})
     paseo(cris, os.path.join(salida, 'cris_paseo.gif'))
     direcciones(cris, os.path.join(salida, 'cris_direcciones.gif'))
     tex = os.path.join(d, 'escenarios', 'taller', 'trabajo', 'texturas', 'piso')
